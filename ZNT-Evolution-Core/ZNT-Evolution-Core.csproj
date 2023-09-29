@@ -8,8 +8,8 @@
         <ProjectGuid>{C11AAB89-8B7D-443E-9E44-2072FECF6FD0}</ProjectGuid>
         <OutputType>Library</OutputType>
         <AppDesignerFolder>Properties</AppDesignerFolder>
-        <RootNamespace>Arknights_ZNT</RootNamespace>
-        <AssemblyName>Arknights_ZNT</AssemblyName>
+        <RootNamespace>ZNT.Evolution.Core</RootNamespace>
+        <AssemblyName>ZNT-Evolution-Core</AssemblyName>
         <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
         <FileAlignment>512</FileAlignment>
     </PropertyGroup>
@@ -18,7 +18,7 @@
         <DebugSymbols>true</DebugSymbols>
         <DebugType>full</DebugType>
         <Optimize>false</Optimize>
-        <OutputPath>D:\Users\CSSXSH\23-09-26\Zombie Night Terror\BepInEx\plugins\</OutputPath>
+        <OutputPath>D:\Users\CSSXSH\23-09-26\Zombie Night Terror\BepInEx\plugins\ZNT-Evolution-Core</OutputPath>
         <DefineConstants>DEBUG;TRACE</DefineConstants>
         <ErrorReport>prompt</ErrorReport>
         <WarningLevel>4</WarningLevel>
@@ -27,7 +27,7 @@
         <PlatformTarget>AnyCPU</PlatformTarget>
         <DebugType>pdbonly</DebugType>
         <Optimize>true</Optimize>
-        <OutputPath>D:\Users\CSSXSH\23-09-26\Zombie Night Terror\BepInEx\plugins</OutputPath>
+        <OutputPath>D:\Users\CSSXSH\23-09-26\Zombie Night Terror\BepInEx\plugins\ZNT-Evolution-Core</OutputPath>
         <DefineConstants>TRACE</DefineConstants>
         <ErrorReport>prompt</ErrorReport>
         <WarningLevel>4</WarningLevel>
@@ -57,8 +57,20 @@
           <HintPath>..\..\..\23-09-26\Zombie Night Terror\BepInEx\core\BepInEx.Preloader.dll</HintPath>
           <Private>False</Private>
         </Reference>
+        <Reference Include="DOTween">
+          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\DOTween.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="GalaxyCSharp">
+          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\GalaxyCSharp.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
         <Reference Include="HarmonyXInterop">
           <HintPath>..\..\..\23-09-26\Zombie Night Terror\BepInEx\core\HarmonyXInterop.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="LZ4">
+          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\LZ4.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="Mono.Cecil">
@@ -77,6 +89,14 @@
           <HintPath>..\..\..\23-09-26\Zombie Night Terror\BepInEx\core\Mono.Cecil.Rocks.dll</HintPath>
           <Private>False</Private>
         </Reference>
+        <Reference Include="Mono.Posix">
+          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\Mono.Posix.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="Mono.Security">
+          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\Mono.Security.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
         <Reference Include="MonoMod.RuntimeDetour">
           <HintPath>..\..\..\23-09-26\Zombie Night Terror\BepInEx\core\MonoMod.RuntimeDetour.dll</HintPath>
           <Private>False</Private>
@@ -85,10 +105,29 @@
           <HintPath>..\..\..\23-09-26\Zombie Night Terror\BepInEx\core\MonoMod.Utils.dll</HintPath>
           <Private>False</Private>
         </Reference>
+        <Reference Include="mscorlib">
+          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\mscorlib.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
         <Reference Include="System" />
+        <Reference Include="System.Configuration">
+          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\System.Configuration.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
         <Reference Include="System.Core" />
         <Reference Include="System.Data" />
+        <Reference Include="System.Security">
+          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\System.Security.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="System.Threading">
+          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\System.Threading.dll</HintPath>
+        </Reference>
         <Reference Include="System.Xml" />
+        <Reference Include="TileSystem.Runtime">
+          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\TileSystem.Runtime.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
         <Reference Include="UnityEngine">
           <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.dll</HintPath>
           <Private>False</Private>
@@ -333,9 +372,13 @@
           <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.XRModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
+        <Reference Include="Vectrosity">
+          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\Vectrosity.dll</HintPath>
+          <Private>False</Private>
+        </Reference>
     </ItemGroup>
     <ItemGroup>
-        <Compile Include="ArknightsPlugin.cs" />
+        <Compile Include="EvolutionCorePlugin.cs" />
         <Compile Include="DebugPatch.cs" />
         <Compile Include="Properties\AssemblyInfo.cs"/>
     </ItemGroup>
