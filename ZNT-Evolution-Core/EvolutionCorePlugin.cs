@@ -8,7 +8,7 @@ namespace ZNT.Evolution.Core
     {
         public void Start()
         {
-            new Harmony(Info.Metadata.GUID).PatchAll();
+            Harmony.CreateAndPatchAll(typeof(DebugPatch));
         }
     }
 }
