@@ -5,10 +5,10 @@
 ### 导入流程
 
 - [x] FMODAsset 声音资源
-- [x] tk2dSpriteCollectionData 精灵图 
-- [x] ~~VisualEffect~~
+- [ ] tk2dSpriteCollectionData 精灵图资源
+- [ ] ~~VisualEffect~~
 - [x] tk2dSpriteAnimation 精灵图动画
-- [x] ExplosionAsset 突变效果
+- [ ] ExplosionAsset 技能效果
 - [x] PhysicObjectAsset 物理效果
 - [x] CharacterAnimationAsset 动作-动画
 - [x] CharacterAsset 角色资源
@@ -38,6 +38,9 @@
 ### 创建声音
 
 - `FMODUnity.RuntimeManager.LoadBank`
+
+支持从 `znt_Data/StreamingAssets` (File) 和 `AssetBundle` (TextAsset) 导入
+导入后需要还需要为 `FMODAsset`
 
 ### 创建动画
 
