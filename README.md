@@ -1,15 +1,23 @@
 ﻿# ZNT-EVOLUTION
 
-## 导入流程
+## 导入记录
 
-- [x] FMODAsset
-- [x] tk2dSpriteCollectionData 
+### 导入流程
+
+- [x] FMODAsset 声音资源
+- [x] tk2dSpriteCollectionData 精灵图 
 - [x] ~~VisualEffect~~
-- [x] tk2dSpriteAnimation 
-- [x] ExplosionAsset 
-- [x] PhysicObjectAsset 
-- [x] CharacterAnimationAsset 
-- [x] CharacterAsset
+- [x] tk2dSpriteAnimation 精灵图动画
+- [x] ExplosionAsset 突变效果
+- [x] PhysicObjectAsset 物理效果
+- [x] CharacterAnimationAsset 动作-动画
+- [x] CharacterAsset 角色资源
+
+### 导入方法
+
+- `AssetBundle.LoadFromFile`
+
+`AssetBundle` 的 assets 文件需要在 其中有一个 AssetBundle 类型的对象定义索引
 
 ## 开发记录
 
