@@ -380,6 +380,7 @@
     <ItemGroup>
         <Compile Include="Asset\AnimationConverter.cs" />
         <Compile Include="Asset\CustomAssetUtility.cs" />
+        <Compile Include="Asset\FMODLoader.cs" />
         <Compile Include="Asset\NameConverter.cs" />
         <Compile Include="EvolutionCorePlugin.cs" />
         <Compile Include="DebugPatch.cs" />
