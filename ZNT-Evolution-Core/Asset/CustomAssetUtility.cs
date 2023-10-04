@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using Newtonsoft.Json;
 using UnityEngine;
 
@@ -6,18 +7,12 @@ namespace ZNT.Evolution.Core.Asset
 {
     public static class CustomAssetUtility
     {
-        private static readonly JsonSerializerSettings AssetSettings = new JsonSerializerSettings
+        private static JsonSerializerSettings NameConverterSettings(params Type[] exclude) => new JsonSerializerSettings
         {
             ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
             PreserveReferencesHandling = PreserveReferencesHandling.Objects,
             TypeNameHandling = TypeNameHandling.Auto,
-            Converters =
-            {
-                new NameConverter(typeof(tk2dSpriteAnimation)),
-                new NameConverter(typeof(tk2dSpriteCollectionData)),
-                new NameConverter(typeof(FMODAsset)),
-                new NameConverter(typeof(Transform))
-            }
+            Converters = { new NameConverter(exclude: exclude) }
         };
 
         private static readonly JsonSerializerSettings AnimationSettings = new JsonSerializerSettings
@@ -25,22 +20,16 @@ namespace ZNT.Evolution.Core.Asset
             ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
             PreserveReferencesHandling = PreserveReferencesHandling.Objects,
             TypeNameHandling = TypeNameHandling.Auto,
-            Converters =
-            {
-                new AnimationConverter(),
-                new NameConverter(typeof(tk2dSpriteCollectionData)),
-                new NameConverter(typeof(FMODAsset)),
-                new NameConverter(typeof(Transform))
-            }
+            Converters = { new AnimationConverter(), new NameConverter() }
         };
 
         public static void SerializeAssetToPath(string target, CustomAsset asset)
         {
-            JsonSerializer jsonSerializer = JsonSerializer.Create(AssetSettings);
+            JsonSerializer jsonSerializer = JsonSerializer.Create(NameConverterSettings(asset.GetType()));
             SaveObjectToPath(jsonSerializer, asset, target);
         }
 
-        public static void SerializeAnimationToPath(string target, tk2dSpriteAnimation asset)
+        public static void SaveAnimationToPath(string target, tk2dSpriteAnimation asset)
         {
             JsonSerializer jsonSerializer = JsonSerializer.Create(AnimationSettings);
             SaveObjectToPath(jsonSerializer, asset, target);
@@ -48,7 +37,7 @@ namespace ZNT.Evolution.Core.Asset
 
         private static void SaveObjectToPath(JsonSerializer jsonSerializer, object data, string path)
         {
-            using (var stream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.ReadWrite))
+            using (var stream = new FileStream(path, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite))
             {
                 using (var writer = new StreamWriter(stream))
                 {
@@ -63,11 +52,19 @@ namespace ZNT.Evolution.Core.Asset
 
         public static T DeserializeAssetFromPath<T>(string source) where T : CustomAsset
         {
-            JsonSerializer jsonSerializer = JsonSerializer.Create(AssetSettings);
-            return LoadObjectToPath<T>(jsonSerializer, source);
+            JsonSerializer jsonSerializer = JsonSerializer.Create(NameConverterSettings(typeof(T)));
+            var impl = LoadObjectToPath<T>(jsonSerializer, source);
+            switch (impl)
+            {
+                case CharacterAnimationAsset animations:
+                    animations.HitAnimations.AnimationLibrary = animations.AnimationLibrary;
+                    animations.DeathAnimations.AnimationLibrary = animations.AnimationLibrary;
+                    break;
+            }
+            return impl;
         }
 
-        public static tk2dSpriteAnimation DeserializeAnimationFromPath(string source)
+        public static tk2dSpriteAnimation LoadAnimationFromPath(string source)
         {
             JsonSerializer jsonSerializer = JsonSerializer.Create(AnimationSettings);
             return LoadObjectToPath<tk2dSpriteAnimation>(jsonSerializer, source);
