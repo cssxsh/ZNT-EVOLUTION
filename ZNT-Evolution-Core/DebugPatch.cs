@@ -16,5 +16,8 @@ namespace ZNT.Evolution.Core
         {
             BepInEx.Logging.Logger.CreateLogSource("CharacterAsset").LogInfo("LoadFromAsset: " + gameObject.name);
         }
+
+        [HarmonyPatch(typeof(Material), "GetTexture", typeof(string)), HarmonyPrefix]
+        public static bool GetTexture(Material __instance, string name) => __instance.HasProperty(name);
     }
 }
