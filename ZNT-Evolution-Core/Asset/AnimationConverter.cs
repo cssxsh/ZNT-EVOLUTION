@@ -14,7 +14,10 @@ namespace ZNT.Evolution.Core.Asset
         public override object ReadJson(JsonReader reader, Type objectType, object _, JsonSerializer serializer)
         {
             var wrapper = serializer.Deserialize<Wrapper>(reader);
-            var impl = new GameObject(wrapper.Name + "(Clone)", typeof(tk2dSpriteAnimation));
+            var impl = new GameObject(wrapper.Name + "(Clone)", typeof(tk2dSpriteAnimation))
+            {
+                hideFlags = HideFlags.HideAndDontSave
+            };
             var animation = impl.GetComponent<tk2dSpriteAnimation>();
             animation.clips = wrapper.Clips;
             animation.InitializeClipCache();
