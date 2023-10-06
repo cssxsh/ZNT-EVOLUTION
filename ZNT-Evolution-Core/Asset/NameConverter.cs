@@ -19,20 +19,11 @@ namespace ZNT.Evolution.Core.Asset
         {
             switch (value)
             {
-                case tk2dSpriteAnimation animation:
-                    writer.WriteValue($"{animation.name} : {value.GetType()}");
+                case FMODAsset fmod:
+                    writer.WriteValue(fmod.path);
                     break;
-                case tk2dSpriteCollectionData sprites:
-                    writer.WriteValue($"{sprites.name} : {value.GetType()}");
-                    break;
-                case GameObject impl:
+                case UnityEngine.Object impl:
                     writer.WriteValue($"{impl.name} : {value.GetType()}");
-                    break;
-                case Transform transform:
-                    writer.WriteValue($"{transform.name} : {value.GetType()}");
-                    break;
-                case CustomAsset asset:
-                    writer.WriteValue($"{asset.name} : {value.GetType()}");
                     break;
                 default:
                     throw new NotSupportedException($"write ${value.GetType()}");
@@ -43,6 +34,8 @@ namespace ZNT.Evolution.Core.Asset
         {
             var key = serializer.Deserialize<string>(reader);
             if (key == null) return null;
+            if (objectType == typeof(FMODAsset)) return FmodAssetIndex.PathIndex[key];
+            
             var name = key.Split(':')[0].Trim();
             foreach (var asset in Resources.FindObjectsOfTypeAll(objectType))
             {
