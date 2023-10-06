@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using HarmonyLib;
 using UnityEngine;
 
 namespace ZNT.Evolution.Core.Asset
 {
-    public static class FMODLoader
+    public static class AssetElementLoader
     {
         /// <summary>
         /// 同步 Bank 中的 Event 到 FmodAssetIndex 中
@@ -19,6 +20,7 @@ namespace ZNT.Evolution.Core.Asset
             foreach (var description in events)
             {
                 var asset = ScriptableObject.CreateInstance<FMODAsset>();
+
                 description.getID(out var guid);
                 asset.id = "{" + guid + "}";
                 description.getPath(out asset.path);
@@ -30,6 +32,21 @@ namespace ZNT.Evolution.Core.Asset
             }
 
             return dictionary;
+        }
+
+        public static string PushToIndex(AssetElement asset)
+        {
+            var id = Guid.NewGuid();
+            Traverse.Create(asset).Field("assetId").SetValue(id.ToString());
+            switch (asset)
+            {
+                case LevelElement element:
+                    // TODO Traverse.Create(element).Field("tags").SetValue(...);
+                    LevelElementIndex.Index.AddAssetElement(element);
+                    break;
+            }
+
+            return asset.AssetId;
         }
     }
 }
