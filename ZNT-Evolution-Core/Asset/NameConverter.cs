@@ -10,10 +10,7 @@ namespace ZNT.Evolution.Core.Asset
     {
         private readonly Type[] _exclude;
 
-        public NameConverter(params Type[] exclude)
-        {
-            _exclude = exclude;
-        }
+        public NameConverter(params Type[] exclude) => _exclude = exclude;
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
