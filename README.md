@@ -15,7 +15,7 @@
 
 ### 关卡单位导入流程
 
-- [ ] Rotorz.Tile.Brush ???
+- [ ] Rotorz.Tile.Brush 笔刷
 - [x] UnityEngine.Sprite 预览
 - [x] LevelElement 关卡单位
 
@@ -50,12 +50,19 @@
 [FMODAsset](docs/FMODAsset.md)
 
 - `FMODUnity.RuntimeManager.LoadBank`
+- `Bank.getEventList`
 
-支持从 `znt_Data/StreamingAssets` (File) 和 `AssetBundle` (TextAsset) 导入  
-导入后需要还需要处理为 `FMODAsset`
+支持从 `znt_Data/StreamingAssets/xxx.bank` (File) 和 `AssetBundle` (TextAsset) 导入 `Bank`  
+`FMODAsset` 创建后还需要加入 `FmodAssetIndex`
 
 ### 创建动画
 
 [tk2dSpriteAnimation](docs/tk2dSpriteAnimation.md)
 
-`new GameObject(wrapper.Name + "(Clone)", typeof(tk2dSpriteAnimation))`
+- `new GameObject("Animation").AddComponent<tk2dSpriteAnimation>()`
+
+### 创建关卡单位
+
+[LevelElement](docs/LevelElement.md)
+
+`LevelElement` 创建后需要加入 `LevelElementIndex`
