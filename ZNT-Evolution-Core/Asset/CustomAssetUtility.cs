@@ -45,17 +45,14 @@ namespace ZNT.Evolution.Core.Asset
             SaveObjectToPath(jsonSerializer, component, target);
         }
 
-        private static void SaveObjectToPath(JsonSerializer jsonSerializer, object data, string path)
+        private static void SaveObjectToPath(JsonSerializer serializer, object data, string path)
         {
-            using (var stream = new FileStream(path, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite))
+            using (var writer = new StreamWriter(path))
             {
-                using (var writer = new StreamWriter(stream))
+                using (var json = new JsonTextWriter(writer))
                 {
-                    using (var json = new JsonTextWriter(writer))
-                    {
-                        json.Formatting = Formatting.Indented;
-                        jsonSerializer.Serialize(json, data);
-                    }
+                    json.Formatting = Formatting.Indented;
+                    serializer.Serialize(json, data);
                 }
             }
         }
@@ -63,22 +60,45 @@ namespace ZNT.Evolution.Core.Asset
         public static T DeserializeAssetFromPath<T>(string source) where T : CustomAsset
         {
             JsonSerializer jsonSerializer = JsonSerializer.Create(NameConverterSettings(typeof(T)));
-            var impl = LoadObjectToPath<T>(jsonSerializer, source);
+            var impl = LoadObjectFromPath<T>(jsonSerializer, source);
             switch (impl)
             {
                 case CharacterAnimationAsset animations:
+                    animations.CommonAnimations.AnimationLibrary = animations.AnimationLibrary;
                     animations.HitAnimations.AnimationLibrary = animations.AnimationLibrary;
                     animations.DeathAnimations.AnimationLibrary = animations.AnimationLibrary;
+                    (animations.CommonAnimations as ISerializationCallbackReceiver).OnAfterDeserialize();
+                    (animations.HitAnimations as ISerializationCallbackReceiver).OnAfterDeserialize();
+                    (animations.DeathAnimations as ISerializationCallbackReceiver).OnAfterDeserialize();
                     break;
             }
 
             return impl;
         }
 
-        public static T LoadComponentToPath<T>(string source) where T : Component
+        public static T DeserializeAssetFromTextAsset<T>(TextAsset asset) where T : CustomAsset
+        {
+            JsonSerializer jsonSerializer = JsonSerializer.Create(NameConverterSettings(typeof(T)));
+            var impl = LoadObjectFromTextAsset<T>(jsonSerializer, asset);
+            switch (impl)
+            {
+                case CharacterAnimationAsset animations:
+                    animations.CommonAnimations.AnimationLibrary = animations.AnimationLibrary;
+                    animations.HitAnimations.AnimationLibrary = animations.AnimationLibrary;
+                    animations.DeathAnimations.AnimationLibrary = animations.AnimationLibrary;
+                    (animations.CommonAnimations as ISerializationCallbackReceiver).OnAfterDeserialize();
+                    (animations.HitAnimations as ISerializationCallbackReceiver).OnAfterDeserialize();
+                    (animations.DeathAnimations as ISerializationCallbackReceiver).OnAfterDeserialize();
+                    break;
+            }
+
+            return impl;
+        }
+
+        public static T LoadComponentFromPath<T>(string source) where T : Component
         {
             JsonSerializer jsonSerializer = JsonSerializer.Create(ComponentSettings(typeof(T)));
-            var impl = LoadObjectToPath<T>(jsonSerializer, source);
+            var impl = LoadObjectFromPath<T>(jsonSerializer, source);
             switch (impl)
             {
                 case tk2dSpriteAnimation animation:
@@ -88,21 +108,53 @@ namespace ZNT.Evolution.Core.Asset
                     sprites.InitDictionary();
                     sprites.InitMaterialIds();
                     break;
+                case ISerializationCallbackReceiver receiver:
+                    receiver.OnAfterDeserialize();
+                    break;
+            }
+
+            return impl;
+        }
+        
+        public static T LoadComponentFromTextAsset<T>(TextAsset asset) where T : Component
+        {
+            JsonSerializer jsonSerializer = JsonSerializer.Create(ComponentSettings(typeof(T)));
+            var impl = LoadObjectFromTextAsset<T>(jsonSerializer, asset);
+            switch (impl)
+            {
+                case tk2dSpriteAnimation animation:
+                    animation.InitializeClipCache();
+                    break;
+                case tk2dSpriteCollectionData sprites:
+                    sprites.InitDictionary();
+                    sprites.InitMaterialIds();
+                    break;
+                case ISerializationCallbackReceiver receiver:
+                    receiver.OnAfterDeserialize();
+                    break;
             }
 
             return impl;
         }
 
-        private static T LoadObjectToPath<T>(JsonSerializer jsonSerializer, string path)
+        private static T LoadObjectFromPath<T>(JsonSerializer jsonSerializer, string path)
         {
-            using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
+            using (var reader = new StreamReader(path))
             {
-                using (var writer = new StreamReader(stream))
+                using (var json = new JsonTextReader(reader))
                 {
-                    using (var json = new JsonTextReader(writer))
-                    {
-                        return jsonSerializer.Deserialize<T>(json);
-                    }
+                    return jsonSerializer.Deserialize<T>(json);
+                }
+            }
+        }
+        
+        private static T LoadObjectFromTextAsset<T>(JsonSerializer jsonSerializer, TextAsset asset)
+        {
+            using (var reader = new StringReader(asset.text))
+            {
+                using (var json = new JsonTextReader(reader))
+                {
+                    return jsonSerializer.Deserialize<T>(json);
                 }
             }
         }
