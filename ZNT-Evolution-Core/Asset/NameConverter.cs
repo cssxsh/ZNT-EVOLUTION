@@ -19,6 +19,9 @@ namespace ZNT.Evolution.Core.Asset
                 case FMODAsset fmod:
                     writer.WriteValue(fmod.path);
                     break;
+                case Shader shader:
+                    writer.WriteValue(shader.name);
+                    break;
                 case UnityEngine.Object impl:
                     writer.WriteValue($"{impl.name} : {value.GetType()}");
                     break;
@@ -32,6 +35,7 @@ namespace ZNT.Evolution.Core.Asset
             var key = serializer.Deserialize<string>(reader);
             if (key == null) return null;
             if (objectType == typeof(FMODAsset)) return FmodAssetIndex.PathIndex[key];
+            if (objectType == typeof(Shader)) return Shader.Find(key);
             
             var name = key.Split(':')[0].Trim();
             foreach (var asset in Resources.FindObjectsOfTypeAll(objectType))
