@@ -15,25 +15,32 @@ namespace ZNT.Evolution.Core
             Harmony.CreateAndPatchAll(typeof(DebugPatch));
             Harmony.CreateAndPatchAll(typeof(StartManagerPatch));
 
-            var path = Path.Combine(Application.dataPath, ".", "Elements");
-
-            if (!Directory.Exists(path)) Directory.Exists(path);
-
-            foreach (var directory in Directory.EnumerateDirectories(path))
+            foreach (var type in (LevelElement.Type[]) Enum.GetValues(typeof(LevelElement.Type)))
             {
-                var target = Path.GetFullPath(directory);
-                var thread = new Thread(() => {
-                    try
+                var path = Path.Combine(Application.dataPath, type.ToString());
+            
+                if (!Directory.Exists(path)) Directory.CreateDirectory(path);
+            
+                foreach (var directory in Directory.EnumerateDirectories(path))
+                {
+                    var target = Path.GetFullPath(directory);
+                    var thread = new Thread(() =>
                     {
-                        var element = LevelElementLoader.LoadFormFolder(path: target);
-                        Logger.LogInfo($"LevelElement {element.name} Loaded");
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.LogWarning(e);
-                    }
-                });
-                StartManagerPatch.Loading[target] = thread;
+                        try
+                        {
+                            lock (typeof(LevelElementLoader))
+                            {
+                                var element = LevelElementLoader.LoadFormFolder(path: target, type: type);
+                                Logger.LogInfo($"LevelElement {element.name} Loaded");
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            Logger.LogWarning(e);
+                        }
+                    });
+                    StartManagerPatch.Loading[target] = thread;
+                }
             }
         }
     }
