@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using HarmonyLib;
 using UnityEngine;
 
 namespace ZNT.Evolution.Core.Asset
 {
-    public static class AssetElementLoader
+    public static class AssetElementBinder
     {
         /// <summary>
         /// 同步 Bank 中的 Event 到 FmodAssetIndex 中
@@ -36,8 +35,7 @@ namespace ZNT.Evolution.Core.Asset
 
         public static string PushToIndex(AssetElement asset)
         {
-            var id = Guid.NewGuid();
-            Traverse.Create(asset).Field("assetId").SetValue(id.ToString());
+            Traverse.Create(asset).Field("assetId").SetValue(asset.name);
             switch (asset)
             {
                 case LevelElement element:

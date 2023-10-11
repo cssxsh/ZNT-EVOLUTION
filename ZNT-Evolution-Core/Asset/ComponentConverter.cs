@@ -52,7 +52,6 @@ namespace ZNT.Evolution.Core.Asset
             [JsonProperty("clips")] public tk2dSpriteAnimationClip[] Clips => _data.clips;
         }
         
-        
         [Serializable]
         internal class SpritesWrapper
         {

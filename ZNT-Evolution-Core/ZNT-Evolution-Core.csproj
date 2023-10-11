@@ -380,13 +380,15 @@
     <ItemGroup>
         <Compile Include="Asset\ComponentConverter.cs" />
         <Compile Include="Asset\CustomAssetUtility.cs" />
-        <Compile Include="Asset\AssetElementLoader.cs" />
+        <Compile Include="Asset\AssetElementBinder.cs" />
         <Compile Include="Asset\NameConverter.cs" />
         <Compile Include="Asset\ScriptableObjectConverter.cs" />
         <Compile Include="Asset\SpriteAsset.cs" />
         <Compile Include="EvolutionCorePlugin.cs" />
         <Compile Include="DebugPatch.cs" />
+        <Compile Include="LevelElementLoader.cs" />
         <Compile Include="Properties\AssemblyInfo.cs"/>
+        <Compile Include="StartManagerPatch.cs" />
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets"/>
     <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
