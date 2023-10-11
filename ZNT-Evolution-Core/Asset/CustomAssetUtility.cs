@@ -16,7 +16,8 @@ namespace ZNT.Evolution.Core.Asset
             {
                 new NameConverter(exclude: exclude),
                 new ScriptableObjectConverter(),
-                new StringEnumConverter()
+                new StringEnumConverter(),
+                new ColorConverter()
             }
         };
 
@@ -29,7 +30,8 @@ namespace ZNT.Evolution.Core.Asset
                 new ComponentConverter(include: include),
                 new NameConverter(exclude: include),
                 new ScriptableObjectConverter(),
-                new StringEnumConverter()
+                new StringEnumConverter(),
+                new ColorConverter()
             }
         };
 
