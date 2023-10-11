@@ -1,5 +1,26 @@
 ﻿# ZNT-EVOLUTION
 
+## 插件文件结构
+
+```text
+Zombie Night Terror
+├───znt.exe
+├───BepInEx
+│   ├───plugins
+│   │   ├───ZNT-Evolution-Core
+|   |   |   └───ZNT-Evolution-Core.dll
+│   │   └───<...>
+│   └───<...>
+├───znt_Data
+│   ├───Brush
+│   │   ├───arknights_311
+│   │   └───<...>
+│   ├───Decor
+│   │   └───<...>
+│   └───<...>
+└───<...>
+```
+
 ## 导入记录
 
 ### 角色导入流程

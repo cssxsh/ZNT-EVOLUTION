@@ -5,11 +5,11 @@
 ## 结构
 
 - tk2dSpriteCollectionData
-    * name
-    * spriteDefinitions
-    * ...
+  * name
+  * spriteDefinitions
+  * ...
 
 - tk2dSpriteDefinition
-    * name
-    * material
-    * ...
+  * name
+  * material
+  * ...

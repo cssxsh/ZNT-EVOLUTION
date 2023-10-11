@@ -5,6 +5,6 @@
 ## 结构
 
 - FMODAsset
-    * id
-    * path 资源在 Bank 中的路径
-    * AssetId
+  * id
+  * path 资源在 Bank 中的路径
+  * AssetId
