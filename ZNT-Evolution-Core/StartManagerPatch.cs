@@ -2,6 +2,7 @@
 using System.Threading;
 using HarmonyLib;
 
+// ReSharper disable InconsistentNaming
 namespace ZNT.Evolution.Core
 {
     public static class StartManagerPatch
@@ -11,10 +12,13 @@ namespace ZNT.Evolution.Core
         [HarmonyPatch(typeof(StartManager), "Start"), HarmonyPostfix]
         public static void Start(StartManager __instance)
         {
-            foreach (var (_, thread) in Loading)
-            {
-                thread.Start();
-            }
+            foreach (var (_, thread) in Loading) thread.Start();
+        }
+        
+        [HarmonyPatch(typeof(StartManager), "LoadNextScene"), HarmonyPrefix]
+        public static void LoadNextScene(StartManager __instance)
+        {
+            foreach (var (_, thread) in Loading) thread.Join(1_000);
         }
     }
 }
