@@ -64,23 +64,23 @@ namespace ZNT.Evolution.Core
             var bundle = LoadAssetBundle(path: Path.Combine(path, "resources.bundle"));
             Logger.LogDebug($"resources.bundle -> {bundle} -> {bundle.GetAllAssetNames().Join()}");
 
-            if (File.Exists(Path.Combine(path, "sprites.json")))
+            var material = bundle.LoadAsset<Material>("sprites");
+            if (File.Exists(Path.Combine(path, "sprite.info.json")))
             {
-                var sprites = CustomAssetUtility
-                    .LoadComponentFromPath<tk2dSpriteCollectionData>(source: Path.Combine(path, "sprites.json"));
-                Logger.LogDebug($"sprites.json -> {sprites} -> {sprites.materials[0]}");
+                var info = CustomAssetUtility
+                    .DeserializeInfoFromPath<SpriteInfo>(source: Path.Combine(path, "sprite.info.json"));
+                var sprites = CreateSprite(material, info);
+                Logger.LogDebug($"CreateSprite -> {sprites} from {sprites.material}");
             }
             else
             {
-                var material = bundle.LoadAsset<Material>("sprites");
                 var sprites = CreateSingleSprite(material);
-                Logger.LogDebug($"create -> {sprites} -> {sprites.materials[0]}");
-                // CustomAssetUtility.SaveComponentToPath(target: Path.Combine(path, "sprites.json"), sprites);
+                Logger.LogDebug($"CreateSingleSprite -> {sprites} from {sprites.material}");
             }
 
             var element = CustomAssetUtility
                 .DeserializeAssetFromPath<LevelElement>(source: Path.Combine(path, "element.json"));
-            Logger.LogDebug($"element.json -> {element} -> {element.Title}");
+            Logger.LogDebug($"element.json -> {element} to {element.Title}");
             AssetElementBinder.PushToIndex(element);
 
             return element;
@@ -147,9 +147,9 @@ namespace ZNT.Evolution.Core
             var impl = tk2dSpriteCollectionData.CreateFromTexture(
                 texture: material.mainTexture,
                 size: tk2dSpriteCollectionSize.Explicit(0.5F, 12),
-                names: new []{ "???" },
-                regions: new []{ new Rect(0, 0, material.mainTexture.width, material.mainTexture.height) },
-                anchors: new []{ Vector2.zero }
+                names: new[] { "single" },
+                regions: new[] { new Rect(0, 0, material.mainTexture.width, material.mainTexture.height) },
+                anchors: new[] { Vector2.zero }
             );
 
             impl.name = material.name.Replace("_mat", "");
@@ -158,6 +158,26 @@ namespace ZNT.Evolution.Core
             impl.materials[0] = material;
             impl.spriteDefinitions[0].material = material;
             impl.spriteDefinitions[0].name = impl.name.Replace("sprites_", "");
+
+            return impl;
+        }
+
+        private static tk2dSpriteCollectionData CreateSprite(Material material, SpriteInfo info)
+        {
+            var impl = tk2dSpriteCollectionData.CreateFromTexture(
+                texture: material.mainTexture,
+                size: tk2dSpriteCollectionSize.Explicit(orthoSize: info.OrthoSize, targetHeight: info.TargetHeight),
+                names: info.Names,
+                regions: info.Regions,
+                anchors: info.Anchors
+            );
+
+            impl.name = material.name.Replace("_mat", "");
+            impl.gameObject.hideFlags = HideFlags.HideAndDontSave;
+            impl.material = material;
+            impl.materials[0] = material;
+            foreach (var definition in impl.spriteDefinitions) definition.material = material;
+            impl.gameObject.hideFlags = HideFlags.HideAndDontSave;
 
             return impl;
         }
