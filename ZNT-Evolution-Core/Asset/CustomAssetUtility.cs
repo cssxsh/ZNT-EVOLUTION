@@ -16,6 +16,7 @@ namespace ZNT.Evolution.Core.Asset
             {
                 new NameConverter(exclude: exclude),
                 new ScriptableObjectConverter(),
+                new StringEnumConverter(),
                 new NullConverter(include: typeof(tk2dSpriteDefinition)),
                 new ColorConverter(),
                 new Vector2Converter(),
@@ -47,6 +48,12 @@ namespace ZNT.Evolution.Core.Asset
         {
             JsonSerializer serializer = JsonSerializer.Create(AssetSettings(asset.GetType()));
             SaveObjectToPath(serializer, asset, target);
+        }
+        
+        public static void SerializeInfoToPath(string target, EvolutionInfo info)
+        {
+            JsonSerializer serializer = JsonSerializer.Create(AssetSettings(info.GetType()));
+            SaveObjectToPath(serializer, info, target);
         }
 
         public static void SaveComponentToPath(string target, Component component)
@@ -86,6 +93,14 @@ namespace ZNT.Evolution.Core.Asset
             return impl;
         }
 
+        public static T DeserializeInfoFromPath<T>(string source) where T : EvolutionInfo
+        {
+            JsonSerializer serializer = JsonSerializer.Create(AssetSettings(typeof(T)));
+            var impl = LoadObjectFromPath<T>(serializer, source);
+
+            return impl;
+        }
+
         public static T DeserializeAssetFromTextAsset<T>(TextAsset asset) where T : CustomAsset
         {
             JsonSerializer serializer = JsonSerializer.Create(AssetSettings(typeof(T)));
@@ -101,6 +116,14 @@ namespace ZNT.Evolution.Core.Asset
                     (animations.DeathAnimations as ISerializationCallbackReceiver).OnAfterDeserialize();
                     break;
             }
+
+            return impl;
+        }
+
+        public static T DeserializeInfoFromTextAsset<T>(TextAsset asset) where T : EvolutionInfo
+        {
+            JsonSerializer serializer = JsonSerializer.Create(AssetSettings(typeof(T)));
+            var impl = LoadObjectFromTextAsset<T>(serializer, asset);
 
             return impl;
         }
