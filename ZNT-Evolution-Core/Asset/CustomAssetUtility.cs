@@ -8,7 +8,7 @@ namespace ZNT.Evolution.Core.Asset
 {
     public static class CustomAssetUtility
     {
-        private static JsonSerializerSettings NameConverterSettings(params Type[] exclude) => new JsonSerializerSettings
+        private static JsonSerializerSettings AssetSettings(params Type[] exclude) => new JsonSerializerSettings
         {
             ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
             TypeNameHandling = TypeNameHandling.Auto,
@@ -16,8 +16,12 @@ namespace ZNT.Evolution.Core.Asset
             {
                 new NameConverter(exclude: exclude),
                 new ScriptableObjectConverter(),
-                new StringEnumConverter(),
-                new ColorConverter()
+                new NullConverter(include: typeof(tk2dSpriteDefinition)),
+                new ColorConverter(),
+                new Vector2Converter(),
+                new Vector4Converter(),
+                new Vector4Converter(),
+                new Matrix4x4Converter()
             }
         };
 
@@ -31,20 +35,24 @@ namespace ZNT.Evolution.Core.Asset
                 new NameConverter(exclude: include),
                 new ScriptableObjectConverter(),
                 new StringEnumConverter(),
-                new ColorConverter()
+                new ColorConverter(),
+                new Vector2Converter(),
+                new Vector4Converter(),
+                new Vector4Converter(),
+                new Matrix4x4Converter()
             }
         };
 
         public static void SerializeAssetToPath(string target, CustomAsset asset)
         {
-            JsonSerializer jsonSerializer = JsonSerializer.Create(NameConverterSettings(asset.GetType()));
-            SaveObjectToPath(jsonSerializer, asset, target);
+            JsonSerializer serializer = JsonSerializer.Create(AssetSettings(asset.GetType()));
+            SaveObjectToPath(serializer, asset, target);
         }
 
         public static void SaveComponentToPath(string target, Component component)
         {
-            JsonSerializer jsonSerializer = JsonSerializer.Create(ComponentSettings(component.GetType()));
-            SaveObjectToPath(jsonSerializer, component, target);
+            JsonSerializer serializer = JsonSerializer.Create(ComponentSettings(component.GetType()));
+            SaveObjectToPath(serializer, component, target);
         }
 
         private static void SaveObjectToPath(JsonSerializer serializer, object data, string path)
@@ -61,8 +69,8 @@ namespace ZNT.Evolution.Core.Asset
 
         public static T DeserializeAssetFromPath<T>(string source) where T : CustomAsset
         {
-            JsonSerializer jsonSerializer = JsonSerializer.Create(NameConverterSettings(typeof(T)));
-            var impl = LoadObjectFromPath<T>(jsonSerializer, source);
+            JsonSerializer serializer = JsonSerializer.Create(AssetSettings(typeof(T)));
+            var impl = LoadObjectFromPath<T>(serializer, source);
             switch (impl)
             {
                 case CharacterAnimationAsset animations:
@@ -80,8 +88,8 @@ namespace ZNT.Evolution.Core.Asset
 
         public static T DeserializeAssetFromTextAsset<T>(TextAsset asset) where T : CustomAsset
         {
-            JsonSerializer jsonSerializer = JsonSerializer.Create(NameConverterSettings(typeof(T)));
-            var impl = LoadObjectFromTextAsset<T>(jsonSerializer, asset);
+            JsonSerializer serializer = JsonSerializer.Create(AssetSettings(typeof(T)));
+            var impl = LoadObjectFromTextAsset<T>(serializer, asset);
             switch (impl)
             {
                 case CharacterAnimationAsset animations:
@@ -99,8 +107,8 @@ namespace ZNT.Evolution.Core.Asset
 
         public static T LoadComponentFromPath<T>(string source) where T : Component
         {
-            JsonSerializer jsonSerializer = JsonSerializer.Create(ComponentSettings(typeof(T)));
-            var impl = LoadObjectFromPath<T>(jsonSerializer, source);
+            JsonSerializer serializer = JsonSerializer.Create(ComponentSettings(typeof(T)));
+            var impl = LoadObjectFromPath<T>(serializer, source);
             switch (impl)
             {
                 case tk2dSpriteAnimation animation:
@@ -120,8 +128,8 @@ namespace ZNT.Evolution.Core.Asset
         
         public static T LoadComponentFromTextAsset<T>(TextAsset asset) where T : Component
         {
-            JsonSerializer jsonSerializer = JsonSerializer.Create(ComponentSettings(typeof(T)));
-            var impl = LoadObjectFromTextAsset<T>(jsonSerializer, asset);
+            JsonSerializer serializer = JsonSerializer.Create(ComponentSettings(typeof(T)));
+            var impl = LoadObjectFromTextAsset<T>(serializer, asset);
             switch (impl)
             {
                 case tk2dSpriteAnimation animation:
