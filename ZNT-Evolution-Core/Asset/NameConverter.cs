@@ -9,6 +9,8 @@ namespace ZNT.Evolution.Core.Asset
     internal class NameConverter : JsonConverter
     {
         private readonly Type[] _exclude;
+        
+        private static readonly Dictionary<string, object> Cache = new Dictionary<string, object>();
 
         public NameConverter(params Type[] exclude) => _exclude = exclude;
 
@@ -38,10 +40,12 @@ namespace ZNT.Evolution.Core.Asset
             if (objectType == typeof(Shader)) return Shader.Find(key);
             
             var name = key.Split(':')[0].Trim();
+            if (Cache.TryGetValue(name, out var impl) && objectType.IsInstanceOfType(impl)) return impl;
             foreach (var asset in Resources.FindObjectsOfTypeAll(objectType))
             {
                 if (asset.name == name)
                 {
+                    Cache[name] = asset;
                     return asset;
                 }
             }
