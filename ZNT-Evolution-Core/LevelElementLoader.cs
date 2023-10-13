@@ -181,5 +181,11 @@ namespace ZNT.Evolution.Core
 
             return impl;
         }
+        
+        public static Dictionary<string, FMODAsset> LoadBank(string bank)
+        {
+            FMODUnity.RuntimeManager.LoadBank(bankName: bank, loadSamples: true);
+            return AssetElementBinder.FetchFMODAsset(path: $"bank:/{bank}");
+        }
     }
 }
