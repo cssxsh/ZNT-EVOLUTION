@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace ZNT.Evolution.Core
 {
-    [BepInPlugin(GUID: "xyz.cssxsh.znt.evolution.core", Name: "Evolution Core", Version: "0.1.0")]
+    [BepInPlugin(GUID: "xyz.cssxsh.znt.evolution.core", Name: "Evolution Core", Version: "0.1.1")]
     public class EvolutionCorePlugin : BaseUnityPlugin
     {
         public void Awake()
