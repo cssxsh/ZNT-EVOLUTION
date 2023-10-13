@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Newtonsoft.Json;
 using UnityEngine;
 
@@ -24,7 +25,7 @@ namespace ZNT.Evolution.Core.Asset
             TargetHeight = targetHeight;
             Names = names;
             Regions = regions;
-            Anchors = anchors;
+            Anchors = anchors ?? Regions.Select(_ => Vector2.zero).ToArray();
         }
     }
 }
