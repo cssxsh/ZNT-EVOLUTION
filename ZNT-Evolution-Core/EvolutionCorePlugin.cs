@@ -15,12 +15,12 @@ namespace ZNT.Evolution.Core
             Harmony.CreateAndPatchAll(typeof(DebugPatch));
             Harmony.CreateAndPatchAll(typeof(StartManagerPatch));
 
-            foreach (var type in (LevelElement.Type[]) Enum.GetValues(typeof(LevelElement.Type)))
+            foreach (var type in (LevelElement.Type[])Enum.GetValues(typeof(LevelElement.Type)))
             {
                 var path = Path.Combine(Application.dataPath, type.ToString());
-            
+
                 if (!Directory.Exists(path)) Directory.CreateDirectory(path);
-            
+
                 foreach (var directory in Directory.EnumerateDirectories(path))
                 {
                     var target = Path.GetFullPath(directory);
@@ -28,9 +28,8 @@ namespace ZNT.Evolution.Core
                     {
                         try
                         {
-                            lock (typeof(LevelElementLoader))
+                            foreach (var (_, element) in LevelElementLoader.LoadFormFolder(path: target, type: type))
                             {
-                                var element = LevelElementLoader.LoadFormFolder(path: target, type: type);
                                 Logger.LogInfo($"LevelElement {element.name} Loaded");
                             }
                         }

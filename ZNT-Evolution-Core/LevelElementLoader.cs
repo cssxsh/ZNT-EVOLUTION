@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Threading;
 using BepInEx.Logging;
 using HarmonyLib;
@@ -11,7 +12,7 @@ namespace ZNT.Evolution.Core
     {
         private static readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("LevelElementLoader");
 
-        public static LevelElement LoadFormFolder(string path, LevelElement.Type type)
+        public static Dictionary<string, LevelElement> LoadFormFolder(string path, LevelElement.Type type)
         {
             if (Directory.Exists(path))
             {
@@ -19,29 +20,35 @@ namespace ZNT.Evolution.Core
             }
             else
             {
-                Logger.LogInfo($"folder {path} not exists.");
+                Logger.LogInfo($"folder '{path}' not exists.");
                 return null;
             }
 
-            switch (type)
+            
+            lock (typeof(LevelElementLoader))
             {
-                case LevelElement.Type.Brush:
-                    return LoadBrushFormFolder(path: path);
-                case LevelElement.Type.Decor:
-                    return LoadDecorFormFolder(path: path);
+                switch (type)
+                {
+                    case LevelElement.Type.Brush:
+                        return LoadBrushFormFolder(path: path);
+                    case LevelElement.Type.Decor:
+                        return LoadDecorFormFolder(path: path);
+                    default:
+                        return null;
+                }
             }
-
-            return null;
         }
 
-        private static LevelElement LoadBrushFormFolder(string path)
+        private static Dictionary<string, LevelElement> LoadBrushFormFolder(string path)
         {
+            var dictionary = new Dictionary<string, LevelElement>(1);
+            
             var bundle = LoadAssetBundle(path: Path.Combine(path, "resources.bundle"));
             Logger.LogDebug($"resources.bundle -> {bundle} -> {bundle.GetAllAssetNames().Join()}");
 
             var sprites = CustomAssetUtility
                 .LoadComponentFromPath<tk2dSpriteCollectionData>(source: Path.Combine(path, "sprites.json"));
-            Logger.LogDebug($"sprites.json -> {sprites} -> ${sprites.materials[0]}");
+            Logger.LogDebug($"sprites.json -> {sprites} -> {sprites.materials[0]}");
 
             var animation = CustomAssetUtility
                 .LoadComponentFromPath<tk2dSpriteAnimation>(source: Path.Combine(path, "animation.json"));
@@ -53,14 +60,18 @@ namespace ZNT.Evolution.Core
 
             var element = CustomAssetUtility
                 .DeserializeAssetFromPath<LevelElement>(source: Path.Combine(path, "element.json"));
-            Logger.LogDebug($"element.json -> {element} -> ${element.Title}");
-            AssetElementBinder.PushToIndex(element);
+            Logger.LogDebug($"element.json -> {element} -> {element.Title}");
 
-            return element;
+            var id = AssetElementBinder.PushToIndex(element);
+            dictionary.Add(id, element);
+
+            return dictionary;
         }
 
-        private static LevelElement LoadDecorFormFolder(string path)
+        private static Dictionary<string, LevelElement> LoadDecorFormFolder(string path)
         {
+            var dictionary = new Dictionary<string, LevelElement>(1);
+            
             var bundle = LoadAssetBundle(path: Path.Combine(path, "resources.bundle"));
             Logger.LogDebug($"resources.bundle -> {bundle} -> {bundle.GetAllAssetNames().Join()}");
 
@@ -71,19 +82,37 @@ namespace ZNT.Evolution.Core
                     .DeserializeInfoFromPath<SpriteInfo>(source: Path.Combine(path, "sprite.info.json"));
                 var sprites = CreateSprite(material, info);
                 Logger.LogDebug($"CreateSprite -> {sprites} from {sprites.material}");
+            
+                var element = CustomAssetUtility
+                    .DeserializeAssetFromPath<LevelElement>(source: Path.Combine(path, "element.json"));
+                Logger.LogDebug($"element.json -> {element} to {element.Title}");
+                
+                for (var index = 0; index < sprites.spriteDefinitions.Length; index++)
+                {
+                    var impl = Object.Instantiate(element);
+                    impl.SpriteIndex = index;
+                    impl.name = string.Format(element.name, index + 1, sprites.name);
+                    impl.Title = string.Format(element.Title, index + 1, sprites.spriteDefinitions[index].name);
+                    impl.hideFlags = HideFlags.HideAndDontSave;
+                    
+                    var id = AssetElementBinder.PushToIndex(impl);
+                    dictionary.Add(id, impl);
+                }
             }
             else
             {
                 var sprites = CreateSingleSprite(material);
                 Logger.LogDebug($"CreateSingleSprite -> {sprites} from {sprites.material}");
+            
+                var element = CustomAssetUtility
+                    .DeserializeAssetFromPath<LevelElement>(source: Path.Combine(path, "element.json"));
+                Logger.LogDebug($"element.json -> {element} to {element.Title}");
+                
+                var id = AssetElementBinder.PushToIndex(element);
+                dictionary.Add(id, element);
             }
 
-            var element = CustomAssetUtility
-                .DeserializeAssetFromPath<LevelElement>(source: Path.Combine(path, "element.json"));
-            Logger.LogDebug($"element.json -> {element} to {element.Title}");
-            AssetElementBinder.PushToIndex(element);
-
-            return element;
+            return dictionary;
         }
 
         private static AssetBundle LoadAssetBundle(string path)
@@ -177,14 +206,12 @@ namespace ZNT.Evolution.Core
             impl.material = material;
             impl.materials[0] = material;
             foreach (var definition in impl.spriteDefinitions) definition.material = material;
-            impl.gameObject.hideFlags = HideFlags.HideAndDontSave;
 
             return impl;
         }
         
         public static Dictionary<string, FMODAsset> LoadBank(string bank)
         {
-            FMODUnity.RuntimeManager.LoadBank(bankName: bank, loadSamples: true);
             return AssetElementBinder.FetchFMODAsset(path: $"bank:/{bank}");
         }
     }
