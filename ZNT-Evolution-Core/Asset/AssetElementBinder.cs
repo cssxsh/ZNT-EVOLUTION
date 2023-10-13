@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using FMODUnity;
 using HarmonyLib;
 using UnityEngine;
 
@@ -13,8 +14,10 @@ namespace ZNT.Evolution.Core.Asset
         /// <returns> 同步的内容 </returns>
         public static Dictionary<string, FMODAsset> FetchFMODAsset(string path)
         {
-            FMODUnity.RuntimeManager.StudioSystem.getBank(path, out var bank);
-            bank.getEventList(out var events);
+            var result = RuntimeManager.StudioSystem.getBank(path, out var bank);
+            if (!bank.isValid()) throw new BankLoadException(path, result);
+            result = bank.getEventList(out var events);
+            if (events == null) throw new BankLoadException(path, result);
             var dictionary = new Dictionary<string, FMODAsset>(events.Length);
             foreach (var description in events)
             {
@@ -24,9 +27,9 @@ namespace ZNT.Evolution.Core.Asset
                 asset.id = "{" + guid + "}";
                 description.getPath(out asset.path);
                 Traverse.Create(asset).Field("assetId").SetValue(guid.ToString());
-                             
+
                 FmodAssetIndex.Index.AddAssetElement(asset);
-                
+
                 dictionary.TryAdd(asset.path, asset);
             }
 
