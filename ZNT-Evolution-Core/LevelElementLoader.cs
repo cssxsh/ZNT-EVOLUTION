@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using BepInEx.Logging;
 using HarmonyLib;
@@ -14,16 +15,15 @@ namespace ZNT.Evolution.Core
 
         public static Dictionary<string, LevelElement> LoadFormFolder(string path, LevelElement.Type type)
         {
-            if (Directory.Exists(path))
+            if (Directory.Exists(path) || !Directory.EnumerateFiles(path).Any())
             {
                 Logger.LogInfo($"load form folder '{path}'.");
             }
             else
             {
-                Logger.LogInfo($"folder '{path}' not exists.");
+                Logger.LogInfo($"folder '{path}' does not exist or is empty.");
                 return null;
             }
-
             
             lock (typeof(LevelElementLoader))
             {
