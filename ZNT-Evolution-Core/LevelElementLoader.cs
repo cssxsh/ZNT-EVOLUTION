@@ -162,6 +162,13 @@ namespace ZNT.Evolution.Core
                     case Rotorz.Tile.OrientedBrush brush:
                         Logger.LogDebug($"[{bundle.name}] {brush}");
                         break;
+                    case TextAsset asset:
+                        if (path == "bank.strings" || path == "bank_")
+                        {
+                            FMODUnity.RuntimeManager.LoadBank(asset: asset, loadSamples: true);
+                        }
+                        Logger.LogDebug($"[{bundle.name}] {asset.name}");
+                        break;
                     default:
                         Logger.LogDebug($"[{bundle.name}] {request.asset.name}");
                         break;
