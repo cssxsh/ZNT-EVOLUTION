@@ -20,7 +20,7 @@ namespace ZNT.Evolution.Core.Asset
                 new NullConverter(include: typeof(tk2dSpriteDefinition)),
                 new ColorConverter(),
                 new Vector2Converter(),
-                new Vector4Converter(),
+                new Vector3Converter(),
                 new Vector4Converter(),
                 new Matrix4x4Converter()
             }
@@ -38,7 +38,7 @@ namespace ZNT.Evolution.Core.Asset
                 new StringEnumConverter(),
                 new ColorConverter(),
                 new Vector2Converter(),
-                new Vector4Converter(),
+                new Vector3Converter(),
                 new Vector4Converter(),
                 new Matrix4x4Converter()
             }
