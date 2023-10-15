@@ -15,14 +15,14 @@ namespace ZNT.Evolution.Core
 
         public static Dictionary<string, LevelElement> LoadFormFolder(string path, LevelElement.Type type)
         {
-            if (Directory.Exists(path) || !Directory.EnumerateFiles(path).Any())
+            if (Directory.Exists(path) && Directory.EnumerateFiles(path).Any())
             {
                 Logger.LogInfo($"load form folder '{path}'.");
             }
             else
             {
                 Logger.LogInfo($"folder '{path}' does not exist or is empty.");
-                return null;
+                return new Dictionary<string, LevelElement>(0);
             }
             
             lock (typeof(LevelElementLoader))
@@ -46,13 +46,19 @@ namespace ZNT.Evolution.Core
             var bundle = LoadAssetBundle(path: Path.Combine(path, "resources.bundle"));
             Logger.LogDebug($"resources.bundle -> {bundle} -> {bundle.GetAllAssetNames().Join()}");
 
+            if (bundle.LoadAsset("bank_") is TextAsset bank)
+            {
+                var fmod = AssetElementBinder.FetchFMODAsset(path: $"bank:/{bank.name}");
+                Logger.LogDebug($"bank:/{bank.name} -> {fmod.Keys.Join()}");
+            }
+
             var sprites = CustomAssetUtility
                 .LoadComponentFromPath<tk2dSpriteCollectionData>(source: Path.Combine(path, "sprites.json"));
             Logger.LogDebug($"sprites.json -> {sprites} -> {sprites.materials[0]}");
 
             var animation = CustomAssetUtility
                 .LoadComponentFromPath<tk2dSpriteAnimation>(source: Path.Combine(path, "animation.json"));
-            Logger.LogDebug($"animation.name -> {animation}");
+            Logger.LogDebug($"animation.json -> {animation}");
 
             var asset = CustomAssetUtility
                 .DeserializeAssetFromPath<HumanAsset>(source: Path.Combine(path, "asset.json"));
@@ -120,10 +126,7 @@ namespace ZNT.Evolution.Core
             AssetBundle bundle;
             {
                 var request = AssetBundle.LoadFromFileAsync(path);
-                while (!request.isDone)
-                {
-                    Thread.Sleep(100);
-                }
+                while (!request.isDone) Thread.Sleep(100);
 
                 bundle = request.assetBundle;
             }
@@ -132,10 +135,7 @@ namespace ZNT.Evolution.Core
             {
                 Logger.LogDebug($"[{bundle.name}] load path: {name}");
                 var request = bundle.LoadAssetAsync(name);
-                while (!request.isDone)
-                {
-                    Thread.Sleep(100);
-                }
+                while (!request.isDone) Thread.Sleep(100);
 
                 if (request.asset == null)
                 {
@@ -163,9 +163,16 @@ namespace ZNT.Evolution.Core
                         Logger.LogDebug($"[{bundle.name}] {brush}");
                         break;
                     case TextAsset asset:
-                        if (path == "bank.strings" || path == "bank_")
+                        if (name == "bank.strings" || name == "bank_")
                         {
-                            FMODUnity.RuntimeManager.LoadBank(asset: asset, loadSamples: true);
+                            try
+                            {
+                                FMODUnity.RuntimeManager.LoadBank(asset: asset, loadSamples: true);
+                            }
+                            catch (FMODUnity.BankLoadException e)
+                            {
+                                Logger.LogError(e);
+                            }
                         }
                         Logger.LogDebug($"[{bundle.name}] {asset.name}");
                         break;
@@ -215,11 +222,6 @@ namespace ZNT.Evolution.Core
             foreach (var definition in impl.spriteDefinitions) definition.material = material;
 
             return impl;
-        }
-        
-        public static Dictionary<string, FMODAsset> LoadBank(string bank)
-        {
-            return AssetElementBinder.FetchFMODAsset(path: $"bank:/{bank}");
         }
     }
 }
