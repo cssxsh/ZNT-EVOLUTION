@@ -21,3 +21,4 @@
   * SpriteCollection
   * SpriteIndex
   * AnimationLibrary
+  * AnimClipId
