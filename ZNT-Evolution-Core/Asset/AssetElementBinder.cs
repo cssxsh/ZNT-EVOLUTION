@@ -28,7 +28,11 @@ namespace ZNT.Evolution.Core.Asset
                 description.getPath(out asset.path);
                 Traverse.Create(asset).Field("assetId").SetValue(guid.ToString());
 
-                FmodAssetIndex.Index.AddAssetElement(asset);
+                lock (typeof(FmodAssetIndex))
+                {
+                    FmodAssetIndex.Index.AddAssetElement(asset);
+                    Traverse.Create(typeof(FmodAssetIndex)).Field("pathIndex").SetValue(null);
+                }
 
                 dictionary.TryAdd(asset.path, asset);
             }
