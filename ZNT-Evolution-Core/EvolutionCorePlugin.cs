@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using BepInEx;
 using HarmonyLib;
@@ -21,50 +20,7 @@ namespace ZNT.Evolution.Core
             {
                 try
                 {
-                    var loaded = new []
-                    {
-                        "Master Bank.strings",
-                        "Master Bank",
-                        "AmbBank",
-                        "DialogBank",
-                        "IntroBank",
-                        "Musicbank"
-                    };
-                    foreach (var file in Directory.EnumerateFiles(Application.streamingAssetsPath, "*.bank"))
-                    {
-                        var bank = Path.GetFileNameWithoutExtension(file);
-                        if (loaded.Contains(bank)) continue;
-                        if (!bank.EndsWith(".strings")) continue;
-                        try
-                        {
-                            FMODUnity.RuntimeManager.LoadBank(bankName: bank, loadSamples: true);
-                        }
-                        catch (Exception e)
-                        {
-                            Logger.LogWarning(e);
-                        }
-                    }
-                    foreach (var file in Directory.EnumerateFiles(Application.streamingAssetsPath, "*.bank"))
-                    {
-                        var bank = Path.GetFileNameWithoutExtension(file);
-                        if (loaded.Contains(bank)) continue;
-                        if (bank.EndsWith(".strings")) continue;
-                        try
-                        {
-                            FMODUnity.RuntimeManager.LoadBank(bankName: bank, loadSamples: true);
-                        }
-                        catch (Exception e)
-                        {
-                            Logger.LogWarning(e);
-                            continue;
-                        }
-                        var path = $"bank:/{bank}";
-                        Logger.LogDebug($"load: {path}");
-                        foreach (var (_, asset) in AssetElementBinder.FetchFMODAsset(path: path))
-                        {
-                            Logger.LogDebug($"load: {asset.path}");
-                        }
-                    }
+                    LevelElementLoader.LoadBanks(folder: Application.streamingAssetsPath);
                 }
                 catch (Exception e)
                 {

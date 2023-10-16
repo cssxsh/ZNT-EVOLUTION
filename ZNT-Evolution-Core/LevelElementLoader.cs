@@ -223,5 +223,58 @@ namespace ZNT.Evolution.Core
 
             return impl;
         }
+
+        private static readonly string[] LoadedBanks =
+        {
+            "Master Bank.strings",
+            "Master Bank", 
+            "AmbBank", 
+            "DialogBank", 
+            "IntroBank", 
+            "Musicbank"
+        };
+
+        public static void LoadBanks(string folder, bool loadSamples = false)
+        {
+            var main = new List<string>();
+            foreach (var file in Directory.EnumerateFiles(path: folder, searchPattern: "*.bank"))
+            {
+                var bank = Path.GetFileNameWithoutExtension(file);
+                if (LoadedBanks.Contains(bank)) continue;
+                if (!bank.EndsWith(".strings")) continue;
+                try
+                {
+                    FMODUnity.RuntimeManager.LoadBank(bankName: bank, loadSamples: loadSamples);
+                }
+                catch (FMODUnity.BankLoadException e)
+                {
+                    Logger.LogWarning(e);
+                    continue;
+                }
+                main.Add(item: bank.ReplaceLast(".strings", ""));
+            }
+            foreach (var file in Directory.EnumerateFiles(path: folder, searchPattern: "*.bank"))
+            {
+                var bank = Path.GetFileNameWithoutExtension(file);
+                if (LoadedBanks.Contains(bank)) continue;
+                if (bank.EndsWith(".strings")) continue;
+                if (main.Contains(bank)) continue;
+                try
+                {
+                    FMODUnity.RuntimeManager.LoadBank(bankName: bank, loadSamples: loadSamples);
+                }
+                catch (FMODUnity.BankLoadException e)
+                {
+                    Logger.LogWarning(e);
+                    continue;
+                }
+                var path = $"bank:/{bank}";
+                Logger.LogInfo($"load: {path}");
+                foreach (var (_, asset) in AssetElementBinder.FetchFMODAsset(path: path))
+                {
+                    Logger.LogDebug($"[{bank}] {asset.path}");
+                }
+            }
+        }
     }
 }
