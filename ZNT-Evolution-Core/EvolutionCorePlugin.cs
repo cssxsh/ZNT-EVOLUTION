@@ -1,9 +1,11 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using BepInEx;
 using HarmonyLib;
 using UnityEngine;
+using ZNT.Evolution.Core.Asset;
 
 namespace ZNT.Evolution.Core
 {
@@ -14,6 +16,61 @@ namespace ZNT.Evolution.Core
         {
             Harmony.CreateAndPatchAll(typeof(DebugPatch));
             Harmony.CreateAndPatchAll(typeof(StartManagerPatch));
+
+            StartManagerPatch.Loading["fmod"] = new Thread(() =>
+            {
+                try
+                {
+                    var loaded = new []
+                    {
+                        "Master Bank.strings",
+                        "Master Bank",
+                        "AmbBank",
+                        "DialogBank",
+                        "IntroBank",
+                        "Musicbank"
+                    };
+                    foreach (var file in Directory.EnumerateFiles(Application.streamingAssetsPath, "*.bank"))
+                    {
+                        var bank = Path.GetFileNameWithoutExtension(file);
+                        if (loaded.Contains(bank)) continue;
+                        if (!bank.EndsWith(".strings")) continue;
+                        try
+                        {
+                            FMODUnity.RuntimeManager.LoadBank(bankName: bank, loadSamples: true);
+                        }
+                        catch (Exception e)
+                        {
+                            Logger.LogWarning(e);
+                        }
+                    }
+                    foreach (var file in Directory.EnumerateFiles(Application.streamingAssetsPath, "*.bank"))
+                    {
+                        var bank = Path.GetFileNameWithoutExtension(file);
+                        if (loaded.Contains(bank)) continue;
+                        if (bank.EndsWith(".strings")) continue;
+                        try
+                        {
+                            FMODUnity.RuntimeManager.LoadBank(bankName: bank, loadSamples: true);
+                        }
+                        catch (Exception e)
+                        {
+                            Logger.LogWarning(e);
+                            continue;
+                        }
+                        var path = $"bank:/{bank}";
+                        Logger.LogDebug($"load: {path}");
+                        foreach (var (_, asset) in AssetElementBinder.FetchFMODAsset(path: path))
+                        {
+                            Logger.LogDebug($"load: {asset.path}");
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    Logger.LogWarning(e);
+                }
+            });
 
             foreach (var type in (LevelElement.Type[])Enum.GetValues(typeof(LevelElement.Type)))
             {
