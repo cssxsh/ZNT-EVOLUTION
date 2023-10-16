@@ -17,11 +17,15 @@ Zombie Night Terror
 │   │   └───<...>
 │   ├───Decor
 │   │   └───<...>
+│   ├───StreamingAssets
+│   │   ├───MOD.strings.bank
+│   │   ├───Gunner.bank
+│   │   └───<...>
 │   └───<...>
 └───<...>
 ```
 
-## 导入记录
+## 导入流程
 
 ### 角色导入流程
 
