@@ -5,6 +5,488 @@
 ## 结构
 
 - FMODAsset
-  * id
-  * path 资源在 Bank 中的路径
-  * AssetId
+    * id
+    * path 资源在 Bank 中的路径
+    * AssetId
+
+## FMOD Studio
+
+### `d4e6902d-acdd-41ff-981e-bf0d778e777f` - `bank:/Master Bank`
+
+| GUID                                   | PATH                                                           |
+|:---------------------------------------|:---------------------------------------------------------------|
+| `e222ae02-83f3-434d-8938-f2eda4bd19f2` | `bus:/Global Mix/InGame/SFX`                                   |
+| `961af704-3650-4a2f-8b07-0c654edb7226` | `bus:/Global Mix/InGame/MUSIC`                                 |
+| `730b6709-ab68-4ca0-a267-d3049f2de179` | `bus:/Global Mix/Menu`                                         |
+| `edaf9816-a418-4acb-a103-f7d3e8ae7edf` | `bus:/Global Mix/InGame/SFX/ZoomYes/Normal`                    |
+| `74b52f35-f01d-42aa-be14-6de6a43e4c60` | `bus:/Global Mix`                                              |
+| `6cfd4744-cd9c-4178-9b16-7915f6e093ec` | `bus:/Global Mix/InGame/SFX/ZoomYes/Loud`                      |
+| `1a9c735b-061f-41ea-9a22-8d7d7e917fb4` | `bus:/Global Mix/InGame/MUSIC pause`                           |
+| `bbec166b-6f58-4c38-abd6-850372cbacc6` | `bus:/Global Mix/InGame/SFX/ZoomNo`                            |
+| `09f9e080-da54-4739-b8d5-2576f91fcac0` | `bus:/Global Mix/InGame`                                       |
+| `d28f2385-dde9-47c5-a099-0d462b80f069` | `bus:/Global Mix/InGame/TV`                                    |
+| `37a165a6-9878-43d9-ad6f-08882145442a` | `bus:/Global Mix/Menu/MainMenu`                                |
+| `86c984c7-1e68-4d6a-ad51-55b9cc5690ca` | `bus:/Global Mix/InGame/CreditsHit`                            |
+| `ee819ccb-b0c0-4d47-806c-f6a10361940b` | `bus:/Global Mix/InGame/SFX/ZoomYes`                           |
+| `b49aba98-04a7-4195-9e5e-b2ea6b3dfae1` | `bus:/Global Mix/Menu/MenuReverb`                              |
+| `0df9e9aa-d155-4316-99da-d96e3195fd82` | `bus:/Global Mix/InGame/Reverb`                                |
+| `cdab36d6-84cf-4875-8d32-5e97076a5118` | `bus:/Global Mix/InGame/SpeedUp`                               |
+| `921080d7-7f16-4b5f-9cf4-283b310739c6` | `bus:/Global Mix/InGame/SFX/ZoomYes/Normal/ReverbGeneric`      |
+| `c2e5e4e5-bd43-4809-ae35-157bce3361ef` | `bus:/Global Mix/InGame/SFX/ZoomYes/Normal/DirectorTalkReverb` |
+| `83fb4cf3-7f75-4add-8150-1e05851e3ba7` | `bus:/A`                                                       |
+| `d09bf6f4-00a6-4bc5-95d3-9c5886ec31cd` | `bus:/`                                                        |
+| `a4c36200-4182-4a3b-ae88-bdce8c5d4cbc` | `event:/Environment/Env_Portal_Loop`                           |
+| `c13f6700-f7ea-4e31-b34c-9f06a7b63297` | `event:/Humans/Humans_Astrogoliath_Surprised_Low`              |
+| `ce00cf00-101d-44f2-a778-7e95125891b0` | `event:/Environment/Env_Van_Explo`                             |
+| `37198b03-75d6-4431-9a56-feca25cfdd31` | `event:/Zombies/Basic/Zombies_Basic_HumanGrab`                 |
+| `7fae0804-789c-4e2b-b3c6-6190bdc0cd66` | `event:/Menu/TV_Music_Snapshot`                                |
+| `34439304-7778-425c-91ad-9a14d2bf1d86` | `event:/Humans/Boss_ScientistBig_ScreamLoop`                   |
+| `8f58c604-196d-4169-b655-9968466a4940` | `event:/Menu/Menu_ChapterSelect`                               |
+| `d9b4ca04-2e15-494d-9a31-9645b4a53c6a` | `event:/Humans/Weapons/Weapons_Sentry_Canon_Reload`            |
+| `74be0d05-fe3b-4d90-8ab4-d43e00d9a08b` | `event:/Humans/Weapons/Weapons_Chainsaw_Start`                 |
+| `0f12a206-a974-4720-adb7-78199dd418cb` | `event:/Environment/Env_Mine_StandbyLight`                     |
+| `cb5dd706-b5c1-434f-82ad-1f4bcd05cfc1` | `event:/Humans/Humans_Ninja_Steps_Clothes`                     |
+| `0d81a407-ad8d-4705-a511-69cefbdec345` | `event:/Zombies/Basic/Zombies_Runner_Basic_Stop`               |
+| `ced57609-aef5-4c64-9e62-49c881ee746f` | `event:/Humans/Cop_DrugSearch`                                 |
+| `4b25c10a-8e1f-4744-ba96-f4e9d79fd302` | `event:/Humans/Cheerleader_Dance`                              |
+| `d324150b-0776-4968-9fe0-ca538bd76850` | `event:/Humans/Humans_Man_DeathScream`                         |
+| `8ddb970c-70da-4cc3-b9f0-b1818b07df23` | `event:/Humans/Terminator_Spot`                                |
+| `3201a20e-eda2-42f1-88ce-cbde3c83a958` | `event:/Humans/Weapons/Weapons_Astronaut_Shot`                 |
+| `fa3ce50e-4101-4f33-9184-46bb2520b496` | `event:/Environment/Env_Camera_Spot_ON`                        |
+| `669a120f-b5e5-469f-a718-abc4c9ad3141` | `event:/Humans/Boss_Brain_Charge`                              |
+| `899c2d10-c2b1-4458-91b0-0d786b98d282` | `event:/Humans/Boss_ScientistBig_Drug`                         |
+| `c2b7e711-2dd0-4964-8d3a-668a9f04af13` | `event:/Menu/Menu_select_Scream`                               |
+| `b27dc913-37b2-4a68-96c0-f282cf55a574` | `event:/Humans/Weapons/Weapons_Astronaut_Shot_Bullet_Loop`     |
+| `36760315-2d96-446a-bedb-30ffcecb81db` | `event:/Humans/DrugLord_Laugh`                                 |
+| `99b83915-1751-4f79-aef9-947dbd7453c2` | `event:/Environment/Env_Camera_Spot_OFF`                       |
+| `802c5815-fd53-46db-8d53-68fa4152b218` | `event:/Humans/Humans_Girl_TerrorScream`                       |
+| `fe32c015-0f63-4f8d-a5de-f4f3013f49ad` | `event:/Humans/Weapons/Weapons_Shotgun_Shot`                   |
+| `ff177b16-342d-48e9-845b-c33f1d0a1561` | `event:/Humans/Humans_Hazmat_DeathScream`                      |
+| `d3d4c616-ded5-49b4-902f-c394a6b7fea2` | `event:/Menu/Menu_select_Tank`                                 |
+| `a1c24517-f874-4b67-b7fb-4b9a1294a20b` | `event:/Humans/ChainsawDeath`                                  |
+| `5c216a17-6074-4f37-b8b5-d0e4308b2e8d` | `event:/Environment/StadiumHorn`                               |
+| `92e83c18-1309-47b3-b25b-ac3e3de21223` | `event:/Humans/Humans_Hazmat_Scared`                           |
+| `74b52b19-aa2f-4a61-8f7f-9f91b9977833` | `event:/Environment/Env_MetalDoor_Close`                       |
+| `8dd16619-f760-4ab5-b370-e700cddb1726` | `event:/Humans/BossFinal_EyeHit`                               |
+| `93fd8319-664c-491e-9dd4-36dcf5cc398b` | `event:/Menu/Menu_ClicOption`                                  |
+| `96e2a019-0447-4bb7-8eca-378ebcc74389` | `event:/Menu/ChallengeHitFail`                                 |
+| `0b8bca19-6861-4370-9af3-7bbc5f17e76a` | `event:/Humans/Humans_KeyboardTyping`                          |
+| `da6c101a-c61f-4bdc-a3ee-158162d0f4cd` | `event:/Zombies/Climber/Zombies_Climber_Sacrifice_Start`       |
+| `34d8711a-e4b8-4d78-8233-f04af8488984` | `event:/Humans/Weapons/Weapons_Sniper_Shot`                    |
+| `879be51a-5386-4e04-9f74-3657780e9e92` | `event:/Menu/Zoom`                                             |
+| `fe60f91a-df03-4a0a-878d-63ff43767572` | `event:/Environment/Env_Alarm`                                 |
+| `f9a88a1b-ee67-408a-a536-8f4b8e8c5a49` | `event:/Humans/OldLadyWheels`                                  |
+| `bec3911b-bf8f-4452-a27d-121a6435efe2` | `event:/Zombies/Climber/Zombies_Climber_Death_Fire`            |
+| `ba7d791c-0153-4edc-988a-270ea6ce7d3a` | `event:/Zombies/Basic/Zombies_Basic_Boomer_Grow`               |
+| `9494e61c-7fbc-4fae-9cf9-f38892c29e6c` | `event:/Humans/Humans_Man_Pain`                                |
+| `bb280e1e-a2a0-432d-8e97-be739132367e` | `event:/Zombies/Basic/Zombies_Basic_BoomerV4`                  |
+| `8d481f1e-18f4-49be-8ab2-a60ac13acb28` | `event:/Humans/Humans_Contamination_Badass`                    |
+| `a940bc1e-863e-4e9a-921c-a54d7005a21f` | `event:/Environment/Mower_Engine`                              |
+| `a3ce1c1f-2223-4601-b04e-a03f79172467` | `event:/Zombies/Climber/Zombies_Climber_Sacrifice_Fire`        |
+| `59fb261f-6462-4a67-9ff6-2e60aa43cf11` | `event:/Humans/Humans_Worker_Hammer`                           |
+| `62a56e21-90d8-4c55-a3b5-968e57490509` | `event:/Environment/Spaceship_Launch`                          |
+| `0535c322-78d2-4194-a9a4-ddda95202a3b` | `event:/Humans/Humans_Doctor_Write`                            |
+| `9e8d1123-0ac1-4b27-a35e-a28b7ab2de2e` | `event:/Humans/BossFinal_ChargeLoop`                           |
+| `1beac123-e728-49e1-bf25-ff7df59fd3e8` | `event:/Humans/Weapons/Weapons_Sentry_Canon_Unrise`            |
+| `e25c2124-bc52-4364-974c-06dfef556148` | `event:/Humans/BossFinal_EyeFallinVomit`                       |
+| `2fae3924-464a-4b6f-8c1b-fb86b8310b2d` | `event:/Environment/Floor_Collapse`                            |
+| `e42a3c24-b823-4f5c-9dd9-56a9811277b0` | `event:/Humans/Humans_Contamination_ShotGun`                   |
+| `0fc94524-0189-4a63-bd0e-eaa9c3f04817` | `event:/Humans/Clown_Death`                                    |
+| `06b79c24-a160-417c-91bc-541bed1cffaf` | `event:/Humans/Weapons/Molotov_Throw`                          |
+| `68d2f424-ca36-4506-a0ef-f2d44f9c6de8` | `event:/Humans/Humans_Man_DeathScream_Daft`                    |
+| `6ece6825-a983-4685-9a27-2ef7e3fd0c71` | `event:/Menu/Env_TV_ON`                                        |
+| `d8ac3126-341c-4f31-84da-1b7ec7625e58` | `event:/Humans/Humans_Man_Scared`                              |
+| `578ca02a-71d4-4d8d-933b-5070abfd8397` | `event:/Environment/Monolith_Destroyed`                        |
+| `14a1ee2a-3bde-4141-8e52-e50c5fe12e81` | `event:/Humans/SuperComputor_Generator_Loop`                   |
+| `af42752c-7dbc-4c1f-99b6-590390fd4c9a` | `event:/Zombies/Climber/Zombies_Climber_Wisper_random`         |
+| `f166a42c-7b20-4d34-a84d-3c7a7ea54a60` | `event:/Menu/Menu_screenForward`                               |
+| `018cb22c-5111-4b37-a78b-48ca5c7a943a` | `event:/Zombies/Blocker/Zombies_Blocker_Scream`                |
+| `c0191d2d-f58e-40a3-b9f5-e75354b63f0c` | `event:/Humans/Clown_Repulse`                                  |
+| `b2a1a02e-d1bf-499e-83ef-08cbe7110a53` | `event:/Zombies/Blocker/Zombies_Blocker_Death_Fire`            |
+| `e347392f-564f-47ea-8c49-c8e14c9d7788` | `event:/Environment/Env_Laser_Cut`                             |
+| `af39db2f-cb9a-4532-8f7b-803eee2f333c` | `event:/Humans/Weapons/Weapons_Grenadelauncher_Shot`           |
+| `3a933e31-46a9-4d2e-9ef7-5ec68b859596` | `event:/Menu/Menu_MutationOverButton`                          |
+| `e6998331-8044-4126-9ac4-210026f103b6` | `event:/Humans/Weapons/Weapons_Priest_Shoot_Spell`             |
+| `b3f61b32-3ea6-4a4b-aca5-b3ea1bb26d2b` | `event:/Environment/Env_TvZap`                                 |
+| `10374932-1b5d-4aa4-875a-b19f0d332ed0` | `event:/Environment/Env_DoorsHitSoft`                          |
+| `27dba832-6685-46ef-9207-8feaa0930fee` | `event:/Environment/Green_Switch`                              |
+| `307ba833-c73b-4e61-903c-4b9b220ec39c` | `event:/Menu/Menu_Continue`                                    |
+| `4e2b7535-717b-463b-9898-76209dce6f5d` | `event:/Environment/ControlRoom_test`                          |
+| `e2867935-d89a-45be-b3bd-12999932e0f6` | `event:/Environment/Car_stop`                                  |
+| `71c29a35-f8fe-4bbb-b664-bb63dfd67e7e` | `event:/Zombies/Basic/Zombies_Basic_ElecDeath`                 |
+| `853fec37-5d43-40d9-abb2-646bbe2d23ca` | `event:/Zombies/Climber/Zombies_Climber_RunSteps`              |
+| `c8678938-1cd1-4c79-992c-5e9ce87f2965` | `event:/Humans/Weapons/Weapons_Shotgun_Pump`                   |
+| `0af1bc39-6837-4c06-a32c-9cf9022e9228` | `event:/Environment/Env_MetalDoor_Open`                        |
+| `1654453a-b0ee-4273-a4d9-ca9dac31db2e` | `event:/Environment/Car_startLoop`                             |
+| `2f1d963a-4c33-471b-a3b5-2e747541c06b` | `event:/Zombies/Tank/Zombies_Tank_Run_Start`                   |
+| `0e28903b-7f7f-460b-8b81-ea2090f668c1` | `event:/Menu/PauseMenu_Snapshot`                               |
+| `e5a6193c-fcc3-4c3e-b7ae-a287d343239d` | `event:/Humans/Boss_ScientistBig_Mutation`                     |
+| `bc09553c-6484-490f-870a-872e64166310` | `event:/Humans/Boss_Brain_Fire`                                |
+| `b1e5ea3e-7776-4dc4-8c71-82061161ad95` | `event:/Zombies/Climber/Zombies_Climber_Mutation`              |
+| `d675a63f-dc21-4a1d-88ef-b6bfcd09b1d2` | `event:/Humans/AstroGoliath_Death`                             |
+| `0191bd3f-dbd8-40c7-96aa-2a3c71c22812` | `event:/Zombies/Basic/Zombies_Basic_Boomer`                    |
+| `6829bf3f-d867-480d-baaa-a841204aa5cf` | `event:/Zombies/Climber/Zombies_Climber_Griffes`               |
+| `51d34340-121b-4955-9e15-25c1e93a5c79` | `event:/Environment/Env_LightFlick`                            |
+| `2eced040-cfef-4425-9502-d89a1e42ddea` | `event:/Menu/Stairs_UP`                                        |
+| `696c3e41-cd90-4cdd-883e-63c847563a3d` | `event:/Zombies/Basic/Zombies_Basic_Explo`                     |
+| `723d6541-0127-4b3e-b3e6-74b830cc28cd` | `event:/Menu/Menu_Clic`                                        |
+| `d7792643-d75f-461d-a305-365a27108c8b` | `event:/Menu/Menu_ClicGeneric`                                 |
+| `fd238043-b3d4-48b9-897a-196aec89328f` | `event:/Humans/Weapons/Weapons_CanonMoon_BulletImpact`         |
+| `0e514344-2c10-47d6-8f42-1b05df0cb02d` | `event:/Humans/Clown_Reload`                                   |
+| `d28c0a45-8c39-41bd-89a8-f4a529501a82` | `event:/Humans/Humans_Man_TerrorScream`                        |
+| `3a07ca45-c567-409a-a632-c8e9cc0eca1f` | `event:/Environment/Spaceship_LaunchAlarm`                     |
+| `b6143046-4dc4-4357-af0d-04596568456d` | `event:/Humans/MachineGunner_Turn`                             |
+| `73fa5e46-7b90-4a0f-bd3e-d53a25be7694` | `event:/Environment/Floor_Crack`                               |
+| `c7892e48-8a25-4ce2-838e-e21f6dd16b6b` | `event:/Hit_Death/Hit_HeadExplo`                               |
+| `8c578a48-2ab4-44f2-b003-7941b79b2dae` | `event:/Humans/DrugLordDeath`                                  |
+| `1cf9e548-fc1a-4195-9e4c-aa3d3582731e` | `event:/Humans/Boss02_Reload`                                  |
+| `082f1c4a-9c53-426e-8cf3-7af0f0aa2c29` | `event:/Menu/Menu_LevelResult`                                 |
+| `e596a04a-9257-48f4-a7f4-3ff01b7f4cc7` | `event:/Zombies/Basic/Zombies_Basic_Sacrifice_Fire`            |
+| `7b3e7c4b-1cac-4ff8-89df-8fa5d0468680` | `event:/Humans/BossFinal_Open`                                 |
+| `efd8034c-9bf3-4879-a02f-4af82c7eac3d` | `event:/Zombies/Basic/Zombies_Spit_Impact`                     |
+| `bafbb34c-274a-4b6d-a6c9-54eb320bc650` | `event:/Humans/Boss_ScientistBig_RespiIn`                      |
+| `cb6cdd4d-9ad3-4f1b-b611-5521071a3fa9` | `event:/Zombies/Tank/Zombies_Tank_Jump`                        |
+| `65546c4e-7740-448a-9dda-eb0fbf2f7d84` | `event:/Humans/Sniper_steps`                                   |
+| `0489694f-d17b-49d8-aae5-d7f4702cdc14` | `event:/Humans/Weapons/Weapons_Sentry_Canon_Shot`              |
+| `23c32350-6df1-47d1-9079-8fda5de7ea0c` | `event:/Environment/Monolith_Hit`                              |
+| `a619e450-9bad-4f06-9431-a361ebefec70` | `event:/Humans/Humans_Girl_Joy`                                |
+| `eab01851-7c69-4fbd-83b4-a505970a6a16` | `event:/Menu/Menu_LevelPlay`                                   |
+| `73e98f51-4038-4094-88d9-750ac5a17c05` | `event:/Environment/Env_BarricGlass_Break`                     |
+| `e5845052-9173-4c20-9218-f27a3eaa6dce` | `event:/Zombies/Tank/Zombies_Tank_Run_DashEnd`                 |
+| `05ef8553-31aa-4f28-832c-4e9f38e25ce2` | `event:/Humans/Garbage_Girl_In`                                |
+| `435fa454-4451-4c8e-bf8b-3c7b09bd436d` | `event:/Humans/Weapons/Weapons_AssaultRifle_Shot`              |
+| `88fedc54-38df-46df-8a21-645075d88f84` | `event:/Zombies/Blocker/Zombies_Blocker_Mutation_End`          |
+| `b7081856-5c55-413b-be39-c980e936569a` | `event:/Humans/Weapons/Weapons_CRS_Shield_Impact`              |
+| `1b003b56-e66b-4c4b-a746-a3d7ba33d624` | `event:/Humans/Director_CutClap`                               |
+| `61f16157-c1f6-4403-972a-9e40ce9128ae` | `event:/Humans/Humans_Man_Surprised`                           |
+| `1a310a58-dd1e-4206-b050-11343c6b9172` | `event:/Humans/Humans_Hazmat_Surprised`                        |
+| `66295058-4cfc-42d2-a625-54e57900d968` | `event:/Humans/Humans_Civil_Photo`                             |
+| `fe1bb558-cee3-4341-a005-36242d2103fc` | `event:/Zombies/Basic/Zombies_Basic_SpitAim`                   |
+| `7b06cc58-a84b-4681-90e1-098264bd624e` | `event:/Humans/Clown_Shoot`                                    |
+| `8a5ef858-b243-4be2-98c0-93dd03b95b4b` | `event:/Humans/MachineGunner_Laugh`                            |
+| `171f6559-5a7c-4750-98a2-8de2db9e8a5c` | `event:/Menu/Menu_Timer_BipTriple`                             |
+| `2cf4de59-1fbf-47c4-8c61-a1f5f1f5217e` | `event:/Environment/Barrel_Explo`                              |
+| `6d05a85b-80b2-4531-be97-0107a80cf96a` | `event:/Zombies/Tank/Zombies_Tank_Charge`                      |
+| `cb59ae5b-aa70-43e7-a2bd-758bc0a108da` | `event:/Humans/Boss02_Repulse`                                 |
+| `da9cd25b-6fbb-4a07-8ae7-ee58993d0f4d` | `event:/Humans/Humans_Daft_Teleport_In_02`                     |
+| `b6cfd85b-23f2-40bc-ba62-2f590e2c3c9e` | `event:/Humans/Humans_CRS_Steps`                               |
+| `9bc7de5b-035c-4f0e-8a94-f997da8f5ee3` | `event:/Menu/ChallengeHitComplete`                             |
+| `7480725c-bf08-4faf-9d25-ebf7c90e6590` | `event:/Humans/Weapons/Weapons_Sentry_Canon_Rise`              |
+| `504eef5c-db71-439c-8049-4b24b74a10d0` | `event:/Humans/Terminator_Steps`                               |
+| `7353c15d-63d9-4964-9c14-c00533fd6848` | `event:/Menu/Menu_MutationUnlock`                              |
+| `a00c6b5e-5881-40f9-9530-99c1bcff8c41` | `event:/Humans/Humans_Astrogoliath_Pain_Low`                   |
+| `f080755e-b909-4749-87af-8710a5195337` | `event:/Humans/Boss_ScientistBig_Roll_Loop`                    |
+| `2de48160-98ad-46dd-88c3-2065b97a8f5b` | `event:/Hit_Death/Death_Plasma`                                |
+| `fedcac60-9c8f-46fd-831c-f0f9bbed7bb5` | `event:/Humans/Boss_ScientistBig_RespiOut`                     |
+| `2b78c460-06a4-491b-816a-476e76af3372` | `snapshot:/PauseIngame`                                        |
+| `35c4c560-85ea-4088-927b-ab05e814f4dd` | `event:/Environment/Env_Elevator_Stop`                         |
+| `95fc4661-1617-4c41-b965-1766e1a72c06` | `event:/Zombies/Basic/Zombies_Basic_Sacrifice_Start`           |
+| `5e4c7f61-1fdf-4b25-b757-ee8679a64142` | `event:/Hit_Death/Hit_Spike`                                   |
+| `0edea861-f779-4a9e-a49a-da16c18bfa46` | `event:/Humans/MachineGunner_Clothes`                          |
+| `99971662-c04c-4f57-8848-77a4cfde378d` | `event:/Humans/Humans_Ninja_Surprised`                         |
+| `22386862-d294-432e-ad11-15cc9efa7b83` | `event:/Zombies/Basic/Zombies_Basic_Death_Fire`                |
+| `a4120463-8918-41af-8ad2-8f643835106a` | `event:/Environment/Fan_Hospital_Active_Loop`                  |
+| `ae1e7a63-7844-46cc-96a9-bee5bb45e573` | `event:/Zombies/Blocker/Zombies_Blocker_Sacrifice_Start`       |
+| `cc1f0964-1b70-4eb8-a1eb-a8bd1fa34361` | `event:/Humans/Humans_Man_TerrorScream_Daft`                   |
+| `427a1064-4a34-4aef-a830-be57ac10dcff` | `event:/Environment/Env_Barric_Explo`                          |
+| `a9e46b64-7c78-4aed-8f79-78c3455bb5b4` | `event:/Zombies/Tank/Zombies_Tank_Explo`                       |
+| `1712b864-68c1-4373-a063-415893c5862f` | `event:/Humans/AstroGoliath_Jetpack_Start_Loop`                |
+| `141dba64-016a-4d12-8716-5160d8f0d7fc` | `event:/Humans/BossFinal_Death`                                |
+| `7b792065-03a0-4d70-aab6-6a9df4b8005c` | `event:/Humans/AstroGoliath_Jetpack_Land`                      |
+| `b1edcd65-0d04-404b-a14b-29a2bb4f7d83` | `event:/Zombies/Tank/Zombies_Tank_HeadAttack`                  |
+| `f847d765-96af-4bdf-af7c-262f413a7188` | `event:/Humans/Weapons/Weapons_BouncerPunch`                   |
+| `14db4366-0318-4d15-af0e-f4eeea0ffd32` | `event:/Zombies/Climber/Zombies_Climber_Scream`                |
+| `eb197366-80a7-4b8b-a5be-920366b815bd` | `snapshot:/TV_Snapshot`                                        |
+| `7a72c767-cb38-449b-ab9f-c2df0e703885` | `event:/Menu/Menu_select_Run`                                  |
+| `ba131c68-0b8b-4eac-a3b9-435e7df04489` | `event:/Environment/ElevatorDoor_Close`                        |
+| `b56e2f68-ad83-446c-bdbc-a6be643c9a16` | `event:/Humans/Weapons/Weapons_Canon_Moon_Move`                |
+| `219f6e68-e1cf-46da-b0de-e5b5c72a0422` | `event:/Environment/Env_Elevator_Rock_Start`                   |
+| `d9db9e68-1539-4b5b-8e7a-2be49f057620` | `event:/Humans/Weapons/Cheerleader_Kick`                       |
+| `7243e46a-0e2f-47d9-a7fb-233fe7fdade2` | `event:/Environment/Env_BrickWall_Explo`                       |
+| `5074006b-863b-47e2-a133-7bb5cb2bf300` | `event:/Environment/Env_Explo_BombMine`                        |
+| `d428446b-c8fb-4fa3-9269-9c6117c75ac1` | `event:/Environment/Env_DoorsSmash`                            |
+| `654a726b-7c09-438d-b51b-20374e4b8648` | `event:/Environment/Subway`                                    |
+| `3aa39c6d-a523-4a11-beea-2c413421fc2c` | `event:/Menu/Menu_AmbLoop`                                     |
+| `2742f26d-8219-4593-a9e8-b3a54ac8d319` | `event:/Humans/PORN`                                           |
+| `19e6136e-9c1d-4ce1-9bc1-ef665a18e9a6` | `event:/Humans/Weapons/Weapons_Gunner_Reload`                  |
+| `8f491f6e-c3a4-420f-9208-8c96852ab41f` | `event:/Humans/SuperComputer_Rise`                             |
+| `7cf36d6e-6a7d-434f-a444-5c1210dca1d5` | `event:/Humans/Humans_Doctor_glasses`                          |
+| `cf0c9f6e-4f7e-439f-b055-b00a76cc145e` | `event:/Humans/Weapons/Weapons_Chainsaw`                       |
+| `5efd4a6f-f579-43d6-8354-6b3b3f720a44` | `event:/Environment/Env_fan`                                   |
+| `3b5f9d6f-8611-4243-ab8c-6aa1603dcb67` | `event:/Humans/Director_Smoke`                                 |
+| `617ee66f-c2e4-470f-970c-30a697a8a00a` | `event:/Menu/Menu_ClicPrevious`                                |
+| `f5c30370-5154-4529-b7b2-708f58b4bd81` | `event:/Humans/Humans_CartoonFall`                             |
+| `d9991b70-d1be-4f66-a389-d53a35b5964c` | `event:/Menu/Menu_OverButton`                                  |
+| `95f04a71-6332-47df-907c-a8678d84ef75` | `event:/Environment/Env_BigGenerator_Loop`                     |
+| `ff995d72-54e0-4a36-8e3f-91e60220d289` | `event:/Environment/Env_Asteroide_Impact`                      |
+| `8210e072-15eb-4818-95f1-1ac186270248` | `event:/Humans/Humans_Daft_Teleport_Out_02`                    |
+| `a9347173-43ac-4e34-93c1-3b69af86012b` | `event:/Humans/Boss_Brain_Fire_Stop`                           |
+| `6a43c573-970b-4a5f-aec6-531ea205bccb` | `event:/Environment/Barrel_Roll`                               |
+| `397f3374-3ed1-4ad0-9abb-63429f3a414e` | `event:/Environment/Env_Asteroide_PreImpactWhoosh`             |
+| `62a02f75-6245-471d-8f36-15248197f35a` | `event:/Humans/Chemist_Laugh`                                  |
+| `d0266575-9e14-459f-aee8-60f00268cd5a` | `event:/Humans/Humans_Hazmat_TerrorScream`                     |
+| `cc7c6675-1811-48b7-bde0-f490db100eab` | `event:/Humans/Weapons/Weapons_CanonMoon_Shot`                 |
+| `be6f8c75-024e-48af-85a5-2450dab2d2e5` | `event:/Humans/OldLadyFart`                                    |
+| `db32a476-6bb3-4283-a985-015bb500f097` | `event:/Humans/SuperComputer_Unrise`                           |
+| `c92bfe76-f196-4a52-9cc6-fd0216a38620` | `event:/Environment/Env_Doors_Open`                            |
+| `3e3e3277-8263-462e-8117-32c2f46eaabf` | `event:/Humans/Humans_Drone_Attacked`                          |
+| `639f8077-15f2-484e-8d8f-18e499b8640b` | `event:/Humans/Weapons/Weapons_MachineGunNewShot`              |
+| `3c63ef78-893d-4fe6-81c3-c31f8907ec73` | `event:/Menu/Menu_ClicExit`                                    |
+| `f93e9879-aa40-4ae4-bf47-f07d7f728995` | `event:/Humans/Weapons/Weapons_Sentry_Explo`                   |
+| `7b29087b-415d-49f7-96ba-bac04b59280e` | `event:/Zombies/Blocker/Zombies_Blocker_Sacrifice_Fire`        |
+| `16d64b7b-fa3f-48f8-a9a1-372a5afdc33d` | `event:/Environment/Env_BarricGlass_Hit`                       |
+| `7867477c-8171-4644-a3df-10a6fb6243d2` | `event:/Humans/Boss_ScientistBig_Pain`                         |
+| `4109dc7c-978c-4332-a116-46968d0d8a56` | `event:/Zombies/Basic/Zombies_Basic_Spit_Shoot`                |
+| `e1ee1b7d-c542-4c01-8d45-02be8cf7a017` | `event:/Menu/Menu_MutationSelect`                              |
+| `17fa387d-d38e-4eb6-a0e1-2f04b70bb67d` | `event:/Zombies/Basic/Zombies_Basic_Crachat`                   |
+| `0582b37e-08de-49cf-8528-4551c4fca5c4` | `event:/Environment/HandledExplosive_Loop`                     |
+| `291af37e-47d1-4acb-a092-7d7c434d50cf` | `event:/Humans/Weapons/Weapons_MachineGun_Shot`                |
+| `11e29e7f-c5bc-4654-b7ba-1032d76dd7d8` | `event:/Humans/Weapons/Weapons_Chainsaw_Run`                   |
+| `7c308280-f358-4ba1-920d-b9296225e2a9` | `event:/Menu/Menu_MouseOnExit`                                 |
+| `706fb780-6e87-471a-8c1c-4051ab89fc2e` | `snapshot:/DoubleSpeed`                                        |
+| `f0e9e180-2140-4fe7-9597-626f02f56d7b` | `event:/Environment/Env_BigPress_Stop`                         |
+| `e88ef080-947f-4994-bbd1-5679726eab62` | `event:/Zombies/Basic/Zombies_Basic_Bite`                      |
+| `c6129c81-3fb3-4b87-83d5-eebad87605c9` | `event:/Environment/TROLL`                                     |
+| `419e4e82-5ea5-45e8-a430-cfc31c555313` | `event:/Humans/Humans_Dorctor_chirurgie`                       |
+| `f7e7a083-1e65-4481-8683-6f6306a29bd5` | `event:/Zombies/Tank/Zombies_Tank_Boomer_Grow`                 |
+| `8337d783-2174-46c6-b4d1-ba09e8591cee` | `event:/Zombies/Tank/Zombies_Tank_Steps`                       |
+| `886c4584-b209-4c5f-a554-4bc556cda046` | `event:/Environment/Env_DoorsHit`                              |
+| `79ff5184-a4cc-4dd8-93cc-f615aa9f8076` | `event:/Humans/Boss02_Throw`                                   |
+| `af255a84-6cfa-4a05-a8f0-6dc6ac414434` | `event:/Humans/Weapons/Weapons_Uzi`                            |
+| `8560a484-9cc2-4f7b-b4ec-4cd49c190298` | `event:/Humans/MachineGunner_Land`                             |
+| `efbebe84-cd16-465b-af02-fb800d898c63` | `event:/Environment/Env_Elevator_Loop`                         |
+| `f7a8ea85-4db9-42c6-9015-40b879b274eb` | `event:/Humans/MachineGunner_Step`                             |
+| `795d6f86-8f18-4721-a484-2ef385fd96b6` | `event:/Humans/Humans_Man_Surprised_Low`                       |
+| `eddcc286-8cec-481a-b8e7-0041cef58655` | `event:/Humans/Garbage_Girl_Out`                               |
+| `11c93287-229a-4784-81a8-788ca2f8a296` | `event:/Humans/Garbage_Girl_SmallOpen`                         |
+| `0ea13d87-ef8c-4f7f-8e19-94337e7f6875` | `event:/Humans/HomelessDrink`                                  |
+| `43702a88-3bdb-43dd-8f1f-e56453c2231e` | `event:/Menu/Menu_Timer_BipEnd`                                |
+| `f2917688-d827-404d-8285-2531ee66b9e9` | `event:/Humans/Boss_ScientistBig_Jump`                         |
+| `0f8a9788-3150-4dee-bbb5-8532439e0872` | `event:/Menu/Menu_MouseOnOption`                               |
+| `be46d288-2e3e-4bb3-a8dd-c10a81b8dfa2` | `event:/Humans/Humans_Drone_Surprised`                         |
+| `50ed3a89-6ffb-46c3-8eae-8670bd4dccb4` | `event:/Humans/BossFinal_Hit`                                  |
+| `cdac058a-b5ee-41d5-af60-4875a671b5f0` | `event:/Environment/Env_Water_Move`                            |
+| `c1b31a8b-55fb-45fc-a258-115eb3ca9462` | `event:/Humans/Boss_Brain_Death`                               |
+| `518c0c8c-350d-4ae1-9365-25ded91b7ef6` | `event:/Environment/CircularSaw_Loop`                          |
+| `77829a8c-dba9-437a-beb2-2afa9a13657b` | `event:/Menu/Menu_Timer_BipSingle`                             |
+| `4ce4408d-a934-4239-a5c3-e09f28768458` | `event:/Environment/Env_Doors_Close`                           |
+| `42530d8e-e5e5-4d5e-83a7-6b7ab8a32b1d` | `event:/Hit_Death/Hit_Wound`                                   |
+| `97a5a48e-a6aa-426b-bb59-3264dfa515d2` | `event:/Humans/Humans_Worker_Brush`                            |
+| `df322e90-548b-4709-8452-01356193aac2` | `event:/Humans/Chemist_Chair_Walk`                             |
+| `cd40d190-5ca5-41de-a2b5-0cfc6f63d3a3` | `event:/Humans/Humans_Contamination_CopAssault`                |
+| `8796d690-06d2-417a-bf46-8cf75d1c2d79` | `event:/Humans/Humans_Daft_Teleport_In`                        |
+| `4fb79c91-f9f6-45f9-8146-0f6e6607e375` | `event:/Zombies/Blocker/Zombies_Blocker_Mutation`              |
+| `d2dcea91-15ab-47f1-aca2-6546c7512ee0` | `event:/Humans/Humans_Contamination_CopGunner`                 |
+| `21625a93-4628-4fc1-8859-58e10a8507f3` | `event:/Environment/Env_MetalHit`                              |
+| `82990f94-1ece-44c9-87af-3d4774c4584e` | `event:/Humans/Humans_Worker_Drill02`                          |
+| `56bf7594-f34a-4bca-b966-7ac2b9d3d2bd` | `event:/Zombies/Tank/Zombies_Tank_Sacrifice_Fire`              |
+| `51f6ce94-b379-4b4e-8559-14edb235804f` | `event:/Humans/BossFinal_Vomit`                                |
+| `f66c1b96-420c-4547-82ad-275eac24d27d` | `event:/Humans/Boss_Brain_Force`                               |
+| `7d356096-d708-48dc-97f3-c9548d083037` | `event:/Humans/Boss_ScientistBig_Tired`                        |
+| `1785d996-28bb-46e1-8544-ced64a3e73b9` | `event:/Humans/Boss_Brain_Shieldbreak`                         |
+| `1fd81d98-2ac5-4029-a421-f9efa3e5aa74` | `event:/Zombies/Basic/Zombies_Basic_Jump`                      |
+| `e0d95a98-847c-49ae-ac89-6df6e079d7df` | `event:/Menu/Door_Break_OFF`                                   |
+| `baf8fd98-d7e7-4dd2-8ede-f323b9ce88e2` | `event:/Humans/Weapons/Weapons_Chainsaw_CutFlesh`              |
+| `0412909a-aa0a-4dda-abaa-02e7fc8603a0` | `event:/Menu/PauseMenu_Out`                                    |
+| `4556079b-549f-4565-a0c9-f73990db1047` | `event:/Humans/Humans_Girl_Surprised`                          |
+| `3a6b139b-5c09-4709-a9b3-572938f0f975` | `event:/Menu/Menu_select_Block`                                |
+| `7dc8a89b-19f5-4bc2-a594-01417d1183fb` | `event:/Menu/Menu_DeleteSave`                                  |
+| `c950f39c-0ecf-4e52-83e5-a692071d434f` | `event:/Menu/Env_TV_OFF`                                       |
+| `7e3c619d-028f-453f-a173-a515a1ef661f` | `event:/Environment/Env_Thunder`                               |
+| `a68b689d-4e94-4ba6-aa16-b95a1ec6a413` | `event:/Environment/Bridge_Unlock`                             |
+| `b943c09d-2340-485e-b3ff-c7275fffb067` | `event:/Humans/Weapons/Weapons_Virgin_Shoot_Spell`             |
+| `6650be9e-dc67-4589-817c-81188a531eb8` | `event:/Environment/Env_Water_Splash`                          |
+| `23c47c9f-e422-4554-a39a-392a1119412a` | `event:/Zombies/Tank/Zombies_Tank_Sacrifice_Start`             |
+| `f534849f-51da-4965-be8b-01533b0246e7` | `event:/Humans/Weapons/Weapons_CanonMoon_BulletLoop`           |
+| `15f2dc9f-2861-4e74-8798-1475568f3e1b` | `event:/Humans/Boss_ScientistBig_Impact`                       |
+| `ab4802a0-8ef7-4c90-9907-72826349a3e4` | `event:/Humans/Weapons/Weapons_Saber_Woosh`                    |
+| `e5a40aa0-3a61-42c2-a74d-cf9ad50ec795` | `event:/Environment/Env_Portal_Spawn`                          |
+| `83d691a0-172e-402c-9dc0-c61256836088` | `event:/Environment/Moving_Container_Loop`                     |
+| `a651d3a2-7035-4494-88dd-36dd10ad9572` | `event:/Humans/Humans_Ninja_DeathScream`                       |
+| `4c9313a3-3abe-4a95-b491-2378707773f4` | `event:/Environment/Env_Van_Hit`                               |
+| `3a371ea3-f040-4b60-8f32-16b4e74ef934` | `event:/Humans/Humans_Worker_Drill01`                          |
+| `5c0592a3-3a04-4314-af1d-739dd6aa4693` | `event:/Menu/Menu_PlayButton`                                  |
+| `bd2896a3-44c0-4d07-a845-da29552f6c28` | `event:/Zombies/Zombies_random_Amb_Loop`                       |
+| `52893da4-4960-44a9-9094-5ab15f93ea85` | `event:/Environment/Spaceship_Crash`                           |
+| `81eb5aa4-f2a2-4d50-9bce-6b89bd8e4af1` | `event:/Menu/Menu_MouseOnGeneric`                              |
+| `22ee20a5-e563-4281-87f5-2358fa701cf3` | `event:/Humans/Terminator_Death`                               |
+| `beb762a5-12f5-4fe6-addb-916d9a628b04` | `event:/Environment/Env_Elevator_Rock_Stop`                    |
+| `01fd1aa6-8526-4358-a805-d79f9c415eb7` | `event:/Menu/Menu_ClicChapter`                                 |
+| `23cec0a7-fedb-42e7-8149-0263d7f5a269` | `event:/Environment/Fan_Hospital_Activate_Loop`                |
+| `097a07a8-c51f-42ec-94d6-654f5c923c7c` | `event:/Zombies/Basic/Zombies_Basic_CrachatImpact`             |
+| `17b319a8-e17e-47ee-a6a1-e9019470b3d2` | `event:/Menu/Speed_Double_OFF`                                 |
+| `db1c61a8-d858-4d17-9b09-405a907ffc98` | `event:/Menu/Env_TV_Mouth`                                     |
+| `0b59eea8-3be1-4698-b168-686009b0ad58` | `event:/Menu/Speed_Double_SnapShot`                            |
+| `ec002aa9-7dbc-4d11-9c22-775fd054fd66` | `event:/Menu/Menu_ChallengeUnlock`                             |
+| `1f035aa9-16e3-40d2-a321-f994a33254f5` | `event:/Menu/Menu_MouseOnChapter`                              |
+| `5035c1a9-dcf2-42f7-b61c-32288fa33e54` | `event:/Menu/Menu_select_Climb`                                |
+| `31e136aa-dea0-4b57-8f99-5e5f3477d031` | `event:/Humans/Humans_Man_Pain_Daft`                           |
+| `ad863eaa-e798-4cfa-bde9-0135b62bfa4a` | `event:/Humans/BossFinal_HeartBeat`                            |
+| `934153ab-d759-40d9-a11a-83b9c225e427` | `event:/Humans/Humans_Civil_Molotov_aim`                       |
+| `114acaac-8ee0-42ec-b80b-4f9aa0596b8b` | `event:/Humans/BossFinal_Heart_Explo`                          |
+| `88d409ad-f01e-46d6-973e-d3e973f8d01f` | `event:/Humans/Humans_Ninja_WallSteps`                         |
+| `f8b414ad-6f00-48e3-9373-226b13b4b4fa` | `event:/Environment/Harvester_EngineLoop`                      |
+| `f0380fae-c1f0-4c95-be79-040280fb2072` | `event:/Humans/Humans_Contamination_Girl`                      |
+| `eb914baf-ddfa-4e16-944d-0b1229e073b5` | `event:/Humans/Boss_Brain_HitPain`                             |
+| `8e96dcaf-fa26-4b36-9239-6739a990f247` | `event:/Menu/Door_Break_ON`                                    |
+| `19f9f4af-b97a-490d-927d-0f7fd0095161` | `event:/Environment/Env_Speaker_Fire`                          |
+| `c023a5b1-f1bc-48d5-b29d-43e70ee5dd71` | `event:/Environment/Chopper`                                   |
+| `4cc016b2-31b1-48cd-bad4-5a09bed2437a` | `event:/Humans/Weapons/Weapons_Chainsaw_Idle`                  |
+| `1c4a2db3-c622-40ca-90ce-79a7fa38916d` | `event:/Humans/Humans_Daft_Teleport_Out`                       |
+| `c8f506b4-667b-451b-90ff-6bb217d8c4b6` | `event:/Humans/Boss_ScientistBig_Dash`                         |
+| `425a70b4-ad38-440b-8eca-8112d5306f69` | `event:/Hit_Death/Hit_BodyExplo`                               |
+| `efae87b4-0dc1-4b4d-aefd-b3e0ac951855` | `event:/Zombies/Tank/Zombies_Tank_Boomer`                      |
+| `4e1b9cb4-efa2-4cfd-81fa-83cc7613ab5c` | `event:/Humans/Humans_Man_TerrorScream_Low`                    |
+| `8dfd4bb6-3677-446c-b7bb-9b208e501730` | `event:/Menu/Menu_select_Sacri`                                |
+| `db38c8b6-8664-45cc-b4e9-98cd3a561590` | `event:/Environment/Env_fire`                                  |
+| `abe304b7-e206-4922-9995-110a2f9ec3de` | `event:/Environment/ElectricFence`                             |
+| `6f4d20b7-718b-46e6-bffd-81a766d9d56c` | `event:/Environment/Env_Water_Steady`                          |
+| `21e042b7-5917-4ac7-a6a9-6469bbc0f6e7` | `event:/Menu/Menu_select_Jump`                                 |
+| `7af341b8-4d52-4c86-b7af-2bdf4bad3195` | `event:/Humans/Humans_Civil_Journal`                           |
+| `fd64ccb8-ad85-4036-a162-02e59efb314e` | `event:/Humans/Boss_Brain_Shield`                              |
+| `457addb8-c2df-4400-af50-5c8e909d8f32` | `event:/Humans/BossFinal_VomitParticules`                      |
+| `d2ec93b9-b785-49ee-9f79-4ca1844e8bd6` | `event:/Humans/Clown_Steps`                                    |
+| `5de422ba-39bd-4868-acfa-4ea049febdc4` | `event:/Environment/Env_Barric_Hit`                            |
+| `01cb9dba-e0de-4ec7-8618-87022e195cb6` | `event:/Environment/CircularSaw_Move`                          |
+| `bdde1abb-12ff-45e6-aaf2-c9c7ed96941c` | `event:/Environment/ElevatorDoor_Open`                         |
+| `08032cbb-e5ba-446a-a924-dea8ef60f7b0` | `event:/Environment/CircularSaw_Cut`                           |
+| `88995ebb-c188-48b4-b0de-5efd5c13f95c` | `event:/Environment/Env_Vent`                                  |
+| `5f6b9cbc-fc16-4d80-8fda-bcc39bee2013` | `event:/Humans/Director_Contamination`                         |
+| `bc32a6bc-c575-4927-995f-db5731f97176` | `event:/Humans/Boss02_Death`                                   |
+| `022ae5bc-5e56-4dac-85bb-bd6b29a44370` | `event:/Humans/Weapons/Weapons_MachineGunLoud_Shot`            |
+| `9b71babd-7365-4cbd-b064-7c1d493103fe` | `event:/Zombies/Basic/Zombies_Basic_Screamer`                  |
+| `62a9c7bd-b773-4313-babc-5d66c8c275a4` | `event:/Zombies/Basic/Zombies_Basic_Spawn`                     |
+| `09f547be-1d67-42b4-939f-cbb68d689fb0` | `event:/Humans/Humans_Girl_DeathScream`                        |
+| `ab7d78be-b38c-4d4e-b8bf-37425e2d9b91` | `event:/Environment/Env_PowerDown`                             |
+| `0237febe-2e6e-4a53-8ded-c301e3b030db` | `event:/Humans/Weapons/Weapons_MachineGunNewSpin`              |
+| `074d90bf-5d3a-484d-8245-c39707783e77` | `event:/Humans/MachineGunner_Death`                            |
+| `e610cfbf-055e-4811-a359-ecf971ebcabb` | `event:/Environment/Env_Laser_ON`                              |
+| `2b66a5c0-f97c-46c5-9a38-bb4ffd255f65` | `event:/Humans/Humans_Ninja_TerrorScream`                      |
+| `5b78c2c1-d5d4-4a81-942a-b503f4e218bc` | `event:/Zombies/Tank/Zombies_Tank_Mutation`                    |
+| `cf011fc2-422b-440c-b16a-0a736be0e296` | `event:/Humans/Weapons/Rick_Kick`                              |
+| `c87166c2-2888-402c-b737-6bbe83c3e822` | `event:/Humans/Humans_Man_Attack`                              |
+| `c24a5ec3-20e3-43fb-b1d1-a5b988625bf5` | `event:/Environment/Bridge_Impact`                             |
+| `f9739ec4-0743-4ce8-a4e2-03e47e3e96a9` | `event:/Humans/Humans_Drone_Shoot`                             |
+| `1b4ee7c4-c68f-438a-90dc-0402ac922b28` | `event:/Menu/Generator_Break_ON`                               |
+| `fe850dc5-11d6-4329-9498-857382bc1b0f` | `event:/Humans/Weapons/Gun_Reload_In`                          |
+| `5c3dc3c5-3ee1-44f7-a9fd-0478051c54ad` | `event:/Humans/Humans_BeepTyping`                              |
+| `60e8fcc8-ae70-4e92-86c4-237b18fa870b` | `event:/Humans/Weapons/Molotov_Explo`                          |
+| `305a9ac9-e941-4060-b9b2-5fa1827af29e` | `event:/Humans/Weapons/Weapons_Gunner_Shot`                    |
+| `7b6215ca-6701-49c4-a3be-b7e1e0fa379d` | `event:/Humans/Humans_Man_Pain_Low`                            |
+| `bed0a0ca-82fe-4cfa-882d-9d4f60d4d513` | `event:/ADN/ADN_Regain`                                        |
+| `4d5a27cb-0f8b-4b9a-bd56-9961fa9e9c7f` | `event:/Humans/Weapons/Weapons_Kamikaze_Remote_On`             |
+| `4cd637cb-d9f7-4873-a369-1bd395ee31a0` | `event:/Humans/BossFinal_Vacum`                                |
+| `c35493cb-c10f-4606-bab7-72c6cca4547a` | `event:/Humans/Weapons/Weapons_Shotgun_Reload`                 |
+| `bfc713cc-15aa-4ae0-a1a2-e640248c7ec9` | `event:/Zombies/Basic/Zombies_Runner_Basic_Steps`              |
+| `c1746bcc-3a41-4aca-afd9-d3feb3688d06` | `event:/Humans/HomelessBurp`                                   |
+| `1728a1cc-fa25-4dc7-8a6a-023ef055fa7a` | `event:/Zombies/Tank/Zombies_Tank_Screamer`                    |
+| `6e0250d0-5fd6-4d87-b6b7-559f7308a63f` | `event:/Menu/Stairs_DOWN`                                      |
+| `a6e1f9d0-cee9-4f30-b924-b8f1a7a758fa` | `event:/Humans/Weapons/Weapons_Contondante_Woosh`              |
+| `e5e91bd2-1921-4b84-8409-f43e70a8f8ef` | `event:/Environment/Env_WaterSpray_Loop`                       |
+| `04a62bd3-b905-4f82-a5bb-17faab5d3262` | `event:/Humans/Boss_ScientistBig_ChargeRoll`                   |
+| `ee67aed3-8479-42cc-989e-c992739dcdd7` | `event:/Humans/Weapons/Rock_Magnum`                            |
+| `a22501d4-8f97-4563-9ee7-f410c48d5c75` | `event:/Humans/Weapons/Rifle_Reload_In`                        |
+| `6d52b6d4-32a3-41ed-954f-3acef0ae3b8f` | `event:/Environment/Env_flag_Loop`                             |
+| `9a9369d5-eaae-4dfd-864e-7ca576e09aad` | `event:/Humans/Humans_Man_DeathScream_Low`                     |
+| `483e6dd5-6a31-4954-a1c8-b16462b4b7f8` | `event:/Zombies/Tank/Zombies_Tank_Land`                        |
+| `b081fed5-9c84-436f-be22-53da1a0ca157` | `event:/Environment/Env_MouseOnTV`                             |
+| `b01730d6-53b0-4f12-85a7-bd2a0a527877` | `event:/Environment/Monolith_Shield_Off`                       |
+| `a67b7ad6-b3c7-424c-91f8-5b685ffce63c` | `event:/Environment/Container_Impact`                          |
+| `0a00f4d6-8329-459f-b361-1a8427c9966b` | `event:/Humans/Weapons/Rifle_Reload_Out`                       |
+| `c9e526d7-a94c-4387-9d8f-d5be4da16f67` | `event:/Humans/Humans_Ninja_Jump`                              |
+| `a4a1afd8-79e1-4a15-a09f-207de7cefa9a` | `event:/Environment/Crate_Unlock`                              |
+| `cc7105d9-76b5-4a7b-b447-4084fe7b82c7` | `event:/Zombies/Climber/Zombies_Climber_Charge`                |
+| `41eba3d9-3986-4a3d-8dce-52a66829a3fa` | `event:/Humans/Humans_Ninja_Steps`                             |
+| `42a268db-ced8-4fb9-abf9-eeda4bad430f` | `event:/Humans/Humans_Drone_runLoop`                           |
+| `c7cda7db-bed7-42e0-875f-a7c8a5d4edea` | `event:/Zombies/Basic/Zombies_Basic_Explo_Grow`                |
+| `e328eedc-99ca-4afd-bbcc-94a60d0766d7` | `event:/Humans/Astronaut_Jetpack_Start_Loop`                   |
+| `a1dc56dd-28ad-40d5-a740-788e5acbd6cb` | `event:/Environment/Steam_Burst`                               |
+| `2e2ee0dd-db79-429f-b2b7-a065ee75a3b7` | `event:/Humans/SwordWomen_Shower`                              |
+| `72d918de-5c47-44b4-a88b-c82ed02d4427` | `event:/Menu/Menu_ChallengeUnlock_Ingame`                      |
+| `dcbc22df-6654-45ec-8ddd-9a1809565906` | `event:/Menu/Menu_ClicBrain`                                   |
+| `ecd487e0-2ef8-4592-99a3-35f316ed4266` | `event:/Environment/Toxic_Barrel`                              |
+| `f99dc7e0-b563-4292-9d3b-b09425bcd1f1` | `event:/Humans/Astronaut_Jetpack_Land`                         |
+| `b6f4c4e1-c9e3-4ddc-9879-44096aee826a` | `event:/Environment/Barrel_Impact`                             |
+| `e123e2e1-b623-43d4-82ed-3f44c2b8ed9b` | `event:/Humans/Weapons/Weapons_Chainsaw_Stop`                  |
+| `adb7eae2-8bc6-423e-a9e0-210e3f16671c` | `event:/Environment/Fan_Hospital_Desactive`                    |
+| `744608e3-c3f0-4019-a1ae-97cc69625178` | `event:/Humans/Weapons/Weapons_Contondante_impact`             |
+| `ac013be3-1404-41af-95b2-69a757f43ac0` | `event:/Humans/Humans_Contamination_Punk`                      |
+| `8dedb7e3-7112-4360-a246-46b57d42e513` | `event:/Humans/Garbage_Girl_SmallClose`                        |
+| `51befde3-eafa-42a0-9dd7-9a03d041f8f9` | `event:/Humans/Boss02_Attacked`                                |
+| `399211e4-bf2f-4ffc-8cc0-16d226a5c1e3` | `snapshot:/Zoom`                                               |
+| `14f9bde4-01b2-42ad-abe3-71a1490e0c02` | `event:/Menu/Menu_MouseOnBrain`                                |
+| `ff51dae4-5ed1-4a4a-b9aa-46f95c73cf0d` | `event:/Humans/Weapons/Gun_Reload_Out`                         |
+| `e4c5c4e5-bd35-4489-bc8e-32f36fcb7b5f` | `event:/Menu/Menu_select_Spit`                                 |
+| `022ef3e5-81d4-4e5d-ac64-39a391e6e548` | `event:/Humans/BossFinal_Laugh`                                |
+| `5512d6e7-c4e8-4a17-8571-4aa395ad8260` | `event:/Humans/Terminator_RiseStart`                           |
+| `84e5cfe8-205f-439c-9b39-3d3552d5f496` | `event:/Zombies/Tank/Zombies_Tank_Death_Fire`                  |
+| `1946fde8-570d-45ca-94b8-86d9890cee60` | `event:/Menu/Menu_select_Boom`                                 |
+| `761515e9-06c2-4aac-ada7-8305b4c4f73c` | `event:/Menu/Menu_LevelSelect`                                 |
+| `d63cdee9-cc4d-4186-946d-5edb31bff936` | `event:/Zombies/Basic/Zombies_Basic_Charge`                    |
+| `f08310ea-e18f-4c84-bfa1-627d5e7391e7` | `event:/Menu/Speed_Double_ON`                                  |
+| `a4fca6ec-a185-448b-a4a6-1f2d85add672` | `event:/Environment/Env_Tv_Static`                             |
+| `4cf1dbec-6356-457b-a343-5884787f3193` | `event:/Menu/Generator_Break_OFF`                              |
+| `fb951eed-6582-4b2b-ae60-001784565402` | `event:/Zombies/Basic/Zombies_Runner_Basic_Start`              |
+| `3792f9ed-b4d2-4b36-ad32-a8aa5501d0db` | `event:/Menu/PauseMenu_In`                                     |
+| `3f790cee-5d94-4af7-a4fc-92c524dfe8c7` | `event:/Humans/Humans_Girl_Scared`                             |
+| `968df2f0-e4b0-4ef3-bd04-155ea893f13c` | `event:/Environment/Env_PowerUP`                               |
+| `680e2cf1-d183-4ec6-9812-0e86ebe73bc1` | `event:/Hit_Death/Body_Fall`                                   |
+| `09fb3df1-4f16-4bc3-9f6d-effbc34da779` | `event:/Environment/MoRSE`                                     |
+| `512fc7f1-a82c-407a-9372-355d3260219b` | `event:/Humans/BossFinal_Rot`                                  |
+| `b2deedf1-f708-4b4d-afd0-4f0b496f2c74` | `event:/Environment/Env_AlarmSiren`                            |
+| `923b7af2-20be-4595-9d86-687396124e6e` | `event:/Environment/Env_Mine_Activated`                        |
+| `4c7ceaf2-8813-427e-8ae4-0941882d0cea` | `event:/Menu/Menu_screenBack`                                  |
+| `74f50bf3-e201-4380-80a6-09871e27379d` | `event:/Humans/Humans_Man_Surprised_Daft`                      |
+| `958121f4-710a-4666-b0f8-99bb0928997d` | `event:/Zombies/Tank/Zombies_Tank_ArmAttack`                   |
+| `4bf647f4-32f6-4a80-b841-fcbf5a177213` | `event:/Environment/Env_Spaceship_Wrecked`                     |
+| `505194f4-8dfa-4def-a967-4499adbda890` | `event:/Humans/Terminator_Repulse`                             |
+| `15acd7f4-055e-42fe-8f0a-18e0cc174a85` | `event:/Environment/Env_BigPress_Loop`                         |
+| `e4b42af5-ca86-4be1-9e32-a3fa22412577` | `event:/Humans/Weapons/Weapons_Sentry_Canon_Turn`              |
+| `a29d88f5-3613-49a8-b739-a7483b7c99ca` | `event:/Environment/CreditsHit`                                |
+| `b75eadf5-82ce-4b1a-8309-ae256f218bc2` | `event:/Humans/Terminator_Aim`                                 |
+| `00a5c6f5-ffeb-404f-969e-4fcdf2e7e53d` | `event:/Menu/Env_TV_Clic`                                      |
+| `6d0ecef6-085d-4dd0-9216-8ef1cb09b722` | `event:/ADN/ADN_Pickup`                                        |
+| `d49fe8f6-ce9d-41d4-9c81-b9b0035b0b1a` | `event:/Humans/Weapons/Weapons_AstroGoliath_Shot`              |
+| `8ce2b3f7-9a22-42e4-aee2-82a18b4b1beb` | `event:/Hit_Death/Blood_Particules`                            |
+| `5f9cc2f7-c5e6-4b79-905c-f5b74c909dbe` | `snapshot:/PauseMenu`                                          |
+| `7cf545f9-c5f5-4385-b24d-0c86c561d60a` | `event:/Environment/Steam_Loop`                                |
+| `d5cb9af9-f15f-48e9-bc0c-be429cfe6f93` | `event:/Humans/Weapons/Weapons_Sniper_Reload`                  |
+| `2cb9c1f9-aae3-48e2-bd10-91fb144a9a85` | `event:/Humans/DrugLord_Scream`                                |
+| `8bd15afa-f8a0-4bc8-af17-29040b242590` | `event:/Zombies/Tank/Zombies_Tank_Spit_MineLoop`               |
+| `217630fb-eca4-45e6-8713-50ccbcd22e8e` | `event:/Humans/Boss02_Shoot`                                   |
+| `a1bd3efb-7fc6-4980-91f8-09f5c38950eb` | `event:/Environment/Monolith_Shield_Loop`                      |
+| `ef2634fc-7efd-41fb-ac8b-120c148bc856` | `event:/Environment/Env_ElecSparks`                            |
+| `5ff0b3fc-e58e-4135-b20c-0f11971c3120` | `event:/Humans/Humans_Civil_Pop`                               |
+| `9a8527fd-25ff-4e87-81a3-455fc3404a4a` | `event:/Humans/Humans_Civil_Gum`                               |
+| `0fc85afe-68fa-4a87-92cf-ab693c42c4bd` | `event:/Humans/Boss_ScientistBig_RollImpact`                   |
+| `5bc092fe-9dd5-4c2a-9826-019988dd6ccb` | `event:/Humans/Humans_Boy_Vomit`                               |
+| `ab34eafe-cb26-40fb-83d0-c8c69d65eae8` | `event:/Humans/Humans_Cops_DeathScream`                        |
+| `514013ff-0075-4cc7-81ec-9bf4db9b9cb6` | `event:/Menu/Menu_select_Conta`                                |
+| `baf1acff-4264-40dc-bd9d-e780221eb4df` | `event:/Environment/Monolith_Drone`                            |
+
+### `3eb6316e-891f-47c3-8e3e-0128ed382cca` - `bank:/AmbBank`
+
+| GUID                                   | PATH                  |
+|:---------------------------------------|:----------------------|
+| `81d0392c-9eee-4f81-afba-c6d3d9cea012` | `event:/Amb/Amb_Rain` |
+| `d6f1ed9c-bc97-4282-bf77-f2bf8d13f6bb` | `event:/Amb/Amb`      |
+
+## `db258292-7d6d-4fbc-9a09-30c948cec11d` - `bank:/DialogBank`
+
+| GUID                                   | PATH                           |
+|:---------------------------------------|:-------------------------------|
+| `10644322-bd3a-46aa-9fcc-1c9867acc7db` | `event:/Humans/Character_Talk` |
+
+## `af81573e-1a43-42f4-87de-eb697c826bc9` - `bank:/IntroBank`
+
+| GUID                                   | PATH                  |
+|:---------------------------------------|:----------------------|
+| `5d3514d6-ee8b-4cdf-84cb-4e233eb002e9` | `event:/IntroThunder` |
+| `ab9c55eb-ec64-438c-affb-2ecaad4e43b0` | `event:/LogoNoclip`   |
+
+## `3c3bcf61-b415-4b63-ad99-e359ac1e95fa` - `bank:/Musicbank`
+
+| GUID                                   | PATH                                  |
+|:---------------------------------------|:--------------------------------------|
+| `fb254c29-29d0-43d7-b924-567a6040ef19` | `event:/Music/MusicControl`           |
+| `03c50946-8122-4629-a16c-2b8eda8eb7f5` | `event:/Music/Menu_IngamePause_Music` |
