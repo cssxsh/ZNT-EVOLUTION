@@ -52,17 +52,41 @@ namespace ZNT.Evolution.Core
                 Logger.LogDebug($"bank:/{bank.name} -> {fmod.Keys.Join()}");
             }
 
-            var sprites = CustomAssetUtility
-                .LoadComponentFromPath<tk2dSpriteCollectionData>(source: Path.Combine(path, "sprites.json"));
-            Logger.LogDebug($"sprites.json -> {sprites} -> {sprites.materials[0]}");
+            if (File.Exists(Path.Combine(path, "sprites.json")))
+            {
+                var sprites = CustomAssetUtility
+                    .LoadComponentFromPath<tk2dSpriteCollectionData>(source: Path.Combine(path, "sprites.json"));
+                Logger.LogDebug($"sprites.json -> {sprites} -> {sprites.materials[0]}");
+            }
+
+            if (File.Exists(Path.Combine(path, "sprite.info.json")))
+            {
+                var material = bundle.LoadAsset<Material>("sprites");
+                var info = CustomAssetUtility
+                    .DeserializeInfoFromPath<SpriteInfo>(source: Path.Combine(path, "sprite.info.json"));
+                var sprites = CreateSprite(material, info);
+                Logger.LogDebug($"CreateSprite -> {sprites} from {sprites.material}");
+            }
 
             var animation = CustomAssetUtility
                 .LoadComponentFromPath<tk2dSpriteAnimation>(source: Path.Combine(path, "animation.json"));
             Logger.LogDebug($"animation.json -> {animation}");
 
             var asset = CustomAssetUtility
-                .DeserializeAssetFromPath<HumanAsset>(source: Path.Combine(path, "asset.json"));
-            Logger.LogDebug($"asset.json -> {asset}");
+                .DeserializeInfoFromPath<TagInfo>(source: Path.Combine(path, "asset.json"));
+            switch (asset.Tag)
+            {
+                case var tag when tag.HasFlag(Tag.Human):
+                    var human = CustomAssetUtility
+                        .DeserializeAssetFromPath<HumanAsset>(source: Path.Combine(path, "asset.json"));
+                    Logger.LogDebug($"asset.json -> {human}");
+                    break;
+                case var tag when tag.HasFlag(Tag.Decor):
+                    var decor = CustomAssetUtility
+                        .DeserializeAssetFromPath<DecorAsset>(source: Path.Combine(path, "asset.json"));
+                    Logger.LogDebug($"asset.json -> {decor}");
+                    break;
+            }
 
             var element = CustomAssetUtility
                 .DeserializeAssetFromPath<LevelElement>(source: Path.Combine(path, "element.json"));
