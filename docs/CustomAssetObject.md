@@ -9,8 +9,44 @@
   * SpriteCollection `tk2dSpriteCollectionData`
   * AnimationLibrary `tk2dSpriteAnimation` 定义了角色的各种动作
   * MagazineSize 弹匣容量
+  * DamageMultipliers `UnityDictionary<DamageType, float>` 伤害倍率
   * Attachments `UnityDictionary<string, GameObject>` 
   * ...
+
+```csharp
+public enum DamageType
+{
+  None,
+  Fall,
+  Bite,
+  Gun,
+  Rifle,
+  Shotgun,
+  Melee,
+  Sword,
+  Canon,
+  Explosion,
+  Spikes,
+  Fire,
+  Electricity,
+  Laser,
+  Sentry,
+  Contamination,
+  Sacrifice,
+  Acid,
+  Radioactivity,
+  Ripped,
+  Plasma,
+  Squashed,
+  TankDash,
+  MachineGun,
+  Crawler,
+  Tank,
+  Boomer,
+  Spit,
+  HolyFire,
+}
+```
 
 ```log
 "Attachments": {
