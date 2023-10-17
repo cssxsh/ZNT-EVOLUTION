@@ -59,7 +59,7 @@ Zombie Night Terror
 
 ### 创建实体
 
-[CharacterAsset](docs/CharacterAsset.md)
+[CustomAssetObject](docs/CustomAssetObject.md)
 
 - `CustomAssetObject.CreateGameObject`
 
