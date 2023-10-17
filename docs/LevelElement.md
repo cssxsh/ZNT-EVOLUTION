@@ -12,7 +12,7 @@
 
 - LevelElement<Tiles> (ElementType=Brush)
   * AllowedTileSystems `Foreground`/`Gameplay`/`Stairs`/`Triggers`/`Interior`/`InteriorDetails`/`Exterior`/`ExteriorDetails`/`BloodUp`/`BloodDown`/`BloodLeft`/`BloodRight`
-  * Brush 笔刷
+  * Brush [Rotorz.Tile.Brush](./Brush.md)
   * CustomAsset 对应的角色或者装置
 
 - LevelElement<Props> (ElementType=Decor)
