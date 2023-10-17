@@ -9,6 +9,8 @@ namespace ZNT.Evolution.Core
     {
         internal static readonly Dictionary<string, Thread> Loading = new Dictionary<string, Thread>();
 
+        internal static int JoinTimeout = -1;
+
         [HarmonyPatch(typeof(StartManager), "Start"), HarmonyPostfix]
         public static void Start(StartManager __instance)
         {
@@ -18,7 +20,7 @@ namespace ZNT.Evolution.Core
         [HarmonyPatch(typeof(StartManager), "LoadNextScene"), HarmonyPrefix]
         public static void LoadNextScene(StartManager __instance)
         {
-            foreach (var (_, thread) in Loading) thread.Join(1_000);
+            foreach (var (_, thread) in Loading) thread.Join(JoinTimeout);
         }
     }
 }

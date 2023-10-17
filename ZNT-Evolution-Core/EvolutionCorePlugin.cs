@@ -55,5 +55,16 @@ namespace ZNT.Evolution.Core
                 }
             }
         }
+
+        public void Start()
+        {
+            var timeout = Config.Bind(
+                section: "config",
+                key: "join_timeout",
+                defaultValue: -1,
+                description: "外部资源加载等待时间, 单位毫秒"
+            );
+            StartManagerPatch.JoinTimeout = timeout.Value;
+        }
     }
 }
