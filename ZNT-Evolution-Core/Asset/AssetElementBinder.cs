@@ -10,7 +10,7 @@ namespace ZNT.Evolution.Core.Asset
         /// <summary>
         /// 同步 Bank 中的 Event 到 FmodAssetIndex 中
         /// </summary>
-        /// <param name="path"> Bank 的 path, 例如 <c>bank:/Arknights 311 Mudrok</c> </param>
+        /// <param name="path"> Bank 的 path, 例如 <c>bank:/Gunner</c> </param>
         /// <returns> 同步的内容 </returns>
         public static Dictionary<string, FMODAsset> FetchFMODAsset(string path)
         {

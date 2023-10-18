@@ -43,7 +43,7 @@ namespace ZNT.Evolution.Core.Asset
             if (objectType == typeof(FMODAsset))
             {
                 FmodAssetIndex.PathIndex.TryGetValue(key: key, out var asset);
-                if (asset == null) Logger.LogError($"Not Found FMODAsset from '{key}'");
+                if (asset == null) throw new KeyNotFoundException(message: $"Not Found FMODAsset from '{key}'");
                 return asset;
             }
 
@@ -51,14 +51,12 @@ namespace ZNT.Evolution.Core.Asset
             if (Cache.TryGetValue(name, out var impl) && objectType.IsInstanceOfType(impl)) return impl;
             foreach (var asset in Resources.FindObjectsOfTypeAll(objectType))
             {
-                if (asset.name == name)
-                {
-                    Cache[name] = asset;
-                    return asset;
-                }
+                if (asset.name != name) continue;
+                Cache[name] = asset;
+                return asset;
             }
 
-            throw new KeyNotFoundException($"{objectType.FullName}(name: {name})");
+            throw new KeyNotFoundException(message: $"{objectType.FullName}(name: {name})");
         }
 
         public override bool CanConvert(Type objectType) =>

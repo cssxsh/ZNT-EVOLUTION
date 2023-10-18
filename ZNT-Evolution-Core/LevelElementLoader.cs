@@ -24,7 +24,7 @@ namespace ZNT.Evolution.Core
                 Logger.LogInfo($"folder '{path}' does not exist or is empty.");
                 return new Dictionary<string, LevelElement>(0);
             }
-            
+
             lock (typeof(LevelElementLoader))
             {
                 switch (type)
@@ -42,7 +42,7 @@ namespace ZNT.Evolution.Core
         private static Dictionary<string, LevelElement> LoadBrushFormFolder(string path)
         {
             var dictionary = new Dictionary<string, LevelElement>(1);
-            
+
             var bundle = LoadAssetBundle(path: Path.Combine(path, "resources.bundle"));
             Logger.LogDebug($"resources.bundle -> {bundle} -> {bundle.GetAllAssetNames().Join()}");
 
@@ -85,12 +85,33 @@ namespace ZNT.Evolution.Core
                         .DeserializeAssetFromPath<HumanAsset>(source: Path.Combine(path, "asset.json"));
                     Logger.LogDebug($"asset.json -> {human}");
                     break;
+                case var tag when tag.HasFlag(Tag.WorldEnemy):
+                    var enemy = CustomAssetUtility
+                        .DeserializeAssetFromPath<WorldEnemyAsset>(source: Path.Combine(path, "asset.json"));
+                    Logger.LogDebug($"asset.json -> {enemy}");
+                    break;
+                case var tag when tag.HasFlag(Tag.Zombie):
+                    var zombie = CustomAssetUtility
+                        .DeserializeAssetFromPath<ZombieAsset>(source: Path.Combine(path, "asset.json"));
+                    Logger.LogDebug($"asset.json -> {zombie}");
+                    break;
                 case var tag when tag.HasFlag(Tag.Decor):
                     var decor = CustomAssetUtility
                         .DeserializeAssetFromPath<DecorAsset>(source: Path.Combine(path, "asset.json"));
                     Logger.LogDebug($"asset.json -> {decor}");
                     break;
+                case var tag when tag.HasFlag(Tag.Interactable):
+                    var breakable = CustomAssetUtility
+                        .DeserializeAssetFromPath<BreakablePropAsset>(source: Path.Combine(path, "asset.json"));
+                    Logger.LogDebug($"asset.json -> {breakable}");
+                    break;
+                case var tag when tag.HasFlag(Tag.Breakable):
+                    var sentry = CustomAssetUtility
+                        .DeserializeAssetFromPath<SentryGunAsset>(source: Path.Combine(path, "asset.json"));
+                    Logger.LogDebug($"asset.json -> {sentry}");
+                    break;
             }
+            // TODO TriggerAsset MovingObjectAsset
 
             var element = CustomAssetUtility
                 .DeserializeAssetFromPath<LevelElement>(source: Path.Combine(path, "element.json"));
@@ -105,7 +126,7 @@ namespace ZNT.Evolution.Core
         private static Dictionary<string, LevelElement> LoadDecorFormFolder(string path)
         {
             var dictionary = new Dictionary<string, LevelElement>(1);
-            
+
             var bundle = LoadAssetBundle(path: Path.Combine(path, "resources.bundle"));
             Logger.LogDebug($"resources.bundle -> {bundle} -> {bundle.GetAllAssetNames().Join()}");
 
@@ -116,11 +137,11 @@ namespace ZNT.Evolution.Core
                     .DeserializeInfoFromPath<SpriteInfo>(source: Path.Combine(path, "sprite.info.json"));
                 var sprites = CreateSprite(material, info);
                 Logger.LogDebug($"CreateSprite -> {sprites} from {sprites.material}");
-            
+
                 var element = CustomAssetUtility
                     .DeserializeAssetFromPath<LevelElement>(source: Path.Combine(path, "element.json"));
                 Logger.LogDebug($"element.json -> {element} to {element.Title}");
-                
+
                 for (var index = 0; index < sprites.spriteDefinitions.Length; index++)
                 {
                     var impl = Object.Instantiate(element);
@@ -128,7 +149,7 @@ namespace ZNT.Evolution.Core
                     impl.name = string.Format(element.name, index + 1, sprites.name);
                     impl.Title = string.Format(element.Title, index + 1, sprites.spriteDefinitions[index].name);
                     impl.hideFlags = HideFlags.HideAndDontSave;
-                    
+
                     var id = AssetElementBinder.PushToIndex(impl);
                     dictionary.Add(id, impl);
                 }
@@ -137,11 +158,11 @@ namespace ZNT.Evolution.Core
             {
                 var sprites = CreateSingleSprite(material);
                 Logger.LogDebug($"CreateSingleSprite -> {sprites} from {sprites.material}");
-            
+
                 var element = CustomAssetUtility
                     .DeserializeAssetFromPath<LevelElement>(source: Path.Combine(path, "element.json"));
                 Logger.LogDebug($"element.json -> {element} to {element.Title}");
-                
+
                 var id = AssetElementBinder.PushToIndex(element);
                 dictionary.Add(id, element);
             }
@@ -202,6 +223,7 @@ namespace ZNT.Evolution.Core
                                 Logger.LogError(e);
                             }
                         }
+
                         Logger.LogDebug($"[{bundle.name}] {asset.name}");
                         break;
                     default:
@@ -219,7 +241,7 @@ namespace ZNT.Evolution.Core
                 texture: material.mainTexture,
                 size: tk2dSpriteCollectionSize.Explicit(0.5F, 12),
                 names: new[] { "single" },
-                regions: new[] { new Rect(0, 0, material.mainTexture.width, material.mainTexture.height) },
+                regions: new[] { new Rect(1, 1, material.mainTexture.width, material.mainTexture.height) },
                 anchors: new[] { Vector2.zero }
             );
 
@@ -270,8 +292,10 @@ namespace ZNT.Evolution.Core
                     Logger.LogWarning(e);
                     continue;
                 }
+
                 main.Add(item: bank.ReplaceLast(".strings", ""));
             }
+
             foreach (var file in Directory.EnumerateFiles(path: folder, searchPattern: "*.bank"))
             {
                 var bank = Path.GetFileNameWithoutExtension(file);
@@ -288,11 +312,12 @@ namespace ZNT.Evolution.Core
                     Logger.LogWarning(e);
                     continue;
                 }
+
                 var path = $"bank:/{bank}";
                 Logger.LogInfo($"load {path}");
                 foreach (var (_, asset) in AssetElementBinder.FetchFMODAsset(path: path))
                 {
-                    Logger.LogDebug($"[{bank}] {asset.path}");
+                    Logger.LogInfo($"[{bank}] fetch {asset.path}");
                 }
             }
         }
