@@ -40,7 +40,7 @@ Zombie Night Terror
 
 ### 关卡单位导入流程
 
-- [ ] Rotorz.Tile.Brush 笔刷
+- [x] Rotorz.Tile.Brush 笔刷
 - [x] UnityEngine.Sprite 预览
 - [x] LevelElement 关卡单位
 

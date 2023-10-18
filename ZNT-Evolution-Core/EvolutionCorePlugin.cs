@@ -4,11 +4,10 @@ using System.Threading;
 using BepInEx;
 using HarmonyLib;
 using UnityEngine;
-using ZNT.Evolution.Core.Asset;
 
 namespace ZNT.Evolution.Core
 {
-    [BepInPlugin(GUID: "xyz.cssxsh.znt.evolution.core", Name: "Evolution Core", Version: "0.2.2")]
+    [BepInPlugin(GUID: "xyz.cssxsh.znt.evolution.core", Name: "Evolution Core", Version: "0.2.4")]
     public class EvolutionCorePlugin : BaseUnityPlugin
     {
         public void Awake()
@@ -43,7 +42,7 @@ namespace ZNT.Evolution.Core
                         {
                             foreach (var (_, element) in LevelElementLoader.LoadFormFolder(path: target, type: type))
                             {
-                                Logger.LogInfo($"LevelElement {element.name} Loaded");
+                                Logger.LogInfo($"LevelElement {element.name} - {element.Title} Loaded");
                             }
                         }
                         catch (Exception e)
