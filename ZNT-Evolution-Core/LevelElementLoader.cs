@@ -248,24 +248,15 @@ namespace ZNT.Evolution.Core
             return impl;
         }
 
-        private static readonly string[] LoadedBanks =
-        {
-            "Master Bank.strings",
-            "Master Bank", 
-            "AmbBank", 
-            "DialogBank", 
-            "IntroBank", 
-            "Musicbank"
-        };
-
         public static void LoadBanks(string folder, bool loadSamples = false)
         {
             var main = new List<string>();
             foreach (var file in Directory.EnumerateFiles(path: folder, searchPattern: "*.bank"))
             {
                 var bank = Path.GetFileNameWithoutExtension(file);
-                if (LoadedBanks.Contains(bank)) continue;
                 if (!bank.EndsWith(".strings")) continue;
+                var master = bank.ReplaceLast(".strings", "");
+                if (FMODUnity.Settings.Instance.MasterBanks.Contains(master)) continue;
                 try
                 {
                     FMODUnity.RuntimeManager.LoadBank(bankName: bank, loadSamples: loadSamples);
@@ -280,8 +271,9 @@ namespace ZNT.Evolution.Core
             foreach (var file in Directory.EnumerateFiles(path: folder, searchPattern: "*.bank"))
             {
                 var bank = Path.GetFileNameWithoutExtension(file);
-                if (LoadedBanks.Contains(bank)) continue;
                 if (bank.EndsWith(".strings")) continue;
+                if (FMODUnity.Settings.Instance.MasterBanks.Contains(bank)) continue;
+                if (FMODUnity.Settings.Instance.Banks.Contains(bank)) continue;
                 if (main.Contains(bank)) continue;
                 try
                 {
@@ -293,7 +285,7 @@ namespace ZNT.Evolution.Core
                     continue;
                 }
                 var path = $"bank:/{bank}";
-                Logger.LogInfo($"load: {path}");
+                Logger.LogInfo($"load {path}");
                 foreach (var (_, asset) in AssetElementBinder.FetchFMODAsset(path: path))
                 {
                     Logger.LogDebug($"[{bank}] {asset.path}");
