@@ -72,6 +72,10 @@ namespace ZNT.Evolution.Core
                 .LoadComponentFromPath<tk2dSpriteAnimation>(source: Path.Combine(path, "animation.json"));
             Logger.LogDebug($"animation.json -> {animation}");
 
+            var brush = bundle.LoadAsset<Rotorz.Tile.OrientedBrush>("brush");
+            var variation = brush.DefaultOrientation.GetVariation(0);
+            Logger.LogDebug($"brush -> {brush.name} -> {variation.name}");
+
             var asset = CustomAssetUtility
                 .DeserializeInfoFromPath<TagInfo>(source: Path.Combine(path, "asset.json"));
             switch (asset.Tag)
