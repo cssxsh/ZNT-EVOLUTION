@@ -6,10 +6,10 @@
 
 - tk2dSpriteCollectionData
   * name
-  * spriteDefinitions
+  * spriteDefinitions `tk2dSpriteDefinition[]`
   * ...
 
 - tk2dSpriteDefinition
   * name
-  * material
+  * <u>ref material</u> `UnityEngine.Material`
   * ...

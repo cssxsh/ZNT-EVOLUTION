@@ -6,19 +6,19 @@
 
 - LevelElement
   * name
-  * Preview 菜单图标
+  * Preview `UnityEngine.Sprite` 菜单图标
   * ElementType `Brush`/`Decor`
   * ...
 
 - LevelElement<Tiles> (ElementType=Brush)
   * AllowedTileSystems `Foreground`/`Gameplay`/`Stairs`/`Triggers`/`Interior`/`InteriorDetails`/`Exterior`/`ExteriorDetails`/`BloodUp`/`BloodDown`/`BloodLeft`/`BloodRight`
   * Brush [Rotorz.Tile.Brush](./Brush.md)
-  * CustomAsset 对应的角色或者装置
+  * <u>ref CustomAsset</u> 对应的角色或者装置
 
 - LevelElement<Props> (ElementType=Decor)
   * AllowedDecorSystems `Foreground`/`Gameplay`/`Interior`/`Exterior`/`Middleground`/`Background`/`Sky`/`ExteriorParallax`/`ForegroundParallax`
   * DecorType `Static`/`Animated`/`Custom`
-  * SpriteCollection
+  * <u>ref SpriteCollection</u> `tk2dSpriteCollectionData`
   * SpriteIndex
-  * AnimationLibrary
+  * <u>ref AnimationLibrary</u> `tk2dSpriteAnimation`
   * AnimClipId

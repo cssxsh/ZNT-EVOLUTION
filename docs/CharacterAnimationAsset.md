@@ -2,24 +2,18 @@
 
 > 将动画片段和动作联系起来
 
-## 结构
+## 枚举
 
-- CharacterAnimationAsset
-  * name
-  * AnimationLibrary
-  * CommonAnimations `[Animations] => AnimationSettings`
-  * DefaultHitAnimation
-  * HitAnimations `[DamageType] => AnimationSettings`
-  * DefaultDeathAnimation
-  * DeathAnimations `[DamageType] => AnimationSettings`
-  * AirDeathAnimation
-  * AirDeathLandingAnimation
-
-- AnimationSettings
-  * PlayAnimation
-  * OverrideLibrary
-  * Library
-  * Clips 动画片段名
+* `ArmedAnimations`
+* `BulkyMeleeAnimations`
+* `CrawlerAnimations`
+* `DroneAnimations`
+* `MeleeAnimations`
+* `OverlordAnimations`
+* `TankAnimations`
+* `TerminatorAnimations`
+* `UnarmedAnimations`
+* `ZombieAnimations`
 
 ```csharp
 public enum Animations
@@ -81,3 +75,22 @@ public enum Animations
   Empty,
 }
 ```
+
+## 结构
+
+- CharacterAnimationAsset
+  * name
+  * <u>ref AnimationLibrary</u> `tk2dSpriteCollectionData`
+  * CommonAnimations `UnityDictionary<Animations, AnimationSettings>`
+  * DefaultHitAnimation
+  * HitAnimations `UnityDictionary<DamageType, AnimationSettings>`
+  * DefaultDeathAnimation
+  * DeathAnimations `UnityDictionary<DamageType, AnimationSettings>`
+  * AirDeathAnimation
+  * AirDeathLandingAnimation
+
+- AnimationSettings
+  * PlayAnimation `true`/`false`
+  * OverrideLibrary `true`/`false`
+  * <u>Library</u> `tk2dSpriteAnimation`
+  * Clips 动画片段名 `string[]`

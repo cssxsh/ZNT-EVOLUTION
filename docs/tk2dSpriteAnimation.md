@@ -10,36 +10,36 @@
 
 - tk2dSpriteAnimationClip
   * name 片段名
-  * frames
+  * frames `tk2dSpriteAnimationFrame[]`
   * fps
   * loopStart
-  * useableInLevelEditor
-  * staticAnimation
+  * useableInLevelEditor `true`/`false`
+  * staticAnimation `true`/`false`
   * wrapMode `Loop`/`LoopSection`/`Once`/`PingPong`/`RandomFrame`/`RandomLoop`/`Single`
 
 - tk2dSpriteAnimationFrame
-  * ~~ref spriteCollection~~
+  * <u>ref spriteCollection</u> `tk2dSpriteCollectionData`
   * spriteId 在精灵图集合中的序号
-  * triggerEvent
+  * triggerEvent `true`/`false`
   * eventInfo
   * eventInt
   * eventFloat
-  * useAttachedEffects
-  * attachedEffects
-  * ~~ref shaderAnimator~~
-  * playSound
-  * ~~ref soundAsset~~
+  * useAttachedEffects `true`/`false`
+  * attachedEffects `tk2dSpriteAnimationFrame.AttachedEffect[]`
+  * <u>ref shaderAnimator</u> `ShaderAnimator`
+  * playSound `true`/`false`
+  * <u>ref soundAsset</u> `FMODAsset`
   * soundPlayMode `PlayOneshot`/`StartEvent`/`StopEvent`/`None`
-  * stopEventOnAnimChange
-  * preventSoundRestart
-  * setSoundParam
+  * stopEventOnAnimChange `true`/`false`
+  * preventSoundRestart `true`/`false`
+  * setSoundParam `true`/`false`
   * soundParamName
   * soundParamValue
 
 - tk2dSpriteAnimationFrame.AttachedEffect
   * Name
-  * ~~ref VisualEffect~~
-  * RandomEffect
-  * ~~ref RandomVisualEffects~~
-  * AttachToPoint
+  * <u>ref VisualEffect</u> `VisualEffect`
+  * RandomEffect `true`/`false`
+  * <u>ref RandomVisualEffects</u> `List<VisualEffect>`
+  * AttachToPoint `true`/`false`
   * AttachIfUsed `DoNothing`/`Add`/`Replace`
