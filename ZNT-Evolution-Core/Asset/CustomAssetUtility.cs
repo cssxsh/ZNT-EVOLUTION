@@ -52,31 +52,27 @@ namespace ZNT.Evolution.Core.Asset
         
         public static void SerializeInfoToPath(string target, EvolutionInfo info)
         {
-            JsonSerializer serializer = JsonSerializer.Create(AssetSettings(info.GetType()));
+            var serializer = JsonSerializer.Create(AssetSettings(info.GetType()));
             SaveObjectToPath(serializer, info, target);
         }
 
         public static void SaveComponentToPath(string target, Component component)
         {
-            JsonSerializer serializer = JsonSerializer.Create(ComponentSettings(component.GetType()));
+            var serializer = JsonSerializer.Create(ComponentSettings(component.GetType()));
             SaveObjectToPath(serializer, component, target);
         }
 
         private static void SaveObjectToPath(JsonSerializer serializer, object data, string path)
         {
-            using (var writer = new StreamWriter(path))
-            {
-                using (var json = new JsonTextWriter(writer))
-                {
-                    json.Formatting = Formatting.Indented;
-                    serializer.Serialize(json, data);
-                }
-            }
+            using var writer = new StreamWriter(path);
+            using var json = new JsonTextWriter(writer);
+            json.Formatting = Formatting.Indented;
+            serializer.Serialize(json, data);
         }
 
         public static T DeserializeAssetFromPath<T>(string source) where T : CustomAsset
         {
-            JsonSerializer serializer = JsonSerializer.Create(AssetSettings(typeof(T)));
+            var serializer = JsonSerializer.Create(AssetSettings(typeof(T)));
             var impl = LoadObjectFromPath<T>(serializer, source);
             switch (impl)
             {
@@ -95,7 +91,7 @@ namespace ZNT.Evolution.Core.Asset
 
         public static T DeserializeInfoFromPath<T>(string source) where T : EvolutionInfo
         {
-            JsonSerializer serializer = JsonSerializer.Create(AssetSettings(typeof(T)));
+            var serializer = JsonSerializer.Create(AssetSettings(typeof(T)));
             var impl = LoadObjectFromPath<T>(serializer, source);
 
             return impl;
@@ -103,7 +99,7 @@ namespace ZNT.Evolution.Core.Asset
 
         public static T DeserializeAssetFromTextAsset<T>(TextAsset asset) where T : CustomAsset
         {
-            JsonSerializer serializer = JsonSerializer.Create(AssetSettings(typeof(T)));
+            var serializer = JsonSerializer.Create(AssetSettings(typeof(T)));
             var impl = LoadObjectFromTextAsset<T>(serializer, asset);
             switch (impl)
             {
@@ -122,7 +118,7 @@ namespace ZNT.Evolution.Core.Asset
 
         public static T DeserializeInfoFromTextAsset<T>(TextAsset asset) where T : EvolutionInfo
         {
-            JsonSerializer serializer = JsonSerializer.Create(AssetSettings(typeof(T)));
+            var serializer = JsonSerializer.Create(AssetSettings(typeof(T)));
             var impl = LoadObjectFromTextAsset<T>(serializer, asset);
 
             return impl;
@@ -130,7 +126,7 @@ namespace ZNT.Evolution.Core.Asset
 
         public static T LoadComponentFromPath<T>(string source) where T : Component
         {
-            JsonSerializer serializer = JsonSerializer.Create(ComponentSettings(typeof(T)));
+            var serializer = JsonSerializer.Create(ComponentSettings(typeof(T)));
             var impl = LoadObjectFromPath<T>(serializer, source);
             switch (impl)
             {
@@ -151,7 +147,7 @@ namespace ZNT.Evolution.Core.Asset
         
         public static T LoadComponentFromTextAsset<T>(TextAsset asset) where T : Component
         {
-            JsonSerializer serializer = JsonSerializer.Create(ComponentSettings(typeof(T)));
+            var serializer = JsonSerializer.Create(ComponentSettings(typeof(T)));
             var impl = LoadObjectFromTextAsset<T>(serializer, asset);
             switch (impl)
             {
@@ -172,24 +168,16 @@ namespace ZNT.Evolution.Core.Asset
 
         private static T LoadObjectFromPath<T>(JsonSerializer jsonSerializer, string path)
         {
-            using (var reader = new StreamReader(path))
-            {
-                using (var json = new JsonTextReader(reader))
-                {
-                    return jsonSerializer.Deserialize<T>(json);
-                }
-            }
+            using var reader = new StreamReader(path);
+            using var json = new JsonTextReader(reader);
+            return jsonSerializer.Deserialize<T>(json);
         }
         
         private static T LoadObjectFromTextAsset<T>(JsonSerializer jsonSerializer, TextAsset asset)
         {
-            using (var reader = new StringReader(asset.text))
-            {
-                using (var json = new JsonTextReader(reader))
-                {
-                    return jsonSerializer.Deserialize<T>(json);
-                }
-            }
+            using var reader = new StringReader(asset.text);
+            using var json = new JsonTextReader(reader);
+            return jsonSerializer.Deserialize<T>(json);
         }
     }
 }
