@@ -1,7 +1,9 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using BepInEx.Logging;
 using HarmonyLib;
 using UnityEngine;
@@ -22,14 +24,14 @@ namespace ZNT.Evolution.Core
             }
 
             Logger.LogInfo($"load LevelElement form folder '{path}'.");
-            
+
             AssetBundle bundle;
             {
                 var request = AssetBundle.LoadFromFileAsync(Path.Combine(path, "resources.bundle"));
                 yield return request;
                 bundle = request.assetBundle;
             }
-            
+
             Logger.LogDebug($"resources.bundle -> {bundle} -> {bundle.GetAllAssetNames().Join()}");
 
             foreach (var name in bundle.GetAllAssetNames())
@@ -38,7 +40,7 @@ namespace ZNT.Evolution.Core
                 var request = bundle.LoadAssetAsync(name);
                 yield return request;
                 var asset = request.asset;
-                if (asset == null) continue; 
+                if (asset == null) continue;
                 asset.hideFlags = HideFlags.HideAndDontSave;
 
                 switch (asset)
@@ -69,6 +71,8 @@ namespace ZNT.Evolution.Core
                             {
                                 Logger.LogError(e);
                             }
+
+                            yield return null;
                         }
 
                         Logger.LogDebug($"[{bundle.name}] {asset.name}");
@@ -78,19 +82,43 @@ namespace ZNT.Evolution.Core
                         break;
                 }
             }
-            
+
             switch (type)
             {
                 case LevelElement.Type.Brush:
-                    yield return LoadBrushFormFolder(path: path, bundle: bundle);
+                    var brush = Task.Run(() =>
+                    {
+                        try
+                        {
+                            LoadBrushFormFolder(path: path, bundle: bundle);
+                        }
+                        catch (Exception e)
+                        {
+                            Logger.LogWarning(e);
+                        }
+                    });
+                    yield return new WaitUntil(() => brush.IsCompleted);
                     break;
                 case LevelElement.Type.Decor:
-                    yield return LoadDecorFormFolder(path: path, bundle: bundle);
+                    var decor = Task.Run(() =>
+                    {
+                        try
+                        {
+                            LoadDecorFormFolder(path: path, bundle: bundle);
+                        }
+                        catch (Exception e)
+                        {
+                            Logger.LogWarning(e);
+                        }
+                    });
+                    yield return new WaitUntil(() => decor.IsCompleted);
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
         }
 
-        private static IEnumerator<LevelElement> LoadBrushFormFolder(string path, AssetBundle bundle)
+        private static void LoadBrushFormFolder(string path, AssetBundle bundle)
         {
             if (bundle.LoadAsset("bank_") is TextAsset bank)
             {
@@ -100,22 +128,19 @@ namespace ZNT.Evolution.Core
 
             if (File.Exists(Path.Combine(path, "sprites.json")))
             {
-                var sprites = CustomAssetUtility
-                    .LoadComponentFromPath<tk2dSpriteCollectionData>(source: Path.Combine(path, "sprites.json"));
+                var sprites = LoadComponent<tk2dSpriteCollectionData>(source: Path.Combine(path, "sprites.json"));
                 Logger.LogDebug($"sprites.json -> {sprites} -> {sprites.materials[0]}");
             }
 
             if (File.Exists(Path.Combine(path, "sprite.info.json")))
             {
                 var material = bundle.LoadAsset<Material>("sprites");
-                var info = CustomAssetUtility
-                    .DeserializeInfoFromPath<SpriteInfo>(source: Path.Combine(path, "sprite.info.json"));
+                var info = DeserializeInfo<SpriteInfo>(source: Path.Combine(path, "sprite.info.json"));
                 var sprites = CreateSprite(material, info);
                 Logger.LogDebug($"CreateSprite -> {sprites} from {sprites.material}");
             }
 
-            var animation = CustomAssetUtility
-                .LoadComponentFromPath<tk2dSpriteAnimation>(source: Path.Combine(path, "animation.json"));
+            var animation = LoadComponent<tk2dSpriteAnimation>(source: Path.Combine(path, "animation.json"));
             Logger.LogDebug($"animation.json -> {animation}");
 
             var brush = bundle.LoadAsset<Rotorz.Tile.OrientedBrush>("brush");
@@ -157,33 +182,30 @@ namespace ZNT.Evolution.Core
                     Logger.LogDebug($"asset.json -> {sentry}");
                     break;
             }
+
             // TODO TriggerAsset MovingObjectAsset
 
             var element = CustomAssetUtility
                 .DeserializeAssetFromPath<LevelElement>(source: Path.Combine(path, "element.json"));
             var id = AssetElementBinder.PushToIndex(element);
             Logger.LogDebug($"element.json -> {id} -> {element.Title}");
-
-            yield return element;
         }
 
-        private static IEnumerator<LevelElement> LoadDecorFormFolder(string path, AssetBundle bundle)
+        private static void LoadDecorFormFolder(string path, AssetBundle bundle)
         {
             var material = bundle.LoadAsset<Material>("sprites");
             if (File.Exists(Path.Combine(path, "sprite.info.json")))
             {
-                var info = CustomAssetUtility
-                    .DeserializeInfoFromPath<SpriteInfo>(source: Path.Combine(path, "sprite.info.json"));
+                var info = DeserializeInfo<SpriteInfo>(source: Path.Combine(path, "sprite.info.json"));
                 var sprites = CreateSprite(material, info);
                 Logger.LogDebug($"CreateSprite -> {sprites} from {sprites.material}");
 
-                var element = CustomAssetUtility
-                    .DeserializeAssetFromPath<LevelElement>(source: Path.Combine(path, "element.json"));
+                var element = DeserializeAsset<LevelElement>(source: Path.Combine(path, "element.json"));
                 Logger.LogDebug($"element.json -> {element} to {element.Title}");
 
                 for (var index = 0; index < sprites.spriteDefinitions.Length; index++)
                 {
-                    var impl = Object.Instantiate(element);
+                    var impl = UnityEngine.Object.Instantiate(element);
                     impl.SpriteIndex = index;
                     impl.name = string.Format(element.name, index + 1, sprites.name);
                     impl.Title = string.Format(element.Title, index + 1, sprites.spriteDefinitions[index].name);
@@ -191,7 +213,6 @@ namespace ZNT.Evolution.Core
 
                     var id = AssetElementBinder.PushToIndex(impl);
                     Logger.LogInfo($"LevelElement {id} - {impl.Title} Loaded");
-                    yield return impl;
                 }
             }
             else
@@ -205,7 +226,6 @@ namespace ZNT.Evolution.Core
 
                 var id = AssetElementBinder.PushToIndex(element);
                 Logger.LogInfo($"LevelElement {id} - {element.Title} Loaded");
-                yield return element;
             }
         }
 
@@ -248,6 +268,21 @@ namespace ZNT.Evolution.Core
             return impl;
         }
 
+        private static T DeserializeAsset<T>(string source) where T : CustomAsset
+        {
+            return CustomAssetUtility.DeserializeAssetFromPath<T>(source);
+        }
+
+        private static T DeserializeInfo<T>(string source) where T : EvolutionInfo
+        {
+            return CustomAssetUtility.DeserializeInfoFromPath<T>(source);
+        }
+
+        private static T LoadComponent<T>(string source) where T : Component
+        {
+            return CustomAssetUtility.LoadComponentFromPath<T>(source);
+        }
+
         public static IEnumerator LoadBanks(string folder, bool loadSamples = false)
         {
             var main = new List<string>();
@@ -257,18 +292,20 @@ namespace ZNT.Evolution.Core
                 if (!bank.EndsWith(".strings")) continue;
                 var master = bank.ReplaceLast(".strings", "");
                 if (FMODUnity.Settings.Instance.MasterBanks.Contains(master)) continue;
-                try
+                var task = Task.Run(() =>
                 {
-                    FMODUnity.RuntimeManager.LoadBank(bankName: bank, loadSamples: loadSamples);
-                }
-                catch (FMODUnity.BankLoadException e)
-                {
-                    Logger.LogWarning(e);
-                    continue;
-                }
+                    try
+                    {
+                        FMODUnity.RuntimeManager.LoadBank(bankName: bank, loadSamples: loadSamples);
+                    }
+                    catch (FMODUnity.BankLoadException e)
+                    {
+                        Logger.LogWarning(e);
+                    }
+                });
+                yield return new WaitUntil(() => task.IsCompleted);
 
                 main.Add(item: bank.ReplaceLast(".strings", ""));
-                yield return Wait.ForEndOfFrame;
             }
 
             foreach (var file in Directory.EnumerateFiles(path: folder, searchPattern: "*.bank"))
@@ -278,23 +315,25 @@ namespace ZNT.Evolution.Core
                 if (FMODUnity.Settings.Instance.MasterBanks.Contains(bank)) continue;
                 if (FMODUnity.Settings.Instance.Banks.Contains(bank)) continue;
                 if (main.Contains(bank)) continue;
-                try
+                var task = Task.Run(() =>
                 {
-                    Logger.LogInfo($"load Bank {bank}");
-                    FMODUnity.RuntimeManager.LoadBank(bankName: bank, loadSamples: loadSamples);
-                }
-                catch (FMODUnity.BankLoadException e)
-                {
-                    Logger.LogWarning(e);
-                    continue;
-                }
+                    try
+                    {
+                        Logger.LogInfo($"load Bank {bank}");
+                        FMODUnity.RuntimeManager.LoadBank(bankName: bank, loadSamples: loadSamples);
+                    }
+                    catch (FMODUnity.BankLoadException e)
+                    {
+                        Logger.LogWarning(e);
+                    }
+                });
+                yield return new WaitUntil(() => task.IsCompleted);
 
                 var path = $"bank:/{bank}";
                 foreach (var (_, asset) in AssetElementBinder.FetchFMODAsset(path: path))
                 {
                     Logger.LogInfo($"[{bank}] fetch {asset.path}");
                 }
-                yield return Wait.ForEndOfFrame;
             }
         }
     }
