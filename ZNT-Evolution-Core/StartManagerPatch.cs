@@ -11,11 +11,13 @@ namespace ZNT.Evolution.Core
     public static class StartManagerPatch
     {
         private static readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("StartManager");
+        
+        private static IEnumerator Loading;
 
         [HarmonyPatch(typeof(StartManager), methodName: "Start"), HarmonyPostfix]
         public static void Start(StartManager __instance, ref IEnumerator __result)
         {
-            __result = LoadAsset(prefix: __result);
+            __result = Loading = LoadAsset(prefix: __result);
         }
 
         private static IEnumerator LoadAsset(IEnumerator prefix)
@@ -40,5 +42,8 @@ namespace ZNT.Evolution.Core
             }
             Logger.LogInfo("Load LevelElement OK");
         }
+
+        [HarmonyPatch(typeof(StartManager), methodName: "LoadNextScene"), HarmonyPrefix]
+        public static bool LoadNextScene(StartManager __instance) => !Loading.MoveNext();
     }
 }
