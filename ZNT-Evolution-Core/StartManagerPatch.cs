@@ -1,26 +1,44 @@
-﻿using System.Collections.Generic;
-using System.Threading;
+﻿using System;
+using System.Collections;
+using System.IO;
+using BepInEx.Logging;
 using HarmonyLib;
+using UnityEngine;
 
 // ReSharper disable InconsistentNaming
 namespace ZNT.Evolution.Core
 {
     public static class StartManagerPatch
     {
-        internal static readonly Dictionary<string, Thread> Loading = new Dictionary<string, Thread>();
+        private static readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("StartManager");
 
-        internal static int JoinTimeout = -1;
-
-        [HarmonyPatch(typeof(StartManager), "Start"), HarmonyPostfix]
-        public static void Start(StartManager __instance)
+        [HarmonyPatch(typeof(StartManager), methodName: "Start"), HarmonyPostfix]
+        public static void Start(StartManager __instance, ref IEnumerator __result)
         {
-            foreach (var (_, thread) in Loading) thread.Start();
+            __result = LoadAsset(prefix: __result);
         }
-        
-        [HarmonyPatch(typeof(StartManager), "LoadNextScene"), HarmonyPrefix]
-        public static void LoadNextScene(StartManager __instance)
+
+        private static IEnumerator LoadAsset(IEnumerator prefix)
         {
-            foreach (var (_, thread) in Loading) thread.Join(JoinTimeout);
+            yield return prefix;
+            Logger.LogInfo("Initialized");
+            yield return LevelElementLoader.LoadBanks(folder: Application.streamingAssetsPath);
+            Logger.LogInfo("Load Bank OK");
+            foreach (var type in (LevelElement.Type[])Enum.GetValues(typeof(LevelElement.Type)))
+            {
+                var path = Path.Combine(Application.dataPath, type.ToString());
+            
+                if (!Directory.Exists(path)) Directory.CreateDirectory(path);
+            
+                foreach (var directory in Directory.EnumerateDirectories(path))
+                {
+                    if (directory.EndsWith(".bak")) continue;
+                    if (directory.EndsWith(" - 副本")) continue;
+                    var target = Path.GetFullPath(directory);
+                    yield return LevelElementLoader.LoadFormFolder(path: target, type: type);
+                }
+            }
+            Logger.LogInfo("Load LevelElement OK");
         }
     }
 }

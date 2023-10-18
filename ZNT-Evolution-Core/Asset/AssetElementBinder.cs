@@ -46,8 +46,10 @@ namespace ZNT.Evolution.Core.Asset
             switch (asset)
             {
                 case LevelElement element:
-                    // TODO Traverse.Create(element).Field("tags").SetValue(...);
-                    LevelElementIndex.Index.AddAssetElement(element);
+                    lock (typeof(LevelElementIndex))
+                    {
+                        LevelElementIndex.Index.AddAssetElement(element);
+                    }
                     break;
             }
 
