@@ -200,8 +200,21 @@ namespace ZNT.Evolution.Core
                 var sprites = CreateSprite(material, info);
                 Logger.LogDebug($"CreateSprite -> {sprites} from {sprites.material}");
 
+                if (File.Exists(Path.Combine(path, "animation.json")))
+                {
+                    var animation = LoadComponent<tk2dSpriteAnimation>(source: Path.Combine(path, "animation.json"));
+                    Logger.LogDebug($"animation.json -> {animation}");
+                }
+
                 var element = DeserializeAsset<LevelElement>(source: Path.Combine(path, "element.json"));
                 Logger.LogDebug($"element.json -> {element} to {element.Title}");
+
+                if (element.DecorType == LevelElement.DecorStyle.Animated)
+                {
+                    var id = AssetElementBinder.PushToIndex(element);
+                    Logger.LogInfo($"LevelElement {id} - {element} Loaded");
+                    return;
+                }
 
                 for (var index = 0; index < sprites.spriteDefinitions.Length; index++)
                 {
