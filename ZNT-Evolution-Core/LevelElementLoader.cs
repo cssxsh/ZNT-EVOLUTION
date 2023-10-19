@@ -337,6 +337,10 @@ namespace ZNT.Evolution.Core
                     {
                         Logger.LogInfo($"load Bank {bank}");
                         FMODUnity.RuntimeManager.LoadBank(bankName: bank, loadSamples: loadSamples);
+                        foreach (var (_, asset) in AssetElementBinder.FetchFMODAsset(path: $"bank:/{bank}"))
+                        {
+                            Logger.LogInfo($"[{bank}] fetch {asset.path}");
+                        }
                     }
                     catch (FMODUnity.BankLoadException e)
                     {
@@ -344,12 +348,6 @@ namespace ZNT.Evolution.Core
                     }
                 });
                 yield return new WaitUntil(() => task.IsCompleted);
-
-                var path = $"bank:/{bank}";
-                foreach (var (_, asset) in AssetElementBinder.FetchFMODAsset(path: path))
-                {
-                    Logger.LogInfo($"[{bank}] fetch {asset.path}");
-                }
             }
         }
     }

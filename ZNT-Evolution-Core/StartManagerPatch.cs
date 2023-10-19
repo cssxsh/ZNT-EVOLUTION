@@ -24,7 +24,7 @@ namespace ZNT.Evolution.Core
         {
             yield return prefix;
             Logger.LogInfo("Initialized");
-            yield return LevelElementLoader.LoadBanks(folder: Application.streamingAssetsPath);
+            yield return LevelElementLoader.LoadBanks(folder: Application.streamingAssetsPath, loadSamples: true);
             Logger.LogInfo("Load Bank OK");
             foreach (var type in (LevelElement.Type[])Enum.GetValues(typeof(LevelElement.Type)))
             {
