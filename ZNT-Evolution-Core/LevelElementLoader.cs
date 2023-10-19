@@ -63,16 +63,19 @@ namespace ZNT.Evolution.Core
                     case TextAsset bank:
                         if (name == "bank.strings" || name == "bank_")
                         {
-                            try
+                            var task = Task.Run(() =>
                             {
-                                FMODUnity.RuntimeManager.LoadBank(asset: bank, loadSamples: true);
-                            }
-                            catch (FMODUnity.BankLoadException e)
-                            {
-                                Logger.LogError(e);
-                            }
+                                try
+                                {
+                                    FMODUnity.RuntimeManager.LoadBank(asset: bank, loadSamples: true);
+                                }
+                                catch (FMODUnity.BankLoadException e)
+                                {
+                                    Logger.LogError(e);
+                                }
+                            });
 
-                            yield return null;
+                            yield return new WaitUntil(() => task.IsCompleted);
                         }
 
                         Logger.LogDebug($"[{bundle.name}] {asset.name}");
