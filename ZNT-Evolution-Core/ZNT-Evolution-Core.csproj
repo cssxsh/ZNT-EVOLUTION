@@ -387,6 +387,7 @@
         <Compile Include="Asset\NullConverter.cs" />
         <Compile Include="Asset\ScriptableObjectConverter.cs" />
         <Compile Include="Asset\SpriteInfo.cs" />
+        <Compile Include="Asset\SpriteMerge.cs" />
         <Compile Include="Asset\TagInfo.cs" />
         <Compile Include="EvolutionCorePlugin.cs" />
         <Compile Include="DebugPatch.cs" />

@@ -142,6 +142,14 @@ namespace ZNT.Evolution.Core
                 var sprites = CreateSprite(material, info);
                 Logger.LogDebug($"CreateSprite -> {sprites} from {sprites.material}");
             }
+            
+            if (File.Exists(Path.Combine(path, "sprite.merge.json")))
+            {
+                var material = bundle.LoadAsset<Material>("sprites");
+                var merge = DeserializeInfo<SpriteMerge>(folder: path, file: "sprite.merge.json");
+                var sprites = MergeSprite(material, merge);
+                Logger.LogDebug($"MergeSprite -> {sprites} from {sprites.material}");
+            }
 
             var animation = LoadComponent<tk2dSpriteAnimation>(folder: path, file: "animation.json");
             Logger.LogDebug($"animation.json -> {animation}");
@@ -280,6 +288,20 @@ namespace ZNT.Evolution.Core
             return impl;
         }
 
+        private static tk2dSpriteCollectionData MergeSprite(Material material, SpriteMerge merge)
+        {
+            var clone = UnityEngine.Object.Instantiate(merge.Source);
+
+            clone.name = material.name.Replace("_mat", "");
+            clone.gameObject.hideFlags = HideFlags.HideAndDontSave;
+            clone.material = material;
+            clone.materials[0] = material;
+            clone.textures[0] = material.mainTexture;
+            foreach (var definition in clone.spriteDefinitions) definition.material = material;
+
+            return clone;
+        }
+        
         private static T DeserializeAsset<T>(string folder, string file) where T : CustomAsset
         {
             return CustomAssetUtility.DeserializeAssetFromPath<T>(source: Path.Combine(folder, file));
