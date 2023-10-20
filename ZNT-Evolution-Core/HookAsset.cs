@@ -5,8 +5,15 @@ namespace ZNT.Evolution.Core
 {
     internal class HookAsset : CustomAssetObject
     {
-        public Action<GameObject> Action;
+        private Action<GameObject> _action;
 
-        public override void LoadFromAsset(GameObject gameObject) => Action?.Invoke(gameObject);
+        public override void LoadFromAsset(GameObject gameObject) => _action?.Invoke(gameObject);
+
+        public static HookAsset Invoke(Action<GameObject> action)
+        {
+            var hook = CreateInstance<HookAsset>();
+            hook._action = action;
+            return hook;
+        }
     }
 }

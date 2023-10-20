@@ -316,19 +316,14 @@ namespace ZNT.Evolution.Core
             impl.hideFlags = HideFlags.HideAndDontSave;
             impl.ElementType = LevelElement.Type.Brush;
 
-            if (impl.CustomAsset == null)
+            impl.CustomAsset = HookAsset.Invoke(body =>
             {
-                var hook = ScriptableObject.CreateInstance<HookAsset>();
-                hook.Action = body =>
-                {
-                    Logger.LogWarning("Hook!");
-                    var animator = body.GetComponentInChildren<tk2dSpriteAnimator>();
-                    animator.Library = impl.AnimationLibrary;
-                    animator.DefaultClipId = impl.AnimClipId;
-                    animator.Sprite.SetSprite(impl.SpriteCollection, impl.SpriteIndex);
-                };
-                impl.CustomAsset = hook;
-            }
+                Logger.LogWarning("Hook!");
+                var animator = body.GetComponentInChildren<tk2dSpriteAnimator>();
+                animator.Library = impl.AnimationLibrary;
+                animator.DefaultClipId = impl.AnimClipId;
+                animator.Sprite.SetSprite(impl.SpriteCollection, impl.SpriteIndex);
+            });
 
             impl.AddIdentifier = true;
             impl.AddColliderInEditor = true;
