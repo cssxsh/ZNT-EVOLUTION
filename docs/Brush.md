@@ -12,5 +12,5 @@
 
 - Rotorz.Tile.BrushOrientation
   * name 
-  * _variations `Human:2533`, `ActivableDecor:2664`
+  * _variations `Human:2533`, `ActivableDecor:2664`, `MovingObject:4106`
   * ...

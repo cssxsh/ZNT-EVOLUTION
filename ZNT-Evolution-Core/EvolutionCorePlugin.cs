@@ -3,7 +3,7 @@ using HarmonyLib;
 
 namespace ZNT.Evolution.Core
 {
-    [BepInPlugin(GUID: "xyz.cssxsh.znt.evolution.core", Name: "Evolution Core", Version: "0.3.0")]
+    [BepInPlugin(GUID: "xyz.cssxsh.znt.evolution.core", Name: "Evolution Core", Version: "0.4.0")]
     public class EvolutionCorePlugin : BaseUnityPlugin
     {
         public void Awake()
