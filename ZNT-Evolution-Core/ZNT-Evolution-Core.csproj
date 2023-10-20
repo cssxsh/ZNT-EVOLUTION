@@ -391,6 +391,7 @@
         <Compile Include="Asset\TagInfo.cs" />
         <Compile Include="EvolutionCorePlugin.cs" />
         <Compile Include="DebugPatch.cs" />
+        <Compile Include="HookAsset.cs" />
         <Compile Include="LevelElementLoader.cs" />
         <Compile Include="MovingObjectAssetPatch.cs" />
         <Compile Include="Properties\AssemblyInfo.cs"/>

@@ -142,7 +142,7 @@ namespace ZNT.Evolution.Core
                 var sprites = CreateSprite(material, info);
                 Logger.LogDebug($"CreateSprite -> {sprites} from {sprites.material}");
             }
-            
+
             if (File.Exists(Path.Combine(path, "sprite.merge.json")))
             {
                 var material = bundle.LoadAsset<Material>("sprites");
@@ -216,6 +216,13 @@ namespace ZNT.Evolution.Core
 
                 var element = DeserializeAsset<LevelElement>(folder: path, file: "element.json");
                 Logger.LogDebug($"element.json -> {element} to {element.Title}");
+
+                if (element.Brush != null)
+                {
+                    var brush = element.DecorToBrush();
+                    var id = AssetElementBinder.PushToIndex(brush);
+                    Logger.LogInfo($"LevelElement {id} - {brush} Loaded");
+                }
 
                 if (element.DecorType == LevelElement.DecorStyle.Animated)
                 {
@@ -301,7 +308,35 @@ namespace ZNT.Evolution.Core
 
             return clone;
         }
-        
+
+        private static LevelElement DecorToBrush(this LevelElement origin)
+        {
+            var impl = UnityEngine.Object.Instantiate(origin);
+            impl.name = origin.name + "_tiles";
+            impl.hideFlags = HideFlags.HideAndDontSave;
+            impl.ElementType = LevelElement.Type.Brush;
+
+            if (impl.CustomAsset == null)
+            {
+                var hook = ScriptableObject.CreateInstance<HookAsset>();
+                hook.Action = body =>
+                {
+                    Logger.LogWarning("Hook!");
+                    var animator = body.GetComponentInChildren<tk2dSpriteAnimator>();
+                    animator.Library = impl.AnimationLibrary;
+                    animator.DefaultClipId = impl.AnimClipId;
+                    animator.Sprite.SetSprite(impl.SpriteCollection, impl.SpriteIndex);
+                };
+                impl.CustomAsset = hook;
+            }
+
+            impl.AddIdentifier = true;
+            impl.AddColliderInEditor = true;
+            impl.AddObjectSettings = true;
+
+            return impl;
+        }
+
         private static T DeserializeAsset<T>(string folder, string file) where T : CustomAsset
         {
             return CustomAssetUtility.DeserializeAssetFromPath<T>(source: Path.Combine(folder, file));
