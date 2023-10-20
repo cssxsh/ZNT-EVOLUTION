@@ -91,6 +91,7 @@ public enum Voice
   * <u>ref RiseAsset</u> `CustomAssetObject` 转变类型
   * MagazineSize 弹匣容量
   * DamageMultipliers `UnityDictionary<DamageType, float>` 伤害倍率
+  * DirectAim `true`/`false` 直接目标
   * Attachments `UnityDictionary<string, GameObject>` 
   * ...
   * Voice `Voice` 语音类型
