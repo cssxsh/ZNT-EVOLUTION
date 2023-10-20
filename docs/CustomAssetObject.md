@@ -94,6 +94,8 @@ public enum Voice
   * RiseOnDeath 死亡时感染
   * RiseAsset `CustomAssetObject` 感染后转变的单位
   * DirectAim `true`/`false` 直接目标
+  * BlockOpponents `true`/`false` 阻挡
+  * MaxOpponentsBlock 最大阻挡数量
   * Attachments `UnityDictionary<string, GameObject>` 
   * ...
   * Voice `Voice` 语音类型
