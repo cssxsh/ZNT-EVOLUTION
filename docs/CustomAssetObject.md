@@ -90,15 +90,17 @@ public enum Voice
   * <u>ref AnimationLibrary</u> `tk2dSpriteAnimation` 定义了角色的各种动作
   * <u>ref RiseAsset</u> `CustomAssetObject` 转变类型
   * MagazineSize 弹匣容量
+  * Invincible `true`/`false` 无敌
+  * InvincibleOnAttack `true`/`false` 攻击时无敌
   * DamageMultipliers `UnityDictionary<DamageType, float>` 伤害倍率
   * RiseOnDeath 死亡时感染
   * RiseAsset `CustomAssetObject` 感染后转变的单位
   * DirectAim `true`/`false` 直接目标
   * BlockOpponents `true`/`false` 阻挡
   * MaxOpponentsBlock 最大阻挡数量
-  * Attachments `UnityDictionary<string, GameObject>` 
-  * ...
+  * Attachments `UnityDictionary<string, GameObject>` 附加效果
   * Voice `Voice` 语音类型
+  * ...
 
 - DecorAsset
   * name
