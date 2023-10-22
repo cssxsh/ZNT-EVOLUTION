@@ -106,6 +106,9 @@ public enum Voice
   * AttackRange 攻击射程
   * DamageRange 破坏射程
   * MovingAttackRange 移动攻击射程
+  * Height 身高
+  * StairDetectionHeightRatio 楼梯高度判定
+  * CanClimb 可爬行
   * ...
 
 - DecorAsset
