@@ -123,10 +123,12 @@ namespace ZNT.Evolution.Core
 
         private static void LoadBrushFormFolder(string path, AssetBundle bundle)
         {
-            if (bundle.LoadAsset("bank_") is TextAsset bank)
+            if (bundle.LoadAsset(name: "bank_") is TextAsset bank)
             {
-                var fmod = AssetElementBinder.FetchFMODAsset(path: $"bank:/{bank.name}");
-                Logger.LogDebug($"bank:/{bank.name} -> {fmod.Keys.Join()}");
+                foreach (var (_, fmod) in AssetElementBinder.FetchFMODAsset(path: $"bank:/{bank.name}"))
+                {
+                    Logger.LogDebug($"[{bank.name}] fetch {fmod.path}");
+                }
             }
 
             if (File.Exists(Path.Combine(path, "sprites.json")))
@@ -154,7 +156,7 @@ namespace ZNT.Evolution.Core
             var animation = LoadComponent<tk2dSpriteAnimation>(folder: path, file: "animation.json");
             Logger.LogDebug($"animation.json -> {animation}");
 
-            var brush = bundle.LoadAsset<Rotorz.Tile.OrientedBrush>("brush");
+            var brush = bundle.LoadAsset<Rotorz.Tile.OrientedBrush>(name: "brush");
             var variation = brush.DefaultOrientation.GetVariation(0);
             Logger.LogDebug($"brush -> {brush.name} -> {variation.name}");
 
@@ -201,7 +203,7 @@ namespace ZNT.Evolution.Core
 
         private static void LoadDecorFormFolder(string path, AssetBundle bundle)
         {
-            var material = bundle.LoadAsset<Material>("sprites");
+            var material = bundle.LoadAsset<Material>(name: "sprites");
             if (File.Exists(Path.Combine(path, "sprite.info.json")))
             {
                 var info = DeserializeInfo<SpriteInfo>(folder: path, file: "sprite.info.json");
@@ -262,7 +264,7 @@ namespace ZNT.Evolution.Core
                 texture: material.mainTexture,
                 size: tk2dSpriteCollectionSize.Explicit(0.5F, 12),
                 names: new[] { "single" },
-                regions: new[] { new Rect(1, 1, material.mainTexture.width, material.mainTexture.height) },
+                regions: new[] { new Rect(0, 0, material.mainTexture.width, material.mainTexture.height) },
                 anchors: new[] { Vector2.zero }
             );
 
@@ -351,10 +353,9 @@ namespace ZNT.Evolution.Core
         {
             var main = new List<string>();
 
-            foreach (var file in Directory.EnumerateFiles(path: folder, searchPattern: "*.bank"))
+            foreach (var file in Directory.EnumerateFiles(path: folder, searchPattern: "*.strings.bank"))
             {
                 var bank = Path.GetFileNameWithoutExtension(file);
-                if (!bank.EndsWith(".strings")) continue;
                 var master = bank.ReplaceLast(".strings", "");
                 if (FMODUnity.Settings.Instance.MasterBanks.Contains(master)) continue;
                 var task = Task.Run(() =>
