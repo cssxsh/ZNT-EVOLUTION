@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using BepInEx.Logging;
 using Newtonsoft.Json;
 using UnityEngine;
 
@@ -12,8 +11,6 @@ namespace ZNT.Evolution.Core.Asset
         private readonly Type[] _exclude;
 
         private static readonly Dictionary<string, object> Cache = new Dictionary<string, object>();
-
-        private static readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("NameConverter");
 
         public NameConverter(params Type[] exclude) => _exclude = exclude;
 

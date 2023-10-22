@@ -1,5 +1,4 @@
-﻿using BepInEx.Logging;
-using HarmonyLib;
+﻿using HarmonyLib;
 using UnityEngine;
 
 // ReSharper disable InconsistentNaming
@@ -7,8 +6,6 @@ namespace ZNT.Evolution.Core
 {
     public static class MovingObjectAssetPatch
     {
-        private static readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("MovingObjectAsset");
-
         [HarmonyPatch(typeof(MovingObjectAsset), methodName: "LoadFromAsset"), HarmonyPostfix]
         public static void LoadFromAsset(MovingObjectAsset __instance, GameObject gameObject)
         {
