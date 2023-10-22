@@ -100,6 +100,12 @@ public enum Voice
   * MaxOpponentsBlock 最大阻挡数量
   * Attachments `UnityDictionary<string, GameObject>` 附加效果
   * Voice `Voice` 语音类型
+  * AimDistance 瞄准距离
+  * Distance 视野距离
+  * AimRange 瞄准射程
+  * AttackRange 攻击射程
+  * DamageRange 破坏射程
+  * MovingAttackRange 移动攻击射程
   * ...
 
 - DecorAsset
