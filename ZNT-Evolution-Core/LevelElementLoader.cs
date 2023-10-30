@@ -160,37 +160,43 @@ namespace ZNT.Evolution.Core
             var variation = brush.DefaultOrientation.GetVariation(0);
             Logger.LogDebug($"brush -> {brush.name} -> {variation.name}");
 
-            var asset = DeserializeInfo<TagInfo>(folder: path, file: "asset.json");
+            var asset = DeserializeInfo<LevelElementInfo>(folder: path, file: "element.json").CustomAsset;
             switch (asset)
             {
-                case var _ when asset.Tag.HasFlag(Tag.Human):
+                case null:
+                    break;
+                case var _ when asset.Contains("HumanAsset"):
                     var human = DeserializeAsset<HumanAsset>(folder: path, file: "asset.json");
                     Logger.LogDebug($"asset.json -> {human}");
                     break;
-                case var _ when asset.Tag.HasFlag(Tag.WorldEnemy):
+                case var _ when asset.Contains("WorldEnemyAsset"):
                     var enemy = DeserializeAsset<WorldEnemyAsset>(folder: path, file: "asset.json");
                     Logger.LogDebug($"asset.json -> {enemy}");
                     break;
-                case var _ when asset.Tag.HasFlag(Tag.Zombie):
+                case var _ when asset.Contains("ZombieAsset"):
                     var zombie = DeserializeAsset<ZombieAsset>(folder: path, file: "asset.json");
                     Logger.LogDebug($"asset.json -> {zombie}");
                     break;
-                case var _ when asset.Tag.HasFlag(Tag.Decor):
+                case var _ when asset.Contains("DecorAsset"):
                     var decor = DeserializeAsset<DecorAsset>(folder: path, file: "asset.json");
                     Logger.LogDebug($"asset.json -> {decor}");
                     break;
-                case var _ when asset.Tag.HasFlag(Tag.Interactable):
+                case var _ when asset.Contains("BreakablePropAsset"):
                     var breakable = DeserializeAsset<BreakablePropAsset>(folder: path, file: "asset.json");
                     Logger.LogDebug($"asset.json -> {breakable}");
                     break;
-                case var _ when asset.Tag.HasFlag(Tag.Breakable):
+                case var _ when asset.Contains("SentryGunAsset"):
                     var sentry = DeserializeAsset<SentryGunAsset>(folder: path, file: "asset.json");
                     Logger.LogDebug($"asset.json -> {sentry}");
                     break;
-                case var _ when asset.Tag == 0:
+                case var _ when asset.Contains("MovingObjectAsset"):
                     var moving = DeserializeAsset<MovingObjectAsset>(folder: path, file: "asset.json");
                     Traverse.Create(moving).Field("library").SetValue(animation);
                     Logger.LogDebug($"asset.json -> {moving}");
+                    break;
+                case var _ when asset.Contains("TriggerAsset"):
+                    var trigger = DeserializeAsset<TriggerAsset>(folder: path, file: "asset.json");
+                    Logger.LogDebug($"asset.json -> {trigger}");
                     break;
             }
 

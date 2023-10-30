@@ -383,12 +383,12 @@
         <Compile Include="Asset\CustomAssetUtility.cs" />
         <Compile Include="Asset\AssetElementBinder.cs" />
         <Compile Include="Asset\EvolutionInfo.cs" />
+        <Compile Include="Asset\LevelElementInfo.cs" />
         <Compile Include="Asset\NameConverter.cs" />
         <Compile Include="Asset\NullConverter.cs" />
         <Compile Include="Asset\ScriptableObjectConverter.cs" />
         <Compile Include="Asset\SpriteInfo.cs" />
         <Compile Include="Asset\SpriteMerge.cs" />
-        <Compile Include="Asset\TagInfo.cs" />
         <Compile Include="EvolutionCorePlugin.cs" />
         <Compile Include="DebugPatch.cs" />
         <Compile Include="HookAsset.cs" />
