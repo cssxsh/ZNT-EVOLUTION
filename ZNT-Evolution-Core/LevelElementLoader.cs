@@ -27,9 +27,15 @@ namespace ZNT.Evolution.Core
 
             AssetBundle bundle;
             {
-                var request = AssetBundle.LoadFromFileAsync(Path.Combine(path, "resources.bundle"));
+                var file = Path.Combine(path, "resources.bundle");
+                var request = AssetBundle.LoadFromFileAsync(file);
                 yield return request;
                 bundle = request.assetBundle;
+                if (bundle == null)
+                {
+                    Logger.LogWarning($"AssetBundle '{file}' cannot read");
+                    yield break;
+                }
             }
 
             Logger.LogDebug($"resources.bundle -> {bundle} -> {bundle.GetAllAssetNames().Join()}");
@@ -93,7 +99,7 @@ namespace ZNT.Evolution.Core
                     {
                         try
                         {
-                            LoadBrushFormFolder(path: path, bundle: bundle);
+                            bundle.LoadBrushFormFolder(path: path);
                         }
                         catch (Exception e)
                         {
@@ -107,7 +113,7 @@ namespace ZNT.Evolution.Core
                     {
                         try
                         {
-                            LoadDecorFormFolder(path: path, bundle: bundle);
+                            bundle.LoadDecorFormFolder(path: path);
                         }
                         catch (Exception e)
                         {
@@ -121,7 +127,7 @@ namespace ZNT.Evolution.Core
             }
         }
 
-        private static void LoadBrushFormFolder(string path, AssetBundle bundle)
+        private static void LoadBrushFormFolder(this AssetBundle bundle, string path)
         {
             if (bundle.LoadAsset(name: "bank_") is TextAsset bank)
             {
@@ -207,7 +213,7 @@ namespace ZNT.Evolution.Core
             Logger.LogInfo($"LevelElement {id} - {element.Title} Loaded");
         }
 
-        private static void LoadDecorFormFolder(string path, AssetBundle bundle)
+        private static void LoadDecorFormFolder(this AssetBundle bundle, string path)
         {
             var material = bundle.LoadAsset<Material>(name: "sprites");
             if (File.Exists(Path.Combine(path, "sprite.info.json")))
