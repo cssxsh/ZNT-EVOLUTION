@@ -27,18 +27,12 @@ namespace ZNT.Evolution.Core.Asset
         
         public override bool CanConvert(Type objectType) => _include.Contains(objectType);
 
-        private static object Wrap(object value)
+        private static object Wrap(object value) => value switch
         {
-            switch (value)
-            {
-                case tk2dSpriteAnimation animation:
-                    return new AnimationWrapper(animation);
-                case tk2dSpriteCollectionData sprites:
-                    return new SpritesWrapper(sprites);
-                default:
-                    throw new NotSupportedException("wrap " + value.GetType());
-            }
-        }
+            tk2dSpriteAnimation animation => new AnimationWrapper(animation),
+            tk2dSpriteCollectionData sprites => new SpritesWrapper(sprites),
+            _ => throw new NotSupportedException("wrap " + value.GetType())
+        };
         
         [Serializable]
         internal class AnimationWrapper
