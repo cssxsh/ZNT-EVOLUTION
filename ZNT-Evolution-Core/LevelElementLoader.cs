@@ -200,9 +200,26 @@ namespace ZNT.Evolution.Core
                     Traverse.Create(moving).Field("library").SetValue(animation);
                     Logger.LogDebug($"asset.json -> {moving}");
                     break;
+                case var _ when asset.Contains("PhysicObjectAsset"):
+                    var physic = DeserializeAsset<PhysicObjectAsset>(folder: path, file: "asset.json");
+                    Traverse.Create(physic).Field("library").SetValue(animation);
+                    Logger.LogDebug($"asset.json -> {physic}");
+                    break;
                 case var _ when asset.Contains("TriggerAsset"):
                     var trigger = DeserializeAsset<TriggerAsset>(folder: path, file: "asset.json");
                     Logger.LogDebug($"asset.json -> {trigger}");
+                    break;
+                case var _ when asset.Contains("DetectionAsset"):
+                    var detection = DeserializeAsset<DetectionAsset>(folder: path, file: "asset.json");
+                    Logger.LogDebug($"asset.json -> {detection}");
+                    break;
+                case var _ when asset.Contains("ExplosionAsset"):
+                    var explosion = DeserializeAsset<ExplosionAsset>(folder: path, file: "asset.json");
+                    Logger.LogDebug($"asset.json -> {explosion}");
+                    break;
+                case var _ when asset.Contains("ScreamAsset"):
+                    var scream = DeserializeAsset<ScreamAsset>(folder: path, file: "asset.json");
+                    Logger.LogDebug($"asset.json -> {scream}");
                     break;
             }
 
