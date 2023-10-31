@@ -389,6 +389,8 @@
         <Compile Include="Asset\ScriptableObjectConverter.cs" />
         <Compile Include="Asset\SpriteInfo.cs" />
         <Compile Include="Asset\SpriteMerge.cs" />
+        <Compile Include="Editor\EditorComponent.cs" />
+        <Compile Include="Editor\MineTrapEditor.cs" />
         <Compile Include="EvolutionCorePlugin.cs" />
         <Compile Include="DebugPatch.cs" />
         <Compile Include="HookAsset.cs" />
@@ -396,6 +398,7 @@
         <Compile Include="MovingObjectAssetPatch.cs" />
         <Compile Include="Properties\AssemblyInfo.cs"/>
         <Compile Include="StartManagerPatch.cs" />
+        <Compile Include="TriggerAssetPatch.cs" />
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets"/>
     <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
