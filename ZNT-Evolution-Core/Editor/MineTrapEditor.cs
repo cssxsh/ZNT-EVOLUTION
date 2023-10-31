@@ -7,6 +7,22 @@ namespace ZNT.Evolution.Core.Editor
     [DisallowMultipleComponent]
     public class MineTrapEditor : EditorComponent
     {
+        private Trigger Trigger => GetComponentInChildren<Trigger>();
+        
+        [SerializeInEditor(name: "Detected Human")]
+        public bool DetectedHuman
+        {
+            get => Trigger.WithTags.HasFlag(Tag.Human);
+            set => Trigger.WithTags = value ? Trigger.WithTags.Add(Tag.Human) : Trigger.WithTags.Remove(Tag.Human);
+        }
+                
+        [SerializeInEditor(name: "Detected Zombie")]
+        public bool DetectedZombie
+        {
+            get => Trigger.WithTags.HasFlag(Tag.Zombie);
+            set => Trigger.WithTags = value ? Trigger.WithTags.Add(Tag.Zombie) : Trigger.WithTags.Remove(Tag.Zombie);
+        }
+        
         private MineBehaviour Behaviour => GetComponentInChildren<MineBehaviour>();
 
         private ExplosionAsset _explosion;
@@ -35,28 +51,58 @@ namespace ZNT.Evolution.Core.Editor
             set => Explosion().DamageRadius = value;
         }
 
-        [SerializeInEditor(name: "Apply Breakable")]
-        public bool Breakable
+        public Tag ApplyDamageOn
         {
-            get => Explosion().ApplyDamageOn.HasFlag(Tag.Breakable);
-            set => Explosion().ApplyDamageOn =
-                value ? Explosion().ApplyDamageOn.Add(Tag.Breakable) : Explosion().ApplyDamageOn.Remove(Tag.Breakable);
+            get => Explosion().ApplyDamageOn;
+            set => Explosion().ApplyDamageOn = value;
         }
 
-        [SerializeInEditor(name: "Apply Human")]
-        public bool Human
+        [SerializeInEditor(name: "Damage Breakable")]
+        public bool DamageBreakable
         {
-            get => Explosion().ApplyDamageOn.HasFlag(Tag.Human);
-            set => Explosion().ApplyDamageOn =
-                value ? Explosion().ApplyDamageOn.Add(Tag.Human) : Explosion().ApplyDamageOn.Remove(Tag.Human);
+            get => ApplyDamageOn.HasFlag(Tag.Breakable);
+            set => ApplyDamageOn = value ? ApplyDamageOn.Add(Tag.Breakable) : ApplyDamageOn.Remove(Tag.Breakable);
         }
 
-        [SerializeInEditor(name: "Apply Zombie")]
-        public bool Zombie
+        [SerializeInEditor(name: "Damage Human")]
+        public bool DamageHuman
         {
-            get => Explosion().ApplyDamageOn.HasFlag(Tag.Zombie);
-            set => Explosion().ApplyDamageOn =
-                value ? Explosion().ApplyDamageOn.Add(Tag.Zombie) : Explosion().ApplyDamageOn.Remove(Tag.Zombie);
+            get => ApplyDamageOn.HasFlag(Tag.Human);
+            set => ApplyDamageOn = value ? ApplyDamageOn.Add(Tag.Human) : ApplyDamageOn.Remove(Tag.Human);
+        }
+
+        [SerializeInEditor(name: "Damage Zombie")]
+        public bool DamageZombie
+        {
+            get => ApplyDamageOn.HasFlag(Tag.Zombie);
+            set => ApplyDamageOn = value ? ApplyDamageOn.Add(Tag.Zombie) : ApplyDamageOn.Remove(Tag.Zombie);
+        }
+        
+        [SerializeInEditor(name: "Force")]
+        public float Force
+        {
+            get => Explosion().Force;
+            set => Explosion().Force = value;
+        }
+
+        public Tag ApplyForceOn
+        {
+            get => Explosion().ApplyForceOn;
+            set => Explosion().ApplyForceOn = value;
+        }
+
+        [SerializeInEditor(name: "Force Human")]
+        public bool ForceHuman
+        {
+            get => ApplyForceOn.HasFlag(Tag.Human);
+            set => ApplyForceOn = value ? ApplyForceOn.Add(Tag.Human) : ApplyForceOn.Remove(Tag.Human);
+        }
+
+        [SerializeInEditor(name: "Force Zombie")]
+        public bool ForceZombie
+        {
+            get => ApplyForceOn.HasFlag(Tag.Zombie);
+            set => ApplyForceOn = value ? ApplyForceOn.Add(Tag.Zombie) : ApplyForceOn.Remove(Tag.Zombie);
         }
     }
 }

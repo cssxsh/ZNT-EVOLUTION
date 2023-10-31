@@ -10,7 +10,7 @@ namespace ZNT.Evolution.Core
         [HarmonyPatch(typeof(TriggerAsset), methodName: "LoadFromAsset"), HarmonyPostfix]
         public static void LoadFromAsset(TriggerAsset __instance, GameObject gameObject)
         {
-            if (__instance.name == "Mine")
+            if (gameObject.GetComponents<MineBehaviour>().Length != 0)
             {
                 gameObject.AddComponent<MineTrapEditor>();
             }
