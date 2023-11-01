@@ -8,21 +8,21 @@ namespace ZNT.Evolution.Core.Editor
     public class MineTrapEditor : EditorComponent
     {
         private Trigger Trigger => GetComponentInChildren<Trigger>();
-        
+
         [SerializeInEditor(name: "Detected Human")]
         public bool DetectedHuman
         {
             get => Trigger.WithTags.HasFlag(Tag.Human);
             set => Trigger.WithTags = value ? Trigger.WithTags.Add(Tag.Human) : Trigger.WithTags.Remove(Tag.Human);
         }
-                
+
         [SerializeInEditor(name: "Detected Zombie")]
         public bool DetectedZombie
         {
             get => Trigger.WithTags.HasFlag(Tag.Zombie);
             set => Trigger.WithTags = value ? Trigger.WithTags.Add(Tag.Zombie) : Trigger.WithTags.Remove(Tag.Zombie);
         }
-        
+
         private MineBehaviour Behaviour => GetComponentInChildren<MineBehaviour>();
 
         private ExplosionAsset _explosion;
@@ -51,7 +51,7 @@ namespace ZNT.Evolution.Core.Editor
             set => Explosion().DamageRadius = value;
         }
 
-        public Tag ApplyDamageOn
+        private Tag ApplyDamageOn
         {
             get => Explosion().ApplyDamageOn;
             set => Explosion().ApplyDamageOn = value;
@@ -77,7 +77,7 @@ namespace ZNT.Evolution.Core.Editor
             get => ApplyDamageOn.HasFlag(Tag.Zombie);
             set => ApplyDamageOn = value ? ApplyDamageOn.Add(Tag.Zombie) : ApplyDamageOn.Remove(Tag.Zombie);
         }
-        
+
         [SerializeInEditor(name: "Force")]
         public float Force
         {
@@ -85,7 +85,7 @@ namespace ZNT.Evolution.Core.Editor
             set => Explosion().Force = value;
         }
 
-        public Tag ApplyForceOn
+        private Tag ApplyForceOn
         {
             get => Explosion().ApplyForceOn;
             set => Explosion().ApplyForceOn = value;
@@ -103,6 +103,13 @@ namespace ZNT.Evolution.Core.Editor
         {
             get => ApplyForceOn.HasFlag(Tag.Zombie);
             set => ApplyForceOn = value ? ApplyForceOn.Add(Tag.Zombie) : ApplyForceOn.Remove(Tag.Zombie);
+        }
+
+        [SerializeInEditor(name: "Shake Camera")]
+        public bool ShakeCamera
+        {
+            get => Explosion().ShakeCamera;
+            set => Explosion().ShakeCamera = value;
         }
     }
 }
