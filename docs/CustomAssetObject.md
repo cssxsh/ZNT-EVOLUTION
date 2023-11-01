@@ -109,6 +109,7 @@ public enum Voice
   * Height 身高
   * StairDetectionHeightRatio 楼梯高度判定
   * CanClimb 可爬行
+  * CanStepOver 可跨过
   * ...
 
 - DecorAsset
@@ -181,7 +182,7 @@ public enum Voice
   * PlaySounds `true`/`false`
   * DetectedLayers `UnityEngine.LayerMask`
   * CheckTags `true`/`false`
-  * DetectedTags `Tag`
+  * DetectedTags `Tag` 作用对象分类
   * resizeMode `None`/`Horizontal`/`Vertical`/`Both`
   * clampMethod `None`/`Relative`/`Absolute`
   * minSize `UnityEngine.Vector2`

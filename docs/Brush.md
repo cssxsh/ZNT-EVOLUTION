@@ -12,5 +12,16 @@
 
 - Rotorz.Tile.BrushOrientation
   * name 
-  * _variations `Human:2533`, `ActivableDecor:2664`, `MovingObject:4106`
+  * _variations `UnityEngine.Object[]`
   * ...
+
+## 原型
+
+- `Human`:`2533`
+- `CircularEnemyExplosion`: `2627`
+- `ActivableDecor`:`2664`
+- `Zombie`:`2672`
+- `MineTrap`:`2676`
+- `PhysicObject`:`4088`
+- `MovingObject`:`4106`
+- `SentryGun`:`4359`
