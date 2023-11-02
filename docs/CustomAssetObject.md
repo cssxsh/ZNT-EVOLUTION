@@ -86,10 +86,11 @@ public enum Voice
   * DirectAim `true`/`false` 直接目标
   * BlockOpponents `true`/`false` 阻挡
   * MaxOpponentsBlock 最大阻挡数量
-  * Attachments `UnityDictionary<string, GameObject>` 附加效果
-    * `Attachments["moving_attack"]` 冲撞 `Gertrude Moving Attack`/`DrugLord Moving Attack`/`Priest Moving Attack`/`Lumberjack Moving Attack`
-    * `Attachments["shield_attack"]` 护盾 `VirginShield`/`RepelWave`
-    * `Attachments["attach_laser"]` 激光 `LaserAttachment`
+  * Attachments `UnityDictionary<string, UnityEngine.GameObject>` 附加效果
+    * `Attachments["moving_attack"]` 移动攻击 `Gertrude Moving Attack`/`DrugLord Moving Attack`/`Priest Moving Attack`/`Lumberjack Moving Attack`
+    * `Attachments["shield_attack"]` 护盾攻击 `VirginShield`
+    * `Attachments["shield_effect"]` 护盾效果 `RepelWave`
+    * `Attachments["attach_laser"]` 附加激光 `LaserAttachment`
   * Voice `Voice` 语音类型
   * AimDistance 瞄准距离
   * Distance 视野距离
