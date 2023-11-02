@@ -39,18 +39,6 @@ public enum DamageType
 }
 ```
 
-```text
-"Attachments": {
-    "moving_attack": "Gertrude Moving Attack : UnityEngine.GameObject",
-    "moving_attack": "DrugLord Moving Attack : UnityEngine.GameObject",
-    "moving_attack": "Priest Moving Attack : UnityEngine.GameObject",
-    "moving_attack": "Lumberjack Moving Attack : UnityEngine.GameObject",
-    "shield_attack": "VirginShield : UnityEngine.GameObject",
-    "shield_effect": "RepelWave : UnityEngine.GameObject",
-    "attach_laser": "LaserAttachment : UnityEngine.GameObject"
-}
-```
-
 ```csharp
 public enum Voice
 {
@@ -99,6 +87,9 @@ public enum Voice
   * BlockOpponents `true`/`false` 阻挡
   * MaxOpponentsBlock 最大阻挡数量
   * Attachments `UnityDictionary<string, GameObject>` 附加效果
+    * `Attachments["moving_attack"]` 冲撞 `Gertrude Moving Attack`/`DrugLord Moving Attack`/`Priest Moving Attack`/`Lumberjack Moving Attack`
+    * `Attachments["shield_attack"]` 护盾 `VirginShield`/`RepelWave`
+    * `Attachments["attach_laser"]` 激光 `LaserAttachment`
   * Voice `Voice` 语音类型
   * AimDistance 瞄准距离
   * Distance 视野距离
