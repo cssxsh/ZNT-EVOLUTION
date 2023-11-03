@@ -83,7 +83,7 @@ public enum Voice
   * DamageMultipliers `UnityDictionary<DamageType, float>` 伤害倍率
   * RiseOnDeath 死亡时感染
   * RiseAsset `CustomAssetObject` 感染后转变的单位
-  * DirectAim `true`/`false` 直接目标
+  * DirectAim `true`/`false` 直接瞄准
   * BlockOpponents `true`/`false` 阻挡
   * MaxOpponentsBlock 最大阻挡数量
   * Attachments `UnityDictionary<string, UnityEngine.GameObject>` 附加效果
@@ -92,6 +92,8 @@ public enum Voice
     * `Attachments["shield_effect"]` 护盾效果 `RepelWave`
     * `Attachments["attach_laser"]` 附加激光 `LaserAttachment`
   * Voice `Voice` 语音类型
+  * AimFieldOfView 瞄准视野
+  * FieldOfView 视野
   * AimDistance 瞄准距离
   * Distance 视野距离
   * AimRange 瞄准射程
@@ -102,6 +104,12 @@ public enum Voice
   * StairDetectionHeightRatio 楼梯高度判定
   * CanClimb 可爬行
   * CanStepOver 可跨过
+  * MaxFallHeight 最大下坠高度
+  * FleeBeforeZombieExplode 僵尸爆炸前逃离
+  * WalkSpeed 散步速度
+  * RunSpeed 跑步速度 (`SprintSpeed = RunSpeed + 1`)
+  * DeathVelocityThreshold 死亡速率阈值 (耐冲击)
+  * JumpDeathVelocityThreshold 跳跃死亡速率阈值 (耐冲击)
   * ...
 
 - DecorAsset
