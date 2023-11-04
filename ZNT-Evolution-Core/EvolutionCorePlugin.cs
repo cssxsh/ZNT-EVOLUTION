@@ -10,8 +10,7 @@ namespace ZNT.Evolution.Core
         {
             Harmony.CreateAndPatchAll(typeof(DebugPatch));
             Harmony.CreateAndPatchAll(typeof(StartManagerPatch));
-            Harmony.CreateAndPatchAll(typeof(MovingObjectAssetPatch));
-            Harmony.CreateAndPatchAll(typeof(TriggerAssetPatch));
+            Harmony.CreateAndPatchAll(typeof(CustomAssetObjectPatch));
         }
     }
 }

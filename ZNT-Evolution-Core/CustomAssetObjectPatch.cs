@@ -1,11 +1,15 @@
 ﻿using HarmonyLib;
 using UnityEngine;
+using ZNT.Evolution.Core.Editor;
 
 // ReSharper disable InconsistentNaming
 namespace ZNT.Evolution.Core
 {
-    public static class MovingObjectAssetPatch
+    public static class CustomAssetObjectPatch
     {
+
+        #region MovingObjectAsset
+
         [HarmonyPatch(typeof(MovingObjectAsset), methodName: "LoadFromAsset"), HarmonyPostfix]
         public static void LoadFromAsset(MovingObjectAsset __instance, GameObject gameObject)
         {
@@ -30,5 +34,20 @@ namespace ZNT.Evolution.Core
             asset.MoveAnimation = asset.StandAnimation = asset.StopAnimation = orientation;
             controller.Animator.Sprite.SetSprite(orientation);
         }
+
+        #endregion
+
+        #region TriggerAsset
+
+        [HarmonyPatch(typeof(TriggerAsset), methodName: "LoadFromAsset"), HarmonyPostfix]
+        public static void LoadFromAsset(TriggerAsset __instance, GameObject gameObject)
+        {
+            if (gameObject.GetComponents<MineBehaviour>().Length != 0)
+            {
+                gameObject.AddComponent<MineTrapEditor>();
+            }
+        }
+
+        #endregion
     }
 }
