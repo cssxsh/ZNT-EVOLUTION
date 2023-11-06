@@ -47,7 +47,6 @@ namespace ZNT.Evolution.Core
                 yield return request;
                 var asset = request.asset;
                 if (asset == null) continue;
-                asset.hideFlags = HideFlags.HideAndDontSave;
 
                 switch (asset)
                 {
@@ -287,6 +286,105 @@ namespace ZNT.Evolution.Core
             }
         }
 
+        public static IEnumerator ApplyFormFolder(string path)
+        {            
+            if (!Directory.EnumerateFiles(path).Any())
+            {
+                Logger.LogWarning($"folder '{path}' does not exist or is empty.");
+                yield break;
+            }
+
+            Logger.LogInfo($"apply LevelElement form folder '{path}'.");
+
+            AssetBundle bundle;
+            {
+                var file = Path.Combine(path, "resources.bundle");
+                var request = AssetBundle.LoadFromFileAsync(file);
+                yield return request;
+                bundle = request.assetBundle;
+                if (bundle == null)
+                {
+                    Logger.LogWarning($"AssetBundle '{file}' cannot read");
+                    yield break;
+                }
+            }
+
+            Logger.LogDebug($"resources.bundle -> {bundle} -> {bundle.GetAllAssetNames().Join()}");
+
+            foreach (var name in bundle.GetAllAssetNames())
+            {
+                Logger.LogDebug($"[{bundle.name}] load path: {name}");
+                var request = bundle.LoadAssetAsync(name);
+                yield return request;
+                var asset = request.asset;
+                if (asset == null) continue;
+
+                switch (asset)
+                {
+                    case Sprite sprite:
+                        Logger.LogDebug($"[{bundle.name}] {sprite}");
+                        Logger.LogDebug($"[{bundle.name}] {sprite.texture}");
+                        break;
+                    case Material material:
+                        Logger.LogDebug($"[{bundle.name}] {material}");
+                        Logger.LogDebug($"[{bundle.name}] {material.mainTexture}");
+                        Logger.LogDebug($"[{bundle.name}] {material.shader}");
+                        break;
+                    case Shader shader:
+                        Logger.LogDebug($"[{bundle.name}] {shader}");
+                        break;
+                    case TextAsset bank:
+                        if (name == "bank.strings" || name == "bank_")
+                        {
+                            var task = Task.Run(() =>
+                            {
+                                try
+                                {
+                                    FMODUnity.RuntimeManager.LoadBank(asset: bank, loadSamples: true);
+                                }
+                                catch (FMODUnity.BankLoadException e)
+                                {
+                                    Logger.LogError(e);
+                                }
+                            });
+
+                            yield return new WaitUntil(() => task.IsCompleted);
+                        }
+
+                        Logger.LogDebug($"[{bundle.name}] {asset.name}");
+                        break;
+                    default:
+                        Logger.LogDebug($"[{bundle.name}] {request.asset.name}");
+                        break;
+                }
+            }
+
+            var apply = Task.Run(() =>
+            {
+                try
+                {
+                    bundle.ApplyFormFolder(path: path);
+                }
+                catch (Exception e)
+                {
+                    Logger.LogWarning(e);
+                }
+            });
+            yield return new WaitUntil(() => apply.IsCompleted);
+        }
+        
+        private static void ApplyFormFolder(this AssetBundle bundle, string path)
+        {
+            var material = bundle.LoadAsset<Material>("sprites");
+            var info = DeserializeInfo<SpriteInfo>(folder: path, file: "sprite.info.json");
+            var sprites = CreateSprite(material, info);
+            Logger.LogDebug($"CreateSprite -> {sprites} from {sprites.material}");
+
+            var addition = DeserializeInfo<AnimationAddition>(folder: path, file: "animation.addition.json");
+            var animations = addition.Apply();
+            Logger.LogInfo($"{animations.Count} animations apply");
+        }
+
         private static tk2dSpriteCollectionData CreateSingleSprite(Material material)
         {
             var impl = tk2dSpriteCollectionData.CreateFromTexture(
@@ -330,7 +428,7 @@ namespace ZNT.Evolution.Core
         {
             var clone = UnityEngine.Object.Instantiate(merge.Source);
 
-            clone.name = material.name.Replace("_mat", "");
+            clone.name = merge.Name ?? material.name.Replace("_mat", "");
             clone.gameObject.hideFlags = HideFlags.HideAndDontSave;
             clone.material = material;
             clone.materials[0] = material;
@@ -338,6 +436,25 @@ namespace ZNT.Evolution.Core
             foreach (var definition in clone.spriteDefinitions) definition.material = material;
 
             return clone;
+        }
+
+        private static Dictionary<string, tk2dSpriteAnimation> Apply(this AnimationAddition addition)
+        {
+            var animations = Resources.FindObjectsOfTypeAll<tk2dSpriteAnimation>();
+            return addition.Clips.Zip(addition.Targets, (clip, name) =>
+            {
+                foreach (var animation in animations)
+                {
+                    if (animation.name != name) continue;
+                    animation.clips = animation.clips.AddToArray(clip);
+                    Traverse.Create(animation).Field("clipNameCache").SetValue(null);
+                    Traverse.Create(animation).Field("idNameCache").SetValue(null);
+                    animation.InitializeClipCache();
+                    return animation;
+                }
+
+                throw new KeyNotFoundException(message: $"tk2dSpriteAnimation(name: {name})");
+            }).ToDictionary(animation => animation.name);
         }
 
         private static LevelElement DecorToBrush(this LevelElement origin)

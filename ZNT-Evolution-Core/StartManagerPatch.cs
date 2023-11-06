@@ -41,6 +41,14 @@ namespace ZNT.Evolution.Core
                 }
             }
             Logger.LogInfo("Load LevelElement OK");
+            foreach (var directory in Directory.EnumerateDirectories(Path.Combine(Application.dataPath, "Apply")))
+            {
+                if (directory.EndsWith(".bak")) continue;
+                if (directory.EndsWith(" - 副本")) continue;
+                var target = Path.GetFullPath(directory);
+                yield return LevelElementLoader.ApplyFormFolder(path: target);
+            }
+            Logger.LogInfo("Apply LevelElement OK");
         }
 
         [HarmonyPatch(typeof(StartManager), methodName: "LoadNextScene"), HarmonyPrefix]

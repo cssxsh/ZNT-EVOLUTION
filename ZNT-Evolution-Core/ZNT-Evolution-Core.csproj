@@ -379,6 +379,7 @@
         </Reference>
     </ItemGroup>
     <ItemGroup>
+        <Compile Include="Asset\AnimationAddition.cs" />
         <Compile Include="Asset\ComponentConverter.cs" />
         <Compile Include="Asset\CustomAssetUtility.cs" />
         <Compile Include="Asset\AssetElementBinder.cs" />
