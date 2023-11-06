@@ -41,7 +41,9 @@ namespace ZNT.Evolution.Core
                 }
             }
             Logger.LogInfo("Load LevelElement OK");
-            foreach (var directory in Directory.EnumerateDirectories(Path.Combine(Application.dataPath, "Apply")))
+            var apply = Path.Combine(Application.dataPath, "Apply");
+            if (!Directory.Exists(apply)) Directory.CreateDirectory(apply);
+            foreach (var directory in Directory.EnumerateDirectories(apply))
             {
                 if (directory.EndsWith(".bak")) continue;
                 if (directory.EndsWith(" - 副本")) continue;
