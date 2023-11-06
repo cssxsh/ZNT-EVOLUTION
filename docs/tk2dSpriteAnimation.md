@@ -6,14 +6,14 @@
 
 - tk2dSpriteAnimation
   * name
-  * clips
+  * clips `tk2dSpriteAnimationClip[]`
 
 - tk2dSpriteAnimationClip
   * name 片段名
   * frames `tk2dSpriteAnimationFrame[]`
   * fps
   * loopStart
-  * useableInLevelEditor `true`/`false`
+  * useableInLevelEditor `true`/`false` 在地图编辑器可选
   * staticAnimation `true`/`false`
   * wrapMode `Loop`/`LoopSection`/`Once`/`PingPong`/`RandomFrame`/`RandomLoop`/`Single`
 

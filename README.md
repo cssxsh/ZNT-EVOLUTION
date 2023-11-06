@@ -33,8 +33,8 @@ Zombie Night Terror
 - [x] tk2dSpriteCollectionData 精灵图资源
 - [ ] ~~VisualEffect~~
 - [x] tk2dSpriteAnimation 精灵图动画
-- [ ] ExplosionAsset 技能效果
-- [x] PhysicObjectAsset 物理效果
+- [x] ExplosionAsset 爆炸
+- [x] PhysicObjectAsset 物理对象
 - [x] CharacterAnimationAsset 动作-动画
 - [x] CharacterAsset 角色资源
 
