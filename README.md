@@ -12,10 +12,14 @@ Zombie Night Terror
 │   │   └───<...>
 │   └───<...>
 ├───znt_Data
+│   ├───Apply
+│   │   ├───stand_smoke
+│   │   └───<...>
 │   ├───Brush
 │   │   ├───arknights_311
 │   │   └───<...>
 │   ├───Decor
+│   │   ├───fire_copter
 │   │   └───<...>
 │   ├───StreamingAssets
 │   │   ├───MOD.strings.bank
