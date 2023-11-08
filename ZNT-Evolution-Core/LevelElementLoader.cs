@@ -185,6 +185,37 @@ namespace ZNT.Evolution.Core
                 case var _ when asset.Contains("DecorAsset"):
                     var decor = DeserializeAsset<DecorAsset>(folder: path, file: "asset.json");
                     Logger.LogDebug($"asset.json -> {decor}");
+                    if (animation.GetClipByName(decor.ActivateAnimation) == null)
+                    {
+                        var source = DeserializeAsset<LevelElement>(folder: path, file: "element.json");
+                        Logger.LogDebug($"element.json -> {source} to {source.Title}");
+                        for (var index = 0; index < animation.clips.Length; index++)
+                        {
+                            var clone = UnityEngine.Object.Instantiate(decor);
+                            clone.name = string.Format(decor.name, index + 1);
+                            clone.ActivateAnimation = string.Format(decor.ActivateAnimation, index + 1);
+                            if (animation.GetClipByName(clone.ActivateAnimation) == null) break;
+                            clone.DeactivateAnimation = string.Format(decor.DeactivateAnimation, index + 1);
+                            if (animation.GetClipByName(clone.DeactivateAnimation) == null) break;
+                            clone.ActiveAnimation = string.Format(decor.ActiveAnimation, index + 1);
+                            if (animation.GetClipByName(clone.ActiveAnimation) == null) break;
+                            clone.InactiveAnimation = string.Format(decor.InactiveAnimation, index + 1);
+                            if (animation.GetClipByName(clone.InactiveAnimation) == null) break;
+                            
+                            var impl = UnityEngine.Object.Instantiate(source);
+                            impl.name = string.Format(source.name, index + 1);
+                            impl.Title = string.Format(source.Title, index + 1);
+                            impl.Brush = UnityEngine.Object.Instantiate(source.Brush);
+                            impl.Brush.name = $"brush_{impl.name}";
+                            impl.CustomAsset = clone;
+                            
+                            var i = AssetElementBinder.PushToIndex(impl);
+                            Logger.LogInfo($"LevelElement {i} - {impl.Title} Loaded");
+                        }
+                        UnityEngine.Object.Destroy(decor);
+                        UnityEngine.Object.Destroy(source);
+                        return;
+                    }
                     break;
                 case var _ when asset.Contains("BreakablePropAsset"):
                     var breakable = DeserializeAsset<BreakablePropAsset>(folder: path, file: "asset.json");
@@ -272,6 +303,7 @@ namespace ZNT.Evolution.Core
                     var id = AssetElementBinder.PushToIndex(impl);
                     Logger.LogInfo($"LevelElement {id} - {impl.Title} Loaded");
                 }
+                UnityEngine.Object.Destroy(element);
             }
             else
             {
