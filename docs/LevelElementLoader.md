@@ -2,14 +2,15 @@
 
 > 关卡单位导入
 
+为了加快加载速度，不直接从 `json` 加载 `tk2dSpriteCollectionData`  
+而是利用 `SpriteInfo` 或 `SpriteMerge` 间接生成
+
 ## LoadFormFolder
 
 > 加载 `LevelElement`
 
-- load AssetBundle: `resources.bundle`
-- load SpriteInfo: `sprite.info.json`
-- load tk2dSpriteAnimation: `animation.json`
-- load LevelElement: `element.json`
+- `SpriteInfo` 包含坐标信息, 构造自定义的 `tk2dSpriteCollectionData`
+- `SpriteMerge` 包含原型 `tk2dSpriteCollectionData`，通过替换原本的贴图，构造 `tk2dSpriteCollectionData`
 
 ### LoadBrushFormFolder
 
@@ -29,7 +30,7 @@
 - tk2dSpriteAnimation `animation.json`
   * string `name`
   * tk2dSpriteAnimationClip[] `clips` <- tk2dSpriteCollectionData
-- CustomAsset `asset.json` <- `animation.json`, tk2dSpriteCollectionData
+- CustomAsset `asset.json`
   * string `name`
   * string `HierarchyName`
   * ...
@@ -38,7 +39,7 @@
   * string `Title`
   * UnityEngine.Sprite `Preview` <= `preview`
   * Rotorz.Tile.OrientedBrush `Brush` <= `brush`
-  * CustomAssetObject `CustomAsset` <= `asset.json`
+  * CustomAssetObject `CustomAsset` <= `asset.json` <- `animation.json`, tk2dSpriteCollectionData
 
 #### DecorAsset
 
@@ -115,9 +116,7 @@
 
 > 修改
 
-- load AssetBundle: `resources.bundle`
-- load SpriteInfo: `sprite.info.json`
-- load AnimationAddition: `animation.addition.json`
+- `AnimationAddition` 包含操作目标和要添加的动画片段
 
 ### Animation
 
