@@ -31,7 +31,7 @@ Zombie Night Terror
 
 ## 导入流程
 
-### 角色导入流程
+### 主要资源
 
 - [x] FMODAsset 声音资源
 - [x] tk2dSpriteCollectionData 精灵图资源
@@ -41,9 +41,6 @@ Zombie Night Terror
 - [x] PhysicObjectAsset 物理对象
 - [x] CharacterAnimationAsset 动作-动画
 - [x] CharacterAsset 角色资源
-
-### 关卡单位导入流程
-
 - [x] Rotorz.Tile.Brush 笔刷
 - [x] UnityEngine.Sprite 预览
 - [x] LevelElement 关卡单位
@@ -53,6 +50,10 @@ Zombie Night Terror
 - `AssetBundle.LoadFromFile`
 
 `AssetBundle` 的 assets 文件需要其中有一个 AssetBundle 类型的对象定义索引
+
+- [LevelElementLoader](./docs/LevelElementLoader.md)
+
+`LevelElementLoader` 插件实现的关卡单位加载器
 
 ## 开发记录
 
