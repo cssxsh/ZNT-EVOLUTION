@@ -49,5 +49,21 @@ namespace ZNT.Evolution.Core
         }
 
         #endregion
+        
+        #region Rotorz.Tile.Brush
+
+        [HarmonyPatch(typeof(Rotorz.Tile.OrientedBrush), methodName: "Awake"), HarmonyPostfix]
+        public static void Awake(Rotorz.Tile.OrientedBrush __instance)
+        {
+            var body = __instance.DefaultOrientation.GetVariation(0) as GameObject;
+            if (body == null) return;
+
+            if (body.TryGetComponent<DoorBehaviour>(out _))
+            {
+                body.GetComponent<Health>().EditorVisibility = true;
+            }
+        }
+
+        #endregion
     }
 }
