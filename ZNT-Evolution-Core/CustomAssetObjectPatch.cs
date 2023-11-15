@@ -7,7 +7,6 @@ namespace ZNT.Evolution.Core
 {
     public static class CustomAssetObjectPatch
     {
-
         #region MovingObjectAsset
 
         [HarmonyPatch(typeof(MovingObjectAsset), methodName: "LoadFromAsset"), HarmonyPostfix]
@@ -49,7 +48,7 @@ namespace ZNT.Evolution.Core
         }
 
         #endregion
-        
+
         #region Rotorz.Tile.Brush
 
         [HarmonyPatch(typeof(Rotorz.Tile.OrientedBrush), methodName: "Awake"), HarmonyPostfix]
@@ -61,10 +60,10 @@ namespace ZNT.Evolution.Core
                 case null:
                     return;
                 case var _ when body.TryGetComponent<DoorBehaviour>(out var behaviour):
-                    if (behaviour.TryGetComponent<Health>(out var health))
-                    {
-                        health.EditorVisibility = true;
-                    }
+                    if (behaviour.TryGetComponent<Health>(out var health)) health.EditorVisibility = true;
+                    break;
+                case var _ when body.TryGetComponent<BarricadeBehaviour>(out _):
+                    body.AddComponent<LayerEditor>();
                     break;
             }
         }
