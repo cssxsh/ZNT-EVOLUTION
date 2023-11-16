@@ -1,4 +1,6 @@
-﻿using HarmonyLib;
+﻿using System.Collections.Generic;
+using System.Linq;
+using HarmonyLib;
 using UnityEngine;
 using ZNT.Evolution.Core.Editor;
 
@@ -49,6 +51,18 @@ namespace ZNT.Evolution.Core
 
         #endregion
 
+        #region ExplosionAsset
+
+        [HarmonyPatch(typeof(ExplosionAsset), methodName: "LoadFromAsset"), HarmonyPostfix]
+        public static void LoadFromAsset(ExplosionAsset __instance, GameObject gameObject)
+        {
+            gameObject.AddComponent<ExplosionEditor>();
+            gameObject.AddComponent<SignalReceiverLinker>();
+            gameObject.AddComponent<SignalSenderLinker>();
+        }
+
+        #endregion
+
         #region Rotorz.Tile.Brush
 
         [HarmonyPatch(typeof(Rotorz.Tile.OrientedBrush), methodName: "Awake"), HarmonyPostfix]
@@ -66,6 +80,22 @@ namespace ZNT.Evolution.Core
                     body.AddComponent<LayerEditor>();
                     break;
             }
+        }
+
+        [HarmonyPatch(typeof(SignalReceiverLinker), methodName: "OnAwake"), HarmonyPrefix]
+        public static void OnAwake(SignalReceiverLinker __instance)
+        {
+            __instance.ExcludedComponents ??= __instance.GetComponentsInChildren<BaseComponent>(true)
+                .Where(component => !component.EditorVisibility).ToList();
+            __instance.ExcludedGameObjects ??= new List<GameObject>();
+        }
+
+        [HarmonyPatch(typeof(SignalSenderLinker), methodName: "OnAwake"), HarmonyPrefix]
+        public static void OnAwake(SignalSenderLinker __instance)
+        {
+            __instance.ExcludedComponents ??= __instance.GetComponentsInChildren<BaseComponent>(true)
+                .Where(component => !component.EditorVisibility).ToList();
+            __instance.ExcludedGameObjects ??= new List<GameObject>();
         }
 
         #endregion

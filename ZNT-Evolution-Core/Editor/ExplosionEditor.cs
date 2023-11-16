@@ -1,61 +1,34 @@
-﻿using HarmonyLib;
+﻿using System.Linq;
 using UnityEngine;
 
 namespace ZNT.Evolution.Core.Editor
 {
     [SerializeInEditor(name: "Explosion")]
     [DisallowMultipleComponent]
-    public class MineTrapEditor : EditorComponent
+    public class ExplosionEditor : EditorComponent
     {
-        private Trigger Trigger => GetComponentInChildren<Trigger>();
+        private ExplosionEffect Effect => GetComponent<ExplosionEffect>();
 
-        [SerializeInEditor(name: "Detected Human")]
-        public bool DetectedHuman
-        {
-            get => Trigger.WithTags.HasFlag(Tag.Human);
-            set => Trigger.WithTags = value ? Trigger.WithTags.Add(Tag.Human) : Trigger.WithTags.Remove(Tag.Human);
-        }
-
-        [SerializeInEditor(name: "Detected Zombie")]
-        public bool DetectedZombie
-        {
-            get => Trigger.WithTags.HasFlag(Tag.Zombie);
-            set => Trigger.WithTags = value ? Trigger.WithTags.Add(Tag.Zombie) : Trigger.WithTags.Remove(Tag.Zombie);
-        }
-
-        private MineBehaviour Behaviour => GetComponentInChildren<MineBehaviour>();
-
-        private ExplosionAsset _explosion;
-
-        private ExplosionAsset Explosion()
-        {
-            if (_explosion != null) return _explosion;
-            var field = Traverse.Create(Behaviour).Field<ExplosionAsset>(name: "explosion");
-            var impl = field.Value;
-            _explosion = Instantiate(impl);
-            _explosion.name = name;
-            field.Value = _explosion;
-            return _explosion;
-        }
+        private SphereDetection Detection => GetComponent<SphereDetection>();
 
         [SerializeInEditor(name: "Damage")]
         public float Damage
         {
-            get => Explosion().Damage;
-            set => Explosion().Damage = value;
+            get => Effect.Damage;
+            set => Effect.Damage = value;
         }
 
         [SerializeInEditor(name: "Damage Radius")]
         public float DamageRadius
         {
-            get => Explosion().DamageRadius;
-            set => Explosion().DamageRadius = value;
+            get => Detection.Radius;
+            set => Detection.Radius = value;
         }
 
         private Tag ApplyDamageOn
         {
-            get => Explosion().ApplyDamageOn;
-            set => Explosion().ApplyDamageOn = value;
+            get => Effect.ApplyDamageOn;
+            set => Effect.ApplyDamageOn = value;
         }
 
         [SerializeInEditor(name: "Damage Breakable")]
@@ -82,14 +55,14 @@ namespace ZNT.Evolution.Core.Editor
         [SerializeInEditor(name: "Force")]
         public float Force
         {
-            get => Explosion().Force;
-            set => Explosion().Force = value;
+            get => Effect.Force;
+            set => Effect.Force = value;
         }
 
         private Tag ApplyForceOn
         {
-            get => Explosion().ApplyForceOn;
-            set => Explosion().ApplyForceOn = value;
+            get => Effect.ApplyForceOn;
+            set => Effect.ApplyForceOn = value;
         }
 
         [SerializeInEditor(name: "Force Human")]
@@ -109,8 +82,17 @@ namespace ZNT.Evolution.Core.Editor
         [SerializeInEditor(name: "Shake Camera")]
         public bool ShakeCamera
         {
-            get => Explosion().ShakeCamera;
-            set => Explosion().ShakeCamera = value;
+            get => Effect.ShakeCamera;
+            set => Effect.ShakeCamera = value;
+        }
+
+        [SignalReceiver]
+        public void StartExplosion()
+        {
+            foreach (var effect in GetComponentsInChildren<ExplosionEffect>().Reverse())
+            {
+                effect.StartExplosion(0F);
+            }
         }
     }
 }

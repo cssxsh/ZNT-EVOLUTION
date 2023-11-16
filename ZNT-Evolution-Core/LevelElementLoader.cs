@@ -247,6 +247,7 @@ namespace ZNT.Evolution.Core
                     break;
                 case var _ when asset.Contains("ExplosionAsset"):
                     var explosion = DeserializeAsset<ExplosionAsset>(folder: path, file: "asset.json");
+                    Traverse.Create(explosion).Field("autoExplode").SetValue(false);
                     Logger.LogDebug($"asset.json -> {explosion}");
                     break;
                 case var _ when asset.Contains("ScreamAsset"):
