@@ -11,7 +11,7 @@ namespace ZNT.Evolution.Core
     public static class StartManagerPatch
     {
         private static readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("StartManager");
-        
+
         private static IEnumerator Loading;
 
         [HarmonyPatch(typeof(StartManager), methodName: "Start"), HarmonyPostfix]
@@ -29,9 +29,9 @@ namespace ZNT.Evolution.Core
             foreach (var type in (LevelElement.Type[])Enum.GetValues(typeof(LevelElement.Type)))
             {
                 var path = Path.Combine(Application.dataPath, type.ToString());
-            
+
                 if (!Directory.Exists(path)) Directory.CreateDirectory(path);
-            
+
                 foreach (var directory in Directory.EnumerateDirectories(path))
                 {
                     if (directory.EndsWith(".bak")) continue;
@@ -40,6 +40,7 @@ namespace ZNT.Evolution.Core
                     yield return LevelElementLoader.LoadFormFolder(path: target, type: type);
                 }
             }
+
             Logger.LogInfo("Load LevelElement OK");
             var apply = Path.Combine(Application.dataPath, "Apply");
             if (!Directory.Exists(apply)) Directory.CreateDirectory(apply);
@@ -50,6 +51,7 @@ namespace ZNT.Evolution.Core
                 var target = Path.GetFullPath(directory);
                 yield return LevelElementLoader.ApplyFormFolder(path: target);
             }
+
             Logger.LogInfo("Apply LevelElement OK");
         }
 

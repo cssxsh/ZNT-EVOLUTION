@@ -7,7 +7,7 @@ namespace ZNT.Evolution.Core.Asset
     internal class SpriteMerge : EvolutionInfo
     {
         [JsonProperty("Source")] public readonly tk2dSpriteCollectionData Source;
-        
+
         [JsonProperty("Name")] public readonly string Name;
 
         [JsonConstructor]

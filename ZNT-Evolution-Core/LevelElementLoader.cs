@@ -201,21 +201,23 @@ namespace ZNT.Evolution.Core
                             if (animation.GetClipByName(clone.ActiveAnimation) == null) break;
                             clone.InactiveAnimation = string.Format(decor.InactiveAnimation, index + 1);
                             if (animation.GetClipByName(clone.InactiveAnimation) == null) break;
-                            
+
                             var impl = UnityEngine.Object.Instantiate(source);
                             impl.name = string.Format(source.name, index + 1);
                             impl.Title = string.Format(source.Title, index + 1);
                             impl.Brush = UnityEngine.Object.Instantiate(source.Brush);
                             impl.Brush.name = $"brush_{impl.name}";
                             impl.CustomAsset = clone;
-                            
+
                             var i = AssetElementBinder.PushToIndex(impl);
                             Logger.LogInfo($"LevelElement {i} - {impl.Title} Loaded");
                         }
+
                         UnityEngine.Object.Destroy(decor);
                         UnityEngine.Object.Destroy(source);
                         return;
                     }
+
                     break;
                 case var _ when asset.Contains("BreakablePropAsset"):
                     var breakable = DeserializeAsset<BreakablePropAsset>(folder: path, file: "asset.json");
@@ -303,6 +305,7 @@ namespace ZNT.Evolution.Core
                     var id = AssetElementBinder.PushToIndex(impl);
                     Logger.LogInfo($"LevelElement {id} - {impl.Title} Loaded");
                 }
+
                 UnityEngine.Object.Destroy(element);
             }
             else
@@ -319,7 +322,7 @@ namespace ZNT.Evolution.Core
         }
 
         public static IEnumerator ApplyFormFolder(string path)
-        {            
+        {
             if (!Directory.EnumerateFiles(path).Any())
             {
                 Logger.LogWarning($"folder '{path}' does not exist or is empty.");
@@ -404,7 +407,7 @@ namespace ZNT.Evolution.Core
             });
             yield return new WaitUntil(() => apply.IsCompleted);
         }
-        
+
         private static void ApplyFormFolder(this AssetBundle bundle, string path)
         {
             var material = bundle.LoadAsset<Material>("sprites");

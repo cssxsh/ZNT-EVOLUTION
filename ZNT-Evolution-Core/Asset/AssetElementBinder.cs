@@ -50,6 +50,7 @@ namespace ZNT.Evolution.Core.Asset
                     {
                         LevelElementIndex.Index.AddAssetElement(element);
                     }
+
                     break;
             }
 

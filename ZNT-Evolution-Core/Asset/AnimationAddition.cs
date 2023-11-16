@@ -7,7 +7,7 @@ namespace ZNT.Evolution.Core.Asset
     internal class AnimationAddition : EvolutionInfo
     {
         [JsonProperty("Targets")] public readonly string[] Targets;
-        
+
         [JsonProperty("Clips")] public readonly tk2dSpriteAnimationClip[] Clips;
 
         [JsonConstructor]

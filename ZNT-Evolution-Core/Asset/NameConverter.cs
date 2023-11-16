@@ -46,7 +46,7 @@ namespace ZNT.Evolution.Core.Asset
 
             var name = key.Split(':')[0].Trim();
             Cache.TryGetValue(name, out var impl);
-            
+
             if (objectType.IsSubclassOf(typeof(Component)))
             {
                 if (impl is GameObject body) return body.GetComponent(objectType);

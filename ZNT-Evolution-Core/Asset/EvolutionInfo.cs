@@ -2,6 +2,6 @@
 {
     public class EvolutionInfo
     {
-        
+        // Recommended use Readonly Property
     }
 }

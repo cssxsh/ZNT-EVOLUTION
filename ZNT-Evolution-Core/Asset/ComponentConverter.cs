@@ -11,7 +11,7 @@ namespace ZNT.Evolution.Core.Asset
         private readonly Type[] _include;
 
         public ComponentConverter(params Type[] include) => _include = include;
-        
+
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
             serializer.Serialize(writer, Wrap(value));
@@ -24,7 +24,7 @@ namespace ZNT.Evolution.Core.Asset
             return new GameObject(objectType.Name) { hideFlags = HideFlags.HideAndDontSave }
                 .AddComponent(objectType);
         }
-        
+
         public override bool CanConvert(Type objectType) => _include.Contains(objectType);
 
         private static object Wrap(object value) => value switch
@@ -33,19 +33,19 @@ namespace ZNT.Evolution.Core.Asset
             tk2dSpriteCollectionData sprites => new SpritesWrapper(sprites),
             _ => throw new NotSupportedException("wrap " + value.GetType())
         };
-        
+
         [Serializable]
         internal class AnimationWrapper
         {
             [JsonIgnore] private readonly tk2dSpriteAnimation _data;
 
             public AnimationWrapper(tk2dSpriteAnimation data) => _data = data;
-            
+
             [JsonProperty("name")] public string Name => _data.name;
 
             [JsonProperty("clips")] public tk2dSpriteAnimationClip[] Clips => _data.clips;
         }
-        
+
         [Serializable]
         internal class SpritesWrapper
         {

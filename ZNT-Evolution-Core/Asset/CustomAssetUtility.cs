@@ -46,10 +46,10 @@ namespace ZNT.Evolution.Core.Asset
 
         public static void SerializeAssetToPath(string target, CustomAsset asset)
         {
-            JsonSerializer serializer = JsonSerializer.Create(AssetSettings(asset.GetType()));
+            var serializer = JsonSerializer.Create(AssetSettings(asset.GetType()));
             SaveObjectToPath(serializer, asset, target);
         }
-        
+
         public static void SerializeInfoToPath(string target, EvolutionInfo info)
         {
             var serializer = JsonSerializer.Create(AssetSettings(info.GetType()));
@@ -144,7 +144,7 @@ namespace ZNT.Evolution.Core.Asset
 
             return impl;
         }
-        
+
         public static T LoadComponentFromTextAsset<T>(TextAsset asset) where T : Component
         {
             var serializer = JsonSerializer.Create(ComponentSettings(typeof(T)));
@@ -172,7 +172,7 @@ namespace ZNT.Evolution.Core.Asset
             using var json = new JsonTextReader(reader);
             return jsonSerializer.Deserialize<T>(json);
         }
-        
+
         private static T LoadObjectFromTextAsset<T>(JsonSerializer jsonSerializer, TextAsset asset)
         {
             using var reader = new StringReader(asset.text);
