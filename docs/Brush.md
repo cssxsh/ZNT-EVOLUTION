@@ -18,6 +18,7 @@
 ## 原型
 
 - `Human`:`2533`
+- `CircularExplosion`: `2609`
 - `CircularEnemyExplosion`: `2627`
 - `ActivableDecor`:`2664`
 - `Zombie`:`2672`

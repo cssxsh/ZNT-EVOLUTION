@@ -89,10 +89,7 @@ namespace ZNT.Evolution.Core.Editor
         [SignalReceiver]
         public void StartExplosion()
         {
-            foreach (var effect in GetComponentsInChildren<ExplosionEffect>().Reverse())
-            {
-                effect.StartExplosion(0F);
-            }
+            foreach (var effect in GetComponentsInChildren<ExplosionEffect>().Reverse()) effect.StartExplosion(0F);
         }
     }
 }
