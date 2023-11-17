@@ -75,6 +75,7 @@ namespace ZNT.Evolution.Core
                     return;
                 case var _ when body.TryGetComponent<DoorBehaviour>(out var behaviour):
                     if (behaviour.TryGetComponent<Health>(out var health)) health.EditorVisibility = true;
+                    body.AddComponent<LayerEditor>();
                     break;
                 case var _ when body.TryGetComponent<BarricadeBehaviour>(out _):
                     body.AddComponent<LayerEditor>();
