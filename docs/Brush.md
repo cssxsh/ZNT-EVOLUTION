@@ -1,6 +1,6 @@
 ﻿# Rotorz.Tile.Brush
 
-> 主要有为 Rotorz.Tile.OrientedBrush
+> 主要为 Rotorz.Tile.OrientedBrush
 
 ## 结构
 
@@ -16,6 +16,8 @@
   * ...
 
 ## 原型
+
+`_variations[0]` -> `znt_Data/data.unity3d` - `resources.assets`
 
 - `Human`:`2533`
 - `CircularExplosion`: `2609`
