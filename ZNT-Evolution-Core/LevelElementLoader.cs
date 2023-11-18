@@ -170,19 +170,19 @@ namespace ZNT.Evolution.Core
             {
                 case null:
                     break;
-                case var _ when asset.Contains("HumanAsset"):
+                case var _ when asset.EndsWith("HumanAsset"):
                     var human = DeserializeAsset<HumanAsset>(folder: path, file: "asset.json");
                     Logger.LogDebug($"asset.json -> {human}");
                     break;
-                case var _ when asset.Contains("WorldEnemyAsset"):
+                case var _ when asset.EndsWith("WorldEnemyAsset"):
                     var enemy = DeserializeAsset<WorldEnemyAsset>(folder: path, file: "asset.json");
                     Logger.LogDebug($"asset.json -> {enemy}");
                     break;
-                case var _ when asset.Contains("ZombieAsset"):
+                case var _ when asset.EndsWith("ZombieAsset"):
                     var zombie = DeserializeAsset<ZombieAsset>(folder: path, file: "asset.json");
                     Logger.LogDebug($"asset.json -> {zombie}");
                     break;
-                case var _ when asset.Contains("DecorAsset"):
+                case var _ when asset.EndsWith("DecorAsset"):
                     var decor = DeserializeAsset<DecorAsset>(folder: path, file: "asset.json");
                     Logger.LogDebug($"asset.json -> {decor}");
                     if (animation.GetClipByName(decor.ActivateAnimation) == null)
@@ -219,38 +219,38 @@ namespace ZNT.Evolution.Core
                     }
 
                     break;
-                case var _ when asset.Contains("BreakablePropAsset"):
+                case var _ when asset.EndsWith("BreakablePropAsset"):
                     var breakable = DeserializeAsset<BreakablePropAsset>(folder: path, file: "asset.json");
                     Logger.LogDebug($"asset.json -> {breakable}");
                     break;
-                case var _ when asset.Contains("SentryGunAsset"):
+                case var _ when asset.EndsWith("SentryGunAsset"):
                     var sentry = DeserializeAsset<SentryGunAsset>(folder: path, file: "asset.json");
                     Logger.LogDebug($"asset.json -> {sentry}");
                     break;
-                case var _ when asset.Contains("MovingObjectAsset"):
+                case var _ when asset.EndsWith("MovingObjectAsset"):
                     var moving = DeserializeAsset<MovingObjectAsset>(folder: path, file: "asset.json");
                     Traverse.Create(moving).Field("library").SetValue(animation);
                     Logger.LogDebug($"asset.json -> {moving}");
                     break;
-                case var _ when asset.Contains("PhysicObjectAsset"):
+                case var _ when asset.EndsWith("PhysicObjectAsset"):
                     var physic = DeserializeAsset<PhysicObjectAsset>(folder: path, file: "asset.json");
                     Traverse.Create(physic).Field("library").SetValue(animation);
                     Logger.LogDebug($"asset.json -> {physic}");
                     break;
-                case var _ when asset.Contains("TriggerAsset"):
+                case var _ when asset.EndsWith("TriggerAsset"):
                     var trigger = DeserializeAsset<TriggerAsset>(folder: path, file: "asset.json");
                     Logger.LogDebug($"asset.json -> {trigger}");
                     break;
-                case var _ when asset.Contains("DetectionAsset"):
+                case var _ when asset.EndsWith("DetectionAsset"):
                     var detection = DeserializeAsset<DetectionAsset>(folder: path, file: "asset.json");
                     Logger.LogDebug($"asset.json -> {detection}");
                     break;
-                case var _ when asset.Contains("ExplosionAsset"):
+                case var _ when asset.EndsWith("ExplosionAsset"):
                     var explosion = DeserializeAsset<ExplosionAsset>(folder: path, file: "asset.json");
                     Traverse.Create(explosion).Field("autoExplode").SetValue(false);
                     Logger.LogDebug($"asset.json -> {explosion}");
                     break;
-                case var _ when asset.Contains("ScreamAsset"):
+                case var _ when asset.EndsWith("ScreamAsset"):
                     var scream = DeserializeAsset<ScreamAsset>(folder: path, file: "asset.json");
                     Logger.LogDebug($"asset.json -> {scream}");
                     break;
