@@ -161,7 +161,8 @@ namespace ZNT.Evolution.Core
             var animation = LoadComponent<tk2dSpriteAnimation>(folder: path, file: "animation.json");
             Logger.LogDebug($"animation.json -> {animation}");
 
-            var brush = bundle.LoadAsset<Rotorz.Tile.OrientedBrush>(name: "brush");
+            var brush = bundle.LoadAsset<Rotorz.Tile.OrientedBrush>(name: "brush")
+                        ?? CreateBrush(DeserializeInfo<BrushInfo>(folder: path, file: "brush.info.json"));
             var variation = brush.DefaultOrientation.GetVariation(0);
             Logger.LogDebug($"brush -> {brush.name} -> {variation.name}");
 
@@ -472,6 +473,18 @@ namespace ZNT.Evolution.Core
             foreach (var definition in clone.spriteDefinitions) definition.material = material;
 
             return clone;
+        }
+
+        private static Rotorz.Tile.OrientedBrush CreateBrush(BrushInfo info)
+        {
+            var impl = ScriptableObject.CreateInstance<Rotorz.Tile.OrientedBrush>();
+
+            impl.name = info.Name;
+            impl.group = 1;
+            impl.forceLegacySideways = false;
+            impl.AddOrientation(0).AddVariation(info.Variation, 50);
+
+            return impl;
         }
 
         private static Dictionary<string, tk2dSpriteAnimation> Apply(this AnimationAddition addition)
