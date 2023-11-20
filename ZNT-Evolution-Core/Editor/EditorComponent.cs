@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Framework.Events;
 using HarmonyLib;
 
@@ -10,7 +10,7 @@ namespace ZNT.Evolution.Core.Editor
         {
             var attribute = this.GetAttribute<SerializeInEditorAttribute>();
             EditorVisibility = attribute.VisibleInEditor;
-            
+
             var cached = Traverse.Create<SignalReceiver>()
                 .Field<Dictionary<string, System.Type>>(name: "cachedType").Value;
             var type = GetType();

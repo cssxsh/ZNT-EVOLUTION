@@ -1,4 +1,4 @@
-﻿namespace ZNT.Evolution.Core.Asset
+namespace ZNT.Evolution.Core.Asset
 {
     public class EvolutionInfo
     {

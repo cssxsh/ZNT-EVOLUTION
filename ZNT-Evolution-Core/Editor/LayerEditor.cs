@@ -1,4 +1,4 @@
-﻿using UIWidgets;
+using UIWidgets;
 using UnityEngine;
 
 // ReSharper disable InconsistentNaming
@@ -43,7 +43,7 @@ namespace ZNT.Evolution.Core.Editor
             Background = 0x17,
             Sky = 0x18,
             Projectile = 0x19,
-            Spit = 0x1A, 
+            Spit = 0x1A,
             Block_Humans = 0x1B,
             Block_Zombies = 0x1C,
             World_Enemy = 0x1D,
