@@ -1,4 +1,4 @@
-﻿# Rotorz.Tile.Brush
+# Rotorz.Tile.Brush
 
 > 主要为 Rotorz.Tile.OrientedBrush
 

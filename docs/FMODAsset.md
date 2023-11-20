@@ -1,4 +1,4 @@
-﻿# FMODAsset
+# FMODAsset
 
 > 声音资源，定义了一段声音
 

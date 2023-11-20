@@ -1,4 +1,4 @@
-﻿# tk2dSpriteAnimation
+# tk2dSpriteAnimation
 
 > 动画类，定义了动画片段，片段由帧和音频组成
 

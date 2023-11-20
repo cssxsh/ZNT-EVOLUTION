@@ -1,4 +1,4 @@
-﻿# CharacterAnimationAsset
+# CharacterAnimationAsset
 
 > 将动画片段和动作联系起来
 

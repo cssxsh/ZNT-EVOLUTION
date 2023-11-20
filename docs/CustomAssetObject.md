@@ -1,4 +1,4 @@
-﻿# CustomAssetObject
+# CustomAssetObject
 
 > 主要有 HumanAsset, ZombieAsset, DecorAsset
 

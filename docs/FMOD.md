@@ -1,4 +1,4 @@
-﻿# 如何在 BepInEx 插件中向使用 FMOD 的 Unity 游戏中导入新的音频
+# 如何在 BepInEx 插件中向使用 FMOD 的 Unity 游戏中导入新的音频
 
 > 目标游戏 https://store.steampowered.com/app/416680/Zombie_Night_Terror/
 

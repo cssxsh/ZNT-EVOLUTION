@@ -1,4 +1,4 @@
-﻿# UnityEngine.AssetBundle
+# UnityEngine.AssetBundle
 
 > UnityEngine 序列化打包和依赖管理
 
