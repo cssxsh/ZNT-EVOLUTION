@@ -1,4 +1,4 @@
-﻿# ZNT-EVOLUTION
+# ZNT-EVOLUTION
 
 ## 插件文件结构
 
