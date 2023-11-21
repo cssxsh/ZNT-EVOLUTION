@@ -492,7 +492,7 @@ namespace ZNT.Evolution.Core
             return impl;
         }
 
-        private static Dictionary<string, tk2dSpriteAnimation> Apply(this AnimationAddition addition)
+        private static ISet<tk2dSpriteAnimation> Apply(this AnimationAddition addition)
         {
             var animations = Resources.FindObjectsOfTypeAll<tk2dSpriteAnimation>();
             return addition.Clips.Zip(addition.Targets, (clip, name) =>
@@ -508,7 +508,7 @@ namespace ZNT.Evolution.Core
                 }
 
                 throw new KeyNotFoundException(message: $"tk2dSpriteAnimation(name: {name})");
-            }).ToDictionary(animation => animation.name);
+            }).ToHashSet();
         }
 
         private static LevelElement DecorToBrush(this LevelElement origin)
