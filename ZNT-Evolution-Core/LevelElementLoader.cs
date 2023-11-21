@@ -479,10 +479,15 @@ namespace ZNT.Evolution.Core
         {
             var impl = ScriptableObject.CreateInstance<Rotorz.Tile.OrientedBrush>();
 
+            impl.hideFlags = HideFlags.HideAndDontSave;
             impl.name = info.Name;
             impl.group = 1;
-            impl.forceLegacySideways = false;
-            impl.AddOrientation(0).AddVariation(info.Variation, 50);
+            impl.forceLegacySideways = info.ForceLegacySideways;
+            impl.applyPrefabTransform = info.ApplyPrefabTransform;
+            Traverse.Create(impl).Field("_userFlags").SetValue(info.UserFlags);
+            impl.forceOverrideFlags = info.ForceOverrideFlags;
+            impl.Coalesce = info.Coalesce;
+            impl.AddOrientation(mask: 0).AddVariation(variation: info.Variation, weight: 50);
 
             return impl;
         }
