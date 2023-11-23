@@ -391,9 +391,11 @@
         <Compile Include="Asset\ScriptableObjectConverter.cs" />
         <Compile Include="Asset\SpriteInfo.cs" />
         <Compile Include="Asset\SpriteMerge.cs" />
+        <Compile Include="Editor\BarricadeLayerEditor.cs" />
         <Compile Include="Editor\EditorComponent.cs" />
         <Compile Include="Editor\ExplosionEditor.cs" />
         <Compile Include="Editor\LayerEditor.cs" />
+        <Compile Include="Editor\LayerType.cs" />
         <Compile Include="Editor\MineTrapEditor.cs" />
         <Compile Include="EvolutionCorePlugin.cs" />
         <Compile Include="DebugPatch.cs" />
