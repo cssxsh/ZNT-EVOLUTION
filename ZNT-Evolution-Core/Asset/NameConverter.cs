@@ -47,25 +47,19 @@ namespace ZNT.Evolution.Core.Asset
             var name = key.Split(':')[0].Trim();
             Cache.TryGetValue(name, out var impl);
 
-            if (objectType.IsSubclassOf(typeof(Component)))
+            if (objectType.IsInstanceOfType(impl)) return impl;
+
+            if (objectType == typeof(GameObject) && GameObject.Find(name) is { } body)
             {
-                if (impl is GameObject body) return body.GetComponent(objectType);
-                foreach (var asset in Resources.FindObjectsOfTypeAll<GameObject>())
-                {
-                    if (asset.name != name) continue;
-                    Cache[name] = asset;
-                    return asset.GetComponent(objectType);
-                }
+                Cache[name] = body;
+                return body;
             }
-            else
+
+            foreach (var asset in Resources.FindObjectsOfTypeAll(objectType))
             {
-                if (objectType.IsInstanceOfType(impl)) return impl;
-                foreach (var asset in Resources.FindObjectsOfTypeAll(objectType))
-                {
-                    if (asset.name != name) continue;
-                    Cache[name] = asset;
-                    return asset;
-                }
+                if (asset.name != name) continue;
+                Cache[name] = asset;
+                return asset;
             }
 
             throw new KeyNotFoundException(message: $"{objectType.FullName}(name: {name})");
