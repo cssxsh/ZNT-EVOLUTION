@@ -78,7 +78,7 @@ namespace ZNT.Evolution.Core
                     body.AddComponent<LayerEditor>();
                     break;
                 case var _ when body.TryGetComponent<BarricadeBehaviour>(out _):
-                    body.AddComponent<LayerEditor>();
+                    body.AddComponent<BarricadeLayerEditor>();
                     break;
             }
         }
