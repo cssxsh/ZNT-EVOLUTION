@@ -1,5 +1,9 @@
 # ZNT-EVOLUTION
 
+## 项目环境变量
+
+* `ZNTGamePath` 游戏文件目录
+
 ## 插件文件结构
 
 ```text

@@ -19,7 +19,7 @@
         <DebugSymbols>true</DebugSymbols>
         <DebugType>full</DebugType>
         <Optimize>false</Optimize>
-        <OutputPath>..\..\..\23-09-26\Zombie Night Terror\BepInEx\plugins\ZNT-Evolution-Core</OutputPath>
+        <OutputPath>$(ZNTGamePath)\BepInEx\plugins\ZNT-Evolution-Core</OutputPath>
         <DefineConstants>DEBUG;TRACE</DefineConstants>
         <ErrorReport>prompt</ErrorReport>
         <WarningLevel>4</WarningLevel>
@@ -28,353 +28,353 @@
         <PlatformTarget>AnyCPU</PlatformTarget>
         <DebugType>pdbonly</DebugType>
         <Optimize>true</Optimize>
-        <OutputPath>..\..\..\23-09-26\Zombie Night Terror\BepInEx\plugins\ZNT-Evolution-Core</OutputPath>
+        <OutputPath>$(ZNTGamePath)\BepInEx\plugins\ZNT-Evolution-Core</OutputPath>
         <DefineConstants>TRACE</DefineConstants>
         <ErrorReport>prompt</ErrorReport>
         <WarningLevel>4</WarningLevel>
     </PropertyGroup>
     <ItemGroup>
         <Reference Include="0Harmony">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\BepInEx\core\0Harmony.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\BepInEx\core\0Harmony.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="Assembly-CSharp">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\Assembly-CSharp.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\Assembly-CSharp.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="Assembly-CSharp-firstpass">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="BepInEx">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\BepInEx\core\BepInEx.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\BepInEx\core\BepInEx.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="BepInEx.Harmony">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\BepInEx\core\BepInEx.Harmony.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\BepInEx\core\BepInEx.Harmony.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="BepInEx.Preloader">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\BepInEx\core\BepInEx.Preloader.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\BepInEx\core\BepInEx.Preloader.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="DOTween">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\DOTween.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\DOTween.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="GalaxyCSharp">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\GalaxyCSharp.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\GalaxyCSharp.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="HarmonyXInterop">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\BepInEx\core\HarmonyXInterop.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\BepInEx\core\HarmonyXInterop.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="LZ4">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\LZ4.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\LZ4.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="Mono.Cecil">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\BepInEx\core\Mono.Cecil.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\BepInEx\core\Mono.Cecil.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="Mono.Cecil.Mdb">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\BepInEx\core\Mono.Cecil.Mdb.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\BepInEx\core\Mono.Cecil.Mdb.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="Mono.Cecil.Pdb">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\BepInEx\core\Mono.Cecil.Pdb.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\BepInEx\core\Mono.Cecil.Pdb.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="Mono.Cecil.Rocks">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\BepInEx\core\Mono.Cecil.Rocks.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\BepInEx\core\Mono.Cecil.Rocks.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="Mono.Posix">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\Mono.Posix.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\Mono.Posix.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="Mono.Security">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\Mono.Security.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\Mono.Security.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="MonoMod.RuntimeDetour">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\BepInEx\core\MonoMod.RuntimeDetour.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\BepInEx\core\MonoMod.RuntimeDetour.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="MonoMod.Utils">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\BepInEx\core\MonoMod.Utils.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\BepInEx\core\MonoMod.Utils.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="mscorlib">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\mscorlib.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\mscorlib.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="System" />
         <Reference Include="System.Configuration">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\System.Configuration.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\System.Configuration.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="System.Core" />
         <Reference Include="System.Data" />
         <Reference Include="System.Security">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\System.Security.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\System.Security.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="System.Threading">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\System.Threading.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\System.Threading.dll</HintPath>
         </Reference>
         <Reference Include="System.Xml" />
         <Reference Include="TileSystem.Runtime">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\TileSystem.Runtime.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\TileSystem.Runtime.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.AccessibilityModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.AccessibilityModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.AccessibilityModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.AIModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.AIModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.AIModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.AndroidJNIModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.AndroidJNIModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.AndroidJNIModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.AnimationModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.AnimationModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.AnimationModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.ARModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.ARModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.ARModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.AssetBundleModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.AssetBundleModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.AssetBundleModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.AudioModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.AudioModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.AudioModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.ClothModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.ClothModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.ClothModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.ClusterInputModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.ClusterInputModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.ClusterInputModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.ClusterRendererModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.ClusterRendererModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.ClusterRendererModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.CoreModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.CrashReportingModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.CrashReportingModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.CrashReportingModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.DirectorModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.DirectorModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.DirectorModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.DSPGraphModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.DSPGraphModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.DSPGraphModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.FileSystemHttpModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.FileSystemHttpModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.FileSystemHttpModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.GameCenterModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.GameCenterModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.GameCenterModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.GridModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.GridModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.GridModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.HotReloadModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.HotReloadModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.HotReloadModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.ImageConversionModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.ImageConversionModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.ImageConversionModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.IMGUIModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.InputLegacyModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.InputModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.InputModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.InputModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.JSONSerializeModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.JSONSerializeModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.JSONSerializeModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.LocalizationModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.LocalizationModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.LocalizationModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.ParticleSystemModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.ParticleSystemModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.ParticleSystemModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.PerformanceReportingModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.PerformanceReportingModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.PerformanceReportingModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.Physics2DModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.Physics2DModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.Physics2DModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.PhysicsModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.PhysicsModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.PhysicsModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.ProfilerModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.ProfilerModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.ProfilerModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.ScreenCaptureModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.ScreenCaptureModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.ScreenCaptureModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.SharedInternalsModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.SharedInternalsModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.SharedInternalsModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.SpriteMaskModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.SpriteMaskModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.SpriteMaskModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.SpriteShapeModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.SpriteShapeModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.SpriteShapeModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.StreamingModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.StreamingModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.StreamingModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.SubstanceModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.SubstanceModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.SubstanceModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.TerrainModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.TerrainModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.TerrainModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.TerrainPhysicsModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.TerrainPhysicsModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.TerrainPhysicsModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.TextCoreModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.TextCoreModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.TextCoreModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.TextRenderingModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.TilemapModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.TilemapModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.TilemapModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.TLSModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.TLSModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.TLSModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.UI">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.UI.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.UI.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.UIElementsModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.UIElementsModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.UIElementsModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.UIModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.UIModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.UIModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.UmbraModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.UmbraModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.UmbraModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.UNETModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.UNETModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.UNETModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.UnityAnalyticsModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.UnityAnalyticsModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.UnityAnalyticsModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.UnityConnectModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.UnityConnectModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.UnityConnectModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.UnityTestProtocolModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.UnityTestProtocolModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.UnityTestProtocolModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.UnityWebRequestAssetBundleModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.UnityWebRequestAssetBundleModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.UnityWebRequestAssetBundleModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.UnityWebRequestAudioModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.UnityWebRequestAudioModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.UnityWebRequestAudioModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.UnityWebRequestModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.UnityWebRequestModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.UnityWebRequestModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.UnityWebRequestTextureModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.UnityWebRequestTextureModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.UnityWebRequestTextureModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.UnityWebRequestWWWModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.UnityWebRequestWWWModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.UnityWebRequestWWWModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.VehiclesModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.VehiclesModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.VehiclesModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.VFXModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.VFXModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.VFXModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.VideoModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.VideoModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.VideoModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.VRModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.VRModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.VRModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.WindModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.WindModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.WindModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.XRModule">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\UnityEngine.XRModule.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.XRModule.dll</HintPath>
           <Private>False</Private>
         </Reference>
         <Reference Include="Vectrosity">
-          <HintPath>..\..\..\23-09-26\Zombie Night Terror\znt_Data\Managed\Vectrosity.dll</HintPath>
+          <HintPath>$(ZNTGamePath)\znt_Data\Managed\Vectrosity.dll</HintPath>
           <Private>False</Private>
         </Reference>
     </ItemGroup>
