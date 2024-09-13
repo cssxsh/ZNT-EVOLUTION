@@ -20,5 +20,8 @@ namespace ZNT.Evolution.Core
 
         [HarmonyPatch(typeof(Material), methodName: "GetTexture", argumentTypes: typeof(string)), HarmonyPrefix]
         public static bool GetTexture(Material __instance, string name) => __instance.HasProperty(name);
+        
+        [HarmonyPatch(typeof(I2.Loc.LocalizationManager), methodName: "GetTermTranslation"), HarmonyPostfix]
+        public static string GetTermTranslation(string __result, string Term) => __result ?? Term;
     }
 }
