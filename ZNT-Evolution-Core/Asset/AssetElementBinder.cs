@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using FMODUnity;
 using HarmonyLib;
 using UnityEngine;
@@ -55,6 +56,13 @@ namespace ZNT.Evolution.Core.Asset
             }
 
             return asset.AssetId;
+        }
+
+        public static IEnumerable<LevelElement> LevelElements(bool isMod = true)
+        {
+            return LevelElementIndex.Index.Values
+                .Select(element => (LevelElement)element)
+                .Where(element => !isMod || element.name == element.AssetId);
         }
     }
 }
