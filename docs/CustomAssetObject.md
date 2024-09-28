@@ -81,7 +81,7 @@ public enum Voice
   * Invincible `true`/`false` 无敌
   * InvincibleOnAttack `true`/`false` 攻击时无敌
   * DamageMultipliers `UnityDictionary<DamageType, float>` 伤害倍率
-  * RiseOnDeath 死亡时感染
+  * RiseOnDeath `true`/`false` 死亡时感染
   * RiseAsset `CustomAssetObject` 感染后转变的单位
   * DirectAim `true`/`false` 直接瞄准
   * BlockOpponents `true`/`false` 阻挡
