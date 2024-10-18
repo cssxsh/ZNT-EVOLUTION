@@ -52,24 +52,6 @@ namespace ZNT.Evolution.Core
             return reader.ReadToEnd();
         }
 
-        // private static void UpdateMainMenuScene(Scene scene)
-        // {
-        //     var menu = scene.GetRootGameObjects()
-        //         .First(body => body.name == "Menu");
-        //     var canvas = menu.GetChildren()
-        //         .Find(body => body.name == "Canvas");
-        //     var stats = canvas.GetChildren()
-        //         .Find(body => body.name == "Stats Button");
-        //
-        //     var button = Object.Instantiate(stats, canvas.transform);
-        //     button.name = "Mod Button";
-        //     button.transform.position = new Vector3(0, 0, 100);
-        //     var tooltip = button.GetComponent<TooltipReceiver>();
-        //     Traverse.Create(tooltip).Field("text").SetValue("MOD");
-        //     button.GetComponent<Button>()
-        //         .OnClick(() => ComponentSingleton<SceneLoader>.Instance.LoadNextScene(sceneName: "SettingsScene"));
-        // }
-
         #region SettingsScene
 
         // ReSharper disable Once InconsistentNaming
@@ -78,7 +60,6 @@ namespace ZNT.Evolution.Core
         {
             Logger.LogInfo("Update SettingsScene");
             var menu = __instance;
-            // var gui = menu.GetComponentInChildren<GameSettingsGui>(includeInactive: true);
             var tabs = menu.gameObject.GetChildren()
                 .Find(body => body.name == "Option Menu")
                 .GetChildren()
@@ -103,7 +84,8 @@ namespace ZNT.Evolution.Core
                 var info = element.ElementType == LevelElement.Type.Brush 
                     ? $"{element.Title} [{element.AllowedTileSystems}]"
                     : $"{element.Title} [{element.AllowedDecorSystems}]";
-                var term = _localization.AddTerm($"Mod/{element.name}");
+                var term = _localization.GetTermData($"Mod/{element.name}") 
+                           ?? _localization.AddTerm($"Mod/{element.name}");
                 term.SetTranslation(0, info);
                 
                 var item = Object.Instantiate(impl, content.transform);
@@ -115,12 +97,6 @@ namespace ZNT.Evolution.Core
                 var enable = Traverse.Create(element).Field("useable");
                 toggle.OnValueChanged(value => enable.SetValue(value));
                 toggle.SetIsOnWithoutNotify(element.Useable);
-
-                // var preview = Object.Instantiate(item.GetChildren()[0], item.transform);
-                // Object.Destroy(preview.GetComponent<I2.Loc.Localize>());
-                // Object.Destroy(preview.GetComponent<TMPro.TMP_Text>());
-                // preview.GetComponent<Image>()
-                //     .sprite = element.Preview;
             }
 
             var reset = panel.GetChildren()
@@ -131,6 +107,7 @@ namespace ZNT.Evolution.Core
                 .ForEach(localize => localize.Term = "Mod/Reload");
             reload.OnClick(() =>
             {
+                Logger.LogInfo("Reload MOD ...");
                 // TODO: ...
             });
 
