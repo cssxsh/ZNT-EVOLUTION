@@ -520,7 +520,7 @@ namespace ZNT.Evolution.Core
 
             impl.CustomAsset = HookAsset.Invoke(body =>
             {
-                Logger.LogWarning("Hook!");
+                Logger.LogWarning($"{impl.name} Asset Hook!");
                 var animator = body.GetComponentInChildren<tk2dSpriteAnimator>();
                 animator.Library = impl.AnimationLibrary;
                 animator.DefaultClipId = impl.AnimClipId;

@@ -14,7 +14,7 @@ namespace ZNT.Evolution.Core
 
         private static IEnumerator Loading;
 
-        [HarmonyPatch(typeof(StartManager), methodName: "Start"), HarmonyPostfix]
+        [HarmonyPatch(typeof(StartManager), "Start"), HarmonyPostfix]
         public static void Start(StartManager __instance, ref IEnumerator __result)
         {
             __result = Loading = LoadAsset(prefix: __result);
@@ -40,7 +40,6 @@ namespace ZNT.Evolution.Core
                     yield return LevelElementLoader.LoadFormFolder(path: target, type: type);
                 }
             }
-
             Logger.LogInfo("Load LevelElement OK");
             var apply = Path.Combine(Application.dataPath, "Apply");
             if (!Directory.Exists(apply)) Directory.CreateDirectory(apply);
@@ -51,7 +50,6 @@ namespace ZNT.Evolution.Core
                 var target = Path.GetFullPath(directory);
                 yield return LevelElementLoader.ApplyFormFolder(path: target);
             }
-
             Logger.LogInfo("Apply LevelElement OK");
         }
 
