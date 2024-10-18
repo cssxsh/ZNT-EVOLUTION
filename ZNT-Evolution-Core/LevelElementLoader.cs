@@ -210,7 +210,7 @@ namespace ZNT.Evolution.Core
                             impl.Brush.name = $"brush_{impl.name}";
                             impl.CustomAsset = clone;
 
-                            var i = AssetElementBinder.PushToIndex(impl);
+                            var i = impl.Bind();
                             Logger.LogInfo($"LevelElement {i} - {impl.Title} Loaded");
                         }
 
@@ -260,7 +260,7 @@ namespace ZNT.Evolution.Core
             var element = DeserializeAsset<LevelElement>(folder: path, file: "element.json");
             Logger.LogDebug($"element.json -> {element} to {element.Title}");
 
-            var id = AssetElementBinder.PushToIndex(element);
+            var id = element.Bind();
             Logger.LogInfo($"LevelElement {id} - {element.Title} Loaded");
         }
 
@@ -285,13 +285,13 @@ namespace ZNT.Evolution.Core
                 if (element.Brush != null)
                 {
                     var brush = element.DecorToBrush();
-                    var id = AssetElementBinder.PushToIndex(brush);
+                    var id = brush.Bind();
                     Logger.LogInfo($"LevelElement {id} - {brush} Loaded");
                 }
 
                 if (element.DecorType == LevelElement.DecorStyle.Animated)
                 {
-                    var id = AssetElementBinder.PushToIndex(element);
+                    var id = element.Bind();
                     Logger.LogInfo($"LevelElement {id} - {element} Loaded");
                     return;
                 }
@@ -304,7 +304,7 @@ namespace ZNT.Evolution.Core
                     impl.Title = string.Format(element.Title, index + 1, sprites.spriteDefinitions[index].name);
                     impl.hideFlags = HideFlags.HideAndDontSave;
 
-                    var id = AssetElementBinder.PushToIndex(impl);
+                    var id = impl.Bind();
                     Logger.LogInfo($"LevelElement {id} - {impl.Title} Loaded");
                 }
 
@@ -318,7 +318,7 @@ namespace ZNT.Evolution.Core
                 var element = DeserializeAsset<LevelElement>(folder: path, file: "element.json");
                 Logger.LogDebug($"element.json -> {element} to {element.Title}");
 
-                var id = AssetElementBinder.PushToIndex(element);
+                var id = element.Bind();
                 Logger.LogInfo($"LevelElement {id} - {element.Title} Loaded");
             }
         }

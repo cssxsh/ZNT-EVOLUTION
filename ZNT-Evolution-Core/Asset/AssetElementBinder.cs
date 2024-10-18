@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using FMODUnity;
@@ -41,7 +42,7 @@ namespace ZNT.Evolution.Core.Asset
             return dictionary;
         }
 
-        public static string PushToIndex(AssetElement asset)
+        public static string Bind(this AssetElement asset)
         {
             Traverse.Create(asset).Field("assetId").SetValue(asset.name);
             switch (asset)
@@ -53,6 +54,26 @@ namespace ZNT.Evolution.Core.Asset
                     }
 
                     break;
+                default:
+                    throw new NotSupportedException($"Bind: {asset.GetType()}");
+            }
+
+            return asset.AssetId;
+        }
+        
+        public static string Unbind(this AssetElement asset)
+        {
+            switch (asset)
+            {
+                case LevelElement element:
+                    lock (typeof(LevelElementIndex))
+                    {
+                        LevelElementIndex.Index.RemoveAssetElement(element);
+                    }
+
+                    break;
+                default:
+                    throw new NotSupportedException($"Unbind: {asset.GetType()}");
             }
 
             return asset.AssetId;
