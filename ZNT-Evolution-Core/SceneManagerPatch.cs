@@ -1,5 +1,8 @@
+using System;
+using System.Collections;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using BepInEx.Logging;
 using HarmonyLib;
 using UIWidgets;
@@ -68,7 +71,7 @@ namespace ZNT.Evolution.Core
                 .Find(body => body.name == "Option Panels");
 
             var container = Traverse.Create(menu).Field("settingsContainer").GetValue<GameObject[]>();
-            var panel = Object.Instantiate(container[1], panels.transform);
+            var panel = UnityEngine.Object.Instantiate(container[1], panels.transform);
             panel.name = "Mod";
             panel.SetActive(false);
             container = container.AddItem(panel).ToArray();
@@ -81,17 +84,10 @@ namespace ZNT.Evolution.Core
             
             foreach (var element in AssetElementBinder.LevelElements())
             {
-                var info = element.ElementType == LevelElement.Type.Brush 
-                    ? $"{element.Title} [{element.AllowedTileSystems}]"
-                    : $"{element.Title} [{element.AllowedDecorSystems}]";
-                var term = _localization.GetTermData($"Mod/{element.name}") 
-                           ?? _localization.AddTerm($"Mod/{element.name}");
-                term.SetTranslation(0, info);
-                
-                var item = Object.Instantiate(impl, content.transform);
+                var item = UnityEngine.Object.Instantiate(impl, content.transform);
                 item.name = $"{element.Title} Entry";
                 item.GetComponentsInChildren<I2.Loc.Localize>(includeInactive: true)
-                    .ForEach(localize => localize.Term = term.Term);
+                    .ForEach(localize => localize.Term = element.GetTermData().Term);
                 item.SetActive(true);
                 var toggle = item.GetComponentInChildren<Toggle>(includeInactive: true);
                 var enable = Traverse.Create(element).Field("useable");
@@ -112,7 +108,7 @@ namespace ZNT.Evolution.Core
             });
 
             Traverse.Create(menu).Field("settingsContainer").SetValue(container);
-            var tab = Object.Instantiate(tabs.GetChildren()[0], tabs.transform);
+            var tab = UnityEngine.Object.Instantiate(tabs.GetChildren()[0], tabs.transform);
             tab.name = "Mod";
             tab.GetComponentInChildren<I2.Loc.Localize>()
                 .Term = "Mod/Tab_Mod";
@@ -132,6 +128,18 @@ namespace ZNT.Evolution.Core
         {
             toggle.onValueChanged = new Toggle.ToggleEvent();
             toggle.onValueChanged.AddListener(call);
+        }
+        
+        private static I2.Loc.TermData GetTermData(this LevelElement element)
+        {
+            var info = element.ElementType == LevelElement.Type.Brush
+                ? $"{element.Title} [{element.AllowedTileSystems}]"
+                : $"{element.Title} [{element.AllowedDecorSystems}]";
+            var term = _localization.GetTermData($"Mod/{element.name}")
+                       ?? _localization.AddTerm($"Mod/{element.name}");
+            term.SetTranslation(0, info);
+
+            return term;
         }
     }
 }
