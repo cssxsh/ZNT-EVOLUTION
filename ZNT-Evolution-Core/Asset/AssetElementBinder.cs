@@ -61,7 +61,7 @@ namespace ZNT.Evolution.Core.Asset
             return asset.AssetId;
         }
         
-        public static string Unbind(this AssetElement asset)
+        public static void Unbind(this AssetElement asset)
         {
             switch (asset)
             {
@@ -75,8 +75,6 @@ namespace ZNT.Evolution.Core.Asset
                 default:
                     throw new NotSupportedException($"Unbind: {asset.GetType()}");
             }
-
-            return asset.AssetId;
         }
 
         public static IEnumerable<LevelElement> LevelElements(bool isMod = true)
