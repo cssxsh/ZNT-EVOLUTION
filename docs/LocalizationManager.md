@@ -6,10 +6,13 @@
   * Sources `List<LanguageSourceData>`
 
 ```csharp
+public static void UpdateSources()
+{
     if (I2.Loc.LocalizationManager.Sources
         .SelectMany(loaded => loaded.GetCategories())
         .Any(category => category == "Mod"))
     {
+        // 避免重复添加
         return;
     }
     
@@ -21,11 +24,15 @@
     catch (FileNotFoundException e)
     {
         Logger.LogError(e);
+        return;
     }
     
     I2.Loc.LocalizationManager.Sources.Add(source);
+    Logger.LogInfo("Mod LanguageSource Loaded.");
+}
 ```
 
+MOD.csv:
 ```csv
 Key,Type,Desc,English,French,German,Russian,Polish,Portuguese,Spanish,Korean,Japanese,Chinese (Simplified),Chinese (Traditional)
 Tab_Mod,Text,,MOD,,,,,,,,,模组,
@@ -35,6 +42,11 @@ Tab_Mod,Text,,MOD,,,,,,,,,模组,
   * Term
 
 ```csharp
-body.GetComponentsInChildren<I2.Loc.Localize>(includeInactive: true)
-    .ForEach(localize => localize.Term = $"{Category}/{Key}");
+public static void UpdateTerms(this GameObject body)
+{
+    var category = "Mod"; // 可自行修改
+    var key = body.name; // 可自行修改
+    body.GetComponentsInChildren<I2.Loc.Localize>(includeInactive: true)
+        .ForEach(localize => localize.Term = $"{category}/{key}");
+}
 ```
