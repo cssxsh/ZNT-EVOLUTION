@@ -452,7 +452,7 @@ namespace ZNT.Evolution.Core
                 anchors: info.Anchors
             );
 
-            impl.name = material.name.Replace("_mat", "");
+            impl.name = info.Name ?? material.name.Replace("_mat", "");
             impl.gameObject.hideFlags = HideFlags.HideAndDontSave;
             impl.material = material;
             impl.materials[0] = material;

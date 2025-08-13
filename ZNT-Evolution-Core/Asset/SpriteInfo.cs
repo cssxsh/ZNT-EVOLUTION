@@ -18,17 +18,21 @@ namespace ZNT.Evolution.Core.Asset
 
         [JsonProperty("Anchors")] public readonly Vector2[] Anchors;
 
+        [JsonProperty("Name")] public readonly string Name;
+
         [JsonConstructor]
         public SpriteInfo(
             float orthoSize, float targetHeight,
             string[] names, Rect[] regions, Vector2[] anchors = null,
-            Vector2? anchor = null)
+            Vector2? anchor = null,
+            string name = null)
         {
             OrthoSize = orthoSize;
             TargetHeight = targetHeight;
             Names = names;
             Regions = regions;
             Anchors = anchors ?? Regions.Select(_ => anchor ?? Vector2.zero).ToArray();
+            Name = name;
         }
     }
 }
