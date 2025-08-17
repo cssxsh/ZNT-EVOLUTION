@@ -81,7 +81,7 @@ namespace ZNT.Evolution.Core
                 .ForEach(body => body.SetActive(false));
             var impl = content.gameObject.GetChildren()
                 .Find(body => body.name == "FullScreen Entry");
-            
+
             foreach (var element in AssetElementBinder.LevelElements())
             {
                 var item = UnityEngine.Object.Instantiate(impl, content.transform);
@@ -129,7 +129,7 @@ namespace ZNT.Evolution.Core
             toggle.onValueChanged = new Toggle.ToggleEvent();
             toggle.onValueChanged.AddListener(call);
         }
-        
+
         private static I2.Loc.TermData GetTermData(this LevelElement element)
         {
             var info = element.ElementType == LevelElement.Type.Brush

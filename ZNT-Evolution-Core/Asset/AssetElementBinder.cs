@@ -60,7 +60,7 @@ namespace ZNT.Evolution.Core.Asset
 
             return asset.AssetId;
         }
-        
+
         public static void Unbind(this AssetElement asset)
         {
             switch (asset)
