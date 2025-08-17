@@ -63,6 +63,19 @@ namespace ZNT.Evolution.Core
 
         #endregion
 
+        #region CharacterAsset
+
+        [HarmonyPatch(typeof(CharacterAsset), methodName: "LoadFromAsset"), HarmonyPostfix]
+        public static void LoadFromAsset(CharacterAsset __instance, GameObject gameObject)
+        {
+            if (gameObject.TryGetComponent<HumanBehaviour>(out _))
+            {
+                gameObject.AddComponent<HumanEditor>();
+            }
+        }
+
+        #endregion
+
         #region Rotorz.Tile.Brush
 
         [HarmonyPatch(typeof(Rotorz.Tile.OrientedBrush), methodName: "Awake"), HarmonyPostfix]

@@ -397,6 +397,7 @@
         <Compile Include="Editor\LayerEditor.cs" />
         <Compile Include="Editor\LayerType.cs" />
         <Compile Include="Editor\MineTrapEditor.cs" />
+        <Compile Include="Editor\HumanEditor.cs" />
         <Compile Include="EvolutionCorePlugin.cs" />
         <Compile Include="DebugPatch.cs" />
         <Compile Include="HookAsset.cs" />
