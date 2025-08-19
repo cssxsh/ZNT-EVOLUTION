@@ -12,7 +12,7 @@ Bank 文件是 FMOD 的音频打包文件。
 ```text
 Master Bank.bank
 Master Bank.strings.bank
-XXX.bak
+XXX.bank
 ...
 ```
 这样的形式，其中：  

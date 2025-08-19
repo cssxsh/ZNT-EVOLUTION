@@ -91,6 +91,7 @@ public enum Voice
     * `Attachments["shield_attack"]` 护盾攻击 `VirginShield`
     * `Attachments["shield_effect"]` 护盾效果 `RepelWave`
     * `Attachments["attach_laser"]` 附加激光 `LaserAttachment`
+  * <u>ref ThrowableObjects</u> `PhysicObjectAsset[]` 触发效果
   * Voice `Voice` 语音类型
   * AimFieldOfView 瞄准视野
   * FieldOfView 视野

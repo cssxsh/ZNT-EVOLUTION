@@ -19,7 +19,7 @@
         <DebugSymbols>true</DebugSymbols>
         <DebugType>full</DebugType>
         <Optimize>false</Optimize>
-        <OutputPath>$(ZNTGamePath)\BepInEx\plugins\ZNT-Evolution-Core</OutputPath>
+        <OutputPath>$(ZNTGamePath)\BepInEx\plugins\$(MSBuildProjectName)</OutputPath>
         <DefineConstants>DEBUG;TRACE</DefineConstants>
         <ErrorReport>prompt</ErrorReport>
         <WarningLevel>4</WarningLevel>
@@ -28,7 +28,7 @@
         <PlatformTarget>AnyCPU</PlatformTarget>
         <DebugType>pdbonly</DebugType>
         <Optimize>true</Optimize>
-        <OutputPath>$(ZNTGamePath)\BepInEx\plugins\ZNT-Evolution-Core</OutputPath>
+        <OutputPath>$(ZNTGamePath)\BepInEx\plugins\$(MSBuildProjectName)</OutputPath>
         <DefineConstants>TRACE</DefineConstants>
         <ErrorReport>prompt</ErrorReport>
         <WarningLevel>4</WarningLevel>
