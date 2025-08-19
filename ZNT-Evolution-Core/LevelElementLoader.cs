@@ -443,6 +443,7 @@ namespace ZNT.Evolution.Core
             impl.spriteDefinitions[0].material = material;
             impl.spriteDefinitions[0].name = impl.name.Replace("sprites_", "");
 
+            UnityEngine.Object.DontDestroyOnLoad(impl);
             return impl;
         }
 
@@ -462,6 +463,7 @@ namespace ZNT.Evolution.Core
             impl.materials[0] = material;
             foreach (var definition in impl.spriteDefinitions) definition.material = material;
 
+            UnityEngine.Object.DontDestroyOnLoad(impl);
             return impl;
         }
 
@@ -476,6 +478,7 @@ namespace ZNT.Evolution.Core
             clone.textures[0] = material.mainTexture;
             foreach (var definition in clone.spriteDefinitions) definition.material = material;
 
+            UnityEngine.Object.DontDestroyOnLoad(clone);
             return clone;
         }
 
@@ -493,6 +496,7 @@ namespace ZNT.Evolution.Core
             impl.Coalesce = info.Coalesce;
             impl.AddOrientation(mask: 0).AddVariation(variation: info.Variation, weight: 50);
 
+            UnityEngine.Object.DontDestroyOnLoad(impl);
             return impl;
         }
 
@@ -535,6 +539,7 @@ namespace ZNT.Evolution.Core
             impl.AddColliderInEditor = true;
             impl.AddObjectSettings = true;
 
+            UnityEngine.Object.DontDestroyOnLoad(impl);
             return impl;
         }
 
