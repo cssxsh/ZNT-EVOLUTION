@@ -64,6 +64,7 @@ namespace ZNT.Evolution.Core
                         break;
                     case Rotorz.Tile.OrientedBrush brush:
                         Logger.LogDebug($"[{bundle.name}] {brush}");
+                        Logger.LogDebug($"[{bundle.name}] {brush.DefaultOrientation.GetVariation(0)}");
                         break;
                     case TextAsset bank:
                         if (name == "bank.strings" || name == "bank_")
@@ -89,6 +90,8 @@ namespace ZNT.Evolution.Core
                         Logger.LogDebug($"[{bundle.name}] {request.asset.name}");
                         break;
                 }
+
+                UnityEngine.Object.DontDestroyOnLoad(asset);
             }
 
             switch (type)
@@ -164,7 +167,10 @@ namespace ZNT.Evolution.Core
             var brush = bundle.LoadAsset<Rotorz.Tile.OrientedBrush>(name: "brush")
                         ?? CreateBrush(DeserializeInfo<BrushInfo>(folder: path, file: "brush.info.json"));
             var variation = brush.DefaultOrientation.GetVariation(0);
-            Logger.LogDebug($"brush -> {brush.name} -> {variation.name}");
+            Logger.LogDebug($"brush -> {brush} -> {variation}");
+
+            var preview = bundle.LoadAsset<Sprite>(name: "preview");
+            if (preview != null) Logger.LogDebug($"preview -> {preview} -> {preview.texture}");
 
             var asset = DeserializeInfo<LevelElementInfo>(folder: path, file: "element.json").CustomAsset;
             switch (asset)
