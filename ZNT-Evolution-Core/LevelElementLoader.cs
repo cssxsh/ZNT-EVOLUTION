@@ -237,16 +237,16 @@ namespace ZNT.Evolution.Core
                 case var _ when asset.EndsWith("MovingObjectAsset"):
                     var moving = DeserializeAsset<MovingObjectAsset>(folder: path, file: "asset.json");
                     // ReSharper disable once InconsistentNaming
-                    var moving_library = Traverse.Create(moving).Field("library");
-                    moving_library.SetValue(animation);
-                    Logger.LogDebug($"asset.json -> {moving} from {moving_library.GetValue()}");
+                    var moving_library = Traverse.Create(moving).Field<tk2dSpriteAnimation>("library");
+                    moving_library.Value = animation;
+                    Logger.LogDebug($"asset.json -> {moving} from {moving_library.Value}");
                     break;
                 case var _ when asset.EndsWith("PhysicObjectAsset"):
                     var physic = DeserializeAsset<PhysicObjectAsset>(folder: path, file: "asset.json");
                     // ReSharper disable once InconsistentNaming
-                    var physic_library = Traverse.Create(physic).Field("library");
-                    physic_library.SetValue(animation);
-                    Logger.LogDebug($"asset.json -> {physic} from {physic_library.GetValue()}");
+                    var physic_library = Traverse.Create(physic).Field<tk2dSpriteAnimation>("library");
+                    physic_library.Value = animation;
+                    Logger.LogDebug($"asset.json -> {physic} from {physic_library.Value}");
                     break;
                 case var _ when asset.EndsWith("TriggerAsset"):
                     var trigger = DeserializeAsset<TriggerAsset>(folder: path, file: "asset.json");

@@ -70,11 +70,11 @@ namespace ZNT.Evolution.Core
             var panels = menu.gameObject.GetChildren()
                 .Find(body => body.name == "Option Panels");
 
-            var container = Traverse.Create(menu).Field("settingsContainer").GetValue<GameObject[]>();
-            var panel = UnityEngine.Object.Instantiate(container[1], panels.transform);
+            var container = Traverse.Create(menu).Field<GameObject[]>("settingsContainer");
+            var panel = UnityEngine.Object.Instantiate(container.Value[1], panels.transform);
             panel.name = "Mod";
             panel.SetActive(false);
-            container = container.AddItem(panel).ToArray();
+            container.Value = container.Value.AddItem(panel).ToArray();
 
             var content = panel.GetComponentInChildren<VerticalLayoutGroup>();
             content.gameObject.GetChildren()
@@ -107,13 +107,12 @@ namespace ZNT.Evolution.Core
                 // TODO: ...
             });
 
-            Traverse.Create(menu).Field("settingsContainer").SetValue(container);
             var tab = UnityEngine.Object.Instantiate(tabs.GetChildren()[0], tabs.transform);
             tab.name = "Mod";
             tab.GetComponentInChildren<I2.Loc.Localize>()
                 .Term = "Mod/Tab_Mod";
             tab.GetComponentInChildren<Toggle>()
-                .OnValueChanged(value => menu.ShowSettings(group: value ? container.Length - 1 : -1));
+                .OnValueChanged(value => menu.ShowSettings(group: value ? container.Value.Length - 1 : -1));
         }
 
         #endregion
