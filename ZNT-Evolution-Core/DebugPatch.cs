@@ -18,6 +18,12 @@ namespace ZNT.Evolution.Core
             BepInEx.Logging.Logger.CreateLogSource("CustomAssetObject").LogInfo("LoadFromAsset: " + gameObject.name);
         }
 
+        [HarmonyPatch(typeof(Challenge), "IsCompleted"), HarmonyPrefix]
+        public static void IsCompleted(Challenge __instance)
+        {
+            if (Traverse.Create(__instance).Field("checkList").GetValue() == null) __instance.Initialize();
+        }
+
         [HarmonyPatch(typeof(Material), "GetTexture", typeof(string)), HarmonyPrefix]
         public static bool GetTexture(Material __instance, string name) => __instance.HasProperty(name);
 
