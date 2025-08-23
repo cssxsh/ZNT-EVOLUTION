@@ -16,8 +16,12 @@ namespace ZNT.Evolution.Core
         {
             var controller = gameObject.GetComponent<MovingObjectAnimationController>();
             if (controller == null) return;
-            if (!controller.Animator.AnimationExists(__instance.StandAnimation)) return;
-            var frame = controller.Animator.GetAnimationClip(__instance.StandAnimation).frames[0];
+            var orientation = gameObject.GetComponent<ObjectOrientation>();
+            if (orientation == null) return;
+            var current = orientation.CurrentOrientation.ToString().ToLower();
+            var clip = string.Format(__instance.StandAnimation, current);
+            if (!controller.Animator.AnimationExists(clip)) return;
+            var frame = controller.Animator.GetAnimationClip(clip).frames[0];
             controller.Animator.Sprite.SetSprite(frame.spriteCollection, frame.spriteId);
         }
 
@@ -26,39 +30,22 @@ namespace ZNT.Evolution.Core
         {
             var controller = __instance.GetComponentInParent<MovingObjectAnimationController>();
             if (controller == null) return;
-            var clip = value.ToString().ToLower();
+            var current = value.ToString().ToLower();
+            var clip = string.Format(controller.Asset.StandAnimation, current);
             if (!controller.Animator.AnimationExists(clip)) return;
             controller.Animator.Sprite.SetSprite(clip);
         }
 
-        [HarmonyPatch(typeof(MovingObjectAnimationController), methodName: "OnStart"), HarmonyPrefix]
-        public static void OnStart(MovingObjectAnimationController __instance)
+        [HarmonyPatch(typeof(SpriteAnimator), methodName: "ForcePlay", typeof(string), typeof(bool), typeof(bool)),
+         HarmonyPrefix]
+        public static void ForcePlay(SpriteAnimator __instance, ref string animName)
         {
+            var controller = __instance.GetComponentInParent<MovingObjectAnimationController>();
+            if (controller == null) return;
             var orientation = __instance.GetComponentInParent<ObjectOrientation>();
             if (orientation == null) return;
-            var clip = orientation.CurrentOrientation.ToString().ToLower();
-            if (!__instance.Animator.AnimationExists(clip)) return;
-            __instance.Asset.StandAnimation = clip;
-        }
-
-        [HarmonyPatch(typeof(MovingObjectAnimationController), methodName: "OnMove"), HarmonyPrefix]
-        public static void OnMove(MovingObjectAnimationController __instance)
-        {
-            var orientation = __instance.GetComponentInParent<ObjectOrientation>();
-            if (orientation == null) return;
-            var clip = orientation.CurrentOrientation.ToString().ToLower();
-            if (!__instance.Animator.AnimationExists(clip)) return;
-            __instance.Asset.MoveAnimation = clip;
-        }
-
-        [HarmonyPatch(typeof(MovingObjectAnimationController), methodName: "OnStop"), HarmonyPrefix]
-        public static void OnStop(MovingObjectAnimationController __instance)
-        {
-            var orientation = __instance.GetComponentInParent<ObjectOrientation>();
-            if (orientation == null) return;
-            var clip = orientation.CurrentOrientation.ToString().ToLower();
-            if (!__instance.Animator.AnimationExists(clip)) return;
-            __instance.Asset.StopAnimation = clip;
+            var current = orientation.CurrentOrientation.ToString().ToLower();
+            animName = string.Format(animName, current);
         }
 
         #endregion
