@@ -28,12 +28,13 @@ namespace ZNT.Evolution.Core.Asset
                 description.getID(out var guid);
                 asset.id = "{" + guid + "}";
                 description.getPath(out asset.path);
-                Traverse.Create(asset).Field("assetId").SetValue(guid.ToString());
+                Traverse.Create(asset).Field<string>("assetId").Value = guid.ToString();
 
                 lock (typeof(FmodAssetIndex))
                 {
                     FmodAssetIndex.Index.AddAssetElement(asset);
-                    Traverse.Create(typeof(FmodAssetIndex)).Field("pathIndex").SetValue(null);
+                    Traverse.Create<FmodAssetIndex>()
+                            .Field<Dictionary<string, FMODAsset>>("pathIndex").Value = null;
                 }
 
                 dictionary.TryAdd(asset.path, asset);
@@ -44,7 +45,7 @@ namespace ZNT.Evolution.Core.Asset
 
         public static string Bind(this AssetElement asset)
         {
-            Traverse.Create(asset).Field("assetId").SetValue(asset.name);
+            Traverse.Create(asset).Field<string>("assetId").Value = asset.name;
             switch (asset)
             {
                 case LevelElement element:

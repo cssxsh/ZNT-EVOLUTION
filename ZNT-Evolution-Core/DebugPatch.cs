@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using HarmonyLib;
 using UnityEngine;
 
@@ -21,7 +22,10 @@ namespace ZNT.Evolution.Core
         [HarmonyPatch(typeof(Challenge), "IsCompleted"), HarmonyPrefix]
         public static void IsCompleted(Challenge __instance)
         {
-            if (Traverse.Create(__instance).Field("checkList").GetValue() == null) __instance.Initialize();
+            if (Traverse.Create(__instance).Field<List<ChallengeRule>>("checkList").Value == null)
+            {
+                __instance.Initialize();
+            }
         }
 
         [HarmonyPatch(typeof(Material), "GetTexture", typeof(string)), HarmonyPrefix]

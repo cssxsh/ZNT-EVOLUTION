@@ -90,9 +90,9 @@ namespace ZNT.Evolution.Core
                     .ForEach(localize => localize.Term = element.GetTermData().Term);
                 item.SetActive(true);
                 var toggle = item.GetComponentInChildren<Toggle>(includeInactive: true);
-                var enable = Traverse.Create(element).Field("useable");
-                toggle.OnValueChanged(value => enable.SetValue(value));
-                toggle.SetIsOnWithoutNotify(element.Useable);
+                var enable = Traverse.Create(element).Field<bool>("useable");
+                toggle.OnValueChanged(value => enable.Value = value);
+                toggle.SetIsOnWithoutNotify(enable.Value);
             }
 
             var reset = panel.GetChildren()

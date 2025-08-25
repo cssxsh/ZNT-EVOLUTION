@@ -258,7 +258,7 @@ namespace ZNT.Evolution.Core
                     break;
                 case var _ when asset.EndsWith("ExplosionAsset"):
                     var explosion = DeserializeAsset<ExplosionAsset>(folder: path, file: "asset.json");
-                    Traverse.Create(explosion).Field("autoExplode").SetValue(false);
+                    Traverse.Create(explosion).Field<bool>("autoExplode").Value = false;
                     Logger.LogDebug($"asset.json -> {explosion}");
                     break;
                 case var _ when asset.EndsWith("ScreamAsset"):
@@ -497,7 +497,7 @@ namespace ZNT.Evolution.Core
             impl.group = 1;
             impl.forceLegacySideways = info.ForceLegacySideways;
             impl.applyPrefabTransform = info.ApplyPrefabTransform;
-            Traverse.Create(impl).Field("_userFlags").SetValue(info.UserFlags);
+            Traverse.Create(impl).Field<int>("_userFlags").Value = info.UserFlags;
             impl.forceOverrideFlags = info.ForceOverrideFlags;
             impl.Coalesce = info.Coalesce;
             impl.AddOrientation(mask: 0).AddVariation(variation: info.Variation, weight: 50);
@@ -515,8 +515,10 @@ namespace ZNT.Evolution.Core
                 {
                     if (animation.name != name) continue;
                     animation.clips = animation.clips.AddToArray(clip);
-                    Traverse.Create(animation).Field("clipNameCache").SetValue(null);
-                    Traverse.Create(animation).Field("idNameCache").SetValue(null);
+                    Traverse.Create(animation)
+                        .Field<Dictionary<string, tk2dSpriteAnimationClip>>("clipNameCache").Value = null;
+                    Traverse.Create(animation)
+                        .Field<Dictionary<string, int>>("idNameCache").Value = null;
                     animation.InitializeClipCache();
                     return animation;
                 }
