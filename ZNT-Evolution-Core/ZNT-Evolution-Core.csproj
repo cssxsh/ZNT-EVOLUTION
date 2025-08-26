@@ -389,6 +389,7 @@
         <Compile Include="Asset\NameConverter.cs" />
         <Compile Include="Asset\NullConverter.cs" />
         <Compile Include="Asset\ScriptableObjectConverter.cs" />
+        <Compile Include="Asset\SpawnPointAsset.cs" />
         <Compile Include="Asset\SpriteInfo.cs" />
         <Compile Include="Asset\SpriteMerge.cs" />
         <Compile Include="Editor\BarricadeLayerEditor.cs" />

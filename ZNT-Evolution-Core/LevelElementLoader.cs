@@ -265,6 +265,10 @@ namespace ZNT.Evolution.Core
                     var scream = DeserializeAsset<ScreamAsset>(folder: path, file: "asset.json");
                     Logger.LogDebug($"asset.json -> {scream}");
                     break;
+                case var _ when asset.EndsWith("SpawnPointAsset"):
+                    var spawn = DeserializeAsset<SpawnPointAsset>(folder: path, file: "asset.json");
+                    Logger.LogDebug($"asset.json -> {spawn}");
+                    break;
             }
 
             var element = DeserializeAsset<LevelElement>(folder: path, file: "element.json");
