@@ -22,10 +22,10 @@ XXX.bank
 
 PS: 实际上 Master Bank 可以改成其他名字，但主包一定会有对应的 strings 索引  
 
-对于一个游戏而言，FMOD 模块只能有一个主包，因为主包里必然有 `bus:/` 这个 `Root Bus` 。 
-而所有 FMOD 资源对象的 path 和 guid 都是唯一的。
-再加载一个主包会因为 `bus:/` 报错，所以新的音频只能在新从包中加载。
-对于 `Root Bus` , 你可以通过以下代码获取 GUID，之后会用到
+对于一个游戏而言，FMOD 模块只能有一个主包，因为主包里必然有 `bus:/` 这个 `Root Bus` 。  
+而所有 FMOD 资源对象的 path 和 guid 都是唯一的。  
+再加载一个主包会因为 `bus:/` 报错，所以新的音频只能在新从包中加载。  
+对于 `Root Bus` , 你可以通过以下代码获取 GUID `d09bf6f4-00a6-4bc5-95d3-9c5886ec31cd`，之后会用到。  
 ```csharp
 FMODUnity.RuntimeManager.StudioSystem.getBus("bus:/", out var root);
 root.getID(out var id);
