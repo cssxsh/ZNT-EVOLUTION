@@ -43,6 +43,41 @@ namespace ZNT.Evolution.Core.Editor
             set => Behaviour.Attacker.AimRange = value;
         }
 
+        [SerializeInEditor(name: "Alert Duration")]
+        public float AlertDuration
+        {
+            get => Behaviour.AlertedTimer.Duration;
+            set => Behaviour.AlertedTimer.Duration = value;
+        }
+
+        [SerializeInEditor(name: "Alert Radius")]
+        public float AlertRadius
+        {
+            get => ((SphereDetection)Behaviour.Character.Components.AlertZone.Detection).Radius;
+            set => ((SphereDetection)Behaviour.Character.Components.AlertZone.Detection).Radius = value;
+        }
+
+        [SerializeInEditor(name: "Alert Relay Radius")]
+        public float AlertRelayRadius
+        {
+            get => Behaviour.AlertRelayRadius;
+            set => Behaviour.AlertRelayRadius = value;
+        }
+
+        [SerializeInEditor(name: "Alert Relay Ratio")]
+        public float AlertRelayRatio
+        {
+            get => Behaviour.AlertRelayRatio;
+            set => Behaviour.AlertRelayRatio = value;
+        }
+
+        [SerializeInEditor(name: "Alert Relay Over Time")]
+        public bool AlertRelayOverTime
+        {
+            get => Behaviour.RelayAlertOverTime;
+            set => Behaviour.RelayAlertOverTime = value;
+        }
+
         [SerializeInEditor(name: "Voice")]
         public Voice Voice
         {
