@@ -68,6 +68,7 @@ namespace ZNT.Evolution.Core
         [HarmonyPatch(typeof(ExplosionAsset), methodName: "LoadFromAsset"), HarmonyPostfix]
         public static void LoadFromAsset(ExplosionAsset __instance, GameObject gameObject)
         {
+            if (gameObject.TryGetComponent<ExplosionEditor>(out _)) return;
             gameObject.AddComponent<ExplosionEditor>();
             gameObject.AddComponent<SignalReceiverLinker>();
             gameObject.AddComponent<SignalSenderLinker>();
@@ -80,9 +81,12 @@ namespace ZNT.Evolution.Core
         [HarmonyPatch(typeof(CharacterAsset), methodName: "LoadFromAsset"), HarmonyPostfix]
         public static void LoadFromAsset(CharacterAsset __instance, GameObject gameObject)
         {
-            if (gameObject.TryGetComponent<HumanBehaviour>(out _))
+            switch (__instance)
             {
-                gameObject.AddComponent<HumanEditor>();
+                case HumanAsset _:
+                    if (gameObject.TryGetComponent<HumanEditor>(out _)) return;
+                    gameObject.AddComponent<HumanEditor>();
+                    break;
             }
         }
 

@@ -25,37 +25,36 @@ namespace ZNT.Evolution.Core.Editor
 
         private MineBehaviour Behaviour => GetComponentInChildren<MineBehaviour>();
 
-        private ExplosionAsset _explosion;
-
-        private ExplosionAsset Explosion()
+        private ExplosionAsset Explosion
         {
-            if (_explosion != null) return _explosion;
-            var field = Traverse.Create(Behaviour).Field<ExplosionAsset>(name: "explosion");
-            var impl = field.Value;
-            _explosion = Instantiate(impl);
-            _explosion.name = name;
-            field.Value = _explosion;
-            return _explosion;
+            get
+            {
+                var field = Traverse.Create(Behaviour).Field<ExplosionAsset>(name: "explosion");
+                if (field.Value.name == name) return field.Value;
+                field.Value = Instantiate(field.Value);
+                field.Value.name = name;
+                return field.Value;
+            }
         }
 
         [SerializeInEditor(name: "Damage")]
         public float Damage
         {
-            get => Explosion().Damage;
-            set => Explosion().Damage = value;
+            get => Explosion.Damage;
+            set => Explosion.Damage = value;
         }
 
         [SerializeInEditor(name: "Damage Radius")]
         public float DamageRadius
         {
-            get => Explosion().DamageRadius;
-            set => Explosion().DamageRadius = value;
+            get => Explosion.DamageRadius;
+            set => Explosion.DamageRadius = value;
         }
 
         private Tag ApplyDamageOn
         {
-            get => Explosion().ApplyDamageOn;
-            set => Explosion().ApplyDamageOn = value;
+            get => Explosion.ApplyDamageOn;
+            set => Explosion.ApplyDamageOn = value;
         }
 
         [SerializeInEditor(name: "Damage Breakable")]
@@ -82,14 +81,14 @@ namespace ZNT.Evolution.Core.Editor
         [SerializeInEditor(name: "Force")]
         public float Force
         {
-            get => Explosion().Force;
-            set => Explosion().Force = value;
+            get => Explosion.Force;
+            set => Explosion.Force = value;
         }
 
         private Tag ApplyForceOn
         {
-            get => Explosion().ApplyForceOn;
-            set => Explosion().ApplyForceOn = value;
+            get => Explosion.ApplyForceOn;
+            set => Explosion.ApplyForceOn = value;
         }
 
         [SerializeInEditor(name: "Force Human")]
@@ -109,8 +108,8 @@ namespace ZNT.Evolution.Core.Editor
         [SerializeInEditor(name: "Shake Camera")]
         public bool ShakeCamera
         {
-            get => Explosion().ShakeCamera;
-            set => Explosion().ShakeCamera = value;
+            get => Explosion.ShakeCamera;
+            set => Explosion.ShakeCamera = value;
         }
     }
 }
