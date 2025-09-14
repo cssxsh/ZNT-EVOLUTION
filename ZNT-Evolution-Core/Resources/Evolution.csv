@@ -1,3 +1,3 @@
 Key,Type,Desc,English,French,German,Russian,Polish,Portuguese,Spanish,Korean,Japanese,Chinese (Simplified),Chinese (Traditional)
-Tab_Mod,Text,,MOD,,,,,,,,,模组,
-Reload,Text,,Reload,,,,,,,,,重新加载（暂不支持）,
+Mod_Tab,Text,,MOD,,,,,,,,,模组,
+Mod_Reset,Text,,Reload,,,,,,,,,重新加载（暂不支持）,

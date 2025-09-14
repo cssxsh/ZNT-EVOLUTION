@@ -26,7 +26,7 @@ namespace ZNT.Evolution.Core
         {
             if (I2.Loc.LocalizationManager.Sources
                 .SelectMany(loaded => loaded.GetCategories())
-                .Any(category => category == "Mod"))
+                .Any(category => category == "Evolution"))
             {
                 return;
             }
@@ -34,7 +34,7 @@ namespace ZNT.Evolution.Core
             _localization ??= new I2.Loc.LanguageSourceData();
             try
             {
-                _localization.Import_CSV(Category: "Mod", CSVstring: Resource("MOD.csv"));
+                _localization.Import_CSV(Category: "Evolution", CSVstring: Resource("Evolution.csv"));
             }
             catch (FileNotFoundException e)
             {
@@ -42,7 +42,7 @@ namespace ZNT.Evolution.Core
             }
 
             I2.Loc.LocalizationManager.Sources.Add(_localization);
-            Logger.LogInfo("Mod LanguageSource Loaded.");
+            Logger.LogInfo("Evolution LanguageSource Loaded.");
         }
 
         private static string Resource(string name)
@@ -64,25 +64,14 @@ namespace ZNT.Evolution.Core
         public static void SettingsScene(SettingsMenu __instance)
         {
             Logger.LogInfo("Update SettingsScene");
-            var menu = __instance;
-            var tabs = menu.gameObject.GetChildren()
-                .Find(body => body.name == "Option Menu")
-                .GetChildren()
-                .Find(body => body.name == "Tabs");
-            var panels = menu.gameObject.GetChildren()
-                .Find(body => body.name == "Option Panels");
+            __instance.AddMod();
+        }
 
-            var container = Traverse.Create(menu).Field<GameObject[]>("settingsContainer");
-            var panel = UnityEngine.Object.Instantiate(container.Value[1], panels.transform);
-            panel.name = "Mod";
-            panel.SetActive(false);
-            container.Value = container.Value.AddItem(panel).ToArray();
-
-            var content = panel.GetComponentInChildren<VerticalLayoutGroup>();
-            content.gameObject.GetChildren()
-                .ForEach(body => body.SetActive(false));
-            var impl = content.gameObject.GetChildren()
-                .Find(body => body.name == "FullScreen Entry");
+        private static void AddMod(this SettingsMenu menu)
+        {
+            var mod = menu.AddPanel("Mod");
+            var impl = menu.transform.Find("Option Panels/Video/Scroll Area/ScrollView/Content/FullScreen Entry").gameObject;
+            var content = mod.GetComponentInChildren<VerticalLayoutGroup>();
 
             foreach (var element in AssetElementBinder.LevelElements())
             {
@@ -97,24 +86,43 @@ namespace ZNT.Evolution.Core
                 toggle.SetIsOnWithoutNotify(enable.Value);
             }
 
-            var reset = panel.GetChildren()
-                .Find(body => body.name == "Reset Entry");
-            var reload = reset.GetComponentInChildren<Button>();
-            reload.name = "ReloadButton";
-            reload.GetComponentsInChildren<I2.Loc.Localize>(includeInactive: true)
-                .ForEach(localize => localize.Term = "Mod/Reload");
+            var reload = mod.transform.Find("Reset Entry").GetComponentInChildren<Button>();
             reload.OnClick(() =>
             {
                 Logger.LogInfo("Reload MOD ...");
                 // TODO: ...
             });
+        }
 
-            var tab = UnityEngine.Object.Instantiate(tabs.GetChildren()[0], tabs.transform);
-            tab.name = "Mod";
+        private static GameObject AddPanel(this SettingsMenu menu, string name)
+        {
+            var panels = menu.transform.Find("Option Panels");
+            var tabs = menu.transform.Find("Option Menu/Tabs");
+
+            var panel = UnityEngine.Object.Instantiate(panels.GetChild(0).gameObject, panels);
+            panel.name = name;
+            var content = panel.GetComponentInChildren<VerticalLayoutGroup>();
+            content.transform.DestroyChildren();
+            panel.SetActive(false);
+
+            var container = Traverse.Create(menu).Field<GameObject[]>("settingsContainer");
+            var index = container.Value.Length;
+            container.Value = container.Value.AddItem(panel).ToArray();
+
+            var tab = UnityEngine.Object.Instantiate(tabs.GetChild(0).gameObject, tabs);
+            tab.name = name;
             tab.GetComponentsInChildren<I2.Loc.Localize>(includeInactive: true)
-                .ForEach(localize => localize.Term = "Mod/Tab_Mod");
+                .ForEach(localize => localize.Term = $"Evolution/{name}_Tab");
             tab.GetComponentInChildren<Toggle>()
-                .OnValueChanged(value => menu.ShowSettings(group: value ? container.Value.Length - 1 : -1));
+                .OnValueChanged(value => menu.ShowSettings(group: value ? index : -1));
+
+            var reset = panel.transform.Find("Reset Entry");
+            var reload = reset.GetComponentInChildren<Button>();
+            reload.GetComponentsInChildren<I2.Loc.Localize>(includeInactive: true)
+                .ForEach(localize => localize.Term = $"Evolution/{name}_Reset");
+            reload.OnClick(() => {});
+
+            return panel;
         }
 
         #endregion
