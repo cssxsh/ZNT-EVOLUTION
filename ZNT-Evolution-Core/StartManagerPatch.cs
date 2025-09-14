@@ -14,7 +14,8 @@ namespace ZNT.Evolution.Core
 
         private static IEnumerator Loading;
 
-        [HarmonyPatch(typeof(StartManager), "Start"), HarmonyPostfix]
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(StartManager), "Start")]
         public static void Start(StartManager __instance, ref IEnumerator __result)
         {
             __result = Loading = LoadAsset(prefix: __result);
@@ -29,9 +30,7 @@ namespace ZNT.Evolution.Core
             foreach (var type in (LevelElement.Type[])Enum.GetValues(typeof(LevelElement.Type)))
             {
                 var path = Path.Combine(Application.dataPath, type.ToString());
-
                 if (!Directory.Exists(path)) Directory.CreateDirectory(path);
-
                 foreach (var directory in Directory.EnumerateDirectories(path))
                 {
                     if (directory.EndsWith(".bak")) continue;
@@ -53,7 +52,8 @@ namespace ZNT.Evolution.Core
             Logger.LogInfo("Apply LevelElement OK");
         }
 
-        [HarmonyPatch(typeof(StartManager), methodName: "LoadNextScene"), HarmonyPrefix]
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(StartManager), "LoadNextScene")]
         public static bool LoadNextScene(StartManager __instance) => !Loading.MoveNext();
     }
 }

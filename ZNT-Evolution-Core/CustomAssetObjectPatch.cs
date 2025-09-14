@@ -11,7 +11,8 @@ namespace ZNT.Evolution.Core
     {
         #region MovingObjectAsset
 
-        [HarmonyPatch(typeof(MovingObjectAsset), methodName: "LoadFromAsset"), HarmonyPostfix]
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(MovingObjectAsset), "LoadFromAsset")]
         public static void LoadFromAsset(MovingObjectAsset __instance, GameObject gameObject)
         {
             var controller = gameObject.GetComponent<MovingObjectAnimationController>();
@@ -25,7 +26,8 @@ namespace ZNT.Evolution.Core
             controller.Animator.Sprite.SetSprite(frame.spriteCollection, frame.spriteId);
         }
 
-        [HarmonyPatch(typeof(ObjectOrientation), methodName: "orientation", MethodType.Setter), HarmonyPostfix]
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(ObjectOrientation), "orientation", MethodType.Setter)]
         public static void CurrentOrientation(ObjectOrientation __instance, ObjectOrientation.Orientation value)
         {
             var controller = __instance.GetComponentInParent<MovingObjectAnimationController>();
@@ -36,8 +38,8 @@ namespace ZNT.Evolution.Core
             controller.Animator.Sprite.SetSprite(clip);
         }
 
-        [HarmonyPatch(typeof(SpriteAnimator), methodName: "ForcePlay", typeof(string), typeof(bool), typeof(bool)),
-         HarmonyPrefix]
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(SpriteAnimator), "ForcePlay", typeof(string), typeof(bool), typeof(bool))]
         public static void ForcePlay(SpriteAnimator __instance, ref string animName)
         {
             var controller = __instance.GetComponentInParent<MovingObjectAnimationController>();
@@ -52,7 +54,8 @@ namespace ZNT.Evolution.Core
 
         #region TriggerAsset
 
-        [HarmonyPatch(typeof(TriggerAsset), methodName: "LoadFromAsset"), HarmonyPostfix]
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(TriggerAsset), "LoadFromAsset")]
         public static void LoadFromAsset(TriggerAsset __instance, GameObject gameObject)
         {
             if (gameObject.TryGetComponent<MineBehaviour>(out _))
@@ -65,7 +68,8 @@ namespace ZNT.Evolution.Core
 
         #region ExplosionAsset
 
-        [HarmonyPatch(typeof(ExplosionAsset), methodName: "LoadFromAsset"), HarmonyPostfix]
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(ExplosionAsset), "LoadFromAsset")]
         public static void LoadFromAsset(ExplosionAsset __instance, GameObject gameObject)
         {
             if (gameObject.TryGetComponent<ExplosionEditor>(out _)) return;
@@ -78,7 +82,8 @@ namespace ZNT.Evolution.Core
 
         #region CharacterAsset
 
-        [HarmonyPatch(typeof(CharacterAsset), methodName: "LoadFromAsset"), HarmonyPostfix]
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(CharacterAsset), "LoadFromAsset")]
         public static void LoadFromAsset(CharacterAsset __instance, GameObject gameObject)
         {
             switch (__instance)
@@ -94,7 +99,8 @@ namespace ZNT.Evolution.Core
 
         #region Rotorz.Tile.Brush
 
-        [HarmonyPatch(typeof(Rotorz.Tile.OrientedBrush), methodName: "Awake"), HarmonyPostfix]
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(Rotorz.Tile.OrientedBrush), "Awake")]
         public static void Awake(Rotorz.Tile.OrientedBrush __instance)
         {
             var body = __instance.DefaultOrientation?.GetVariation(0) as GameObject;
@@ -112,7 +118,8 @@ namespace ZNT.Evolution.Core
             }
         }
 
-        [HarmonyPatch(typeof(SignalReceiverLinker), methodName: "OnAwake"), HarmonyPrefix]
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(SignalReceiverLinker), "OnAwake")]
         public static void OnAwake(SignalReceiverLinker __instance)
         {
             __instance.ExcludedComponents ??= __instance.GetComponentsInChildren<BaseComponent>(true)
@@ -120,7 +127,8 @@ namespace ZNT.Evolution.Core
             __instance.ExcludedGameObjects ??= new List<GameObject>();
         }
 
-        [HarmonyPatch(typeof(SignalSenderLinker), methodName: "OnAwake"), HarmonyPrefix]
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(SignalSenderLinker), "OnAwake")]
         public static void OnAwake(SignalSenderLinker __instance)
         {
             __instance.ExcludedComponents ??= __instance.GetComponentsInChildren<BaseComponent>(true)

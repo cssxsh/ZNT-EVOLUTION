@@ -11,6 +11,7 @@ using UnityEngine.Events;
 using UnityEngine.UI;
 using ZNT.Evolution.Core.Asset;
 
+// ReSharper disable InconsistentNaming
 namespace ZNT.Evolution.Core
 {
     public static class SceneManagerPatch
@@ -19,7 +20,8 @@ namespace ZNT.Evolution.Core
 
         private static I2.Loc.LanguageSourceData _localization;
 
-        [HarmonyPatch(typeof(I2.Loc.LocalizationManager), "UpdateSources"), HarmonyPostfix]
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(I2.Loc.LocalizationManager), "UpdateSources")]
         public static void UpdateSources()
         {
             if (I2.Loc.LocalizationManager.Sources
@@ -57,8 +59,8 @@ namespace ZNT.Evolution.Core
 
         #region SettingsScene
 
-        // ReSharper disable Once InconsistentNaming
-        [HarmonyPatch(typeof(SettingsMenu), "OnCreate"), HarmonyPostfix]
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(SettingsMenu), "OnCreate")]
         public static void SettingsScene(SettingsMenu __instance)
         {
             Logger.LogInfo("Update SettingsScene");
@@ -109,8 +111,8 @@ namespace ZNT.Evolution.Core
 
             var tab = UnityEngine.Object.Instantiate(tabs.GetChildren()[0], tabs.transform);
             tab.name = "Mod";
-            tab.GetComponentInChildren<I2.Loc.Localize>()
-                .Term = "Mod/Tab_Mod";
+            tab.GetComponentsInChildren<I2.Loc.Localize>(includeInactive: true)
+                .ForEach(localize => localize.Term = "Mod/Tab_Mod");
             tab.GetComponentInChildren<Toggle>()
                 .OnValueChanged(value => menu.ShowSettings(group: value ? container.Value.Length - 1 : -1));
         }
@@ -131,9 +133,12 @@ namespace ZNT.Evolution.Core
 
         private static I2.Loc.TermData GetTermData(this LevelElement element)
         {
-            var info = element.ElementType == LevelElement.Type.Brush
-                ? $"{element.Title} [{element.AllowedTileSystems}]"
-                : $"{element.Title} [{element.AllowedDecorSystems}]";
+            var info = element.ElementType switch
+            {
+                LevelElement.Type.Brush => $"{element.Title} [{element.AllowedTileSystems}]",
+                LevelElement.Type.Decor => $"{element.Title} [{element.AllowedDecorSystems}]",
+                _ => throw new ArgumentOutOfRangeException(element.name)
+            };
             var term = _localization.GetTermData($"Mod/{element.name}")
                        ?? _localization.AddTerm($"Mod/{element.name}");
             term.SetTranslation(0, info);
