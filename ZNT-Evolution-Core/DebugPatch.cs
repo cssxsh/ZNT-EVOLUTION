@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using HarmonyLib;
 using UnityEngine;
@@ -40,5 +41,16 @@ namespace ZNT.Evolution.Core
         [HarmonyPostfix]
         [HarmonyPatch(typeof(I2.Loc.LocalizationManager), "GetTermTranslation")]
         public static string GetTermTranslation(string __result, string Term) => __result ?? Term;
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(Physics2D), "RaycastNonAlloc", typeof(Vector2), typeof(Vector2), typeof(RaycastHit2D[]),
+            typeof(float))]
+        public static void RaycastNonAlloc(Vector2 origin, Vector2 direction, RaycastHit2D[] results, float distance)
+        {
+            if (results.Length > 1) return;
+            var count = Physics2D.RaycastNonAlloc(origin, direction, DetectionHelper.DistanceCheck, distance);
+            Array.Sort(DetectionHelper.DistanceCheck, 0,count);
+            results[0] = DetectionHelper.DistanceCheck[0];
+        }
     }
 }
