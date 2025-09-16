@@ -23,10 +23,11 @@ namespace ZNT.Evolution.Core
 
         private static IEnumerator LoadAsset(IEnumerator prefix)
         {
+            Logger.LogInfo("Initializing");
             yield return prefix;
-            Logger.LogInfo("Initialized");
+            Logger.LogInfo("Loading Bank");
             yield return LevelElementLoader.LoadBanks(folder: Application.streamingAssetsPath, loadSamples: true);
-            Logger.LogInfo("Load Bank OK");
+            Logger.LogInfo("Loading LevelElement");
             foreach (var type in (LevelElement.Type[])Enum.GetValues(typeof(LevelElement.Type)))
             {
                 var path = Path.Combine(Application.dataPath, type.ToString());
@@ -36,10 +37,10 @@ namespace ZNT.Evolution.Core
                     if (directory.EndsWith(".bak")) continue;
                     if (directory.EndsWith(" - 副本")) continue;
                     var target = Path.GetFullPath(directory);
-                    yield return LevelElementLoader.LoadFormFolder(path: target, type: type);
+                    yield return LevelElementLoader.LoadFromFolder(path: target, type: type);
                 }
             }
-            Logger.LogInfo("Load LevelElement OK");
+
             var apply = Path.Combine(Application.dataPath, "Apply");
             if (!Directory.Exists(apply)) Directory.CreateDirectory(apply);
             foreach (var directory in Directory.EnumerateDirectories(apply))
@@ -49,7 +50,18 @@ namespace ZNT.Evolution.Core
                 var target = Path.GetFullPath(directory);
                 yield return LevelElementLoader.ApplyFormFolder(path: target);
             }
-            Logger.LogInfo("Apply LevelElement OK");
+
+            Logger.LogInfo("Loading Patch");
+            foreach (var file in Directory.EnumerateFiles(Application.streamingAssetsPath, "*.patch"))
+            {
+                var request = AssetBundle.LoadFromFileAsync(file);
+                yield return request;
+                var fonts = request.assetBundle.LoadAllAssets<TMPro.TMP_FontAsset>();
+                TMPro.TMP_Settings.fallbackFontAssets.AddRange(fonts);
+                var font = request.assetBundle.LoadAsset<TMPro.TMP_FontAsset>("wqy-microhei_CN SDF.asset");
+                if (font != null) TMPro.TMP_Settings.defaultFontAsset.fallbackFontAssets.Insert(0, font);
+                Logger.LogInfo($"Loaded Patch {file}");
+            }
         }
 
         [HarmonyPrefix]

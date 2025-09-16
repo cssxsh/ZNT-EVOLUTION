@@ -15,7 +15,7 @@ namespace ZNT.Evolution.Core
     {
         private static readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("LevelElementLoader");
 
-        public static IEnumerator LoadFormFolder(string path, LevelElement.Type type)
+        public static IEnumerator LoadFromFolder(string path, LevelElement.Type type)
         {
             if (!Directory.EnumerateFiles(path).Any())
             {
@@ -23,7 +23,7 @@ namespace ZNT.Evolution.Core
                 yield break;
             }
 
-            Logger.LogInfo($"load LevelElement form folder '{path}'.");
+            Logger.LogInfo($"load LevelElement from folder '{path}'.");
 
             AssetBundle bundle;
             {
@@ -101,7 +101,7 @@ namespace ZNT.Evolution.Core
                     {
                         try
                         {
-                            bundle.LoadBrushFormFolder(path: path);
+                            bundle.LoadBrushFromFolder(path: path);
                         }
                         catch (Exception e)
                         {
@@ -115,7 +115,7 @@ namespace ZNT.Evolution.Core
                     {
                         try
                         {
-                            bundle.LoadDecorFormFolder(path: path);
+                            bundle.LoadDecorFromFolder(path: path);
                         }
                         catch (Exception e)
                         {
@@ -129,7 +129,7 @@ namespace ZNT.Evolution.Core
             }
         }
 
-        private static void LoadBrushFormFolder(this AssetBundle bundle, string path)
+        private static void LoadBrushFromFolder(this AssetBundle bundle, string path)
         {
             if (bundle.LoadAsset(name: "bank_") is TextAsset bank)
             {
@@ -278,7 +278,7 @@ namespace ZNT.Evolution.Core
             Logger.LogInfo($"LevelElement {id} - {element.Title} Loaded");
         }
 
-        private static void LoadDecorFormFolder(this AssetBundle bundle, string path)
+        private static void LoadDecorFromFolder(this AssetBundle bundle, string path)
         {
             var material = bundle.LoadAsset<Material>(name: "sprites");
             if (File.Exists(Path.Combine(path, "sprite.info.json")))
@@ -345,7 +345,7 @@ namespace ZNT.Evolution.Core
                 yield break;
             }
 
-            Logger.LogInfo($"apply LevelElement form folder '{path}'.");
+            Logger.LogInfo($"apply LevelElement from folder '{path}'.");
 
             AssetBundle bundle;
             {
@@ -414,7 +414,7 @@ namespace ZNT.Evolution.Core
             {
                 try
                 {
-                    bundle.ApplyFormFolder(path: path);
+                    bundle.ApplyFromFolder(path: path);
                 }
                 catch (Exception e)
                 {
@@ -424,7 +424,7 @@ namespace ZNT.Evolution.Core
             yield return new WaitUntil(() => apply.IsCompleted);
         }
 
-        private static void ApplyFormFolder(this AssetBundle bundle, string path)
+        private static void ApplyFromFolder(this AssetBundle bundle, string path)
         {
             var material = bundle.LoadAsset<Material>("sprites");
             var info = DeserializeInfo<SpriteInfo>(folder: path, file: "sprite.info.json");
