@@ -5,33 +5,26 @@ namespace ZNT.Evolution.Core.Editor
 {
     [SerializeInEditor(name: "Barricade Layer")]
     [DisallowMultipleComponent]
-    public class BarricadeLayerEditor : EditorComponent
+    public class BarricadeLayerEditor : LayerEditor
     {
-        [SerializeInEditor(name: "Main Layer")]
-        public LayerType Layer
-        {
-            get => (LayerType)gameObject.layer;
-            set => gameObject.layer = (int)value;
-        }
-
-        private GameObject Body(string n) => gameObject.GetChildren().Find(body => body.name == n);
+        private GameObject Body(string child) => gameObject.transform.Find(child)?.gameObject;
 
         private GameObject TopCollider => Body("TopCollider") ?? gameObject;
 
         [SerializeInEditor(name: "Top Layer")]
-        public LayerType Top
+        public Layer Top
         {
-            get => (LayerType)TopCollider.layer;
-            set => TopCollider.layer = (int)value;
+            get => (Layer)(0x01 << TopCollider.layer);
+            set => TopCollider.layer = LayerMask.NameToLayer(value.ToString());
         }
 
         private GameObject BottomCollider => Body("BottomCollider") ?? gameObject;
 
         [SerializeInEditor(name: "Bottom Layer")]
-        public LayerType Bottom
+        public Layer Bottom
         {
-            get => (LayerType)BottomCollider.layer;
-            set => BottomCollider.layer = (int)value;
+            get => (Layer)(0x01 << BottomCollider.layer);
+            set => BottomCollider.layer = LayerMask.NameToLayer(value.ToString());
         }
     }
 }

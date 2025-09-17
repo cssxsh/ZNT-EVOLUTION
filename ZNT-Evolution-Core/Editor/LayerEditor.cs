@@ -7,10 +7,10 @@ namespace ZNT.Evolution.Core.Editor
     public class LayerEditor : EditorComponent
     {
         [SerializeInEditor(name: "Main Layer")]
-        public LayerType Layer
+        public Layer Layer
         {
-            get => (LayerType)gameObject.layer;
-            set => gameObject.layer = (int)value;
+            get => (Layer)(0x01 << gameObject.layer);
+            set => gameObject.layer = LayerMask.NameToLayer(value.ToString());
         }
     }
 }

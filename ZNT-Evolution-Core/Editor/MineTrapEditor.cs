@@ -29,7 +29,7 @@ namespace ZNT.Evolution.Core.Editor
         {
             get
             {
-                var field = Traverse.Create(Behaviour).Field<ExplosionAsset>(name: "explosion");
+                var field = Traverse.Create(Behaviour).Field<ExplosionAsset>("explosion");
                 if (field.Value.name == name) return field.Value;
                 field.Value = Instantiate(field.Value);
                 field.Value.name = name;
