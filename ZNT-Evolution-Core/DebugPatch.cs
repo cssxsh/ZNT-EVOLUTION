@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using HarmonyLib;
 using UnityEngine;
 
@@ -51,6 +52,33 @@ namespace ZNT.Evolution.Core
             var count = Physics2D.RaycastNonAlloc(origin, direction, DetectionHelper.DistanceCheck, distance);
             Array.Sort(DetectionHelper.DistanceCheck, 0,count);
             results[0] = DetectionHelper.DistanceCheck[0];
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(SpawnCharacterChooser), "OnCreate")]
+        public static void OnCreate(SpawnCharacterChooser __instance)
+        {
+            var spawn = Traverse.Create(__instance).Field("spawn").Field<Enum>("spawnType");
+            var characters = Traverse.Create(__instance).Field<List<CharacterAsset>>("selectableCharacters").Value;
+            characters.Clear();
+            switch (spawn.Value.ToString())
+            {
+                case "Human":
+                    characters.AddRange(LevelElementIndex.Index.Values.Cast<LevelElement>()
+                        .Select(element => element.CustomAsset)
+                        .OfType<HumanAsset>());
+                    break;
+                case "Zombie":
+                    characters.AddRange(LevelElementIndex.Index.Values.Cast<LevelElement>()
+                        .Select(element => element.CustomAsset)
+                        .OfType<ZombieAsset>());
+                    break;
+                default:
+                    characters.AddRange(LevelElementIndex.Index.Values.Cast<LevelElement>()
+                        .Select(element => element.CustomAsset)
+                        .OfType<CharacterAsset>());
+                    break;
+            }
         }
     }
 }
