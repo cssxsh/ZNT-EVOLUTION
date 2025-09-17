@@ -1,3 +1,5 @@
 Key,Type,Desc,English,French,German,Russian,Polish,Portuguese,Spanish,Korean,Japanese,Chinese (Simplified),Chinese (Traditional)
 Mod_Tab,Text,,MOD,,,,,,,,,模组,
 Mod_Reset,Text,,Reload,,,,,,,,,重新加载（暂不支持）,
+Plugin_Tab,Text,,PLUGIN,,,,,,,,,插件,
+Plugin_Reset,Text,,Reset to default,,,,,,,,,恢复默认设置,

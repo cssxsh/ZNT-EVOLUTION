@@ -3,6 +3,7 @@ using System.Collections;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
 using UIWidgets;
@@ -17,6 +18,8 @@ namespace ZNT.Evolution.Core
     public static class SceneManagerPatch
     {
         private static readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("SceneManager");
+
+        #region LanguageSource
 
         private static I2.Loc.LanguageSourceData _localization;
 
@@ -56,6 +59,8 @@ namespace ZNT.Evolution.Core
             using var reader = new StreamReader(fs);
             return reader.ReadToEnd();
         }
+        
+        #endregion
 
         #region SettingsScene
 
@@ -65,6 +70,7 @@ namespace ZNT.Evolution.Core
         {
             Logger.LogInfo("Update SettingsScene");
             __instance.AddMod();
+            __instance.AddPlugin();
         }
 
         private static void AddMod(this SettingsMenu menu)
@@ -94,6 +100,67 @@ namespace ZNT.Evolution.Core
             });
         }
 
+        private static void AddPlugin(this SettingsMenu menu)
+        {
+            var mod = menu.AddPanel("Plugin");
+            var content = mod.GetComponentInChildren<VerticalLayoutGroup>();
+            var fullscreen = menu.transform.Find("Option Panels/Video/Scroll Area/ScrollView/Content/FullScreen Entry").gameObject;
+
+            foreach (var (_, info) in BepInEx.Bootstrap.Chainloader.PluginInfos)
+            {
+                var plugin = Traverse.Create(info.Instance);
+                foreach (var name in plugin.Fields())
+                {
+                    var field = plugin.Field(name);
+                    if (!typeof(ConfigEntryBase).IsAssignableFrom(field.GetValueType())) continue;
+                    var entry = plugin.Field(name).GetValue<ConfigEntryBase>();
+                    var term = _localization.GetTermData($"{info.Metadata.Name}/{name}")
+                               ?? _localization.AddTerm($"{info.Metadata.Name}/{name}");
+                    term.SetTranslation(0, $"[{info.Metadata.Name}] {entry.Definition.Key}");
+                    term.SetTranslation(9, $"[{info.Metadata.Name}] {entry.Description.Description}");
+                    if (field.GetValueType() == typeof(ConfigEntry<bool>))
+                    {
+                        var item = UnityEngine.Object.Instantiate(fullscreen, content.transform);
+                        item.name = $"{info.Metadata.Name} {name} Entry";
+                        item.GetComponentsInChildren<I2.Loc.Localize>(includeInactive: true)
+                            .ForEach(localize => localize.Term = $"{info.Metadata.Name}/{name}");
+                        item.SetActive(true);
+                        var toggle = item.GetComponentInChildren<Toggle>(includeInactive: true);
+                        toggle.OnValueChanged(value => entry.BoxedValue = value);
+                        toggle.SetIsOnWithoutNotify((bool)entry.BoxedValue);
+                    }
+                    else
+                    {
+                        // ...
+                    }
+                }
+            }
+
+            var reload = mod.transform.Find("Reset Entry").GetComponentInChildren<Button>();
+            reload.OnClick(() =>
+            {
+                foreach (var (_, info) in BepInEx.Bootstrap.Chainloader.PluginInfos)
+                {
+                    var plugin = Traverse.Create(info.Instance);
+                    foreach (var name in plugin.Fields())
+                    {
+                        var field = plugin.Field(name);
+                        if (!typeof(ConfigEntryBase).IsAssignableFrom(field.GetValueType())) continue;
+                        var entry = plugin.Field(name).GetValue<ConfigEntryBase>();
+                        entry.BoxedValue = entry.DefaultValue;
+                        switch (entry.BoxedValue)
+                        {
+                            case bool value:
+                                content.transform.Find($"{info.Metadata.Name} {name} Entry")
+                                    .GetComponentInChildren<Toggle>(includeInactive: true)
+                                    .SetIsOnWithoutNotify(value);
+                                break;
+                        }
+                    }
+                }
+            });
+        }
+
         private static GameObject AddPanel(this SettingsMenu menu, string name)
         {
             var panels = menu.transform.Find("Option Panels");
@@ -120,7 +187,7 @@ namespace ZNT.Evolution.Core
             var reload = reset.GetComponentInChildren<Button>();
             reload.GetComponentsInChildren<I2.Loc.Localize>(includeInactive: true)
                 .ForEach(localize => localize.Term = $"Evolution/{name}_Reset");
-            reload.OnClick(() => {});
+            reload.OnClick(() => Logger.LogWarning($"{name} reset no define"));
 
             return panel;
         }
@@ -147,8 +214,8 @@ namespace ZNT.Evolution.Core
                 LevelElement.Type.Decor => $"{element.Title} [{element.AllowedDecorSystems}]",
                 _ => throw new ArgumentOutOfRangeException(element.name)
             };
-            var term = _localization.GetTermData($"Mod/{element.name}")
-                       ?? _localization.AddTerm($"Mod/{element.name}");
+            var term = _localization.GetTermData($"Evolution/{element.name}")
+                       ?? _localization.AddTerm($"Evolution/{element.name}");
             term.SetTranslation(0, info);
 
             return term;
