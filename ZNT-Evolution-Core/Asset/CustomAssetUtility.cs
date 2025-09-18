@@ -1,4 +1,3 @@
-using System;
 using System.IO;
 using HarmonyLib;
 using Newtonsoft.Json;
@@ -9,14 +8,14 @@ namespace ZNT.Evolution.Core.Asset
 {
     public static class CustomAssetUtility
     {
-        private static JsonSerializerSettings AssetSettings(params Type[] exclude) => new JsonSerializerSettings
+        private static JsonSerializerSettings SerializerSettings => new JsonSerializerSettings
         {
             ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
             TypeNameHandling = TypeNameHandling.Auto,
             Converters =
             {
-                new NameConverter(exclude: exclude),
-                new ScriptableObjectConverter(),
+                new TopConverter(),
+                new NameConverter(),
                 new StringEnumConverter(),
                 new NullConverter(include: typeof(tk2dSpriteDefinition)),
                 new ColorConverter(),
@@ -27,40 +26,10 @@ namespace ZNT.Evolution.Core.Asset
             }
         };
 
-        private static JsonSerializerSettings ComponentSettings(params Type[] include) => new JsonSerializerSettings
+        public static void SerializeObjectToPath(string target, object data)
         {
-            ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-            TypeNameHandling = TypeNameHandling.Auto,
-            Converters =
-            {
-                new ComponentConverter(include: include),
-                new NameConverter(exclude: include),
-                new ScriptableObjectConverter(),
-                new StringEnumConverter(),
-                new ColorConverter(),
-                new Vector2Converter(),
-                new Vector3Converter(),
-                new Vector4Converter(),
-                new Matrix4x4Converter()
-            }
-        };
-
-        public static void SerializeAssetToPath(string target, CustomAsset asset)
-        {
-            var serializer = JsonSerializer.Create(AssetSettings(asset.GetType()));
-            SaveObjectToPath(serializer, asset, target);
-        }
-
-        public static void SerializeInfoToPath(string target, EvolutionInfo info)
-        {
-            var serializer = JsonSerializer.Create(AssetSettings(info.GetType()));
-            SaveObjectToPath(serializer, info, target);
-        }
-
-        public static void SaveComponentToPath(string target, Component component)
-        {
-            var serializer = JsonSerializer.Create(ComponentSettings(component.GetType()));
-            SaveObjectToPath(serializer, component, target);
+            var serializer = JsonSerializer.Create(SerializerSettings);
+            SaveObjectToPath(serializer, data, target);
         }
 
         private static void SaveObjectToPath(JsonSerializer serializer, object data, string path)
@@ -71,9 +40,9 @@ namespace ZNT.Evolution.Core.Asset
             serializer.Serialize(json, data);
         }
 
-        public static T DeserializeAssetFromPath<T>(string source) where T : CustomAsset
+        public static T DeserializeObjectFromPath<T>(string source)
         {
-            var serializer = JsonSerializer.Create(AssetSettings(typeof(T)));
+            var serializer = JsonSerializer.Create(SerializerSettings);
             var impl = LoadObjectFromPath<T>(serializer, source);
             switch (impl)
             {
@@ -85,52 +54,6 @@ namespace ZNT.Evolution.Core.Asset
                     (animations.HitAnimations as ISerializationCallbackReceiver).OnAfterDeserialize();
                     (animations.DeathAnimations as ISerializationCallbackReceiver).OnAfterDeserialize();
                     break;
-            }
-
-            return impl;
-        }
-
-        public static T DeserializeInfoFromPath<T>(string source) where T : EvolutionInfo
-        {
-            var serializer = JsonSerializer.Create(AssetSettings(typeof(T)));
-            var impl = LoadObjectFromPath<T>(serializer, source);
-
-            return impl;
-        }
-
-        public static T DeserializeAssetFromTextAsset<T>(TextAsset asset) where T : CustomAsset
-        {
-            var serializer = JsonSerializer.Create(AssetSettings(typeof(T)));
-            var impl = LoadObjectFromTextAsset<T>(serializer, asset);
-            switch (impl)
-            {
-                case CharacterAnimationAsset animations:
-                    animations.CommonAnimations.AnimationLibrary = animations.AnimationLibrary;
-                    animations.HitAnimations.AnimationLibrary = animations.AnimationLibrary;
-                    animations.DeathAnimations.AnimationLibrary = animations.AnimationLibrary;
-                    (animations.CommonAnimations as ISerializationCallbackReceiver).OnAfterDeserialize();
-                    (animations.HitAnimations as ISerializationCallbackReceiver).OnAfterDeserialize();
-                    (animations.DeathAnimations as ISerializationCallbackReceiver).OnAfterDeserialize();
-                    break;
-            }
-
-            return impl;
-        }
-
-        public static T DeserializeInfoFromTextAsset<T>(TextAsset asset) where T : EvolutionInfo
-        {
-            var serializer = JsonSerializer.Create(AssetSettings(typeof(T)));
-            var impl = LoadObjectFromTextAsset<T>(serializer, asset);
-
-            return impl;
-        }
-
-        public static T LoadComponentFromPath<T>(string source) where T : Component
-        {
-            var serializer = JsonSerializer.Create(ComponentSettings(typeof(T)));
-            var impl = LoadObjectFromPath<T>(serializer, source);
-            switch (impl)
-            {
                 case tk2dSpriteAnimation animation:
                     animation.InitializeClipCache();
                     break;
@@ -146,12 +69,20 @@ namespace ZNT.Evolution.Core.Asset
             return impl;
         }
 
-        public static T LoadComponentFromTextAsset<T>(TextAsset asset) where T : Component
+        public static T DeserializeObjectFromTextAsset<T>(TextAsset asset)
         {
-            var serializer = JsonSerializer.Create(ComponentSettings(typeof(T)));
+            var serializer = JsonSerializer.Create(SerializerSettings);
             var impl = LoadObjectFromTextAsset<T>(serializer, asset);
             switch (impl)
             {
+                case CharacterAnimationAsset animations:
+                    animations.CommonAnimations.AnimationLibrary = animations.AnimationLibrary;
+                    animations.HitAnimations.AnimationLibrary = animations.AnimationLibrary;
+                    animations.DeathAnimations.AnimationLibrary = animations.AnimationLibrary;
+                    (animations.CommonAnimations as ISerializationCallbackReceiver).OnAfterDeserialize();
+                    (animations.HitAnimations as ISerializationCallbackReceiver).OnAfterDeserialize();
+                    (animations.DeathAnimations as ISerializationCallbackReceiver).OnAfterDeserialize();
+                    break;
                 case tk2dSpriteAnimation animation:
                     animation.InitializeClipCache();
                     break;
@@ -183,6 +114,7 @@ namespace ZNT.Evolution.Core.Asset
 
         internal static MovingObjectAssetWrap Wrap(this MovingObjectAsset moving)
         {
+            if (moving is MovingObjectAssetWrap wrapped) return wrapped;
             var wrap = ScriptableObject.CreateInstance<MovingObjectAssetWrap>();
             Traverse.IterateFields(moving, wrap, Traverse.CopyFields);
             return wrap;
@@ -190,6 +122,7 @@ namespace ZNT.Evolution.Core.Asset
 
         internal static PhysicObjectAssetWrap Wrap(this PhysicObjectAsset physic)
         {
+            if (physic is PhysicObjectAssetWrap wrapped) return wrapped;
             var wrap = ScriptableObject.CreateInstance<PhysicObjectAssetWrap>();
             Traverse.IterateFields(physic, wrap, Traverse.CopyFields);
             return wrap;
@@ -197,6 +130,7 @@ namespace ZNT.Evolution.Core.Asset
 
         internal static TriggerAssetWrap Wrap(this TriggerAsset trigger)
         {
+            if (trigger is TriggerAssetWrap wrapped) return wrapped;
             var wrap = ScriptableObject.CreateInstance<TriggerAssetWrap>();
             Traverse.IterateFields(trigger, wrap, Traverse.CopyFields);
             return wrap;
@@ -204,6 +138,7 @@ namespace ZNT.Evolution.Core.Asset
 
         internal static ExplosionAssetWrap Wrap(this ExplosionAsset explosion)
         {
+            if (explosion is ExplosionAssetWrap wrapped) return wrapped;
             var wrap = ScriptableObject.CreateInstance<ExplosionAssetWrap>();
             Traverse.IterateFields(explosion, wrap, Traverse.CopyFields);
             return wrap;

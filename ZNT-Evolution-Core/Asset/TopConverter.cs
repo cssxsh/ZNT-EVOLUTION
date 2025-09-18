@@ -1,38 +1,56 @@
 using System;
-using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using UnityEngine;
 
 namespace ZNT.Evolution.Core.Asset
 {
-    internal class ComponentConverter : CustomCreationConverter<Component>
+    internal class TopConverter : CustomCreationConverter<UnityEngine.Object>
     {
-        private readonly Type[] _include;
-
-        public ComponentConverter(params Type[] include) => _include = include;
+        private bool _top = true;
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            serializer.Serialize(writer, Wrap(value));
+            writer.WriteValue(value switch
+            {
+                MovingObjectAsset moving => moving.Wrap(),
+                PhysicObjectAsset physic => physic.Wrap(),
+                TriggerAsset trigger => trigger.Wrap(),
+                ExplosionAsset explosion => explosion.Wrap(),
+                tk2dSpriteAnimation animation => new AnimationWrapper(animation),
+                tk2dSpriteCollectionData sprites => new SpritesWrapper(sprites),
+                _ => value
+            });
         }
 
         public override bool CanWrite => true;
 
-        public override Component Create(Type objectType)
+        public override UnityEngine.Object Create(Type objectType)
         {
-            return new GameObject(objectType.Name) { hideFlags = HideFlags.HideAndDontSave }
-                .AddComponent(objectType);
+            _top = false;
+            if (typeof(ScriptableObject).IsAssignableFrom(objectType))
+            {
+                if (objectType == typeof(MovingObjectAsset)) objectType = typeof(MovingObjectAssetWrap);
+                else if (objectType == typeof(PhysicObjectAsset)) objectType = typeof(PhysicObjectAssetWrap);
+                else if (objectType == typeof(TriggerAsset)) objectType = typeof(TriggerAssetWrap);
+                else if (objectType == typeof(ExplosionAsset)) objectType = typeof(ExplosionAssetWrap);
+                return ScriptableObject.CreateInstance(objectType) as CustomAsset;
+            }
+
+            if (typeof(Component).IsAssignableFrom(objectType))
+            {
+                return new GameObject(objectType.Name) { hideFlags = HideFlags.HideAndDontSave }
+                    .AddComponent(objectType);
+            }
+
+            return objectType.GetConstructor(Array.Empty<Type>())?.Invoke(null) as UnityEngine.Object;
         }
 
-        public override bool CanConvert(Type objectType) => _include.Contains(objectType);
-
-        private static object Wrap(object value) => value switch
+        public override bool CanConvert(Type objectType)
         {
-            tk2dSpriteAnimation animation => new AnimationWrapper(animation),
-            tk2dSpriteCollectionData sprites => new SpritesWrapper(sprites),
-            _ => throw new NotSupportedException("wrap " + value.GetType())
-        };
+            if (typeof(EvolutionInfo).IsAssignableFrom(objectType)) _top = false;
+            return _top && base.CanConvert(objectType);
+        }
 
         [Serializable]
         internal class AnimationWrapper

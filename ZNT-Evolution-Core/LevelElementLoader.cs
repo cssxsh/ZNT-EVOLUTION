@@ -141,14 +141,14 @@ namespace ZNT.Evolution.Core
 
             if (File.Exists(Path.Combine(path, "sprites.json")))
             {
-                var sprites = LoadComponent<tk2dSpriteCollectionData>(folder: path, file: "sprites.json");
+                var sprites = DeserializeObject<tk2dSpriteCollectionData>(folder: path, file: "sprites.json");
                 Logger.LogDebug($"sprites.json -> {sprites} -> {sprites.materials[0]}");
             }
 
             if (File.Exists(Path.Combine(path, "sprite.info.json")))
             {
                 var material = bundle.LoadAsset<Material>("sprites");
-                var info = DeserializeInfo<SpriteInfo>(folder: path, file: "sprite.info.json");
+                var info = DeserializeObject<SpriteInfo>(folder: path, file: "sprite.info.json");
                 var sprites = CreateSprite(material, info);
                 Logger.LogDebug($"CreateSprite -> {sprites} from {sprites.material}");
             }
@@ -156,45 +156,45 @@ namespace ZNT.Evolution.Core
             if (File.Exists(Path.Combine(path, "sprite.merge.json")))
             {
                 var material = bundle.LoadAsset<Material>("sprites");
-                var merge = DeserializeInfo<SpriteMerge>(folder: path, file: "sprite.merge.json");
+                var merge = DeserializeObject<SpriteMerge>(folder: path, file: "sprite.merge.json");
                 var sprites = MergeSprite(material, merge);
                 Logger.LogDebug($"MergeSprite -> {sprites} from {sprites.material}");
             }
 
-            var animation = LoadComponent<tk2dSpriteAnimation>(folder: path, file: "animation.json");
+            var animation = DeserializeObject<tk2dSpriteAnimation>(folder: path, file: "animation.json");
             Logger.LogDebug($"animation.json -> {animation}");
 
             var brush = bundle.LoadAsset<Rotorz.Tile.OrientedBrush>("brush")
-                        ?? CreateBrush(DeserializeInfo<BrushInfo>(folder: path, file: "brush.info.json"));
+                        ?? CreateBrush(DeserializeObject<BrushInfo>(folder: path, file: "brush.info.json"));
             var variation = brush.DefaultOrientation.GetVariation(0);
             Logger.LogDebug($"brush -> {brush} -> {variation}");
 
             var preview = bundle.LoadAsset<Sprite>("preview");
             if (preview != null) Logger.LogDebug($"preview -> {preview} -> {preview.texture}");
 
-            var asset = DeserializeInfo<LevelElementInfo>(folder: path, file: "element.json").CustomAsset;
+            var asset = DeserializeObject<LevelElementInfo>(folder: path, file: "element.json").CustomAsset;
             switch (asset)
             {
                 case null:
                     break;
                 case var _ when asset.EndsWith("HumanAsset"):
-                    var human = DeserializeAsset<HumanAsset>(folder: path, file: "asset.json");
+                    var human = DeserializeObject<HumanAsset>(folder: path, file: "asset.json");
                     Logger.LogDebug($"asset.json -> {human} from {human.AnimationLibrary}");
                     break;
                 case var _ when asset.EndsWith("WorldEnemyAsset"):
-                    var enemy = DeserializeAsset<WorldEnemyAsset>(folder: path, file: "asset.json");
+                    var enemy = DeserializeObject<WorldEnemyAsset>(folder: path, file: "asset.json");
                     Logger.LogDebug($"asset.json -> {enemy} from {enemy.AnimationLibrary}");
                     break;
                 case var _ when asset.EndsWith("ZombieAsset"):
-                    var zombie = DeserializeAsset<ZombieAsset>(folder: path, file: "asset.json");
+                    var zombie = DeserializeObject<ZombieAsset>(folder: path, file: "asset.json");
                     Logger.LogDebug($"asset.json -> {zombie} from {zombie.AnimationLibrary}");
                     break;
                 case var _ when asset.EndsWith("DecorAsset"):
-                    var decor = DeserializeAsset<DecorAsset>(folder: path, file: "asset.json");
+                    var decor = DeserializeObject<DecorAsset>(folder: path, file: "asset.json");
                     Logger.LogDebug($"asset.json -> {decor} from {decor.Animation}");
                     if (animation.GetClipByName(decor.ActivateAnimation) == null)
                     {
-                        var source = DeserializeAsset<LevelElement>(folder: path, file: "element.json");
+                        var source = DeserializeObject<LevelElement>(folder: path, file: "element.json");
                         Logger.LogDebug($"element.json -> {source} to {source.Title}");
                         for (var index = 0; index < animation.clips.Length; index++)
                         {
@@ -227,45 +227,45 @@ namespace ZNT.Evolution.Core
 
                     break;
                 case var _ when asset.EndsWith("BreakablePropAsset"):
-                    var breakable = DeserializeAsset<BreakablePropAsset>(folder: path, file: "asset.json");
+                    var breakable = DeserializeObject<BreakablePropAsset>(folder: path, file: "asset.json");
                     Logger.LogDebug($"asset.json -> {breakable} from {breakable.Animation}");
                     break;
                 case var _ when asset.EndsWith("SentryGunAsset"):
-                    var sentry = DeserializeAsset<SentryGunAsset>(folder: path, file: "asset.json");
+                    var sentry = DeserializeObject<SentryGunAsset>(folder: path, file: "asset.json");
                     Logger.LogDebug($"asset.json -> {sentry} from {sentry.Animation}");
                     break;
                 case var _ when asset.EndsWith("MovingObjectAsset"):
-                    var moving = DeserializeAsset<MovingObjectAssetWrap>(folder: path, file: "asset.json");
+                    var moving = DeserializeObject<MovingObjectAssetWrap>(folder: path, file: "asset.json");
                     if (moving.Animation == null) moving.Animation = animation;
                     Logger.LogDebug($"asset.json -> {moving} from {moving.Animation}");
                     break;
                 case var _ when asset.EndsWith("PhysicObjectAsset"):
-                    var physic = DeserializeAsset<PhysicObjectAssetWrap>(folder: path, file: "asset.json");
+                    var physic = DeserializeObject<PhysicObjectAssetWrap>(folder: path, file: "asset.json");
                     Logger.LogDebug($"asset.json -> {physic} from {physic.Animation}");
                     break;
                 case var _ when asset.EndsWith("TriggerAsset"):
-                    var trigger = DeserializeAsset<TriggerAssetWrap>(folder: path, file: "asset.json");
+                    var trigger = DeserializeObject<TriggerAssetWrap>(folder: path, file: "asset.json");
                     Logger.LogDebug($"asset.json -> {trigger} from {trigger.Animation}");
                     break;
                 case var _ when asset.EndsWith("DetectionAsset"):
-                    var detection = DeserializeAsset<DetectionAsset>(folder: path, file: "asset.json");
+                    var detection = DeserializeObject<DetectionAsset>(folder: path, file: "asset.json");
                     Logger.LogDebug($"asset.json -> {detection}");
                     break;
                 case var _ when asset.EndsWith("ExplosionAsset"):
-                    var explosion = DeserializeAsset<ExplosionAssetWrap>(folder: path, file: "asset.json");
+                    var explosion = DeserializeObject<ExplosionAssetWrap>(folder: path, file: "asset.json");
                     Logger.LogDebug($"asset.json -> {explosion}");
                     break;
                 case var _ when asset.EndsWith("ScreamAsset"):
-                    var scream = DeserializeAsset<ScreamAsset>(folder: path, file: "asset.json");
+                    var scream = DeserializeObject<ScreamAsset>(folder: path, file: "asset.json");
                     Logger.LogDebug($"asset.json -> {scream}");
                     break;
                 case var _ when asset.EndsWith("SpawnPointAsset"):
-                    var spawn = DeserializeAsset<SpawnPointAsset>(folder: path, file: "asset.json");
+                    var spawn = DeserializeObject<SpawnPointAsset>(folder: path, file: "asset.json");
                     Logger.LogDebug($"asset.json -> {spawn}");
                     break;
             }
 
-            var element = DeserializeAsset<LevelElement>(folder: path, file: "element.json");
+            var element = DeserializeObject<LevelElement>(folder: path, file: "element.json");
             Logger.LogDebug($"element.json -> {element} to {element.Title}");
 
             var id = element.Bind();
@@ -277,17 +277,17 @@ namespace ZNT.Evolution.Core
             var material = bundle.LoadAsset<Material>("sprites");
             if (File.Exists(Path.Combine(path, "sprite.info.json")))
             {
-                var info = DeserializeInfo<SpriteInfo>(folder: path, file: "sprite.info.json");
+                var info = DeserializeObject<SpriteInfo>(folder: path, file: "sprite.info.json");
                 var sprites = CreateSprite(material, info);
                 Logger.LogDebug($"CreateSprite -> {sprites} from {sprites.material}");
 
                 if (File.Exists(Path.Combine(path, "animation.json")))
                 {
-                    var animation = LoadComponent<tk2dSpriteAnimation>(folder: path, file: "animation.json");
+                    var animation = DeserializeObject<tk2dSpriteAnimation>(folder: path, file: "animation.json");
                     Logger.LogDebug($"animation.json -> {animation}");
                 }
 
-                var element = DeserializeAsset<LevelElement>(folder: path, file: "element.json");
+                var element = DeserializeObject<LevelElement>(folder: path, file: "element.json");
                 Logger.LogDebug($"element.json -> {element} to {element.Title}");
 
                 if (element.Brush != null)
@@ -323,7 +323,7 @@ namespace ZNT.Evolution.Core
                 var sprites = CreateSingleSprite(material);
                 Logger.LogDebug($"CreateSingleSprite -> {sprites} from {sprites.material}");
 
-                var element = DeserializeAsset<LevelElement>(folder: path, file: "element.json");
+                var element = DeserializeObject<LevelElement>(folder: path, file: "element.json");
                 Logger.LogDebug($"element.json -> {element} to {element.Title}");
 
                 var id = element.Bind();
@@ -421,11 +421,11 @@ namespace ZNT.Evolution.Core
         private static void ApplyFromFolder(this AssetBundle bundle, string path)
         {
             var material = bundle.LoadAsset<Material>("sprites");
-            var info = DeserializeInfo<SpriteInfo>(folder: path, file: "sprite.info.json");
+            var info = DeserializeObject<SpriteInfo>(folder: path, file: "sprite.info.json");
             var sprites = CreateSprite(material, info);
             Logger.LogDebug($"CreateSprite -> {sprites} from {sprites.material}");
 
-            var addition = DeserializeInfo<AnimationAddition>(folder: path, file: "animation.addition.json");
+            var addition = DeserializeObject<AnimationAddition>(folder: path, file: "animation.addition.json");
             var animations = addition.Apply();
             Logger.LogInfo($"{animations.Count} animations apply");
         }
@@ -549,19 +549,9 @@ namespace ZNT.Evolution.Core
             return impl;
         }
 
-        private static T DeserializeAsset<T>(string folder, string file) where T : CustomAsset
+        private static T DeserializeObject<T>(string folder, string file)
         {
-            return CustomAssetUtility.DeserializeAssetFromPath<T>(source: Path.Combine(folder, file));
-        }
-
-        private static T DeserializeInfo<T>(string folder, string file) where T : EvolutionInfo
-        {
-            return CustomAssetUtility.DeserializeInfoFromPath<T>(source: Path.Combine(folder, file));
-        }
-
-        private static T LoadComponent<T>(string folder, string file) where T : Component
-        {
-            return CustomAssetUtility.LoadComponentFromPath<T>(source: Path.Combine(folder, file));
+            return CustomAssetUtility.DeserializeObjectFromPath<T>(source: Path.Combine(folder, file));
         }
 
         public static IEnumerator LoadBanks(string folder, bool loadSamples = false)

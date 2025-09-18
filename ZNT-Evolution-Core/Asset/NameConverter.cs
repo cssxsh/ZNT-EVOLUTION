@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Newtonsoft.Json;
 using UnityEngine;
 
@@ -8,11 +7,7 @@ namespace ZNT.Evolution.Core.Asset
 {
     internal class NameConverter : JsonConverter
     {
-        private readonly Type[] _exclude;
-
         private static readonly Dictionary<string, object> Cache = new Dictionary<string, object>();
-
-        public NameConverter(params Type[] exclude) => _exclude = exclude;
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
@@ -65,7 +60,6 @@ namespace ZNT.Evolution.Core.Asset
             throw new KeyNotFoundException(message: $"{objectType.FullName}(name: {name})");
         }
 
-        public override bool CanConvert(Type objectType) =>
-            !_exclude.Contains(objectType) && objectType.IsSubclassOf(typeof(UnityEngine.Object));
+        public override bool CanConvert(Type objectType) => typeof(UnityEngine.Object).IsAssignableFrom(objectType);
     }
 }

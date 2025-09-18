@@ -22,9 +22,9 @@ namespace ZNT.Evolution.Core.Asset
 
         [JsonConstructor]
         public BrushInfo(
-            string name, 
-            bool forceLegacySideways, 
-            bool applyPrefabTransform, 
+            string name,
+            bool forceLegacySideways,
+            bool applyPrefabTransform,
             int userFlags,
             bool forceOverrideFlags,
             Rotorz.Tile.Coalesce coalesce,
