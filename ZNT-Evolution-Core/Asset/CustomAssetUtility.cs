@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using HarmonyLib;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using UnityEngine;
@@ -178,6 +179,34 @@ namespace ZNT.Evolution.Core.Asset
             using var reader = new StringReader(asset.text);
             using var json = new JsonTextReader(reader);
             return jsonSerializer.Deserialize<T>(json);
+        }
+
+        internal static MovingObjectAssetWrap Wrap(this MovingObjectAsset moving)
+        {
+            var wrap = ScriptableObject.CreateInstance<MovingObjectAssetWrap>();
+            Traverse.IterateFields(moving, wrap, Traverse.CopyFields);
+            return wrap;
+        }
+
+        internal static PhysicObjectAssetWrap Wrap(this PhysicObjectAsset physic)
+        {
+            var wrap = ScriptableObject.CreateInstance<PhysicObjectAssetWrap>();
+            Traverse.IterateFields(physic, wrap, Traverse.CopyFields);
+            return wrap;
+        }
+
+        internal static TriggerAssetWrap Wrap(this TriggerAsset trigger)
+        {
+            var wrap = ScriptableObject.CreateInstance<TriggerAssetWrap>();
+            Traverse.IterateFields(trigger, wrap, Traverse.CopyFields);
+            return wrap;
+        }
+
+        internal static ExplosionAssetWrap Wrap(this ExplosionAsset explosion)
+        {
+            var wrap = ScriptableObject.CreateInstance<ExplosionAssetWrap>();
+            Traverse.IterateFields(explosion, wrap, Traverse.CopyFields);
+            return wrap;
         }
     }
 }

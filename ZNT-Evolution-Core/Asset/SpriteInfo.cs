@@ -22,9 +22,11 @@ namespace ZNT.Evolution.Core.Asset
 
         [JsonConstructor]
         public SpriteInfo(
-            float orthoSize, float targetHeight,
-            string[] names, Rect[] regions, Vector2[] anchors = null,
-            Vector2? anchor = null,
+            float orthoSize,
+            float targetHeight,
+            string[] names,
+            Rect[] regions,
+            Vector2[] anchors = null, Vector2? anchor = null,
             string name = null)
         {
             OrthoSize = orthoSize;

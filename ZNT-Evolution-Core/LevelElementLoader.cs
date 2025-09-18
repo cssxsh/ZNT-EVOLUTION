@@ -235,21 +235,16 @@ namespace ZNT.Evolution.Core
                     Logger.LogDebug($"asset.json -> {sentry} from {sentry.Animation}");
                     break;
                 case var _ when asset.EndsWith("MovingObjectAsset"):
-                    var moving = DeserializeAsset<MovingObjectAsset>(folder: path, file: "asset.json");
-                    // ReSharper disable once InconsistentNaming
-                    var moving_library = Traverse.Create(moving).Field<tk2dSpriteAnimation>("library");
-                    moving_library.Value = animation;
-                    Logger.LogDebug($"asset.json -> {moving} from {moving_library.Value}");
+                    var moving = DeserializeAsset<MovingObjectAssetWrap>(folder: path, file: "asset.json");
+                    if (moving.Animation == null) moving.Animation = animation;
+                    Logger.LogDebug($"asset.json -> {moving} from {moving.Animation}");
                     break;
                 case var _ when asset.EndsWith("PhysicObjectAsset"):
-                    var physic = DeserializeAsset<PhysicObjectAsset>(folder: path, file: "asset.json");
-                    // ReSharper disable once InconsistentNaming
-                    var physic_library = Traverse.Create(physic).Field<tk2dSpriteAnimation>("library");
-                    physic_library.Value = animation;
-                    Logger.LogDebug($"asset.json -> {physic} from {physic_library.Value}");
+                    var physic = DeserializeAsset<PhysicObjectAssetWrap>(folder: path, file: "asset.json");
+                    Logger.LogDebug($"asset.json -> {physic} from {physic.Animation}");
                     break;
                 case var _ when asset.EndsWith("TriggerAsset"):
-                    var trigger = DeserializeAsset<TriggerAsset>(folder: path, file: "asset.json");
+                    var trigger = DeserializeAsset<TriggerAssetWrap>(folder: path, file: "asset.json");
                     Logger.LogDebug($"asset.json -> {trigger} from {trigger.Animation}");
                     break;
                 case var _ when asset.EndsWith("DetectionAsset"):
@@ -257,8 +252,7 @@ namespace ZNT.Evolution.Core
                     Logger.LogDebug($"asset.json -> {detection}");
                     break;
                 case var _ when asset.EndsWith("ExplosionAsset"):
-                    var explosion = DeserializeAsset<ExplosionAsset>(folder: path, file: "asset.json");
-                    Traverse.Create(explosion).Field<bool>("autoExplode").Value = false;
+                    var explosion = DeserializeAsset<ExplosionAssetWrap>(folder: path, file: "asset.json");
                     Logger.LogDebug($"asset.json -> {explosion}");
                     break;
                 case var _ when asset.EndsWith("ScreamAsset"):

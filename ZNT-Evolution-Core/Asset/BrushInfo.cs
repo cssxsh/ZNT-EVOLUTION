@@ -21,8 +21,14 @@ namespace ZNT.Evolution.Core.Asset
         [JsonProperty("Variation")] public readonly UnityEngine.Object Variation;
 
         [JsonConstructor]
-        public BrushInfo(string name, bool forceLegacySideways, bool applyPrefabTransform, int userFlags,
-            bool forceOverrideFlags, Rotorz.Tile.Coalesce coalesce, UnityEngine.Object variation)
+        public BrushInfo(
+            string name, 
+            bool forceLegacySideways, 
+            bool applyPrefabTransform, 
+            int userFlags,
+            bool forceOverrideFlags,
+            Rotorz.Tile.Coalesce coalesce,
+            UnityEngine.Object variation)
         {
             Name = name;
             ForceLegacySideways = forceLegacySideways;
