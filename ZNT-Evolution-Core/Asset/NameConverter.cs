@@ -39,7 +39,7 @@ namespace ZNT.Evolution.Core.Asset
             if (objectType == typeof(Shader)) return Shader.Find(key);
             if (objectType == typeof(FMODAsset))
             {
-                FmodAssetIndex.PathIndex.TryGetValue(key: key, out var asset);
+                FmodAssetIndex.PathIndex.TryGetValue(key, out var asset);
                 if (asset == null) throw new KeyNotFoundException(message: $"Not Found FMODAsset from '{key}'");
                 return asset;
             }

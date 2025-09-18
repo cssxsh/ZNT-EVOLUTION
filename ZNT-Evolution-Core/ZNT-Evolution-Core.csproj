@@ -35,381 +35,380 @@
     </PropertyGroup>
     <ItemGroup>
         <Reference Include="0Harmony">
-          <HintPath>$(ZNTGamePath)\BepInEx\core\0Harmony.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\BepInEx\core\0Harmony.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="Assembly-CSharp">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\Assembly-CSharp.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\Assembly-CSharp.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="Assembly-CSharp-firstpass">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="BepInEx">
-          <HintPath>$(ZNTGamePath)\BepInEx\core\BepInEx.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\BepInEx\core\BepInEx.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="BepInEx.Harmony">
-          <HintPath>$(ZNTGamePath)\BepInEx\core\BepInEx.Harmony.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\BepInEx\core\BepInEx.Harmony.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="BepInEx.Preloader">
-          <HintPath>$(ZNTGamePath)\BepInEx\core\BepInEx.Preloader.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\BepInEx\core\BepInEx.Preloader.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="DOTween">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\DOTween.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\DOTween.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="GalaxyCSharp">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\GalaxyCSharp.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\GalaxyCSharp.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="HarmonyXInterop">
-          <HintPath>$(ZNTGamePath)\BepInEx\core\HarmonyXInterop.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\BepInEx\core\HarmonyXInterop.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="LZ4">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\LZ4.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\LZ4.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="Mono.Cecil">
-          <HintPath>$(ZNTGamePath)\BepInEx\core\Mono.Cecil.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\BepInEx\core\Mono.Cecil.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="Mono.Cecil.Mdb">
-          <HintPath>$(ZNTGamePath)\BepInEx\core\Mono.Cecil.Mdb.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\BepInEx\core\Mono.Cecil.Mdb.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="Mono.Cecil.Pdb">
-          <HintPath>$(ZNTGamePath)\BepInEx\core\Mono.Cecil.Pdb.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\BepInEx\core\Mono.Cecil.Pdb.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="Mono.Cecil.Rocks">
-          <HintPath>$(ZNTGamePath)\BepInEx\core\Mono.Cecil.Rocks.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\BepInEx\core\Mono.Cecil.Rocks.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="Mono.Posix">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\Mono.Posix.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\Mono.Posix.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="Mono.Security">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\Mono.Security.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\Mono.Security.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="MonoMod.RuntimeDetour">
-          <HintPath>$(ZNTGamePath)\BepInEx\core\MonoMod.RuntimeDetour.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\BepInEx\core\MonoMod.RuntimeDetour.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="MonoMod.Utils">
-          <HintPath>$(ZNTGamePath)\BepInEx\core\MonoMod.Utils.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\BepInEx\core\MonoMod.Utils.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="mscorlib">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\mscorlib.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\mscorlib.dll</HintPath>
+            <Private>False</Private>
         </Reference>
-        <Reference Include="System" />
+        <Reference Include="System"/>
         <Reference Include="System.Configuration">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\System.Configuration.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\System.Configuration.dll</HintPath>
+            <Private>False</Private>
         </Reference>
-        <Reference Include="System.Core" />
-        <Reference Include="System.Data" />
+        <Reference Include="System.Core"/>
+        <Reference Include="System.Data"/>
         <Reference Include="System.Security">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\System.Security.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\System.Security.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="System.Threading">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\System.Threading.dll</HintPath>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\System.Threading.dll</HintPath>
         </Reference>
-        <Reference Include="System.Xml" />
+        <Reference Include="System.Xml"/>
         <Reference Include="TileSystem.Runtime">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\TileSystem.Runtime.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\TileSystem.Runtime.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.AccessibilityModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.AccessibilityModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.AccessibilityModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.AIModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.AIModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.AIModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.AndroidJNIModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.AndroidJNIModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.AndroidJNIModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.AnimationModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.AnimationModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.AnimationModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.ARModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.ARModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.ARModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.AssetBundleModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.AssetBundleModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.AssetBundleModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.AudioModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.AudioModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.AudioModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.ClothModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.ClothModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.ClothModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.ClusterInputModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.ClusterInputModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.ClusterInputModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.ClusterRendererModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.ClusterRendererModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.ClusterRendererModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.CoreModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.CrashReportingModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.CrashReportingModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.CrashReportingModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.DirectorModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.DirectorModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.DirectorModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.DSPGraphModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.DSPGraphModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.DSPGraphModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.FileSystemHttpModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.FileSystemHttpModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.FileSystemHttpModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.GameCenterModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.GameCenterModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.GameCenterModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.GridModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.GridModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.GridModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.HotReloadModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.HotReloadModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.HotReloadModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.ImageConversionModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.ImageConversionModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.ImageConversionModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.IMGUIModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.InputLegacyModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.InputModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.InputModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.InputModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.JSONSerializeModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.JSONSerializeModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.JSONSerializeModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.LocalizationModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.LocalizationModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.LocalizationModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.ParticleSystemModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.ParticleSystemModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.ParticleSystemModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.PerformanceReportingModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.PerformanceReportingModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.PerformanceReportingModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.Physics2DModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.Physics2DModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.Physics2DModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.PhysicsModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.PhysicsModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.PhysicsModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.ProfilerModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.ProfilerModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.ProfilerModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.ScreenCaptureModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.ScreenCaptureModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.ScreenCaptureModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.SharedInternalsModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.SharedInternalsModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.SharedInternalsModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.SpriteMaskModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.SpriteMaskModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.SpriteMaskModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.SpriteShapeModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.SpriteShapeModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.SpriteShapeModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.StreamingModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.StreamingModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.StreamingModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.SubstanceModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.SubstanceModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.SubstanceModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.TerrainModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.TerrainModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.TerrainModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.TerrainPhysicsModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.TerrainPhysicsModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.TerrainPhysicsModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.TextCoreModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.TextCoreModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.TextCoreModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.TextRenderingModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.TilemapModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.TilemapModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.TilemapModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.TLSModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.TLSModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.TLSModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.UI">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.UI.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.UI.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.UIElementsModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.UIElementsModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.UIElementsModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.UIModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.UIModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.UIModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.UmbraModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.UmbraModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.UmbraModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.UNETModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.UNETModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.UNETModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.UnityAnalyticsModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.UnityAnalyticsModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.UnityAnalyticsModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.UnityConnectModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.UnityConnectModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.UnityConnectModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.UnityTestProtocolModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.UnityTestProtocolModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.UnityTestProtocolModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.UnityWebRequestAssetBundleModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.UnityWebRequestAssetBundleModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.UnityWebRequestAssetBundleModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.UnityWebRequestAudioModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.UnityWebRequestAudioModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.UnityWebRequestAudioModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.UnityWebRequestModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.UnityWebRequestModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.UnityWebRequestModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.UnityWebRequestTextureModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.UnityWebRequestTextureModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.UnityWebRequestTextureModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.UnityWebRequestWWWModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.UnityWebRequestWWWModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.UnityWebRequestWWWModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.VehiclesModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.VehiclesModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.VehiclesModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.VFXModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.VFXModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.VFXModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.VideoModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.VideoModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.VideoModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.VRModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.VRModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.VRModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.WindModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.WindModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.WindModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.XRModule">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.XRModule.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\UnityEngine.XRModule.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="Vectrosity">
-          <HintPath>$(ZNTGamePath)\znt_Data\Managed\Vectrosity.dll</HintPath>
-          <Private>False</Private>
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\Vectrosity.dll</HintPath>
+            <Private>False</Private>
         </Reference>
     </ItemGroup>
     <ItemGroup>
-        <Compile Include="Asset\AnimationAddition.cs" />
-        <Compile Include="Asset\BrushInfo.cs" />
-        <Compile Include="Asset\ComponentConverter.cs" />
-        <Compile Include="Asset\CustomAssetUtility.cs" />
-        <Compile Include="Asset\AssetElementBinder.cs" />
-        <Compile Include="Asset\EvolutionInfo.cs" />
-        <Compile Include="Asset\LevelElementInfo.cs" />
-        <Compile Include="Asset\NameConverter.cs" />
-        <Compile Include="Asset\NullConverter.cs" />
-        <Compile Include="Asset\ScriptableObjectConverter.cs" />
-        <Compile Include="Asset\SpawnPointAsset.cs" />
-        <Compile Include="Asset\SpriteInfo.cs" />
-        <Compile Include="Asset\SpriteMerge.cs" />
-        <Compile Include="Editor\BarricadeLayerEditor.cs" />
-        <Compile Include="Editor\EditorComponent.cs" />
-        <Compile Include="Editor\ExplosionEditor.cs" />
-        <Compile Include="Editor\LayerEditor.cs" />
-        <Compile Include="Editor\LayerType.cs" />
-        <Compile Include="Editor\MineTrapEditor.cs" />
-        <Compile Include="Editor\HumanEditor.cs" />
-        <Compile Include="EvolutionCorePlugin.cs" />
-        <Compile Include="DebugPatch.cs" />
-        <Compile Include="HookAsset.cs" />
-        <Compile Include="LevelElementLoader.cs" />
-        <Compile Include="CustomAssetObjectPatch.cs" />
+        <Compile Include="Asset\AnimationAddition.cs"/>
+        <Compile Include="Asset\BrushInfo.cs"/>
+        <Compile Include="Asset\ComponentConverter.cs"/>
+        <Compile Include="Asset\CustomAssetUtility.cs"/>
+        <Compile Include="Asset\AssetElementBinder.cs"/>
+        <Compile Include="Asset\EvolutionInfo.cs"/>
+        <Compile Include="Asset\HookAsset.cs"/>
+        <Compile Include="Asset\LevelElementInfo.cs"/>
+        <Compile Include="Asset\NameConverter.cs"/>
+        <Compile Include="Asset\NullConverter.cs"/>
+        <Compile Include="Asset\ScriptableObjectConverter.cs"/>
+        <Compile Include="Asset\SpawnPointAsset.cs"/>
+        <Compile Include="Asset\SpriteInfo.cs"/>
+        <Compile Include="Asset\SpriteMerge.cs"/>
+        <Compile Include="Editor\BarricadeLayerEditor.cs"/>
+        <Compile Include="Editor\EditorComponent.cs"/>
+        <Compile Include="Editor\ExplosionEditor.cs"/>
+        <Compile Include="Editor\LayerEditor.cs"/>
+        <Compile Include="Editor\MineTrapEditor.cs"/>
+        <Compile Include="Editor\HumanEditor.cs"/>
+        <Compile Include="EvolutionCorePlugin.cs"/>
+        <Compile Include="DebugPatch.cs"/>
+        <Compile Include="LevelElementLoader.cs"/>
+        <Compile Include="CustomAssetObjectPatch.cs"/>
         <Compile Include="Properties\AssemblyInfo.cs"/>
-        <Compile Include="SceneManagerPatch.cs" />
-        <Compile Include="StartManagerPatch.cs" />
+        <Compile Include="SceneManagerPatch.cs"/>
+        <Compile Include="StartManagerPatch.cs"/>
     </ItemGroup>
     <ItemGroup>
-        <EmbeddedResource Include="Resources\**" />
+        <EmbeddedResource Include="Resources\**"/>
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets"/>
     <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

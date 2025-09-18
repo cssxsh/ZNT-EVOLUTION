@@ -34,7 +34,7 @@ namespace ZNT.Evolution.Core.Asset
                 {
                     FmodAssetIndex.Index.AddAssetElement(asset);
                     Traverse.Create<FmodAssetIndex>()
-                            .Field<Dictionary<string, FMODAsset>>("pathIndex").Value = null;
+                        .Field<Dictionary<string, FMODAsset>>("pathIndex").Value = null;
                 }
 
                 dictionary.TryAdd(asset.path, asset);
@@ -56,7 +56,7 @@ namespace ZNT.Evolution.Core.Asset
 
                     break;
                 default:
-                    throw new NotSupportedException($"Bind: {asset.GetType()}");
+                    throw new NotSupportedException($"Bind: {asset}");
             }
 
             return asset.AssetId;
@@ -74,14 +74,14 @@ namespace ZNT.Evolution.Core.Asset
 
                     break;
                 default:
-                    throw new NotSupportedException($"Unbind: {asset.GetType()}");
+                    throw new NotSupportedException($"Unbind: {asset}");
             }
         }
 
         public static IEnumerable<LevelElement> LevelElements(bool isMod = true)
         {
             return LevelElementIndex.Index.Values
-                .Select(element => (LevelElement)element)
+                .Cast<LevelElement>()
                 .Where(element => !isMod || element.name == element.AssetId);
         }
     }

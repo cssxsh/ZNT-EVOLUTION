@@ -1,38 +1,40 @@
 using System.Linq;
 using UnityEngine;
 
+// ReSharper disable ClassNeverInstantiated.Global
+// ReSharper disable UnassignedField.Global
 namespace ZNT.Evolution.Core.Asset
 {
     public class SpawnPointAsset : CustomAssetObject
     {
         public CustomAssetObject[] spawnableObjects;
- 
+
         public float interval = 2f;
- 
+
         public float startDelay;
- 
+
         public int count;
- 
+
         public bool infinite;
- 
+
         public bool active = true;
- 
+
         public bool moveOnStart = true;
- 
+
         public Vector3 orientation = Vector3.forward;
- 
+
         public Vector2 direction = Vector3.right;
- 
+
         public float speed;
- 
+
         public float duration;
- 
+
         public bool applyDamages = true;
-        
+
         public CharacterMutation spawnMutation;
-        
+
         public MoveSpeed defaultSpeed;
-        
+
         public override void LoadFromAsset(GameObject gameObject)
         {
             base.LoadFromAsset(gameObject);

@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace ZNT.Evolution.Core
+namespace ZNT.Evolution.Core.Asset
 {
     internal class HookAsset : CustomAssetObject
     {

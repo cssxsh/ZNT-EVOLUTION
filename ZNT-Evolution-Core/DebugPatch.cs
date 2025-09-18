@@ -44,13 +44,14 @@ namespace ZNT.Evolution.Core
         public static string GetTermTranslation(string __result, string Term) => __result ?? Term;
 
         [HarmonyPostfix]
-        [HarmonyPatch(typeof(Physics2D), "RaycastNonAlloc", typeof(Vector2), typeof(Vector2), typeof(RaycastHit2D[]),
-            typeof(float))]
+        [HarmonyPatch(typeof(Physics2D), "RaycastNonAlloc",
+            typeof(Vector2), typeof(Vector2), typeof(RaycastHit2D[]), typeof(float))]
         public static void RaycastNonAlloc(Vector2 origin, Vector2 direction, RaycastHit2D[] results, float distance)
         {
-            if (results.Length > 1) return;
+            if (results.Length != 1) return;
+            DetectionHelper.DistanceCheck[0] = results[0];
             var count = Physics2D.RaycastNonAlloc(origin, direction, DetectionHelper.DistanceCheck, distance);
-            Array.Sort(DetectionHelper.DistanceCheck, 0,count);
+            Array.Sort(DetectionHelper.DistanceCheck, 0, count);
             results[0] = DetectionHelper.DistanceCheck[0];
         }
 
@@ -58,25 +59,28 @@ namespace ZNT.Evolution.Core
         [HarmonyPatch(typeof(SpawnCharacterChooser), "OnCreate")]
         public static void OnCreate(SpawnCharacterChooser __instance)
         {
-            var spawn = Traverse.Create(__instance).Field("spawn").Field<Enum>("spawnType");
+            var spawn = Traverse.Create(__instance).Field("spawn").Field<Enum>("spawnType").Value;
             var characters = Traverse.Create(__instance).Field<List<CharacterAsset>>("selectableCharacters").Value;
             characters.Clear();
-            switch (spawn.Value.ToString())
+            switch (spawn.ToString())
             {
                 case "Human":
                     characters.AddRange(LevelElementIndex.Index.Values.Cast<LevelElement>()
                         .Select(element => element.CustomAsset)
-                        .OfType<HumanAsset>());
+                        .OfType<HumanAsset>()
+                        .Distinct());
                     break;
                 case "Zombie":
                     characters.AddRange(LevelElementIndex.Index.Values.Cast<LevelElement>()
                         .Select(element => element.CustomAsset)
-                        .OfType<ZombieAsset>());
+                        .OfType<ZombieAsset>()
+                        .Distinct());
                     break;
                 default:
                     characters.AddRange(LevelElementIndex.Index.Values.Cast<LevelElement>()
                         .Select(element => element.CustomAsset)
-                        .OfType<CharacterAsset>());
+                        .OfType<CharacterAsset>()
+                        .Distinct());
                     break;
             }
         }

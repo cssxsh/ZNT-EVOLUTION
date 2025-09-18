@@ -131,7 +131,7 @@ namespace ZNT.Evolution.Core
 
         private static void LoadBrushFromFolder(this AssetBundle bundle, string path)
         {
-            if (bundle.LoadAsset(name: "bank_") is TextAsset bank)
+            if (bundle.LoadAsset("bank_") is TextAsset bank)
             {
                 foreach (var (_, fmod) in AssetElementBinder.FetchFMODAsset(path: $"bank:/{bank.name}"))
                 {
@@ -164,12 +164,12 @@ namespace ZNT.Evolution.Core
             var animation = LoadComponent<tk2dSpriteAnimation>(folder: path, file: "animation.json");
             Logger.LogDebug($"animation.json -> {animation}");
 
-            var brush = bundle.LoadAsset<Rotorz.Tile.OrientedBrush>(name: "brush")
+            var brush = bundle.LoadAsset<Rotorz.Tile.OrientedBrush>("brush")
                         ?? CreateBrush(DeserializeInfo<BrushInfo>(folder: path, file: "brush.info.json"));
             var variation = brush.DefaultOrientation.GetVariation(0);
             Logger.LogDebug($"brush -> {brush} -> {variation}");
 
-            var preview = bundle.LoadAsset<Sprite>(name: "preview");
+            var preview = bundle.LoadAsset<Sprite>("preview");
             if (preview != null) Logger.LogDebug($"preview -> {preview} -> {preview.texture}");
 
             var asset = DeserializeInfo<LevelElementInfo>(folder: path, file: "element.json").CustomAsset;
@@ -280,7 +280,7 @@ namespace ZNT.Evolution.Core
 
         private static void LoadDecorFromFolder(this AssetBundle bundle, string path)
         {
-            var material = bundle.LoadAsset<Material>(name: "sprites");
+            var material = bundle.LoadAsset<Material>("sprites");
             if (File.Exists(Path.Combine(path, "sprite.info.json")))
             {
                 var info = DeserializeInfo<SpriteInfo>(folder: path, file: "sprite.info.json");

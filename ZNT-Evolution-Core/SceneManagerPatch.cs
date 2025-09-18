@@ -59,7 +59,7 @@ namespace ZNT.Evolution.Core
             using var reader = new StreamReader(fs);
             return reader.ReadToEnd();
         }
-        
+
         #endregion
 
         #region SettingsScene
@@ -76,12 +76,13 @@ namespace ZNT.Evolution.Core
         private static void AddMod(this SettingsMenu menu)
         {
             var mod = menu.AddPanel("Mod");
-            var impl = menu.transform.Find("Option Panels/Video/Scroll Area/ScrollView/Content/FullScreen Entry").gameObject;
+            var impl = menu.transform
+                .Find("Option Panels/Video/Scroll Area/ScrollView/Content/FullScreen Entry").gameObject;
             var content = mod.GetComponentInChildren<VerticalLayoutGroup>();
 
             foreach (var element in AssetElementBinder.LevelElements())
             {
-                var item = UnityEngine.Object.Instantiate(impl, content.transform);
+                var item = UnityEngine.Object.Instantiate(original: impl, parent: content.transform);
                 item.name = $"{element.Title} Entry";
                 item.GetComponentsInChildren<I2.Loc.Localize>(includeInactive: true)
                     .ForEach(localize => localize.Term = element.GetTermData().Term);
@@ -104,7 +105,8 @@ namespace ZNT.Evolution.Core
         {
             var mod = menu.AddPanel("Plugin");
             var content = mod.GetComponentInChildren<VerticalLayoutGroup>();
-            var fullscreen = menu.transform.Find("Option Panels/Video/Scroll Area/ScrollView/Content/FullScreen Entry").gameObject;
+            var fullscreen = menu.transform
+                .Find("Option Panels/Video/Scroll Area/ScrollView/Content/FullScreen Entry").gameObject;
 
             foreach (var (_, info) in BepInEx.Bootstrap.Chainloader.PluginInfos)
             {
@@ -120,7 +122,7 @@ namespace ZNT.Evolution.Core
                     term.SetTranslation(9, $"[{info.Metadata.Name}] {entry.Description.Description}");
                     if (field.GetValueType() == typeof(ConfigEntry<bool>))
                     {
-                        var item = UnityEngine.Object.Instantiate(fullscreen, content.transform);
+                        var item = UnityEngine.Object.Instantiate(original: fullscreen, parent: content.transform);
                         item.name = $"{info.Metadata.Name} {name} Entry";
                         item.GetComponentsInChildren<I2.Loc.Localize>(includeInactive: true)
                             .ForEach(localize => localize.Term = $"{info.Metadata.Name}/{name}");
@@ -166,7 +168,7 @@ namespace ZNT.Evolution.Core
             var panels = menu.transform.Find("Option Panels");
             var tabs = menu.transform.Find("Option Menu/Tabs");
 
-            var panel = UnityEngine.Object.Instantiate(panels.GetChild(0).gameObject, panels);
+            var panel = UnityEngine.Object.Instantiate(original: panels.GetChild(0).gameObject, parent: panels);
             panel.name = name;
             var content = panel.GetComponentInChildren<VerticalLayoutGroup>();
             content.transform.DestroyChildren();
@@ -176,7 +178,7 @@ namespace ZNT.Evolution.Core
             var index = container.Value.Length;
             container.Value = container.Value.AddItem(panel).ToArray();
 
-            var tab = UnityEngine.Object.Instantiate(tabs.GetChild(0).gameObject, tabs);
+            var tab = UnityEngine.Object.Instantiate(original: tabs.GetChild(0).gameObject, parent: tabs);
             tab.name = name;
             tab.GetComponentsInChildren<I2.Loc.Localize>(includeInactive: true)
                 .ForEach(localize => localize.Term = $"Evolution/{name}_Tab");
