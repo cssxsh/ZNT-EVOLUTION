@@ -66,28 +66,25 @@ namespace ZNT.Evolution.Core
                         Logger.LogDebug($"[{bundle.name}] {brush}");
                         Logger.LogDebug($"[{bundle.name}] {brush.DefaultOrientation.GetVariation(0)}");
                         break;
-                    case TextAsset bank:
-                        if (name == "bank.strings" || name == "bank_")
+                    case TextAsset bank when name == "bank.strings" || name == "bank_":
+                    {
+                        var task = Task.Run(() =>
                         {
-                            var task = Task.Run(() =>
+                            try
                             {
-                                try
-                                {
-                                    FMODUnity.RuntimeManager.LoadBank(asset: bank, loadSamples: true);
-                                }
-                                catch (FMODUnity.BankLoadException e)
-                                {
-                                    Logger.LogError(e);
-                                }
-                            });
-
-                            yield return new WaitUntil(() => task.IsCompleted);
-                        }
-
+                                FMODUnity.RuntimeManager.LoadBank(asset: bank, loadSamples: true);
+                            }
+                            catch (FMODUnity.BankLoadException e)
+                            {
+                                Logger.LogError(e);
+                            }
+                        });
+                        yield return new WaitUntil(() => task.IsCompleted);
+                    }
                         Logger.LogDebug($"[{bundle.name}] {asset.name}");
                         break;
                     default:
-                        Logger.LogDebug($"[{bundle.name}] {request.asset.name}");
+                        Logger.LogDebug($"[{bundle.name}] {asset.name}");
                         break;
                 }
 
@@ -378,56 +375,84 @@ namespace ZNT.Evolution.Core
                     case Shader shader:
                         Logger.LogDebug($"[{bundle.name}] {shader}");
                         break;
-                    case TextAsset bank:
-                        if (name == "bank.strings" || name == "bank_")
+                    case TextAsset bank when name == "bank.strings" || name == "bank_":
+                    {
+                        var task = Task.Run(() =>
                         {
-                            var task = Task.Run(() =>
+                            try
                             {
-                                try
-                                {
-                                    FMODUnity.RuntimeManager.LoadBank(asset: bank, loadSamples: true);
-                                }
-                                catch (FMODUnity.BankLoadException e)
-                                {
-                                    Logger.LogError(e);
-                                }
-                            });
-
-                            yield return new WaitUntil(() => task.IsCompleted);
-                        }
-
+                                FMODUnity.RuntimeManager.LoadBank(asset: bank, loadSamples: true);
+                            }
+                            catch (FMODUnity.BankLoadException e)
+                            {
+                                Logger.LogError(e);
+                            }
+                        });
+                        yield return new WaitUntil(() => task.IsCompleted);
+                    }
                         Logger.LogDebug($"[{bundle.name}] {asset.name}");
                         break;
                     default:
-                        Logger.LogDebug($"[{bundle.name}] {request.asset.name}");
+                        Logger.LogDebug($"[{bundle.name}] {asset.name}");
                         break;
                 }
             }
 
-            var apply = Task.Run(() =>
+            foreach (var addition in Directory.EnumerateFiles(path, "*.addition.json"))
             {
-                try
+                var apply = Task.Run(() =>
                 {
-                    bundle.ApplyFromFolder(path: path);
-                }
-                catch (Exception e)
-                {
-                    Logger.LogWarning(e);
-                }
-            });
-            yield return new WaitUntil(() => apply.IsCompleted);
+                    try
+                    {
+                        switch (addition)
+                        {
+                            case "animation.addition.json":
+                                bundle.ApplyAnimationFormFolder(path: path);
+                                break;
+                            case "element.addition.json":
+                                bundle.ApplyElementFormFolder(path: path);
+                                break;
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.LogWarning(e);
+                    }
+                });
+                yield return new WaitUntil(() => apply.IsCompleted);
+            }
         }
 
-        private static void ApplyFromFolder(this AssetBundle bundle, string path)
+        private static void ApplyAnimationFormFolder(this AssetBundle bundle, string path)
         {
             var material = bundle.LoadAsset<Material>("sprites");
             var info = DeserializeObject<SpriteInfo>(folder: path, file: "sprite.info.json");
             var sprites = CreateSprite(material, info);
             Logger.LogDebug($"CreateSprite -> {sprites} from {sprites.material}");
 
-            var addition = DeserializeObject<AnimationAddition>(folder: path, file: "animation.addition.json");
-            var animations = addition.Apply();
-            Logger.LogInfo($"{animations.Count} animations apply");
+            var animation = DeserializeObject<AnimationAddition>(folder: path, file: "animation.addition.json");
+            animation.Apply();
+            Logger.LogInfo($"{animation.Targets.Length} animations apply");
+        }
+
+        private static void ApplyElementFormFolder(this AssetBundle _, string path)
+        {
+            var asset = DeserializeObject<LevelElementInfo>(folder: path, file: "element.addition.json").CustomAsset;
+            switch (asset)
+            {
+                case var _ when asset.EndsWith("PhysicObjectAsset"):
+                    var physic = DeserializeObject<PhysicObjectAssetWrap>(folder: path, file: "asset.json");
+                    Logger.LogDebug($"asset.json -> {physic} from {physic.Animation}");
+                    break;
+                case var _ when asset.EndsWith("ExplosionAsset"):
+                    var explosion = DeserializeObject<ExplosionAssetWrap>(folder: path, file: "asset.json");
+                    Logger.LogDebug($"asset.json -> {explosion}");
+                    break;
+            }
+
+            var element = DeserializeObject<LevelElementAddition>(folder: path, file: "element.addition.json");
+            element.Apply();
+            Logger.LogInfo($"{element.Targets.Length} elements apply");
         }
 
         private static tk2dSpriteCollectionData CreateSingleSprite(Material material)
@@ -502,27 +527,6 @@ namespace ZNT.Evolution.Core
 
             UnityEngine.Object.DontDestroyOnLoad(impl);
             return impl;
-        }
-
-        private static ISet<tk2dSpriteAnimation> Apply(this AnimationAddition addition)
-        {
-            var animations = Resources.FindObjectsOfTypeAll<tk2dSpriteAnimation>();
-            return addition.Clips.Zip(addition.Targets, (clip, name) =>
-            {
-                foreach (var animation in animations)
-                {
-                    if (animation.name != name) continue;
-                    animation.clips = animation.clips.AddToArray(clip);
-                    Traverse.Create(animation)
-                        .Field<Dictionary<string, tk2dSpriteAnimationClip>>("clipNameCache").Value = null;
-                    Traverse.Create(animation)
-                        .Field<Dictionary<string, int>>("idNameCache").Value = null;
-                    animation.InitializeClipCache();
-                    return animation;
-                }
-
-                throw new KeyNotFoundException(message: $"tk2dSpriteAnimation(name: {name})");
-            }).ToHashSet();
         }
 
         private static LevelElement DecorToBrush(this LevelElement origin)

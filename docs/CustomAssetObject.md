@@ -2,74 +2,6 @@
 
 > 主要有 HumanAsset, ZombieAsset, DecorAsset
 
-## 枚举
-
-```csharp
-public enum DamageType
-{
-  None,
-  Fall,
-  Bite,
-  Gun,
-  Rifle,
-  Shotgun,
-  Melee,
-  Sword,
-  Canon,
-  Explosion,
-  Spikes,
-  Fire,
-  Electricity,
-  Laser,
-  Sentry,
-  Contamination,
-  Sacrifice,
-  Acid,
-  Radioactivity,
-  Ripped,
-  Plasma,
-  Squashed,
-  TankDash,
-  MachineGun,
-  Crawler,
-  Tank,
-  Boomer,
-  Spit,
-  HolyFire,
-}
-```
-
-```csharp
-public enum Voice
-{
-  None,
-  Woman1,
-  Woman2,
-  Man1,
-  Man2,
-  Survivor1,
-  Survivor2,
-  Bouncer,
-  Cop,
-  Hazmat,
-  Doctor,
-  Computer,
-  Dj,
-  Clown,
-  Terminator,
-  DrugLord,
-  Gertrude,
-  Chemist,
-  ChemistMutated,
-  ChemistFinal,
-  Michelle,
-  MachineGunner,
-  Director,
-  Preacher,
-  Homeless,
-}
-```
-
 ## 结构
 
 - HumanAsset
@@ -237,3 +169,27 @@ public enum Voice
   * DamageAppliedTo `UnityEngine.LayerMask`
   * Speed
   * MoveOnStart `true`/`false`
+
+- PhysicObjectAsset
+  * name
+  * <u>ref library</u> `tk2dSpriteAnimation`
+  * playAnimation `true`/`false`
+  * MoveAnimation
+  * HitAnimation
+  * <u>ref RollingSound</u> `FMODAsset`
+  * <u>ref HitSound</u> `FMODAsset`
+  * ColliderRadius
+  * ColliderOffset `UnityEngine.Vector2`
+  * AttachToParent `true`/`false`
+  * StartDirection `UnityEngine.Vector2`
+  * StartForce
+  * StartAngularVelocity
+  * DamageRadius
+  * DamageOffset `UnityEngine.Vector2`
+  * DamageCharacterOnTrigger `true`/`false`
+  * DamageCharacterOnCollide `true`/`false`
+  * DamageAmount
+  * DamageType `DamageType`
+  * <u>ref Explosion</u> `ExplosionAsset`,
+  * <u>ref ExplodeEffect</u> `VisualEffect`
+  * ExplodeOn `Wall`/`Ground`/`Ceiling`/`Target`
