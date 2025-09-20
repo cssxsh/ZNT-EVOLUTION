@@ -75,5 +75,19 @@ namespace ZNT.Evolution.Core
         }
 
         #endregion
+
+        #region LevelElement
+
+        private static bool ShowAllElement => EvolutionCorePlugin.ShowAllElement.Value;
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(LevelElement), "Useable", MethodType.Getter)]
+        public static void Enable(LevelElement __instance, ref bool __result)
+        {
+            if (!ShowAllElement) return;
+            __result = true;
+        }
+
+        #endregion
     }
 }

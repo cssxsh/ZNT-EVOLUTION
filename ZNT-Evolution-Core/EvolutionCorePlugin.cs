@@ -11,6 +11,8 @@ namespace ZNT.Evolution.Core
 
         internal static ConfigEntry<bool> RayConeFindNearest;
 
+        internal static ConfigEntry<bool> ShowAllElement;
+
         public void Awake()
         {
             Harmony.CreateAndPatchAll(typeof(DebugPatch));
@@ -24,6 +26,7 @@ namespace ZNT.Evolution.Core
         {
             CorpsesCountMax = Config.Bind("config", "CorpsesCountMax", 20, "尸体数量上限");
             RayConeFindNearest = Config.Bind("config", "RayConeFindNearest", false, "视锥邻近查找");
+            ShowAllElement = Config.Bind("config", "ShowAllElement", false, "显示所有组件");
         }
     }
 }
