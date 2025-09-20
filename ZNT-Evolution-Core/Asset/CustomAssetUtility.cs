@@ -17,7 +17,6 @@ namespace ZNT.Evolution.Core.Asset
                 new TopConverter(),
                 new NameConverter(),
                 new StringEnumConverter(),
-                new NullConverter(include: typeof(tk2dSpriteDefinition)),
                 new ColorConverter(),
                 new Vector2Converter(),
                 new Vector3Converter(),
@@ -28,6 +27,13 @@ namespace ZNT.Evolution.Core.Asset
 
         public static void SerializeObjectToPath(string target, object data)
         {
+            switch (data)
+            {
+                case LevelElement element:
+                    element.SpriteDefinition = null;
+                    break;
+            }
+
             var serializer = JsonSerializer.Create(SerializerSettings);
             SaveObjectToPath(serializer, data, target);
         }

@@ -390,7 +390,6 @@
         <Compile Include="Asset\LevelElementInfo.cs"/>
         <Compile Include="Asset\MovingObjectAssetWrap.cs"/>
         <Compile Include="Asset\NameConverter.cs"/>
-        <Compile Include="Asset\NullConverter.cs"/>
         <Compile Include="Asset\PhysicObjectAssetWrap.cs"/>
         <Compile Include="Asset\ScriptableObjectConverter.cs"/>
         <Compile Include="Asset\SpawnPointAsset.cs"/>
