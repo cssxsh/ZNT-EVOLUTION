@@ -42,18 +42,6 @@ namespace ZNT.Evolution.Core
         [HarmonyPatch(typeof(I2.Loc.LocalizationManager), "GetTermTranslation")]
         public static string GetTermTranslation(string __result, string Term) => __result ?? Term;
 
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(Physics2D), "RaycastNonAlloc",
-            typeof(Vector2), typeof(Vector2), typeof(RaycastHit2D[]), typeof(float))]
-        public static void RaycastNonAlloc(Vector2 origin, Vector2 direction, RaycastHit2D[] results, float distance)
-        {
-            if (results.Length != 1) return;
-            DetectionHelper.DistanceCheck[0] = results[0];
-            var count = Physics2D.RaycastNonAlloc(origin, direction, DetectionHelper.DistanceCheck, distance);
-            Array.Sort(DetectionHelper.DistanceCheck, 0, count);
-            results[0] = DetectionHelper.DistanceCheck[0];
-        }
-
         [HarmonyPrefix]
         [HarmonyPatch(typeof(SpawnCharacterChooser), "OnCreate")]
         public static void OnCreate(SpawnCharacterChooser __instance)
@@ -82,6 +70,37 @@ namespace ZNT.Evolution.Core
                         .Distinct());
                     break;
             }
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(RayConeDetection), "UpdateAngles", typeof(bool))]
+        public static void UpdateAngles(RayConeDetection __instance)
+        {
+            var rays = Traverse.Create(__instance).Field<Vector2[]>("rays").Value;
+            rays.OrderBy(ray => Guid.NewGuid()).ToArray().CopyTo(rays);
+            // if (__instance.GetComponentInParent<CharacterBehaviour>() is ZombieBehaviour) return;
+            // var human = (HumanAsset)
+            //     ((LevelElement)LevelElementIndex.Index["837e592ae7c270b4089d9222b1f72146"]).CustomAsset;
+            // for (var i = __instance.transform.childCount; i < __instance.RayCount; i++)
+            // {
+            //     var laser = UnityEngine.Object.Instantiate(human.Attachments["attach_laser"], __instance.transform);
+            //     laser.layer = LayerMask.NameToLayer("Renderer");
+            // }
+            //
+            // for (var i = 0; i < __instance.transform.childCount; i++)
+            // {
+            //     __instance.transform.GetChild(i).gameObject.SetActive(false);
+            // }
+            //
+            // var inverted = Traverse.Create(__instance).Field<int>("inverted").Value;
+            // for (var i = 0; i < rays.Length; i++)
+            // {
+            //     var laser = __instance.transform.GetChild(i);
+            //     laser.gameObject.SetActive(true);
+            //     laser.right = rays[i] * inverted;
+            //     laser.GetComponent<LaserAttachment>().MaxDistance = __instance.Distance;
+            //     laser.GetComponent<LaserRenderer>().Color = Color.red;
+            // }
         }
     }
 }
