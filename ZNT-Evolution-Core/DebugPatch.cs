@@ -26,13 +26,12 @@ namespace ZNT.Evolution.Core
         }
 
         [HarmonyPrefix]
+        [HarmonyPatch(typeof(Challenge), "IsFailed")]
         [HarmonyPatch(typeof(Challenge), "IsCompleted")]
         public static void IsCompleted(Challenge __instance)
         {
-            if (Traverse.Create(__instance).Field<List<ChallengeRule>>("checkList").Value == null)
-            {
-                __instance.Initialize();
-            }
+            if (Traverse.Create(__instance).Field<List<ChallengeRule>>("checkList").Value != null) return;
+            __instance.Initialize();
         }
 
         [HarmonyPrefix]
