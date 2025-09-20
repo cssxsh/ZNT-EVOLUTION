@@ -105,8 +105,6 @@ namespace ZNT.Evolution.Core
         {
             var mod = menu.AddPanel("Plugin");
             var content = mod.GetComponentInChildren<VerticalLayoutGroup>();
-            var fullscreen = menu.transform
-                .Find("Option Panels/Video/Scroll Area/ScrollView/Content/FullScreen Entry").gameObject;
 
             foreach (var (_, info) in BepInEx.Bootstrap.Chainloader.PluginInfos)
             {
@@ -120,8 +118,10 @@ namespace ZNT.Evolution.Core
                                ?? _localization.AddTerm($"{info.Metadata.Name}/{name}");
                     term.SetTranslation(0, $"[{info.Metadata.Name}] {entry.Definition.Key}");
                     term.SetTranslation(9, $"[{info.Metadata.Name}] {entry.Description.Description}");
-                    if (field.GetValueType() == typeof(ConfigEntry<bool>))
+                    if (entry.SettingType == typeof(bool))
                     {
+                        var fullscreen = menu.transform
+                            .Find("Option Panels/Video/Scroll Area/ScrollView/Content/FullScreen Entry").gameObject;
                         var item = UnityEngine.Object.Instantiate(original: fullscreen, parent: content.transform);
                         item.name = $"{info.Metadata.Name} {name} Entry";
                         item.GetComponentsInChildren<I2.Loc.Localize>(includeInactive: true)
@@ -131,9 +131,30 @@ namespace ZNT.Evolution.Core
                         toggle.OnValueChanged(value => entry.BoxedValue = value);
                         toggle.SetIsOnWithoutNotify((bool)entry.BoxedValue);
                     }
-                    else
+                    else if (entry.SettingType == typeof(int))
                     {
-                        // ...
+                        var fps = menu.transform
+                            .Find("Option Panels/Video/Scroll Area/ScrollView/Content/Max FPS Entry").gameObject;
+                        var item = UnityEngine.Object.Instantiate(original: fps, parent: content.transform);
+                        item.name = $"{info.Metadata.Name} {name} Entry";
+                        item.GetComponentsInChildren<I2.Loc.Localize>(includeInactive: true)
+                            .ForEach(localize => localize.Term = $"{info.Metadata.Name}/{name}");
+                        item.SetActive(true);
+                        var input = item.GetComponentInChildren<InputField>(includeInactive: true);
+                        input.OnValueChanged(value =>
+                        {
+                            if (value == "") value = "20";
+                            entry.SetSerializedValue(value);
+                        });
+                        input.SetTextWithoutNotify(((int)entry.BoxedValue & int.MaxValue).ToString());
+                        input.interactable = (int)entry.BoxedValue >= 0;
+                        var toggle = item.GetComponentInChildren<Toggle>(includeInactive: true);
+                        toggle.OnValueChanged(value =>
+                        {
+                            entry.BoxedValue = (value ? int.MaxValue : -1) | ((int)entry.BoxedValue & int.MaxValue);
+                            input.interactable = value;
+                        });
+                        toggle.SetIsOnWithoutNotify(input.interactable);
                     }
                 }
             }
@@ -150,12 +171,20 @@ namespace ZNT.Evolution.Core
                         if (!typeof(ConfigEntryBase).IsAssignableFrom(field.GetValueType())) continue;
                         var entry = plugin.Field(name).GetValue<ConfigEntryBase>();
                         entry.BoxedValue = entry.DefaultValue;
+                        var item = content.transform.Find($"{info.Metadata.Name} {name} Entry");
                         switch (entry.BoxedValue)
                         {
                             case bool value:
-                                content.transform.Find($"{info.Metadata.Name} {name} Entry")
-                                    .GetComponentInChildren<Toggle>(includeInactive: true)
+                                item.GetComponentInChildren<Toggle>(includeInactive: true)
                                     .SetIsOnWithoutNotify(value);
+                                break;
+                            case int value:
+                                item.GetComponentInChildren<InputField>(includeInactive: true)
+                                    .SetTextWithoutNotify((value & int.MaxValue).ToString());
+                                item.GetComponentInChildren<InputField>(includeInactive: true)
+                                    .interactable = value >= 0;
+                                item.GetComponentInChildren<Toggle>(includeInactive: true)
+                                    .SetIsOnWithoutNotify(value >= 0);
                                 break;
                         }
                     }
@@ -206,6 +235,12 @@ namespace ZNT.Evolution.Core
         {
             toggle.onValueChanged = new Toggle.ToggleEvent();
             toggle.onValueChanged.AddListener(call);
+        }
+
+        private static void OnValueChanged(this InputField input, UnityAction<string> call)
+        {
+            input.onValueChanged = new InputField.OnChangeEvent();
+            input.onValueChanged.AddListener(call);
         }
 
         private static I2.Loc.TermData GetTermData(this LevelElement element)

@@ -405,6 +405,7 @@
         <Compile Include="Editor\HumanEditor.cs"/>
         <Compile Include="EvolutionCorePlugin.cs"/>
         <Compile Include="DebugPatch.cs"/>
+        <Compile Include="GlobalSettingsPatch.cs"/>
         <Compile Include="LevelElementLoader.cs"/>
         <Compile Include="CustomAssetObjectPatch.cs"/>
         <Compile Include="Properties\AssemblyInfo.cs"/>
