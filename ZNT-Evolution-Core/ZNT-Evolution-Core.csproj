@@ -392,7 +392,6 @@
         <Compile Include="Asset\MovingObjectAssetWrapper.cs"/>
         <Compile Include="Asset\UnityEngineObjectConverter.cs"/>
         <Compile Include="Asset\PhysicObjectAssetWrapper.cs"/>
-        <Compile Include="Asset\ScriptableObjectConverter.cs"/>
         <Compile Include="Asset\SpawnPointAsset.cs"/>
         <Compile Include="Asset\SpriteInfo.cs"/>
         <Compile Include="Asset\SpriteMerge.cs"/>
