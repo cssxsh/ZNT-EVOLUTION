@@ -1,8 +1,10 @@
+using System;
 using HarmonyLib;
 
 namespace ZNT.Evolution.Core.Asset
 {
-    internal class ExplosionAssetWrap : ExplosionAsset
+    [Serializable]
+    internal class ExplosionAssetWrapper : ExplosionAsset
     {
         public bool AutoExplode
         {

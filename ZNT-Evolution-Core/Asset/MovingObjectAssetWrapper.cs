@@ -1,8 +1,10 @@
+using System;
 using HarmonyLib;
 
 namespace ZNT.Evolution.Core.Asset
 {
-    internal class MovingObjectAssetWrap : MovingObjectAsset
+    [Serializable]
+    internal class MovingObjectAssetWrapper : MovingObjectAsset
     {
         public tk2dSpriteAnimation Animation
         {

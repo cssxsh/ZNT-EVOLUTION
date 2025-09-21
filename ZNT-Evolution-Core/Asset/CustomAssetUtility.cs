@@ -14,7 +14,6 @@ namespace ZNT.Evolution.Core.Asset
             TypeNameHandling = TypeNameHandling.Auto,
             Converters =
             {
-                new TopConverter(),
                 new NameConverter(),
                 new StringEnumConverter(),
                 new ColorConverter(),
@@ -118,34 +117,34 @@ namespace ZNT.Evolution.Core.Asset
             return jsonSerializer.Deserialize<T>(json);
         }
 
-        internal static MovingObjectAssetWrap Wrap(this MovingObjectAsset moving)
+        internal static MovingObjectAssetWrapper Wrap(this MovingObjectAsset moving)
         {
-            if (moving is MovingObjectAssetWrap wrapped) return wrapped;
-            var wrap = ScriptableObject.CreateInstance<MovingObjectAssetWrap>();
+            if (moving is MovingObjectAssetWrapper wrapped) return wrapped;
+            var wrap = ScriptableObject.CreateInstance<MovingObjectAssetWrapper>();
             Traverse.IterateFields(moving, wrap, Traverse.CopyFields);
             return wrap;
         }
 
-        internal static PhysicObjectAssetWrap Wrap(this PhysicObjectAsset physic)
+        internal static PhysicObjectAssetWrapper Wrap(this PhysicObjectAsset physic)
         {
-            if (physic is PhysicObjectAssetWrap wrapped) return wrapped;
-            var wrap = ScriptableObject.CreateInstance<PhysicObjectAssetWrap>();
+            if (physic is PhysicObjectAssetWrapper wrapped) return wrapped;
+            var wrap = ScriptableObject.CreateInstance<PhysicObjectAssetWrapper>();
             Traverse.IterateFields(physic, wrap, Traverse.CopyFields);
             return wrap;
         }
 
-        internal static TriggerAssetWrap Wrap(this TriggerAsset trigger)
+        internal static TriggerAssetWrapper Wrap(this TriggerAsset trigger)
         {
-            if (trigger is TriggerAssetWrap wrapped) return wrapped;
-            var wrap = ScriptableObject.CreateInstance<TriggerAssetWrap>();
+            if (trigger is TriggerAssetWrapper wrapped) return wrapped;
+            var wrap = ScriptableObject.CreateInstance<TriggerAssetWrapper>();
             Traverse.IterateFields(trigger, wrap, Traverse.CopyFields);
             return wrap;
         }
 
-        internal static ExplosionAssetWrap Wrap(this ExplosionAsset explosion)
+        internal static ExplosionAssetWrapper Wrap(this ExplosionAsset explosion)
         {
-            if (explosion is ExplosionAssetWrap wrapped) return wrapped;
-            var wrap = ScriptableObject.CreateInstance<ExplosionAssetWrap>();
+            if (explosion is ExplosionAssetWrapper wrapped) return wrapped;
+            var wrap = ScriptableObject.CreateInstance<ExplosionAssetWrapper>();
             Traverse.IterateFields(explosion, wrap, Traverse.CopyFields);
             return wrap;
         }

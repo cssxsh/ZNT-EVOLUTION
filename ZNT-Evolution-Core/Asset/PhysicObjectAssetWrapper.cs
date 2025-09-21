@@ -1,9 +1,11 @@
+using System;
 using HarmonyLib;
 using UnityEngine;
 
 namespace ZNT.Evolution.Core.Asset
 {
-    internal class PhysicObjectAssetWrap : PhysicObjectAsset
+    [Serializable]
+    internal class PhysicObjectAssetWrapper : PhysicObjectAsset
     {
         public bool CarryParent
         {

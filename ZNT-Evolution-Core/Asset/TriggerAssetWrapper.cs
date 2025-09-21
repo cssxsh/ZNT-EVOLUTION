@@ -1,11 +1,13 @@
+using System;
 using HarmonyLib;
 using UnityEngine;
 
 namespace ZNT.Evolution.Core.Asset
 {
-    internal class TriggerAssetWrap : TriggerAsset
+    [Serializable]
+    internal class TriggerAssetWrapper : TriggerAsset
     {
-        public TrapType TrapType
+        public TrapType TrapMode
         {
             get => Traverse.Create(this).Field<TrapType>("type").Value;
             set => Traverse.Create(this).Field<TrapType>("type").Value = value;

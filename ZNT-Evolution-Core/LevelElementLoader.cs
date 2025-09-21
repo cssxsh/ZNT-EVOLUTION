@@ -232,16 +232,16 @@ namespace ZNT.Evolution.Core
                     Logger.LogDebug($"asset.json -> {sentry} from {sentry.Animation}");
                     break;
                 case var _ when asset.EndsWith("MovingObjectAsset"):
-                    var moving = DeserializeObject<MovingObjectAssetWrap>(folder: path, file: "asset.json");
-                    if (moving.Animation == null) moving.Animation = animation;
+                    var moving = DeserializeObject<MovingObjectAsset>(folder: path, file: "asset.json").Wrap();
+                    moving.Animation ??= animation;
                     Logger.LogDebug($"asset.json -> {moving} from {moving.Animation}");
                     break;
                 case var _ when asset.EndsWith("PhysicObjectAsset"):
-                    var physic = DeserializeObject<PhysicObjectAssetWrap>(folder: path, file: "asset.json");
+                    var physic = DeserializeObject<PhysicObjectAsset>(folder: path, file: "asset.json").Wrap();
                     Logger.LogDebug($"asset.json -> {physic} from {physic.Animation}");
                     break;
                 case var _ when asset.EndsWith("TriggerAsset"):
-                    var trigger = DeserializeObject<TriggerAssetWrap>(folder: path, file: "asset.json");
+                    var trigger = DeserializeObject<TriggerAsset>(folder: path, file: "asset.json").Wrap();
                     Logger.LogDebug($"asset.json -> {trigger} from {trigger.Animation}");
                     break;
                 case var _ when asset.EndsWith("DetectionAsset"):
@@ -249,7 +249,7 @@ namespace ZNT.Evolution.Core
                     Logger.LogDebug($"asset.json -> {detection}");
                     break;
                 case var _ when asset.EndsWith("ExplosionAsset"):
-                    var explosion = DeserializeObject<ExplosionAssetWrap>(folder: path, file: "asset.json");
+                    var explosion = DeserializeObject<ExplosionAsset>(folder: path, file: "asset.json");
                     Logger.LogDebug($"asset.json -> {explosion}");
                     break;
                 case var _ when asset.EndsWith("ScreamAsset"):
@@ -441,11 +441,11 @@ namespace ZNT.Evolution.Core
             switch (asset)
             {
                 case var _ when asset.EndsWith("PhysicObjectAsset"):
-                    var physic = DeserializeObject<PhysicObjectAssetWrap>(folder: path, file: "asset.json");
+                    var physic = DeserializeObject<PhysicObjectAsset>(folder: path, file: "asset.json").Wrap();
                     Logger.LogDebug($"asset.json -> {physic} from {physic.Animation}");
                     break;
                 case var _ when asset.EndsWith("ExplosionAsset"):
-                    var explosion = DeserializeObject<ExplosionAssetWrap>(folder: path, file: "asset.json");
+                    var explosion = DeserializeObject<ExplosionAsset>(folder: path, file: "asset.json");
                     Logger.LogDebug($"asset.json -> {explosion}");
                     break;
             }
