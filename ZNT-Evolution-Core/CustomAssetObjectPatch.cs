@@ -16,9 +16,9 @@ namespace ZNT.Evolution.Core
         public static void LoadFromAsset(MovingObjectAsset __instance, GameObject gameObject)
         {
             var controller = gameObject.GetComponent<MovingObjectAnimationController>();
-            if (controller == null) return;
+            if (controller is null) return;
             var orientation = gameObject.GetComponent<ObjectOrientation>();
-            if (orientation == null) return;
+            if (orientation is null) return;
             var current = orientation.CurrentOrientation.ToString().ToLower();
             var clip = string.Format(__instance.StandAnimation, current);
             if (!controller.Animator.AnimationExists(clip)) return;
@@ -31,7 +31,7 @@ namespace ZNT.Evolution.Core
         public static void CurrentOrientation(ObjectOrientation __instance, ObjectOrientation.Orientation value)
         {
             var controller = __instance.GetComponentInParent<MovingObjectAnimationController>();
-            if (controller == null) return;
+            if (controller is null) return;
             var current = value.ToString().ToLower();
             var clip = string.Format(controller.Asset.StandAnimation, current);
             if (!controller.Animator.AnimationExists(clip)) return;
@@ -43,9 +43,9 @@ namespace ZNT.Evolution.Core
         public static void ForcePlay(SpriteAnimator __instance, ref string animName)
         {
             var controller = __instance.GetComponentInParent<MovingObjectAnimationController>();
-            if (controller == null) return;
+            if (controller is null) return;
             var orientation = __instance.GetComponentInParent<ObjectOrientation>();
-            if (orientation == null) return;
+            if (orientation is null) return;
             var current = orientation.CurrentOrientation.ToString().ToLower();
             animName = string.Format(animName, current);
         }
@@ -122,7 +122,7 @@ namespace ZNT.Evolution.Core
         [HarmonyPatch(typeof(SignalReceiverLinker), "OnAwake")]
         public static void OnAwake(SignalReceiverLinker __instance)
         {
-            __instance.ExcludedComponents ??= __instance.GetComponentsInChildren<BaseComponent>(true)
+            __instance.ExcludedComponents ??= __instance.GetComponentsInChildren<BaseComponent>(includeInactive: true)
                 .Where(component => !component.EditorVisibility).ToList();
             __instance.ExcludedGameObjects ??= new List<GameObject>();
         }
@@ -131,7 +131,7 @@ namespace ZNT.Evolution.Core
         [HarmonyPatch(typeof(SignalSenderLinker), "OnAwake")]
         public static void OnAwake(SignalSenderLinker __instance)
         {
-            __instance.ExcludedComponents ??= __instance.GetComponentsInChildren<BaseComponent>(true)
+            __instance.ExcludedComponents ??= __instance.GetComponentsInChildren<BaseComponent>(includeInactive: true)
                 .Where(component => !component.EditorVisibility).ToList();
             __instance.ExcludedGameObjects ??= new List<GameObject>();
         }

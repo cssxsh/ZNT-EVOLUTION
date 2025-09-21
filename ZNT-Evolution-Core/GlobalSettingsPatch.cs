@@ -82,11 +82,7 @@ namespace ZNT.Evolution.Core
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(LevelElement), "Useable", MethodType.Getter)]
-        public static void Enable(LevelElement __instance, ref bool __result)
-        {
-            if (!ShowAllElement) return;
-            __result = true;
-        }
+        public static void Usable(LevelElement __instance, ref bool __result) => __result = ShowAllElement || __result;
 
         #endregion
     }

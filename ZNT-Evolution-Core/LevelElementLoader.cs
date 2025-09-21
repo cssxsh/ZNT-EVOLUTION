@@ -31,7 +31,7 @@ namespace ZNT.Evolution.Core
                 var request = AssetBundle.LoadFromFileAsync(file);
                 yield return request;
                 bundle = request.assetBundle;
-                if (bundle == null)
+                if (bundle is null)
                 {
                     Logger.LogWarning($"AssetBundle '{file}' cannot read");
                     yield break;
@@ -46,7 +46,7 @@ namespace ZNT.Evolution.Core
                 var request = bundle.LoadAssetAsync(name);
                 yield return request;
                 var asset = request.asset;
-                if (asset == null) continue;
+                if (asset is null) continue;
 
                 switch (asset)
                 {
@@ -167,7 +167,7 @@ namespace ZNT.Evolution.Core
             Logger.LogDebug($"brush -> {brush} -> {variation}");
 
             var preview = bundle.LoadAsset<Sprite>("preview");
-            if (preview != null) Logger.LogDebug($"preview -> {preview} -> {preview.texture}");
+            if (preview) Logger.LogDebug($"preview -> {preview} -> {preview.texture}");
 
             var asset = DeserializeObject<LevelElementInfo>(folder: path, file: "element.json").CustomAsset;
             switch (asset)
@@ -287,7 +287,7 @@ namespace ZNT.Evolution.Core
                 var element = DeserializeObject<LevelElement>(folder: path, file: "element.json");
                 Logger.LogDebug($"element.json -> {element} to {element.Title}");
 
-                if (element.Brush != null)
+                if (element.Brush)
                 {
                     var brush = element.DecorToBrush();
                     var id = brush.Bind();
@@ -344,7 +344,7 @@ namespace ZNT.Evolution.Core
                 var request = AssetBundle.LoadFromFileAsync(file);
                 yield return request;
                 bundle = request.assetBundle;
-                if (bundle == null)
+                if (bundle is null)
                 {
                     Logger.LogWarning($"AssetBundle '{file}' cannot read");
                     yield break;
@@ -359,7 +359,7 @@ namespace ZNT.Evolution.Core
                 var request = bundle.LoadAssetAsync(name);
                 yield return request;
                 var asset = request.asset;
-                if (asset == null) continue;
+                if (asset is null) continue;
 
                 switch (asset)
                 {

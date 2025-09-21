@@ -111,5 +111,10 @@ namespace ZNT.Evolution.Core.Editor
             get => Explosion.ShakeCamera;
             set => Explosion.ShakeCamera = value;
         }
+
+        private void OnDestroy()
+        {
+            Destroy(Explosion);
+        }
     }
 }

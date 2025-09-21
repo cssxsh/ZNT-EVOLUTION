@@ -22,7 +22,7 @@ namespace ZNT.Evolution.Core
         public static void LoadFromAsset(CustomAssetObject __instance, GameObject gameObject)
         {
             BepInEx.Logging.Logger.CreateLogSource("CustomAssetObject")
-                .LogInfo($"LoadFromAsset: {gameObject} for {__instance}");
+                .LogDebug($"LoadFromAsset: {gameObject} for {__instance}");
         }
 
         [HarmonyPrefix]

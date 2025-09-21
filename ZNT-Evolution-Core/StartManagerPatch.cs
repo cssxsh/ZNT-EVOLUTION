@@ -59,7 +59,7 @@ namespace ZNT.Evolution.Core
                 var fonts = request.assetBundle.LoadAllAssets<TMPro.TMP_FontAsset>();
                 TMPro.TMP_Settings.fallbackFontAssets.AddRange(fonts);
                 var font = request.assetBundle.LoadAsset<TMPro.TMP_FontAsset>("wqy-microhei_CN SDF.asset");
-                if (font != null) TMPro.TMP_Settings.defaultFontAsset.fallbackFontAssets.Insert(0, font);
+                if (font) TMPro.TMP_Settings.defaultFontAsset.fallbackFontAssets.Insert(0, font);
                 Logger.LogInfo($"Loaded Patch {file}");
             }
         }

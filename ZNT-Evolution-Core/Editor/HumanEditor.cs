@@ -78,8 +78,8 @@ namespace ZNT.Evolution.Core.Editor
             set => Behaviour.RelayAlertOverTime = value;
         }
 
-        [SerializeInEditor(name: "Vision All")]
-        public bool VisionAll
+        [SerializeInEditor(name: "Vision Cast All")]
+        public bool VisionCastAll
         {
             get => ((RayConeDetection)Behaviour.Vision.Detection).CastAll;
             set => ((RayConeDetection)Behaviour.Vision.Detection).CastAll = value;
