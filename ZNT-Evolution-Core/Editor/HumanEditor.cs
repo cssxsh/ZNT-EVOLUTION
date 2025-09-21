@@ -1,3 +1,4 @@
+using HarmonyLib;
 using UnityEngine;
 
 namespace ZNT.Evolution.Core.Editor
@@ -83,6 +84,20 @@ namespace ZNT.Evolution.Core.Editor
         {
             get => ((RayConeDetection)Behaviour.Vision.Detection).CastAll;
             set => ((RayConeDetection)Behaviour.Vision.Detection).CastAll = value;
+        }
+
+        [SerializeInEditor(name: "Block Opponents")]
+        public bool BlockOpponents
+        {
+            get => Traverse.Create(Behaviour.Stopper).Field<bool>("blockOpponents").Value;
+            set => Traverse.Create(Behaviour.Stopper).Field<bool>("blockOpponents").Value = value;
+        }
+
+        [SerializeInEditor(name: "Max Opponents Block")]
+        public int MaxOpponentsBlock
+        {
+            get => Traverse.Create(Behaviour.Stopper).Field<int>("MaxOpponents").Value;
+            set => Traverse.Create(Behaviour.Stopper).Field<int>("MaxOpponents").Value = value;
         }
 
         [SerializeInEditor(name: "Voice")]

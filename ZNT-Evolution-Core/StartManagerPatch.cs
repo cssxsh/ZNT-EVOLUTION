@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.IO;
 using BepInEx.Logging;
@@ -28,17 +27,33 @@ namespace ZNT.Evolution.Core
             Logger.LogInfo("Loading Bank");
             yield return LevelElementLoader.LoadBanks(folder: Application.streamingAssetsPath, loadSamples: true);
             Logger.LogInfo("Loading LevelElement");
-            foreach (var type in (LevelElement.Type[])Enum.GetValues(typeof(LevelElement.Type)))
+            foreach (var human in Resources.FindObjectsOfTypeAll<HumanAsset>())
             {
-                var path = Path.Combine(Application.dataPath, type.ToString());
-                if (!Directory.Exists(path)) Directory.CreateDirectory(path);
-                foreach (var directory in Directory.EnumerateDirectories(path))
+                if (human.BlockOpponents && human.MaxOpponentsBlock == 0)
                 {
-                    if (directory.EndsWith(".bak")) continue;
-                    if (directory.EndsWith(" - 副本")) continue;
-                    var target = Path.GetFullPath(directory);
-                    yield return LevelElementLoader.LoadFromFolder(path: target, type: type);
+                    human.BlockOpponents = false;
+                    Logger.LogDebug($"Fix BlockOpponents for {human}");
                 }
+            }
+
+            var brush = Path.Combine(Application.dataPath, nameof(LevelElement.Type.Brush));
+            if (!Directory.Exists(brush)) Directory.CreateDirectory(brush);
+            foreach (var directory in Directory.EnumerateDirectories(brush))
+            {
+                if (directory.EndsWith(".bak")) continue;
+                if (directory.EndsWith(" - 副本")) continue;
+                var target = Path.GetFullPath(directory);
+                yield return LevelElementLoader.LoadFromFolder(path: target, type: LevelElement.Type.Brush);
+            }
+
+            var decor = Path.Combine(Application.dataPath, nameof(LevelElement.Type.Decor));
+            if (!Directory.Exists(decor)) Directory.CreateDirectory(decor);
+            foreach (var directory in Directory.EnumerateDirectories(decor))
+            {
+                if (directory.EndsWith(".bak")) continue;
+                if (directory.EndsWith(" - 副本")) continue;
+                var target = Path.GetFullPath(directory);
+                yield return LevelElementLoader.LoadFromFolder(path: target, type: LevelElement.Type.Decor);
             }
 
             var apply = Path.Combine(Application.dataPath, "Apply");
