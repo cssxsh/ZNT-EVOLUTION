@@ -389,7 +389,7 @@
         <Compile Include="Asset\HookAsset.cs"/>
         <Compile Include="Asset\LevelElementInfo.cs"/>
         <Compile Include="Asset\MovingObjectAssetWrapper.cs"/>
-        <Compile Include="Asset\NameConverter.cs"/>
+        <Compile Include="Asset\UnityEngineObjectConverter.cs"/>
         <Compile Include="Asset\PhysicObjectAssetWrapper.cs"/>
         <Compile Include="Asset\ScriptableObjectConverter.cs"/>
         <Compile Include="Asset\SpawnPointAsset.cs"/>

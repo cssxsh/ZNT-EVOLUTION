@@ -8,10 +8,8 @@ using UnityEngine;
 
 namespace ZNT.Evolution.Core.Asset
 {
-    internal class NameConverter : CustomCreationConverter<UnityEngine.Object>
+    internal class UnityEngineObjectConverter : CustomCreationConverter<UnityEngine.Object>
     {
-        private static readonly Dictionary<string, object> Cache = new Dictionary<string, object>();
-
         public override bool CanWrite => true;
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
@@ -60,6 +58,8 @@ namespace ZNT.Evolution.Core.Asset
 
         public override bool CanRead => true;
 
+        private readonly Dictionary<string, object> _cache = new Dictionary<string, object>();
+
         public override UnityEngine.Object Create(Type objectType)
         {
             if (typeof(ScriptableObject).IsAssignableFrom(objectType))
@@ -89,20 +89,20 @@ namespace ZNT.Evolution.Core.Asset
             if (objectType == typeof(FMODAsset)) return FmodAssetIndex.PathIndex[key];
 
             var name = key.Split(':')[0].Trim();
-            Cache.TryGetValue(name, out var impl);
+            _cache.TryGetValue(name, out var impl);
 
             if (objectType.IsInstanceOfType(impl)) return impl;
 
             if (objectType == typeof(GameObject) && GameObject.Find(name) is { } body)
             {
-                Cache[name] = body;
+                _cache[name] = body;
                 return body;
             }
 
             foreach (var asset in Resources.FindObjectsOfTypeAll(objectType))
             {
                 if (asset.name != name) continue;
-                Cache[name] = asset;
+                _cache[name] = asset;
                 return asset;
             }
 

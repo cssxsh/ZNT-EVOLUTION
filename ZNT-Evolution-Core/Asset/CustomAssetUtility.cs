@@ -14,7 +14,7 @@ namespace ZNT.Evolution.Core.Asset
             TypeNameHandling = TypeNameHandling.Auto,
             Converters =
             {
-                new NameConverter(),
+                new UnityEngineObjectConverter(),
                 new StringEnumConverter(),
                 new ColorConverter(),
                 new Vector2Converter(),
