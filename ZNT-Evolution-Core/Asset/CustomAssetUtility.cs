@@ -16,6 +16,7 @@ namespace ZNT.Evolution.Core.Asset
             {
                 new UnityEngineObjectConverter(),
                 new StringEnumConverter(),
+                new LayerMaskConverter(),
                 new ColorConverter(),
                 new Vector2Converter(),
                 new Vector3Converter(),
