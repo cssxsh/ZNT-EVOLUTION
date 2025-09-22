@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 using ZNT.LevelEditor;
@@ -9,19 +8,6 @@ namespace ZNT.Evolution.Core.Editor
     [DisallowMultipleComponent]
     public class LayerEditor : EditorComponent, IEditorOverride
     {
-        private static List<string> _names;
-
-        private void Awake()
-        {
-            if (_names != null) return;
-            _names = new List<string>(0x20);
-            for (var i = 0; i < 0x20; i++)
-            {
-                _names[i] = LayerMask.LayerToName(i);
-                if (string.IsNullOrEmpty(_names[i])) _names[i] = i.ToString();
-            }
-        }
-
         [SerializeInEditor(name: "Main Layer")]
         public int Main
         {
@@ -48,22 +34,36 @@ namespace ZNT.Evolution.Core.Editor
             get => BottomCollider.layer;
             set => BottomCollider.layer = value;
         }
+        
+        private static string[] _names;
+
+        private string[] LayerNames()
+        {
+            if (_names != null) return _names;
+            _names = new string[0x20];
+            for (var i = 0; i < 0x20; i++)
+            {
+                _names[i] = LayerMask.LayerToName(i);
+                if (string.IsNullOrEmpty(_names[i])) _names[i] = i.ToString();
+            }
+            return _names;
+        }
 
         public bool OverrideMemberUi(SelectionMenu selectionMenu, global::EditorComponent component, MemberInfo member)
         {
             var binder = selectionMenu.InstantiateCustomBinder(selectionMenu.CustomBinders.IntStringList);
             switch (member.Name)
             {
-                case "Main":
-                    binder.BindIndexListField(component, member, _names);
+                case nameof(Main):
+                    binder.BindIndexListField(component, member, LayerNames());
                     return true;
-                case "Top":
-                    binder.BindIndexListField(component, member, _names);
-                    binder.EditorVisibility = !(Child("TopCollider") is null);
+                case nameof(Top):
+                    binder.BindIndexListField(component, member, LayerNames());
+                    if (Child("TopCollider") is null) binder.EditorVisibility = false;
                     return true;
-                case "Bottom":
-                    binder.BindIndexListField(component, member, _names);
-                    binder.EditorVisibility = !(Child("BottomCollider") is null);
+                case nameof(Bottom):
+                    binder.BindIndexListField(component, member, LayerNames());
+                    if (Child("BottomCollider") is null) binder.EditorVisibility = false;
                     return true;
                 default:
                     return false;

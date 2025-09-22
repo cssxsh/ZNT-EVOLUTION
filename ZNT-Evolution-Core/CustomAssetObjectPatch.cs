@@ -95,12 +95,9 @@ namespace ZNT.Evolution.Core
             {
                 case null:
                     return;
-                case var _ when body.TryGetComponent<DoorBehaviour>(out _):
+                case var _ when body.TryGetComponent<PropBehaviour>(out _):
                     if (body.TryGetComponent<Health>(out var health)) health.EditorVisibility = true;
-                    body.AddComponent<LayerEditor>();
-                    break;
-                case var _ when body.TryGetComponent<BarricadeBehaviour>(out _):
-                    body.AddComponent<LayerEditor>();
+                    if (body.GetComponent<LayerEditor>() is null) body.AddComponent<LayerEditor>();
                     break;
             }
         }
