@@ -123,6 +123,7 @@ namespace ZNT.Evolution.Core.Asset
             if (moving is MovingObjectAssetWrapper wrapped) return wrapped;
             var wrap = ScriptableObject.CreateInstance<MovingObjectAssetWrapper>();
             Traverse.IterateFields(moving, wrap, Traverse.CopyFields);
+            wrap.name = moving.name;
             return wrap;
         }
 
@@ -131,6 +132,7 @@ namespace ZNT.Evolution.Core.Asset
             if (physic is PhysicObjectAssetWrapper wrapped) return wrapped;
             var wrap = ScriptableObject.CreateInstance<PhysicObjectAssetWrapper>();
             Traverse.IterateFields(physic, wrap, Traverse.CopyFields);
+            wrap.name = physic.name;
             return wrap;
         }
 
@@ -139,6 +141,7 @@ namespace ZNT.Evolution.Core.Asset
             if (trigger is TriggerAssetWrapper wrapped) return wrapped;
             var wrap = ScriptableObject.CreateInstance<TriggerAssetWrapper>();
             Traverse.IterateFields(trigger, wrap, Traverse.CopyFields);
+            wrap.name = trigger.name;
             return wrap;
         }
 
@@ -147,6 +150,7 @@ namespace ZNT.Evolution.Core.Asset
             if (explosion is ExplosionAssetWrapper wrapped) return wrapped;
             var wrap = ScriptableObject.CreateInstance<ExplosionAssetWrapper>();
             Traverse.IterateFields(explosion, wrap, Traverse.CopyFields);
+            wrap.name = explosion.name;
             return wrap;
         }
     }
