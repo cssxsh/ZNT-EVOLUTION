@@ -27,13 +27,6 @@ namespace ZNT.Evolution.Core.Asset
 
         public static void SerializeObjectToPath(string target, object data)
         {
-            switch (data)
-            {
-                case LevelElement element:
-                    element.SpriteDefinition = null;
-                    break;
-            }
-
             var serializer = JsonSerializer.Create(SerializerSettings);
             SaveObjectToPath(serializer, data, target);
         }

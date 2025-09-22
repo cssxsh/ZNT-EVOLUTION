@@ -26,6 +26,10 @@ namespace ZNT.Evolution.Core.Asset
                     tk2dSpriteCollectionData sprites => new SpritesWrapper(sprites),
                     _ => value
                 };
+                if (value is LevelElement element) element.SpriteDefinition = null;
+                {
+                    if (value is CustomAssetObject asset) asset.Layer = asset.Layer.value.ToLayerMask();
+                }
                 Traverse.Create(serializer)
                     .Field("_serializerWriter")
                     .Method("SerializeObject", new[]
@@ -37,6 +41,9 @@ namespace ZNT.Evolution.Core.Asset
                         typeof(JsonContract)
                     })
                     .GetValue(writer, value, serializer.ContractResolver.ResolveContract(value.GetType()), null, null);
+                {
+                    if (value is CustomAssetObject asset) asset.Layer = asset.Layer.value.ToLayer();
+                }
                 return;
             }
 
@@ -82,7 +89,15 @@ namespace ZNT.Evolution.Core.Asset
 
         public override object ReadJson(JsonReader reader, Type objectType, object _, JsonSerializer serializer)
         {
-            if (reader.Depth == 0) return base.ReadJson(reader, objectType, null, serializer);
+            if (reader.Depth == 0)
+            {
+                var value = base.ReadJson(reader, objectType, _, serializer);
+                {
+                    if (value is CustomAssetObject asset) asset.Layer = asset.Layer.value.ToLayer();
+                }
+                return value;
+            }
+
             var key = serializer.Deserialize<string>(reader);
             if (key == null) return null;
             if (objectType == typeof(Shader)) return Shader.Find(key);
