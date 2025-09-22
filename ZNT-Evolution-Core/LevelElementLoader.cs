@@ -169,7 +169,29 @@ namespace ZNT.Evolution.Core
             var preview = bundle.LoadAsset<Sprite>("preview");
             if (preview) Logger.LogDebug($"preview -> {preview} -> {preview.texture}");
 
+            foreach (var file in Directory.EnumerateFiles(path, "*.explosion.json"))
+            {
+                var filename = Path.GetFileName(file);
+                var explosion = DeserializeObject<ExplosionAsset>(folder: path, file: filename);
+                Logger.LogDebug($"{filename} -> {explosion}");
+            }
+
+            foreach (var file in Directory.EnumerateFiles(path, "*.physic.json"))
+            {
+                var filename = Path.GetFileName(file);
+                var physic = DeserializeObject<PhysicObjectAsset>(folder: path, file: file).Wrap();
+                Logger.LogDebug($"{filename} -> {physic} from {physic.Animation}");
+            }
+
+            foreach (var file in Directory.EnumerateFiles(path, "*.human.json"))
+            {
+                var filename = Path.GetFileName(file);
+                var human = DeserializeObject<HumanAsset>(folder: path, file: file);
+                Logger.LogDebug($"{filename} -> {human} from {human.AnimationLibrary}");
+            }
+
             var asset = DeserializeObject<LevelElementInfo>(folder: path, file: "element.json").CustomAsset;
+            if (!File.Exists(Path.Combine(path, "asset.json"))) asset = null;
             switch (asset)
             {
                 case null:
@@ -328,7 +350,7 @@ namespace ZNT.Evolution.Core
             }
         }
 
-        public static IEnumerator ApplyFormFolder(string path)
+        public static IEnumerator ApplyFromFolder(string path)
         {
             if (!Directory.EnumerateFiles(path).Any())
             {
@@ -407,10 +429,10 @@ namespace ZNT.Evolution.Core
                         switch (addition)
                         {
                             case "animation.addition.json":
-                                bundle.ApplyAnimationFormFolder(path: path);
+                                bundle.ApplyAnimationFromFolder(path: path);
                                 break;
                             case "element.addition.json":
-                                bundle.ApplyElementFormFolder(path: path);
+                                bundle.ApplyElementFromFolder(path: path);
                                 break;
                         }
                     }
@@ -423,7 +445,7 @@ namespace ZNT.Evolution.Core
             }
         }
 
-        private static void ApplyAnimationFormFolder(this AssetBundle bundle, string path)
+        private static void ApplyAnimationFromFolder(this AssetBundle bundle, string path)
         {
             var material = bundle.LoadAsset<Material>("sprites");
             var info = DeserializeObject<SpriteInfo>(folder: path, file: "sprite.info.json");
@@ -435,19 +457,20 @@ namespace ZNT.Evolution.Core
             Logger.LogInfo($"{animation.Targets.Length} animations apply");
         }
 
-        private static void ApplyElementFormFolder(this AssetBundle _, string path)
+        private static void ApplyElementFromFolder(this AssetBundle _, string path)
         {
-            var asset = DeserializeObject<LevelElementInfo>(folder: path, file: "element.addition.json").CustomAsset;
-            switch (asset)
+            foreach (var file in Directory.EnumerateFiles(path, "*.explosion.json"))
             {
-                case var _ when asset.EndsWith("PhysicObjectAsset"):
-                    var physic = DeserializeObject<PhysicObjectAsset>(folder: path, file: "asset.json").Wrap();
-                    Logger.LogDebug($"asset.json -> {physic} from {physic.Animation}");
-                    break;
-                case var _ when asset.EndsWith("ExplosionAsset"):
-                    var explosion = DeserializeObject<ExplosionAsset>(folder: path, file: "asset.json");
-                    Logger.LogDebug($"asset.json -> {explosion}");
-                    break;
+                var filename = Path.GetFileName(file);
+                var explosion = DeserializeObject<ExplosionAsset>(folder: path, file: filename);
+                Logger.LogDebug($"{filename} -> {explosion}");
+            }
+
+            foreach (var file in Directory.EnumerateFiles(path, "*.physic.json"))
+            {
+                var filename = Path.GetFileName(file);
+                var physic = DeserializeObject<PhysicObjectAsset>(folder: path, file: file).Wrap();
+                Logger.LogDebug($"{filename} -> {physic} from {physic.Animation}");
             }
 
             var element = DeserializeObject<LevelElementAddition>(folder: path, file: "element.addition.json");

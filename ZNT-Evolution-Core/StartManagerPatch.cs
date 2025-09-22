@@ -70,7 +70,7 @@ namespace ZNT.Evolution.Core
                 if (directory.EndsWith(".bak")) continue;
                 if (directory.EndsWith(" - 副本")) continue;
                 var target = Path.GetFullPath(directory);
-                yield return LevelElementLoader.ApplyFormFolder(path: target);
+                yield return LevelElementLoader.ApplyFromFolder(path: target);
             }
 
             Logger.LogInfo("Loading Patch");
