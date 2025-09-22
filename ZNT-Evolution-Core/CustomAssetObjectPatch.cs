@@ -58,24 +58,12 @@ namespace ZNT.Evolution.Core
         [HarmonyPatch(typeof(TriggerAsset), "LoadFromAsset")]
         public static void LoadFromAsset(TriggerAsset __instance, GameObject gameObject)
         {
-            if (gameObject.TryGetComponent<MineBehaviour>(out _))
+            switch (gameObject)
             {
-                gameObject.AddComponent<MineTrapEditor>();
+                case var _ when gameObject.TryGetComponent<MineBehaviour>(out _):
+                    gameObject.AddComponent<MineTrapEditor>();
+                    break;
             }
-        }
-
-        #endregion
-
-        #region ExplosionAsset
-
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(ExplosionAsset), "LoadFromAsset")]
-        public static void LoadFromAsset(ExplosionAsset __instance, GameObject gameObject)
-        {
-            if (gameObject.TryGetComponent<ExplosionEditor>(out _)) return;
-            gameObject.AddComponent<ExplosionEditor>();
-            gameObject.AddComponent<SignalReceiverLinker>();
-            gameObject.AddComponent<SignalSenderLinker>();
         }
 
         #endregion
@@ -89,7 +77,6 @@ namespace ZNT.Evolution.Core
             switch (__instance)
             {
                 case HumanAsset _:
-                    if (gameObject.TryGetComponent<HumanEditor>(out _)) return;
                     gameObject.AddComponent<HumanEditor>();
                     break;
             }

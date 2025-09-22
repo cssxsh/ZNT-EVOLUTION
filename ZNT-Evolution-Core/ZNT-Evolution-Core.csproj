@@ -397,7 +397,6 @@
         <Compile Include="Asset\SpriteMerge.cs"/>
         <Compile Include="Asset\TriggerAssetWrapper.cs"/>
         <Compile Include="Editor\EditorComponent.cs"/>
-        <Compile Include="Editor\ExplosionEditor.cs"/>
         <Compile Include="Editor\LayerEditor.cs"/>
         <Compile Include="Editor\MineTrapEditor.cs"/>
         <Compile Include="Editor\HumanEditor.cs"/>

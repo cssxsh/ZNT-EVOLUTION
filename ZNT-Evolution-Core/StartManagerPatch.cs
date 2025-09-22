@@ -2,6 +2,7 @@ using System.Collections;
 using System.IO;
 using BepInEx.Logging;
 using HarmonyLib;
+using MonoMod.Utils;
 using UnityEngine;
 
 // ReSharper disable InconsistentNaming
@@ -27,12 +28,18 @@ namespace ZNT.Evolution.Core
             Logger.LogInfo("Loading Bank");
             yield return LevelElementLoader.LoadBanks(folder: Application.streamingAssetsPath, loadSamples: true);
             Logger.LogInfo("Loading LevelElement");
-            foreach (var human in Resources.FindObjectsOfTypeAll<HumanAsset>())
+            foreach (var asset in Resources.FindObjectsOfTypeAll<CustomAsset>())
             {
-                if (human.BlockOpponents && human.MaxOpponentsBlock == 0)
+                switch (asset)
                 {
-                    human.BlockOpponents = false;
-                    Logger.LogDebug($"Fix BlockOpponents for {human}");
+                    case HumanAsset { BlockOpponents: true, MaxOpponentsBlock: 0 } human:
+                        human.BlockOpponents = false;
+                        Logger.LogDebug($"Fix BlockOpponents for {human}");
+                        break;
+                    case ExplosionAsset { HierarchyName: "" } explosion:
+                        explosion.HierarchyName = explosion.name.SpacedPascalCase();
+                        Logger.LogDebug($"Fix HierarchyName for {explosion}");
+                        break;
                 }
             }
 

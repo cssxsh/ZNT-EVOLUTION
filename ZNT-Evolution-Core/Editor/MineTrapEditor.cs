@@ -1,11 +1,15 @@
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using HarmonyLib;
 using UnityEngine;
+using ZNT.LevelEditor;
 
 namespace ZNT.Evolution.Core.Editor
 {
     [SerializeInEditor(name: "Explosion")]
     [DisallowMultipleComponent]
-    public class MineTrapEditor : EditorComponent
+    public class MineTrapEditor : EditorComponent, IEditorOverride
     {
         private Trigger Trigger => GetComponentInChildren<Trigger>();
 
@@ -27,94 +31,31 @@ namespace ZNT.Evolution.Core.Editor
 
         private ExplosionAsset Explosion
         {
-            get
-            {
-                var field = Traverse.Create(Behaviour).Field<ExplosionAsset>("explosion");
-                if (field.Value.name == name) return field.Value;
-                field.Value = Instantiate(field.Value);
-                field.Value.name = name;
-                return field.Value;
-            }
+            get => Traverse.Create(Behaviour).Field<ExplosionAsset>("explosion").Value;
+            set => Traverse.Create(Behaviour).Field<ExplosionAsset>("explosion").Value = value;
         }
 
-        [SerializeInEditor(name: "Damage")]
-        public float Damage
+        private Dictionary<string, ExplosionAsset> _selectable;
+
+        [SerializeInEditor(name: "Explosion")]
+        public string Selected
         {
-            get => Explosion.Damage;
-            set => Explosion.Damage = value;
+            get => Explosion.HierarchyName;
+            set => Explosion = _selectable[value];
         }
 
-        [SerializeInEditor(name: "Damage Radius")]
-        public float DamageRadius
+        protected override void OnCreate()
         {
-            get => Explosion.DamageRadius;
-            set => Explosion.DamageRadius = value;
+            base.OnCreate();
+            _selectable = FindObjectsOfType<ExplosionAsset>().ToDictionary(explosion => explosion.HierarchyName);
         }
 
-        private Tag ApplyDamageOn
+        public bool OverrideMemberUi(SelectionMenu selectionMenu, global::EditorComponent component, MemberInfo member)
         {
-            get => Explosion.ApplyDamageOn;
-            set => Explosion.ApplyDamageOn = value;
-        }
-
-        [SerializeInEditor(name: "Damage Breakable")]
-        public bool DamageBreakable
-        {
-            get => ApplyDamageOn.HasFlag(Tag.Breakable);
-            set => ApplyDamageOn = value ? ApplyDamageOn.Add(Tag.Breakable) : ApplyDamageOn.Remove(Tag.Breakable);
-        }
-
-        [SerializeInEditor(name: "Damage Human")]
-        public bool DamageHuman
-        {
-            get => ApplyDamageOn.HasFlag(Tag.Human);
-            set => ApplyDamageOn = value ? ApplyDamageOn.Add(Tag.Human) : ApplyDamageOn.Remove(Tag.Human);
-        }
-
-        [SerializeInEditor(name: "Damage Zombie")]
-        public bool DamageZombie
-        {
-            get => ApplyDamageOn.HasFlag(Tag.Zombie);
-            set => ApplyDamageOn = value ? ApplyDamageOn.Add(Tag.Zombie) : ApplyDamageOn.Remove(Tag.Zombie);
-        }
-
-        [SerializeInEditor(name: "Force")]
-        public float Force
-        {
-            get => Explosion.Force;
-            set => Explosion.Force = value;
-        }
-
-        private Tag ApplyForceOn
-        {
-            get => Explosion.ApplyForceOn;
-            set => Explosion.ApplyForceOn = value;
-        }
-
-        [SerializeInEditor(name: "Force Human")]
-        public bool ForceHuman
-        {
-            get => ApplyForceOn.HasFlag(Tag.Human);
-            set => ApplyForceOn = value ? ApplyForceOn.Add(Tag.Human) : ApplyForceOn.Remove(Tag.Human);
-        }
-
-        [SerializeInEditor(name: "Force Zombie")]
-        public bool ForceZombie
-        {
-            get => ApplyForceOn.HasFlag(Tag.Zombie);
-            set => ApplyForceOn = value ? ApplyForceOn.Add(Tag.Zombie) : ApplyForceOn.Remove(Tag.Zombie);
-        }
-
-        [SerializeInEditor(name: "Shake Camera")]
-        public bool ShakeCamera
-        {
-            get => Explosion.ShakeCamera;
-            set => Explosion.ShakeCamera = value;
-        }
-
-        private void OnDestroy()
-        {
-            Destroy(Explosion);
+            if (member.Name != nameof(Selected)) return false;
+            var binder = selectionMenu.InstantiateCustomBinder(selectionMenu.CustomBinders.IntStringList);
+            binder.BindStringListField(component, member, _selectable.Keys.ToList());
+            return true;
         }
     }
 }
