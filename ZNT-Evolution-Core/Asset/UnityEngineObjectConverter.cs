@@ -48,38 +48,49 @@ namespace ZNT.Evolution.Core.Asset
 
         public override bool CanRead => true;
 
-        public override UnityEngine.Object Create(Type objectType)
+        private static readonly Dictionary<string, object> Cache = new Dictionary<string, object>();
+
+        public override UnityEngine.Object Create(Type type)
         {
-            if (typeof(ScriptableObject).IsAssignableFrom(objectType))
+            if (typeof(ScriptableObject).IsAssignableFrom(type))
             {
-                return ScriptableObject.CreateInstance(objectType);
+                return ScriptableObject.CreateInstance(type);
             }
 
-            if (typeof(Component).IsAssignableFrom(objectType))
+            if (typeof(Component).IsAssignableFrom(type))
             {
-                return new GameObject(objectType.Name).AddComponent(objectType);
+                return new GameObject(type.Name).AddComponent(type);
             }
 
-            return objectType.GetConstructor(Array.Empty<Type>())?.Invoke(null) as UnityEngine.Object;
+            return type.GetConstructor(Array.Empty<Type>())?.Invoke(null) as UnityEngine.Object;
         }
 
-        public override object ReadJson(JsonReader reader, Type objectType, object _, JsonSerializer serializer)
+        public override object ReadJson(JsonReader reader, Type type, object _, JsonSerializer serializer)
         {
-            if (reader.TokenType != JsonToken.String) return base.ReadJson(reader, objectType, _, serializer);
+            if (reader.TokenType != JsonToken.String)
+            {
+                var result = base.ReadJson(reader, type, _, serializer) as UnityEngine.Object;
+                if (result) Cache[result.name] = result;
+                return result;
+            }
+
             var key = serializer.Deserialize<string>(reader);
             if (key == null) return null;
-            if (objectType == typeof(Shader)) return Shader.Find(key);
-            if (objectType == typeof(FMODAsset)) return FmodAssetIndex.PathIndex[key];
+            if (type == typeof(Shader)) return Shader.Find(key);
+            if (type == typeof(FMODAsset)) return FmodAssetIndex.PathIndex[key];
 
             var name = key.Split(':')[0].Trim();
-            if (objectType == typeof(GameObject) && GameObject.Find(name) is { } body) return body;
-            foreach (var asset in Resources.FindObjectsOfTypeAll(objectType))
+            if (Cache.TryGetValue(key, out var value) && type.IsInstanceOfType(value)) return value;
+            if (type == typeof(GameObject)) return GameObject.Find(name);
+            if (typeof(Component).IsAssignableFrom(type) && GameObject.Find(name) is { } o) return o.GetComponent(type);
+            foreach (var asset in Resources.FindObjectsOfTypeAll(type))
             {
                 if (asset.name != name) continue;
+                Cache[key] = asset;
                 return asset;
             }
 
-            throw new KeyNotFoundException(message: $"{objectType.FullName}(name: {name})");
+            throw new KeyNotFoundException(message: $"{type.FullName}(name: {name})");
         }
     }
 }
