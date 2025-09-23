@@ -1,11 +1,12 @@
-using System;
 using System.Linq;
+using JetBrains.Annotations;
 using Newtonsoft.Json;
 using UnityEngine;
 
 namespace ZNT.Evolution.Core.Asset
 {
-    [Serializable]
+    [JsonObject]
+    [UsedImplicitly]
     internal class SpriteInfo : EvolutionInfo
     {
         [JsonProperty("OrthoSize")] public readonly float OrthoSize;

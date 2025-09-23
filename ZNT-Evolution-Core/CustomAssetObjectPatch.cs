@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
+using Newtonsoft.Json;
+using Rotorz.Tile;
 using UnityEngine;
 using ZNT.Evolution.Core.Editor;
 
@@ -87,8 +89,8 @@ namespace ZNT.Evolution.Core
         #region Rotorz.Tile.Brush
 
         [HarmonyPostfix]
-        [HarmonyPatch(typeof(Rotorz.Tile.OrientedBrush), "Awake")]
-        public static void Awake(Rotorz.Tile.OrientedBrush __instance)
+        [HarmonyPatch(typeof(OrientedBrush), "Awake")]
+        public static void Awake(OrientedBrush __instance)
         {
             var body = __instance.DefaultOrientation?.GetVariation(0) as GameObject;
             switch (body)
@@ -118,6 +120,24 @@ namespace ZNT.Evolution.Core
             __instance.ExcludedComponents ??= __instance.GetComponentsInChildren<BaseComponent>(includeInactive: true)
                 .Where(component => !component.EditorVisibility).ToList();
             __instance.ExcludedGameObjects ??= new List<GameObject>();
+        }
+
+        #endregion
+
+        #region Newtonsoft.Json.JsonSerializer
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(JsonSerializer), "Serialize", typeof(JsonWriter), typeof(object))]
+        public static void Serialize(JsonSerializer __instance, object value)
+        {
+            if (value is ISerializationCallbackReceiver receiver) receiver.OnBeforeSerialize();
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(JsonSerializer), "Deserialize", typeof(JsonReader), typeof(System.Type))]
+        public static void Deserialize(JsonSerializer __instance, ref object __result)
+        {
+            if (__result is ISerializationCallbackReceiver receiver) receiver.OnAfterDeserialize();
         }
 
         #endregion

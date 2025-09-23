@@ -1,9 +1,10 @@
-using System;
+using JetBrains.Annotations;
 using Newtonsoft.Json;
 
 namespace ZNT.Evolution.Core.Asset
 {
-    [Serializable]
+    [JsonObject]
+    [UsedImplicitly]
     internal class SpriteMerge : EvolutionInfo
     {
         [JsonProperty("Source")] public readonly tk2dSpriteCollectionData Source;

@@ -179,8 +179,8 @@ namespace ZNT.Evolution.Core
             foreach (var file in Directory.EnumerateFiles(path, "*.physic.json"))
             {
                 var filename = Path.GetFileName(file);
-                var physic = DeserializeObject<PhysicObjectAsset>(folder: path, file: file).Wrap();
-                Logger.LogDebug($"{filename} -> {physic} from {physic.Animation}");
+                var physic = DeserializeObject<PhysicObjectAsset>(folder: path, file: file);
+                Logger.LogDebug($"{filename} -> {physic}");
             }
 
             foreach (var file in Directory.EnumerateFiles(path, "*.human.json"))
@@ -254,16 +254,16 @@ namespace ZNT.Evolution.Core
                     Logger.LogDebug($"asset.json -> {sentry} from {sentry.Animation}");
                     break;
                 case var _ when asset.EndsWith("MovingObjectAsset"):
-                    var moving = DeserializeObject<MovingObjectAsset>(folder: path, file: "asset.json").Wrap();
-                    moving.Animation ??= animation;
-                    Logger.LogDebug($"asset.json -> {moving} from {moving.Animation}");
+                    var moving = DeserializeObject<MovingObjectAsset>(folder: path, file: "asset.json");
+                    Traverse.Create(moving).Field<tk2dSpriteAnimation>("library").Value ??= animation;
+                    Logger.LogDebug($"asset.json -> {moving}");
                     break;
                 case var _ when asset.EndsWith("PhysicObjectAsset"):
-                    var physic = DeserializeObject<PhysicObjectAsset>(folder: path, file: "asset.json").Wrap();
-                    Logger.LogDebug($"asset.json -> {physic} from {physic.Animation}");
+                    var physic = DeserializeObject<PhysicObjectAsset>(folder: path, file: "asset.json");
+                    Logger.LogDebug($"asset.json -> {physic}");
                     break;
                 case var _ when asset.EndsWith("TriggerAsset"):
-                    var trigger = DeserializeObject<TriggerAsset>(folder: path, file: "asset.json").Wrap();
+                    var trigger = DeserializeObject<TriggerAsset>(folder: path, file: "asset.json");
                     Logger.LogDebug($"asset.json -> {trigger} from {trigger.Animation}");
                     break;
                 case var _ when asset.EndsWith("DetectionAsset"):
@@ -469,8 +469,8 @@ namespace ZNT.Evolution.Core
             foreach (var file in Directory.EnumerateFiles(path, "*.physic.json"))
             {
                 var filename = Path.GetFileName(file);
-                var physic = DeserializeObject<PhysicObjectAsset>(folder: path, file: file).Wrap();
-                Logger.LogDebug($"{filename} -> {physic} from {physic.Animation}");
+                var physic = DeserializeObject<PhysicObjectAsset>(folder: path, file: file);
+                Logger.LogDebug($"{filename} -> {physic}");
             }
 
             var element = DeserializeObject<LevelElementAddition>(folder: path, file: "element.addition.json");

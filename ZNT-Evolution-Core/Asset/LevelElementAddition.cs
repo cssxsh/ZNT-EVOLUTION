@@ -1,10 +1,12 @@
 using System;
 using HarmonyLib;
+using JetBrains.Annotations;
 using Newtonsoft.Json;
 
 namespace ZNT.Evolution.Core.Asset
 {
-    [Serializable]
+    [JsonObject]
+    [UsedImplicitly]
     internal class LevelElementAddition : EvolutionInfo
     {
         [JsonProperty("Targets")] public readonly LevelElement[] Targets;

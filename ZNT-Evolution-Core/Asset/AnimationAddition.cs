@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
 using HarmonyLib;
+using JetBrains.Annotations;
 using Newtonsoft.Json;
 
 namespace ZNT.Evolution.Core.Asset
 {
-    [Serializable]
+    [JsonObject]
+    [UsedImplicitly]
     internal class AnimationAddition : EvolutionInfo
     {
         [JsonProperty("Targets")] public readonly tk2dSpriteAnimation[] Targets;
