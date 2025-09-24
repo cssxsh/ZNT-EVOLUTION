@@ -9,7 +9,7 @@ namespace ZNT.Evolution.Core.Editor
 {
     [SerializeInEditor(name: "Explosion")]
     [DisallowMultipleComponent]
-    public class MineTrapEditor : EditorComponent, IEditorOverride
+    public class MineTrapEditor : Editor, IEditorOverride
     {
         private Trigger Trigger => GetComponentInChildren<Trigger>();
 
@@ -50,7 +50,7 @@ namespace ZNT.Evolution.Core.Editor
             _selectable = FindObjectsOfType<ExplosionAsset>().ToDictionary(explosion => explosion.HierarchyName);
         }
 
-        public bool OverrideMemberUi(SelectionMenu selectionMenu, global::EditorComponent component, MemberInfo member)
+        public bool OverrideMemberUi(SelectionMenu selectionMenu, EditorComponent component, MemberInfo member)
         {
             if (member.Name != nameof(Selected)) return false;
             var binder = selectionMenu.InstantiateCustomBinder(selectionMenu.CustomBinders.IntStringList);

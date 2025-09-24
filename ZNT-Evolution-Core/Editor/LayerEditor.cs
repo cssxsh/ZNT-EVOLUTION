@@ -6,7 +6,7 @@ namespace ZNT.Evolution.Core.Editor
 {
     [SerializeInEditor(name: "Layer")]
     [DisallowMultipleComponent]
-    public class LayerEditor : EditorComponent, IEditorOverride
+    public class LayerEditor : Editor, IEditorOverride
     {
         [SerializeInEditor(name: "Main Layer")]
         public int Main
@@ -34,7 +34,7 @@ namespace ZNT.Evolution.Core.Editor
             get => BottomCollider.layer;
             set => BottomCollider.layer = value;
         }
-        
+
         private static string[] _names;
 
         private string[] LayerNames()
@@ -46,10 +46,11 @@ namespace ZNT.Evolution.Core.Editor
                 _names[i] = LayerMask.LayerToName(i);
                 if (string.IsNullOrEmpty(_names[i])) _names[i] = i.ToString();
             }
+
             return _names;
         }
 
-        public bool OverrideMemberUi(SelectionMenu selectionMenu, global::EditorComponent component, MemberInfo member)
+        public bool OverrideMemberUi(SelectionMenu selectionMenu, EditorComponent component, MemberInfo member)
         {
             var binder = selectionMenu.InstantiateCustomBinder(selectionMenu.CustomBinders.IntStringList);
             switch (member.Name)
@@ -58,12 +59,10 @@ namespace ZNT.Evolution.Core.Editor
                     binder.BindIndexListField(component, member, LayerNames());
                     return true;
                 case nameof(Top):
-                    binder.BindIndexListField(component, member, LayerNames());
-                    if (Child("TopCollider") is null) binder.EditorVisibility = false;
+                    if (Child("TopCollider")) binder.BindIndexListField(component, member, LayerNames());
                     return true;
                 case nameof(Bottom):
-                    binder.BindIndexListField(component, member, LayerNames());
-                    if (Child("BottomCollider") is null) binder.EditorVisibility = false;
+                    if (Child("BottomCollider")) binder.BindIndexListField(component, member, LayerNames());
                     return true;
                 default:
                     return false;

@@ -1,6 +1,6 @@
 namespace ZNT.Evolution.Core.Editor
 {
-    public abstract class EditorComponent : BaseComponent
+    public abstract class Editor : BaseComponent
     {
         protected override void OnCreate()
         {
