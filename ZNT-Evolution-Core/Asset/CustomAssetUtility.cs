@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -7,6 +8,8 @@ namespace ZNT.Evolution.Core.Asset
 {
     public static class CustomAssetUtility
     {
+        public static readonly Dictionary<string, Object> Cache = new Dictionary<string, Object>();
+
         private static JsonSerializerSettings SerializerSettings => new JsonSerializerSettings
         {
             ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
@@ -24,6 +27,8 @@ namespace ZNT.Evolution.Core.Asset
                 new Matrix4x4Converter()
             }
         };
+
+        public static string NameAndType(this Object o) => $"{o.name} : {o.GetType()}";
 
         public static void SerializeObjectToPath(string target, object data)
         {

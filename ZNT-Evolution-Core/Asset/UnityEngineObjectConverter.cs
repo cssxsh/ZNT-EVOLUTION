@@ -39,7 +39,7 @@ namespace ZNT.Evolution.Core.Asset
                     writer.WriteValue(shader.name);
                     break;
                 case UnityEngine.Object impl:
-                    writer.WriteValue($"{impl.name} : {value.GetType()}");
+                    writer.WriteValue(impl.NameAndType());
                     break;
                 default:
                     throw new NotSupportedException($"write ${value.GetType()}");
@@ -47,8 +47,6 @@ namespace ZNT.Evolution.Core.Asset
         }
 
         public override bool CanRead => true;
-
-        private static readonly Dictionary<string, object> Cache = new Dictionary<string, object>();
 
         public override UnityEngine.Object Create(Type type)
         {
@@ -70,7 +68,7 @@ namespace ZNT.Evolution.Core.Asset
             if (reader.TokenType != JsonToken.String)
             {
                 var result = base.ReadJson(reader, type, _, serializer) as UnityEngine.Object;
-                if (result) Cache[result.name] = result;
+                if (result) CustomAssetUtility.Cache[result.NameAndType()] = result;
                 return result;
             }
 
@@ -79,14 +77,14 @@ namespace ZNT.Evolution.Core.Asset
             if (type == typeof(Shader)) return Shader.Find(key);
             if (type == typeof(FMODAsset)) return FmodAssetIndex.PathIndex[key];
 
+            if (CustomAssetUtility.Cache.TryGetValue(key, out var value)) return value;
             var name = key.Split(':')[0].Trim();
-            if (Cache.TryGetValue(key, out var value) && type.IsInstanceOfType(value)) return value;
             if (type == typeof(GameObject)) return GameObject.Find(name);
-            if (typeof(Component).IsAssignableFrom(type) && GameObject.Find(name) is { } o) return o.GetComponent(type);
+            if (type == typeof(Transform)) return GameObject.Find(name).transform;
             foreach (var asset in Resources.FindObjectsOfTypeAll(type))
             {
                 if (asset.name != name) continue;
-                Cache[key] = asset;
+                CustomAssetUtility.Cache[key] = asset;
                 return asset;
             }
 

@@ -4,6 +4,7 @@ using BepInEx.Logging;
 using HarmonyLib;
 using MonoMod.Utils;
 using UnityEngine;
+using ZNT.Evolution.Core.Asset;
 
 // ReSharper disable InconsistentNaming
 namespace ZNT.Evolution.Core
@@ -30,6 +31,7 @@ namespace ZNT.Evolution.Core
             Logger.LogInfo("Loading LevelElement");
             foreach (var asset in Resources.FindObjectsOfTypeAll<CustomAsset>())
             {
+                CustomAssetUtility.Cache[asset.NameAndType()] = asset;
                 switch (asset)
                 {
                     case HumanAsset { BlockOpponents: true, MaxOpponentsBlock: 0 } human:
