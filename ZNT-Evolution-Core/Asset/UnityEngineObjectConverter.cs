@@ -16,6 +16,7 @@ namespace ZNT.Evolution.Core.Asset
         {
             if (writer.WriteState == WriteState.Start)
             {
+                if (value is ISerializationCallbackReceiver receiver) receiver.OnBeforeSerialize();
                 Traverse.Create(serializer)
                     .Field("_serializerWriter")
                     .Method("SerializeObject", new[]
@@ -68,6 +69,7 @@ namespace ZNT.Evolution.Core.Asset
             if (reader.TokenType != JsonToken.String)
             {
                 var result = base.ReadJson(reader, type, _, serializer) as UnityEngine.Object;
+                if (result is ISerializationCallbackReceiver receiver) receiver.OnAfterDeserialize();
                 if (result) CustomAssetUtility.Cache[result.NameAndType()] = result;
                 return result;
             }
