@@ -32,6 +32,8 @@ namespace ZNT.Evolution.Core.Asset
                     when !member.IsDefined(typeof(SerializeField)):
                 case { Name: nameof(LevelElement.SpriteDefinition) }
                     when typeof(LevelElement).IsAssignableFrom(member.DeclaringType):
+                case { Name: nameof(LevelElement.AttachPoints) }
+                    when typeof(LevelElement).IsAssignableFrom(member.DeclaringType):
                     property.Ignored = true;
                     break;
                 case { }

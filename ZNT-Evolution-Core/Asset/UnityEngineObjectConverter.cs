@@ -81,8 +81,7 @@ namespace ZNT.Evolution.Core.Asset
 
             if (CustomAssetUtility.Cache.TryGetValue(key, out var value)) return value;
             var name = key.Split(':')[0].Trim();
-            if (type == typeof(GameObject)) return GameObject.Find(name);
-            if (type == typeof(Transform)) return GameObject.Find(name).transform;
+            type = Type.GetType(key.Split(':')[1].Trim()) ?? type;
             foreach (var asset in Resources.FindObjectsOfTypeAll(type))
             {
                 if (asset.name != name) continue;
