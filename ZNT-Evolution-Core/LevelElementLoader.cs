@@ -190,6 +190,13 @@ namespace ZNT.Evolution.Core
                 Logger.LogDebug($"{filename} -> {human} from {human.AnimationLibrary}");
             }
 
+            foreach (var file in Directory.EnumerateFiles(path, "*.animations.json"))
+            {
+                var filename = Path.GetFileName(file);
+                var animations = DeserializeObject<CharacterAnimationAsset>(folder: path, file: file);
+                Logger.LogDebug($"{filename} -> {animations}");
+            }
+
             var asset = DeserializeObject<LevelElementInfo>(folder: path, file: "element.json").CustomAsset;
             if (!File.Exists(Path.Combine(path, "asset.json"))) asset = null;
             switch (asset)
@@ -452,6 +459,13 @@ namespace ZNT.Evolution.Core
             var sprites = CreateSprite(material, info);
             Logger.LogDebug($"CreateSprite -> {sprites} from {sprites.material}");
 
+            foreach (var file in Directory.EnumerateFiles(path, "*.animations.json"))
+            {
+                var filename = Path.GetFileName(file);
+                var animations = DeserializeObject<CharacterAnimationAsset>(folder: path, file: file);
+                Logger.LogDebug($"{filename} -> {animations}");
+            }
+
             var animation = DeserializeObject<AnimationAddition>(folder: path, file: "animation.addition.json");
             animation.Apply();
             Logger.LogInfo($"{animation.Targets.Length} animations apply");
@@ -514,6 +528,7 @@ namespace ZNT.Evolution.Core
             impl.material = material;
             impl.materials[0] = material;
             foreach (var definition in impl.spriteDefinitions) definition.material = material;
+            foreach (var (index, points) in info.AttachPoints) impl.spriteDefinitions[index].attachPoints = points;
 
             UnityEngine.Object.DontDestroyOnLoad(impl);
             return impl;

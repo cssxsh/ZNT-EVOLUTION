@@ -12,4 +12,10 @@
 - tk2dSpriteDefinition
   * name
   * <u>ref material</u> `UnityEngine.Material`
+  * attachPoints `tk2dSpriteDefinition.AttachPoint[]` 附着点，作用为更新组件坐标
   * ...
+
+- tk2dSpriteDefinition.AttachPoint
+  * name
+  * position `UnityEngine.Vector3`
+  * angle

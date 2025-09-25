@@ -21,9 +21,9 @@
   * <u>ref spriteCollection</u> `tk2dSpriteCollectionData`
   * spriteId 在精灵图集合中的序号
   * triggerEvent `true`/`false`
-  * eventInfo
-  * eventInt
-  * eventFloat
+  * eventInfo 事件名
+  * eventInt 事件参数
+  * eventFloat 事件参数
   * useAttachedEffects `true`/`false`
   * attachedEffects `tk2dSpriteAnimationFrame.AttachedEffect[]`
   * <u>ref shaderAnimator</u> `ShaderAnimator`

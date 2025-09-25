@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using UnityEngine;
+using ZNT.Evolution.Core.Asset;
 using ZNT.Evolution.Core.Editor;
 
 // ReSharper disable InconsistentNaming
@@ -98,6 +99,15 @@ namespace ZNT.Evolution.Core
                     gameObject.AddComponent<HumanEditor>();
                     break;
             }
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(HumanAnimationController), "Initialize")]
+        private static void Initialize(HumanAnimationController __instance)
+        {
+            var key = $"{__instance.SharedAsset.name}Animations : CharacterAnimationAsset";
+            var animations = CustomAssetUtility.Cache[key] as CharacterAnimationAsset;
+            if (animations) __instance.SharedAsset.Animations = animations;
         }
 
         #endregion

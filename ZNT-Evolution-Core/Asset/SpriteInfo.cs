@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
@@ -19,6 +20,8 @@ namespace ZNT.Evolution.Core.Asset
 
         [JsonProperty("Anchors")] public readonly Vector2[] Anchors;
 
+        [JsonProperty("AttachPoints")] public readonly Dictionary<int, tk2dSpriteDefinition.AttachPoint[]> AttachPoints;
+
         [JsonProperty("Name")] public readonly string Name;
 
         [JsonConstructor]
@@ -28,6 +31,7 @@ namespace ZNT.Evolution.Core.Asset
             string[] names,
             Rect[] regions,
             Vector2[] anchors = null, Vector2? anchor = null,
+            Dictionary<int, tk2dSpriteDefinition.AttachPoint[]> points = null,
             string name = null)
         {
             OrthoSize = orthoSize;
@@ -35,6 +39,7 @@ namespace ZNT.Evolution.Core.Asset
             Names = names;
             Regions = regions;
             Anchors = anchors ?? Regions.Select(_ => anchor ?? Vector2.zero).ToArray();
+            AttachPoints = points ?? new Dictionary<int, tk2dSpriteDefinition.AttachPoint[]>();
             Name = name;
         }
     }
