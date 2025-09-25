@@ -433,7 +433,7 @@ namespace ZNT.Evolution.Core
                 {
                     try
                     {
-                        switch (addition)
+                        switch (Path.GetFileName(addition))
                         {
                             case "animation.addition.json":
                                 bundle.ApplyAnimationFromFolder(path: path);
