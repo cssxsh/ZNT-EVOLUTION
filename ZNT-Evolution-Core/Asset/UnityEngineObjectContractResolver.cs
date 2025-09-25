@@ -69,6 +69,13 @@ namespace ZNT.Evolution.Core.Asset
                     break;
                 }
 
+                layer = mask.value switch // Fix old data error
+                {
+                    0x00 => 0x00,
+                    0x09 => 0x09,
+                    0x1E => 0x1E,
+                    _ => layer
+                };
                 if (layer == -1) throw new FormatException($"Invalid {mask.value:X8}");
                 _origin.SetValue(target, _origin.GetValue(target) switch
                 {
