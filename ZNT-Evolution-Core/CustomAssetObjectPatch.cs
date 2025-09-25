@@ -52,6 +52,24 @@ namespace ZNT.Evolution.Core
 
         #endregion
 
+        #region PhysicObjectAsset
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(PhysicObjectBehaviour), "OnTriggerEnter2D", typeof(Collider2D))]
+        public static void OnTriggerEnter2D(PhysicObjectBehaviour __instance, Collider2D other)
+        {
+            var mask = (int)__instance.SharedAsset.ExplodeOn;
+            var target = 0x00;
+            if (other.TryGetComponent<ZombieAnimationController>(out var zombie) && zombie.enabled) target |= 0x10;
+            if (other.TryGetComponent<ClimberAnimationController>(out var climber) && climber.enabled) target |= 0x20;
+            if (other.TryGetComponent<BlockerAnimationController>(out var blocker) && blocker.enabled) target |= 0x40;
+            if (other.TryGetComponent<TankAnimationController>(out var tank) && tank.enabled) target |= 0x80;
+            if (!BitMask.HasAny(mask, target)) return;
+            __instance.OnDie(null);
+        }
+
+        #endregion
+
         #region TriggerAsset
 
         [HarmonyPostfix]
