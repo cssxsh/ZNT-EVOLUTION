@@ -18,12 +18,12 @@
   * DirectAim `true`/`false` 直接瞄准
   * BlockOpponents `true`/`false` 阻挡
   * MaxOpponentsBlock 最大阻挡数量
-  * Attachments `UnityDictionary<string, UnityEngine.GameObject>` 附加效果
+  * Attachments `UnityDictionary<string, UnityEngine.GameObject>` 附件
     * `Attachments["moving_attack"]` 移动攻击 `Gertrude Moving Attack`/`DrugLord Moving Attack`/`Priest Moving Attack`/`Lumberjack Moving Attack`
     * `Attachments["shield_attack"]` 护盾攻击 `VirginShield`
     * `Attachments["shield_effect"]` 护盾效果 `RepelWave`
     * `Attachments["attach_laser"]` 附加激光 `LaserAttachment`
-  * <u>ref ThrowableObjects</u> `PhysicObjectAsset[]` 触发效果
+  * <u>ref ThrowableObjects</u> `PhysicObjectAsset[]` 可抛物品
   * Voice `Voice` 语音类型
   * AimFieldOfView 瞄准视野
   * FieldOfView 视野

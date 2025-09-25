@@ -1,8 +1,6 @@
 using System;
-using System.Collections;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
@@ -15,7 +13,7 @@ using ZNT.Evolution.Core.Asset;
 // ReSharper disable InconsistentNaming
 namespace ZNT.Evolution.Core
 {
-    public static class SceneManagerPatch
+    internal static class SceneManagerPatch
     {
         private static readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("SceneManager");
 

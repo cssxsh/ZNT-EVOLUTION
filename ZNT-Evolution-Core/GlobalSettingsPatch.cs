@@ -7,7 +7,7 @@ using UnityEngine;
 // ReSharper disable InconsistentNaming
 namespace ZNT.Evolution.Core
 {
-    public static class GlobalSettingsPatch
+    internal static class GlobalSettingsPatch
     {
         #region CorpseBehaviour
 

@@ -594,6 +594,7 @@ namespace ZNT.Evolution.Core
                 {
                     try
                     {
+                        Logger.LogInfo($"load Bank {bank}");
                         FMODUnity.RuntimeManager.LoadBank(bankName: bank, loadSamples: loadSamples);
                     }
                     catch (FMODUnity.BankLoadException e)

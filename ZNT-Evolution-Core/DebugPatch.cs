@@ -7,7 +7,7 @@ using UnityEngine;
 // ReSharper disable InconsistentNaming
 namespace ZNT.Evolution.Core
 {
-    public static class DebugPatch
+    internal static class DebugPatch
     {
         [HarmonyPrefix]
         [HarmonyPatch(typeof(SceneLoader), "LoadNextScene")]

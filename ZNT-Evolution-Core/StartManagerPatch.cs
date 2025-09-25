@@ -9,7 +9,7 @@ using ZNT.Evolution.Core.Asset;
 // ReSharper disable InconsistentNaming
 namespace ZNT.Evolution.Core
 {
-    public static class StartManagerPatch
+    internal static class StartManagerPatch
     {
         private static readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("StartManager");
 

@@ -51,9 +51,13 @@ namespace ZNT.Evolution.Core.Asset
             spawn.Speed = speed;
             spawn.Duration = duration;
             spawn.ApplyDamages = applyDamages;
-            if (!(spawn is CharacterSpawnPoint character)) return;
-            character.SpawnMutation = spawnMutation;
-            character.DefaultSpeed = defaultSpeed;
+            switch (spawn)
+            {
+                case CharacterSpawnPoint character:
+                    character.SpawnMutation = spawnMutation;
+                    character.DefaultSpeed = defaultSpeed;
+                    break;
+            }
         }
     }
 }

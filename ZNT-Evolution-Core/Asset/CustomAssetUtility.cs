@@ -8,7 +8,7 @@ namespace ZNT.Evolution.Core.Asset
 {
     public static class CustomAssetUtility
     {
-        public static readonly Dictionary<string, Object> Cache = new Dictionary<string, Object>();
+        internal static readonly Dictionary<string, Object> Cache = new Dictionary<string, Object>();
 
         private static JsonSerializerSettings SerializerSettings => new JsonSerializerSettings
         {

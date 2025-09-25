@@ -7,7 +7,7 @@ using ZNT.Evolution.Core.Editor;
 // ReSharper disable InconsistentNaming
 namespace ZNT.Evolution.Core
 {
-    public static class CustomAssetObjectPatch
+    internal static class CustomAssetObjectPatch
     {
         #region MovingObjectAsset
 
