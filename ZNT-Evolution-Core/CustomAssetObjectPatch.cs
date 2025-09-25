@@ -59,13 +59,16 @@ namespace ZNT.Evolution.Core
         [HarmonyPatch(typeof(PhysicObjectBehaviour), "OnTriggerEnter2D", typeof(Collider2D))]
         public static void OnTriggerEnter2D(PhysicObjectBehaviour __instance, Collider2D other)
         {
-            var mask = (int)__instance.SharedAsset.ExplodeOn;
-            var target = 0x00;
-            if (other.TryGetComponent<ZombieAnimationController>(out var zombie) && zombie.enabled) target |= 0x10;
-            if (other.TryGetComponent<ClimberAnimationController>(out var climber) && climber.enabled) target |= 0x20;
-            if (other.TryGetComponent<BlockerAnimationController>(out var blocker) && blocker.enabled) target |= 0x40;
-            if (other.TryGetComponent<TankAnimationController>(out var tank) && tank.enabled) target |= 0x80;
-            if (!BitMask.HasAny(mask, target)) return;
+            var targets = other.GetComponents<BaseAnimationController>()
+                .Aggregate(ExplodeSurfaceConverter.None, (mask, controller) => mask | controller switch
+                {
+                    ZombieAnimationController { enabled: true } => ExplodeSurfaceConverter.Zombie,
+                    ClimberAnimationController { enabled: true } => ExplodeSurfaceConverter.Climber,
+                    BlockerAnimationController { enabled: true } => ExplodeSurfaceConverter.Blocker,
+                    TankAnimationController { enabled: true } => ExplodeSurfaceConverter.Tank,
+                    _ => ExplodeSurfaceConverter.None
+                });
+            if (!__instance.SharedAsset.ExplodeOn.HasFlag(targets)) return;
             __instance.OnDie(null);
         }
 
@@ -80,7 +83,7 @@ namespace ZNT.Evolution.Core
             switch (gameObject)
             {
                 case var _ when gameObject.TryGetComponent<MineBehaviour>(out _):
-                    gameObject.AddComponent<MineTrapEditor>();
+                    if (gameObject.GetComponent<MineTrapEditor>() is null) gameObject.AddComponent<MineTrapEditor>();
                     break;
             }
         }
@@ -96,18 +99,18 @@ namespace ZNT.Evolution.Core
             switch (__instance)
             {
                 case HumanAsset _:
-                    gameObject.AddComponent<HumanEditor>();
+                    if (gameObject.GetComponent<HumanEditor>() is null) gameObject.AddComponent<HumanEditor>();
                     break;
             }
         }
 
         [HarmonyPrefix]
         [HarmonyPatch(typeof(HumanAnimationController), "Initialize")]
-        private static void Initialize(HumanAnimationController __instance)
+        public static void Initialize(HumanAnimationController __instance)
         {
-            var key = $"{__instance.SharedAsset.name} : CharacterAnimationAsset";
-            var animations = CustomAssetUtility.Cache[key] as CharacterAnimationAsset;
-            if (animations) __instance.SharedAsset.Animations = animations;
+            var asset = (HumanAsset)__instance.GetComponent<AssetComponent>().Asset;
+            CustomAssetUtility.Cache.TryGetValue($"{asset.name} : CharacterAnimationAsset", out var animations);
+            if (animations) asset.Animations = animations as CharacterAnimationAsset;
         }
 
         #endregion
