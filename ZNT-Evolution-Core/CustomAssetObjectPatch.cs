@@ -97,17 +97,13 @@ namespace ZNT.Evolution.Core
             {
                 case HumanAsset _:
                     gameObject.AddComponent<HumanEditor>();
+                {
+                    var key = $"{__instance.name} : CharacterAnimationAsset";
+                    var animations = CustomAssetUtility.Cache[key] as CharacterAnimationAsset;
+                    if (animations) __instance.Animations = animations;
+                }
                     break;
             }
-        }
-
-        [HarmonyPrefix]
-        [HarmonyPatch(typeof(HumanAnimationController), "Initialize")]
-        private static void Initialize(HumanAnimationController __instance)
-        {
-            var key = $"{__instance.SharedAsset.name}Animations : CharacterAnimationAsset";
-            var animations = CustomAssetUtility.Cache[key] as CharacterAnimationAsset;
-            if (animations) __instance.SharedAsset.Animations = animations;
         }
 
         #endregion
