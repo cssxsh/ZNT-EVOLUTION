@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using HarmonyLib;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -27,20 +28,18 @@ namespace ZNT.Evolution.Core.Asset
 
         public override bool CanRead => true;
 
-        public override LayerMask Create(Type objectType) => 0x00000000;
+        public override LayerMask Create(Type objectType) => 0x00000001;
 
-        public override object ReadJson(JsonReader reader, Type objectType, object _, JsonSerializer serializer)
+        public override object ReadJson(JsonReader reader, Type type, object _, JsonSerializer serializer)
         {
-            if (reader.TokenType == JsonToken.StartObject) return base.ReadJson(reader, objectType, _, serializer);
-            var mask = 0;
-            foreach (var name in serializer.Deserialize<string>(reader).Split(','))
+            if (reader.TokenType != JsonToken.String) return base.ReadJson(reader, type, _, serializer);
+            var names = serializer.Deserialize<string>(reader).Split(',').Select(name => name.Trim());
+            return (LayerMask)names.Aggregate(0x00000000, (mask, name) =>
             {
-                var layer = LayerMask.NameToLayer(name.Trim());
-                if (layer == -1) layer = int.Parse(name.Trim());
-                mask |= 0x01 << layer;
-            }
-
-            return (LayerMask)mask;
+                var layer = LayerMask.NameToLayer(name);
+                if (layer == -1) layer = int.Parse(name);
+                return mask | (0x01 << layer);
+            });
         }
     }
 }

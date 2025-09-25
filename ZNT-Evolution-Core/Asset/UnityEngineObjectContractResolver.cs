@@ -61,13 +61,15 @@ namespace ZNT.Evolution.Core.Asset
             public void SetValue(object target, object value)
             {
                 var mask = (LayerMask)value;
-                var layer = 0;
+                var layer = -1;
                 for (var i = 0x00; i < 0x20; i++)
                 {
-                    if (!BitMask.HasAll(mask, layer)) continue;
+                    if (mask.value != 0x01 << i) continue;
                     layer = i;
+                    break;
                 }
 
+                if (layer == -1) throw new FormatException($"Invalid {mask.value:X8}");
                 _origin.SetValue(target, _origin.GetValue(target) switch
                 {
                     LayerMask _ => (LayerMask)layer,
@@ -84,7 +86,7 @@ namespace ZNT.Evolution.Core.Asset
                     int index => index,
                     _ => throw new FormatException("Invalid value")
                 };
-                return (LayerMask)(1 << layer);
+                return (LayerMask)(0x01 << layer);
             }
         }
     }
