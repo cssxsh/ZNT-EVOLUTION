@@ -192,4 +192,4 @@
   * DamageType `DamageType`
   * <u>ref Explosion</u> `ExplosionAsset`,
   * <u>ref ExplodeEffect</u> `VisualEffect`
-  * ExplodeOn `Wall`/`Ground`/`Ceiling`/`Target`
+  * ExplodeOn `Wall`/`Ground`/`Ceiling`/`Target` 代码扩展 `Zombie`/`Climber`/`Blocker`/`Tank`/`IgnoreHuman`

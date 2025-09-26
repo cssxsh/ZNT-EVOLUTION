@@ -27,6 +27,8 @@ namespace ZNT.Evolution.Core.Asset
 
         public const PhysicObjectBehaviour.ExplodeSurface Tank = (PhysicObjectBehaviour.ExplodeSurface)0x00000080;
 
+        public const PhysicObjectBehaviour.ExplodeSurface IgnoreHuman = Zombie | Climber | Blocker | Tank;
+
         public override bool CanWrite => true;
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
@@ -61,6 +63,7 @@ namespace ZNT.Evolution.Core.Asset
                 nameof(Climber) => Climber,
                 nameof(Blocker) => Blocker,
                 nameof(Tank) => Tank,
+                nameof(IgnoreHuman) => IgnoreHuman,
                 _ => None
             });
         }
