@@ -35,6 +35,7 @@ namespace ZNT.Evolution.Core.Asset
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
             var mask = (ExplodeSurface)value;
+            if (mask == None) writer.WriteValue((int)None);
             var flags = new List<string>();
             if (mask.HasFlag(Wall)) flags.Add(nameof(Wall));
             if (mask.HasFlag(Ground)) flags.Add(nameof(Ground));

@@ -15,6 +15,7 @@ namespace ZNT.Evolution.Core.Asset
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
             var mask = (LayerMask)value;
+            if (mask.value == 0x00000000) writer.WriteValue(0x00000000);
             var names = new List<string>();
             for (var layer = 0x00; layer < 0x20; layer++)
             {
@@ -32,6 +33,7 @@ namespace ZNT.Evolution.Core.Asset
 
         public override object ReadJson(JsonReader reader, Type type, object _, JsonSerializer serializer)
         {
+            if (reader.TokenType == JsonToken.Integer) return (LayerMask)serializer.Deserialize<int>(reader);
             if (reader.TokenType != JsonToken.String) return (LayerMask)serializer.Deserialize<Wrapper>(reader).value;
             var names = serializer.Deserialize<string>(reader).Split(',')
                 .Select(n => n.Trim()).Where(n => n.Length > 0);
