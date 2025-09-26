@@ -544,6 +544,7 @@ namespace ZNT.Evolution.Core
             clone.materials[0] = material;
             clone.textures[0] = material.mainTexture;
             foreach (var definition in clone.spriteDefinitions) definition.material = material;
+            foreach (var (index, points) in merge.AttachPoints) clone.spriteDefinitions[index].attachPoints = points;
 
             UnityEngine.Object.DontDestroyOnLoad(clone);
             return clone;
