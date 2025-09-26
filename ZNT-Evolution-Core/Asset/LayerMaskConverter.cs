@@ -33,7 +33,8 @@ namespace ZNT.Evolution.Core.Asset
         public override object ReadJson(JsonReader reader, Type type, object _, JsonSerializer serializer)
         {
             if (reader.TokenType != JsonToken.String) return (LayerMask)serializer.Deserialize<Wrapper>(reader).value;
-            var names = serializer.Deserialize<string>(reader).Split(',').Select(name => name.Trim());
+            var names = serializer.Deserialize<string>(reader).Split(',')
+                .Select(n => n.Trim()).Where(n => n.Length > 0);
             return (LayerMask)names.Aggregate(0x00000000, (mask, name) =>
             {
                 var layer = LayerMask.NameToLayer(name);
