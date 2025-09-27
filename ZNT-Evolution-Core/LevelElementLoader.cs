@@ -169,6 +169,14 @@ namespace ZNT.Evolution.Core
             var preview = bundle.LoadAsset<Sprite>("preview");
             if (preview) Logger.LogDebug($"preview -> {preview} -> {preview.texture}");
 
+            foreach (var file in Directory.EnumerateFiles(path, "*.component.json"))
+            {
+                var filename = Path.GetFileName(file);
+                var merge = DeserializeObject<ComponentMerge>(folder: path, file: filename);
+                var component = MergeComponent(merge);
+                Logger.LogDebug($"{filename} -> {component}");
+            }
+
             foreach (var file in Directory.EnumerateFiles(path, "*.explosion.json"))
             {
                 var filename = Path.GetFileName(file);
@@ -473,6 +481,14 @@ namespace ZNT.Evolution.Core
 
         private static void ApplyElementFromFolder(this AssetBundle _, string path)
         {
+            foreach (var file in Directory.EnumerateFiles(path, "*.component.json"))
+            {
+                var filename = Path.GetFileName(file);
+                var merge = DeserializeObject<ComponentMerge>(folder: path, file: filename);
+                var component = MergeComponent(merge);
+                Logger.LogDebug($"{filename} -> {component}");
+            }
+
             foreach (var file in Directory.EnumerateFiles(path, "*.explosion.json"))
             {
                 var filename = Path.GetFileName(file);
@@ -545,6 +561,17 @@ namespace ZNT.Evolution.Core
             clone.textures[0] = material.mainTexture;
             foreach (var definition in clone.spriteDefinitions) definition.material = material;
             foreach (var (index, points) in merge.AttachPoints) clone.spriteDefinitions[index].attachPoints = points;
+
+            UnityEngine.Object.DontDestroyOnLoad(clone);
+            return clone;
+        }
+
+        private static Component MergeComponent(ComponentMerge merge)
+        {
+            var clone = UnityEngine.Object.Instantiate(merge.Source);
+
+            clone.name = merge.Name;
+            CustomAssetUtility.Merge(clone, merge.Fields);
 
             UnityEngine.Object.DontDestroyOnLoad(clone);
             return clone;

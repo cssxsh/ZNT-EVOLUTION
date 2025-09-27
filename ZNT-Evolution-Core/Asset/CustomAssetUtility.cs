@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using HarmonyLib;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using UnityEngine;
@@ -34,41 +36,49 @@ namespace ZNT.Evolution.Core.Asset
         public static void SerializeObjectToPath(string target, object data)
         {
             var serializer = JsonSerializer.Create(SerializerSettings);
-            SaveObjectToPath(serializer, data, target);
-        }
-
-        private static void SaveObjectToPath(JsonSerializer serializer, object data, string path)
-        {
-            using var writer = new StreamWriter(path);
+            using var writer = new StreamWriter(target);
             using var json = new JsonTextWriter(writer);
             json.Formatting = Formatting.Indented;
             serializer.Serialize(json, data);
         }
 
+        public static void SerializeObjectToTextAsset(out TextAsset asset, object data)
+        {
+            var serializer = JsonSerializer.Create(SerializerSettings);
+            using var writer = new StringWriter();
+            using var json = new JsonTextWriter(writer);
+            json.Formatting = Formatting.Indented;
+            serializer.Serialize(json, data);
+            asset = new TextAsset(writer.ToString());
+        }
+
         public static T DeserializeObjectFromPath<T>(string source)
         {
             var serializer = JsonSerializer.Create(SerializerSettings);
-            return LoadObjectFromPath<T>(serializer, source);
+            using var reader = new StreamReader(source);
+            using var json = new JsonTextReader(reader);
+            return serializer.Deserialize<T>(json);
         }
 
         public static T DeserializeObjectFromTextAsset<T>(TextAsset asset)
         {
             var serializer = JsonSerializer.Create(SerializerSettings);
-            return LoadObjectFromTextAsset<T>(serializer, asset);
-        }
-
-        private static T LoadObjectFromPath<T>(JsonSerializer jsonSerializer, string path)
-        {
-            using var reader = new StreamReader(path);
-            using var json = new JsonTextReader(reader);
-            return jsonSerializer.Deserialize<T>(json);
-        }
-
-        private static T LoadObjectFromTextAsset<T>(JsonSerializer jsonSerializer, TextAsset asset)
-        {
             using var reader = new StringReader(asset.text);
             using var json = new JsonTextReader(reader);
-            return jsonSerializer.Deserialize<T>(json);
+            return serializer.Deserialize<T>(json);
+        }
+
+        public static void Merge(Object o, IDictionary<string, string> fields)
+        {
+            var serializer = JsonSerializer.Create(SerializerSettings);
+            foreach (var (path, text) in fields)
+            {
+                var field = path.Split('.').Aggregate(Traverse.Create(o), (t, name) => t.Field(name));
+                using var reader = new StringReader(text);
+                using var json = new JsonTextReader(reader);
+                var value = serializer.Deserialize(json, field.GetValueType());
+                field.SetValue(value);
+            }
         }
     }
 }

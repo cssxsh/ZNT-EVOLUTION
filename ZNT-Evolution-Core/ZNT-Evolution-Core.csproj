@@ -382,6 +382,7 @@
         <Compile Include="Asset\AnimationAddition.cs"/>
         <Compile Include="Asset\BrushInfo.cs"/>
         <Compile Include="Asset\ExplodeSurfaceConverter.cs"/>
+        <Compile Include="Asset\ComponentMerge.cs"/>
         <Compile Include="Asset\LayerMaskConverter.cs"/>
         <Compile Include="Asset\LevelElementAddition.cs"/>
         <Compile Include="Asset\CustomAssetUtility.cs"/>
