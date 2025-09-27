@@ -5,7 +5,7 @@ namespace ZNT.Evolution.Core.Asset
 {
     [JsonObject]
     [UsedImplicitly]
-    internal class LevelElementInfo : EvolutionInfo
+    internal class LevelElementInfo
     {
         [JsonProperty("CustomAsset")] public readonly string CustomAsset;
 

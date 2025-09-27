@@ -3,25 +3,23 @@ using HarmonyLib;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 
+// ReSharper disable MemberCanBePrivate.Global
 namespace ZNT.Evolution.Core.Asset
 {
     [JsonObject]
     [UsedImplicitly]
-    internal class LevelElementAddition : EvolutionInfo
+    internal class LevelElementAddition : EvolutionAddition<LevelElement>
     {
-        [JsonProperty("Targets")] public readonly LevelElement[] Targets;
-
         [JsonProperty("Assets")] public readonly CustomAssetObject[] Assets;
 
         [JsonConstructor]
-        public LevelElementAddition(LevelElement[] targets, CustomAssetObject[] assets)
+        public LevelElementAddition(LevelElement[] targets, CustomAssetObject[] assets) : base(targets)
         {
             if (targets.Length != assets.Length) throw new FormatException("Targets.Length != Assets.Length");
-            Targets = targets;
             Assets = assets;
         }
 
-        public void Apply()
+        public override void Apply()
         {
             for (var i = 0; i < Assets.Length; i++)
             {

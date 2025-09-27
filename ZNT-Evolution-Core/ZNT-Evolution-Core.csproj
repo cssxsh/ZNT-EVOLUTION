@@ -381,13 +381,15 @@
     <ItemGroup>
         <Compile Include="Asset\AnimationAddition.cs"/>
         <Compile Include="Asset\BrushInfo.cs"/>
+        <Compile Include="Asset\EvolutionAddition.cs"/>
+        <Compile Include="Asset\EvolutionInfo.cs"/>
         <Compile Include="Asset\ExplodeSurfaceConverter.cs"/>
         <Compile Include="Asset\ComponentMerge.cs"/>
         <Compile Include="Asset\LayerMaskConverter.cs"/>
         <Compile Include="Asset\LevelElementAddition.cs"/>
         <Compile Include="Asset\CustomAssetUtility.cs"/>
         <Compile Include="Asset\AssetElementBinder.cs"/>
-        <Compile Include="Asset\EvolutionInfo.cs"/>
+        <Compile Include="Asset\EvolutionMerge.cs"/>
         <Compile Include="Asset\HookAsset.cs"/>
         <Compile Include="Asset\LevelElementInfo.cs"/>
         <Compile Include="Asset\UnityEngineObjectContractResolver.cs"/>

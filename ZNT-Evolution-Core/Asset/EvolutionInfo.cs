@@ -1,7 +1,18 @@
+using Newtonsoft.Json;
+
+// ReSharper disable MemberCanBeProtected.Global
+// ReSharper disable UnusedMemberInSuper.Global
 namespace ZNT.Evolution.Core.Asset
 {
-    public class EvolutionInfo
+    public abstract class EvolutionInfo<T> where T : UnityEngine.Object
     {
-        // Recommended use Readonly Property
+        [JsonProperty("Name")] public readonly string Name;
+
+        protected EvolutionInfo(string name)
+        {
+            Name = name;
+        }
+
+        public abstract T Create();
     }
 }

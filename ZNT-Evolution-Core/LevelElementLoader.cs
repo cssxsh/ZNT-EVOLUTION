@@ -146,7 +146,7 @@ namespace ZNT.Evolution.Core
             {
                 var material = bundle.LoadAsset<Material>("sprites");
                 var info = DeserializeObject<SpriteInfo>(folder: path, file: "sprite.info.json");
-                var sprites = CreateSprite(material, info);
+                var sprites = info.WithMaterial(material).Create();
                 Logger.LogDebug($"CreateSprite -> {sprites} from {sprites.material}");
             }
 
@@ -154,7 +154,7 @@ namespace ZNT.Evolution.Core
             {
                 var material = bundle.LoadAsset<Material>("sprites");
                 var merge = DeserializeObject<SpriteMerge>(folder: path, file: "sprite.merge.json");
-                var sprites = MergeSprite(material, merge);
+                var sprites = merge.WithMaterial(material).Create();
                 Logger.LogDebug($"MergeSprite -> {sprites} from {sprites.material}");
             }
 
@@ -162,18 +162,41 @@ namespace ZNT.Evolution.Core
             Logger.LogDebug($"animation.json -> {animation}");
 
             var brush = bundle.LoadAsset<Rotorz.Tile.OrientedBrush>("brush")
-                        ?? CreateBrush(DeserializeObject<BrushInfo>(folder: path, file: "brush.info.json"));
+                        ?? DeserializeObject<BrushInfo>(folder: path, file: "brush.info.json").Create();
             var variation = brush.DefaultOrientation.GetVariation(0);
             Logger.LogDebug($"brush -> {brush} -> {variation}");
 
             var preview = bundle.LoadAsset<Sprite>("preview");
             if (preview) Logger.LogDebug($"preview -> {preview} -> {preview.texture}");
 
+            foreach (var file in Directory.EnumerateFiles(path, "*.sprite.info.json"))
+            {
+                var filename = Path.GetFileName(file);
+                var info = DeserializeObject<SpriteInfo>(folder: path, file: filename);
+                var sprites = info.Create();
+                Logger.LogDebug($"{filename} -> {sprites}");
+            }
+
+            foreach (var file in Directory.EnumerateFiles(path, "*.sprite.merge.json"))
+            {
+                var filename = Path.GetFileName(file);
+                var merge = DeserializeObject<SpriteMerge>(folder: path, file: file);
+                var sprites = merge.Create();
+                Logger.LogDebug($"{filename} -> {sprites}");
+            }
+
+            foreach (var file in Directory.EnumerateFiles(path, "*.animations.json"))
+            {
+                var filename = Path.GetFileName(file);
+                var animations = DeserializeObject<CharacterAnimationAsset>(folder: path, file: file);
+                Logger.LogDebug($"{filename} -> {animations}");
+            }
+
             foreach (var file in Directory.EnumerateFiles(path, "*.component.json"))
             {
                 var filename = Path.GetFileName(file);
                 var merge = DeserializeObject<ComponentMerge>(folder: path, file: filename);
-                var component = MergeComponent(merge);
+                var component = merge.Create();
                 Logger.LogDebug($"{filename} -> {component}");
             }
 
@@ -196,13 +219,6 @@ namespace ZNT.Evolution.Core
                 var filename = Path.GetFileName(file);
                 var human = DeserializeObject<HumanAsset>(folder: path, file: file);
                 Logger.LogDebug($"{filename} -> {human} from {human.AnimationLibrary}");
-            }
-
-            foreach (var file in Directory.EnumerateFiles(path, "*.animations.json"))
-            {
-                var filename = Path.GetFileName(file);
-                var animations = DeserializeObject<CharacterAnimationAsset>(folder: path, file: file);
-                Logger.LogDebug($"{filename} -> {animations}");
             }
 
             var asset = DeserializeObject<LevelElementInfo>(folder: path, file: "element.json").CustomAsset;
@@ -312,7 +328,7 @@ namespace ZNT.Evolution.Core
             if (File.Exists(Path.Combine(path, "sprite.info.json")))
             {
                 var info = DeserializeObject<SpriteInfo>(folder: path, file: "sprite.info.json");
-                var sprites = CreateSprite(material, info);
+                var sprites = info.WithMaterial(material).Create();
                 Logger.LogDebug($"CreateSprite -> {sprites} from {sprites.material}");
 
                 if (File.Exists(Path.Combine(path, "animation.json")))
@@ -462,10 +478,29 @@ namespace ZNT.Evolution.Core
 
         private static void ApplyAnimationFromFolder(this AssetBundle bundle, string path)
         {
-            var material = bundle.LoadAsset<Material>("sprites");
-            var info = DeserializeObject<SpriteInfo>(folder: path, file: "sprite.info.json");
-            var sprites = CreateSprite(material, info);
-            Logger.LogDebug($"CreateSprite -> {sprites} from {sprites.material}");
+            if (File.Exists(Path.Combine(path, "sprite.info.json")))
+            {
+                var material = bundle.LoadAsset<Material>("sprites");
+                var info = DeserializeObject<SpriteInfo>(folder: path, file: "sprite.info.json");
+                var sprites = info.WithMaterial(material).Create();
+                Logger.LogDebug($"CreateSprite -> {sprites} from {sprites.material}");
+            }
+
+            foreach (var file in Directory.EnumerateFiles(path, "*.sprite.info.json"))
+            {
+                var filename = Path.GetFileName(file);
+                var info = DeserializeObject<SpriteInfo>(folder: path, file: filename);
+                var sprites = info.Create();
+                Logger.LogDebug($"{filename} -> {sprites}");
+            }
+
+            foreach (var file in Directory.EnumerateFiles(path, "*.sprite.merge.json"))
+            {
+                var filename = Path.GetFileName(file);
+                var merge = DeserializeObject<SpriteMerge>(folder: path, file: file);
+                var sprites = merge.Create();
+                Logger.LogDebug($"{filename} -> {sprites}");
+            }
 
             foreach (var file in Directory.EnumerateFiles(path, "*.animations.json"))
             {
@@ -485,7 +520,7 @@ namespace ZNT.Evolution.Core
             {
                 var filename = Path.GetFileName(file);
                 var merge = DeserializeObject<ComponentMerge>(folder: path, file: filename);
-                var component = MergeComponent(merge);
+                var component = merge.Create();
                 Logger.LogDebug($"{filename} -> {component}");
             }
 
@@ -524,72 +559,6 @@ namespace ZNT.Evolution.Core
             impl.materials[0] = material;
             impl.spriteDefinitions[0].material = material;
             impl.spriteDefinitions[0].name = impl.name.Replace("sprites_", "");
-
-            UnityEngine.Object.DontDestroyOnLoad(impl);
-            return impl;
-        }
-
-        private static tk2dSpriteCollectionData CreateSprite(Material material, SpriteInfo info)
-        {
-            var impl = tk2dSpriteCollectionData.CreateFromTexture(
-                texture: material.mainTexture,
-                size: tk2dSpriteCollectionSize.Explicit(orthoSize: info.OrthoSize, targetHeight: info.TargetHeight),
-                names: info.Names,
-                regions: info.Regions,
-                anchors: info.Anchors
-            );
-
-            impl.name = info.Name ?? material.name.Replace("_mat", "");
-            impl.gameObject.hideFlags = HideFlags.HideAndDontSave;
-            impl.material = material;
-            impl.materials[0] = material;
-            foreach (var definition in impl.spriteDefinitions) definition.material = material;
-            foreach (var (index, points) in info.AttachPoints) impl.spriteDefinitions[index].attachPoints = points;
-
-            UnityEngine.Object.DontDestroyOnLoad(impl);
-            return impl;
-        }
-
-        private static tk2dSpriteCollectionData MergeSprite(Material material, SpriteMerge merge)
-        {
-            var clone = UnityEngine.Object.Instantiate(merge.Source);
-
-            clone.name = merge.Name ?? material.name.Replace("_mat", "");
-            clone.gameObject.hideFlags = HideFlags.HideAndDontSave;
-            clone.material = material;
-            clone.materials[0] = material;
-            clone.textures[0] = material.mainTexture;
-            foreach (var definition in clone.spriteDefinitions) definition.material = material;
-            foreach (var (index, points) in merge.AttachPoints) clone.spriteDefinitions[index].attachPoints = points;
-
-            UnityEngine.Object.DontDestroyOnLoad(clone);
-            return clone;
-        }
-
-        private static Component MergeComponent(ComponentMerge merge)
-        {
-            var clone = UnityEngine.Object.Instantiate(merge.Source);
-
-            clone.name = merge.Name;
-            CustomAssetUtility.Merge(clone, merge.Fields);
-
-            UnityEngine.Object.DontDestroyOnLoad(clone);
-            return clone;
-        }
-
-        private static Rotorz.Tile.OrientedBrush CreateBrush(BrushInfo info)
-        {
-            var impl = ScriptableObject.CreateInstance<Rotorz.Tile.OrientedBrush>();
-
-            impl.hideFlags = HideFlags.HideAndDontSave;
-            impl.name = info.Name;
-            impl.group = 1;
-            impl.forceLegacySideways = info.ForceLegacySideways;
-            impl.applyPrefabTransform = info.ApplyPrefabTransform;
-            Traverse.Create(impl).Field<int>("_userFlags").Value = info.UserFlags;
-            impl.forceOverrideFlags = info.ForceOverrideFlags;
-            impl.Coalesce = info.Coalesce;
-            impl.AddOrientation(mask: 0).AddVariation(variation: info.Variation, weight: 50);
 
             UnityEngine.Object.DontDestroyOnLoad(impl);
             return impl;

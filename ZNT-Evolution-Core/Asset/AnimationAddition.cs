@@ -4,25 +4,23 @@ using HarmonyLib;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 
+// ReSharper disable MemberCanBePrivate.Global
 namespace ZNT.Evolution.Core.Asset
 {
     [JsonObject]
     [UsedImplicitly]
-    internal class AnimationAddition : EvolutionInfo
+    internal class AnimationAddition : EvolutionAddition<tk2dSpriteAnimation>
     {
-        [JsonProperty("Targets")] public readonly tk2dSpriteAnimation[] Targets;
-
         [JsonProperty("Clips")] public readonly tk2dSpriteAnimationClip[] Clips;
 
         [JsonConstructor]
-        public AnimationAddition(tk2dSpriteAnimation[] targets, tk2dSpriteAnimationClip[] clips)
+        public AnimationAddition(tk2dSpriteAnimation[] targets, tk2dSpriteAnimationClip[] clips) : base(targets)
         {
             if (targets.Length != clips.Length) throw new FormatException("Targets.Length != Clips.Length");
-            Targets = targets;
             Clips = clips;
         }
 
-        public void Apply()
+        public override void Apply()
         {
             for (var i = 0; i < Clips.Length; i++)
             {

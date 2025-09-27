@@ -3,24 +3,30 @@ using JetBrains.Annotations;
 using Newtonsoft.Json;
 using UnityEngine;
 
+// ReSharper disable MemberCanBePrivate.Global
 namespace ZNT.Evolution.Core.Asset
 {
     [JsonObject]
     [UsedImplicitly]
-    internal class ComponentMerge : EvolutionInfo
+    internal class ComponentMerge : EvolutionMerge<Component>
     {
-        [JsonProperty("Source")] public readonly Component Source;
-
-        [JsonProperty("Name")] public readonly string Name;
-
         [JsonProperty("Fields")] public readonly Dictionary<string, string> Fields;
 
         [JsonConstructor]
-        public ComponentMerge(Component source, string name, Dictionary<string, string> fields)
+        public ComponentMerge(Component source, string name, Dictionary<string, string> fields) : base(name, source)
         {
-            Source = source;
-            Name = name;
             Fields = fields;
+        }
+
+        public override Component Create()
+        {
+            var clone = Object.Instantiate(Source);
+
+            clone.name = Name;
+            CustomAssetUtility.Merge(clone, Fields);
+
+            Object.DontDestroyOnLoad(clone);
+            return clone;
         }
     }
 }
