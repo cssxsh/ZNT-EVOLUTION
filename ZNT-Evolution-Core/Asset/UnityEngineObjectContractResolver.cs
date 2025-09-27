@@ -38,7 +38,8 @@ namespace ZNT.Evolution.Core.Asset
                     break;
                 case { }
                     when member.IsDefined(typeof(LayerAttribute)):
-                    property.PropertyType = typeof(LayerMask);
+                    property.PropertyType = typeof(int);
+                    property.MemberConverter = new LayerConverter();
                     property.ValueProvider = new LayerProvider(origin: property.ValueProvider);
                     break;
                 case { Name: nameof(UnityEngine.Object.name) }:
@@ -60,23 +61,7 @@ namespace ZNT.Evolution.Core.Asset
 
             public void SetValue(object target, object value)
             {
-                var mask = (LayerMask)value;
-                var layer = -1;
-                for (var i = 0x00; i < 0x20; i++)
-                {
-                    if (mask.value != 0x01 << i) continue;
-                    layer = i;
-                    break;
-                }
-
-                layer = mask.value switch // Fix old data error
-                {
-                    0x00 => 0x00,
-                    0x09 => 0x09,
-                    0x1E => 0x1E,
-                    _ => layer
-                };
-                if (layer == -1) throw new FormatException($"Invalid {mask.value:X8}");
+                var layer = (int)value;
                 _origin.SetValue(target, _origin.GetValue(target) switch
                 {
                     LayerMask _ => (LayerMask)layer,
@@ -87,13 +72,12 @@ namespace ZNT.Evolution.Core.Asset
 
             public object GetValue(object target)
             {
-                var layer = _origin.GetValue(target) switch
+                return _origin.GetValue(target) switch
                 {
                     LayerMask mask => mask.value,
                     int index => index,
                     _ => throw new FormatException("Invalid value")
                 };
-                return (LayerMask)(0x01 << layer);
             }
         }
     }

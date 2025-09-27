@@ -385,6 +385,7 @@
         <Compile Include="Asset\EvolutionInfo.cs"/>
         <Compile Include="Asset\ExplodeSurfaceConverter.cs"/>
         <Compile Include="Asset\ComponentMerge.cs"/>
+        <Compile Include="Asset\LayerConverter.cs"/>
         <Compile Include="Asset\LayerMaskConverter.cs"/>
         <Compile Include="Asset\LevelElementAddition.cs"/>
         <Compile Include="Asset\CustomAssetUtility.cs"/>
