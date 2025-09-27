@@ -71,6 +71,7 @@ namespace ZNT.Evolution.Core.Asset
                 var result = base.ReadJson(reader, type, _, serializer) as UnityEngine.Object;
                 if (result is ISerializationCallbackReceiver receiver) receiver.OnAfterDeserialize();
                 if (result) CustomAssetUtility.Cache[result.NameAndType()] = result;
+                if (result) UnityEngine.Object.DontDestroyOnLoad(result);
                 return result;
             }
 
@@ -81,7 +82,7 @@ namespace ZNT.Evolution.Core.Asset
 
             if (CustomAssetUtility.Cache.TryGetValue(key, out var value)) return value;
             var name = key.Split(':')[0].Trim();
-            type = AccessTools.TypeByName(key.Split(':')[1].Trim()) ?? type;
+            if (key.Split(':').Length > 1) type = AccessTools.TypeByName(key.Split(':')[1].Trim()) ?? type;
             foreach (var asset in Resources.FindObjectsOfTypeAll(type))
             {
                 if (asset.name != name) continue;
