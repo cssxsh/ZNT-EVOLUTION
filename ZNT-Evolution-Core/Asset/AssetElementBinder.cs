@@ -28,15 +28,9 @@ namespace ZNT.Evolution.Core.Asset
                 description.getID(out var guid);
                 asset.id = "{" + guid + "}";
                 description.getPath(out asset.path);
-                Traverse.Create(asset).Field<string>("assetId").Value = guid.ToString();
-
-                lock (typeof(FmodAssetIndex))
-                {
-                    FmodAssetIndex.Index.AddAssetElement(asset);
-                    Traverse.Create<FmodAssetIndex>()
-                        .Field<Dictionary<string, FMODAsset>>("pathIndex").Value = null;
-                }
-
+                asset.name = asset.path.Split('/').Last();
+                Traverse.Create(asset).Field<string>("assetId").Value = $"{path} - {asset.path}";
+                asset.Bind();
                 dictionary.TryAdd(asset.path, asset);
             }
 
@@ -45,15 +39,21 @@ namespace ZNT.Evolution.Core.Asset
 
         public static string Bind(this AssetElement asset)
         {
-            Traverse.Create(asset).Field<string>("assetId").Value = asset.name;
+            Traverse.Create(asset).Field<string>("assetId").Value ??= asset.name;
             switch (asset)
             {
                 case LevelElement element:
-                    lock (typeof(LevelElementIndex))
-                    {
-                        LevelElementIndex.Index.AddAssetElement(element);
-                    }
-
+                    lock (LevelElementIndex.IndexName) LevelElementIndex.Index.AddAssetElement(element);
+                    break;
+                case FMODAsset fmod:
+                    lock (FmodAssetIndex.IndexName) FmodAssetIndex.Index.AddAssetElement(fmod);
+                    FmodAssetIndex.PathIndex[fmod.path] = fmod;
+                    break;
+                case VisualEffect effect:
+                    lock (VisualEffectIndex.IndexName) VisualEffectIndex.Index.AddAssetElement(effect);
+                    break;
+                case ShaderAnimator animator:
+                    lock (ShaderAnimatorIndex.IndexName) ShaderAnimatorIndex.Index.AddAssetElement(animator);
                     break;
                 default:
                     throw new NotSupportedException($"Bind: {asset}");
@@ -67,11 +67,17 @@ namespace ZNT.Evolution.Core.Asset
             switch (asset)
             {
                 case LevelElement element:
-                    lock (typeof(LevelElementIndex))
-                    {
-                        LevelElementIndex.Index.RemoveAssetElement(element);
-                    }
-
+                    lock (LevelElementIndex.IndexName) LevelElementIndex.Index.RemoveAssetElement(element);
+                    break;
+                case FMODAsset fmod:
+                    lock (FmodAssetIndex.IndexName) FmodAssetIndex.Index.RemoveAssetElement(fmod);
+                    FmodAssetIndex.PathIndex.Remove(fmod.path);
+                    break;
+                case VisualEffect effect:
+                    lock (VisualEffectIndex.IndexName) VisualEffectIndex.Index.RemoveAssetElement(effect);
+                    break;
+                case ShaderAnimator animator:
+                    lock (ShaderAnimatorIndex.IndexName) ShaderAnimatorIndex.Index.RemoveAssetElement(animator);
                     break;
                 default:
                     throw new NotSupportedException($"Unbind: {asset}");
