@@ -39,7 +39,7 @@ namespace ZNT.Evolution.Core.Asset
                 case { }
                     when member.IsDefined(typeof(LayerAttribute)):
                     property.PropertyType = typeof(int);
-                    property.MemberConverter = new LayerConverter();
+                    property.Converter = property.MemberConverter = new LayerConverter();
                     property.ValueProvider = new LayerProvider(origin: property.ValueProvider);
                     break;
                 case { Name: nameof(UnityEngine.Object.name) }:

@@ -15,7 +15,12 @@ namespace ZNT.Evolution.Core.Asset
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
             var mask = (LayerMask)value;
-            if (mask.value == 0x00000000) writer.WriteValue(0x00000000);
+            if (mask.value == 0x00000000)
+            {
+                writer.WriteValue(0x00000000);
+                return;
+            }
+
             var names = new List<string>();
             for (var layer = 0x00; layer < 0x20; layer++)
             {
