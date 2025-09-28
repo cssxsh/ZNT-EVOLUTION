@@ -46,15 +46,13 @@ namespace ZNT.Evolution.Core.Editor
 
         protected override void OnCreate()
         {
-            base.OnCreate();
             _selectable = FindObjectsOfType<ExplosionAsset>().ToDictionary(explosion => explosion.HierarchyName);
         }
 
-        public bool OverrideMemberUi(SelectionMenu selectionMenu, EditorComponent component, MemberInfo member)
+        public bool OverrideMemberUi(SelectionMenu menu, EditorComponent component, MemberInfo member)
         {
             if (member.Name != nameof(Selected)) return false;
-            var binder = selectionMenu.InstantiateCustomBinder(selectionMenu.CustomBinders.IntStringList);
-            binder.BindStringListField(component, member, _selectable.Keys.ToList());
+            CustomBinder(menu).BindStringListField(component, member, _selectable.Keys.ToList());
             return true;
         }
     }

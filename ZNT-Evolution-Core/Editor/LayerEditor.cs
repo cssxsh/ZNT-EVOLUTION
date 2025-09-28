@@ -50,19 +50,18 @@ namespace ZNT.Evolution.Core.Editor
             return _names;
         }
 
-        public bool OverrideMemberUi(SelectionMenu selectionMenu, EditorComponent component, MemberInfo member)
+        public bool OverrideMemberUi(SelectionMenu menu, EditorComponent component, MemberInfo member)
         {
-            var binder = selectionMenu.InstantiateCustomBinder(selectionMenu.CustomBinders.IntStringList);
             switch (member.Name)
             {
                 case nameof(Main):
-                    binder.BindIndexListField(component, member, LayerNames());
+                    CustomBinder(menu).BindIndexListField(component, member, LayerNames());
                     return true;
                 case nameof(Top):
-                    if (Child("TopCollider")) binder.BindIndexListField(component, member, LayerNames());
+                    if (Child("TopCollider")) CustomBinder(menu).BindIndexListField(component, member, LayerNames());
                     return true;
                 case nameof(Bottom):
-                    if (Child("BottomCollider")) binder.BindIndexListField(component, member, LayerNames());
+                    if (Child("BottomCollider")) CustomBinder(menu).BindIndexListField(component, member, LayerNames());
                     return true;
                 default:
                     return false;

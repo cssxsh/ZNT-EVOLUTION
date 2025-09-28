@@ -1,11 +1,17 @@
+using ZNT.LevelEditor;
+
 namespace ZNT.Evolution.Core.Editor
 {
     public abstract class Editor : BaseComponent
     {
-        protected override void OnCreate()
+        protected Editor()
         {
-            var attribute = this.GetAttribute<SerializeInEditorAttribute>();
-            EditorVisibility = attribute.VisibleInEditor;
+            EditorVisibility = true;
+        }
+
+        protected static SupportedTypeBinder CustomBinder(SelectionMenu menu)
+        {
+            return menu.InstantiateCustomBinder(menu.CustomBinders.IntStringList);
         }
     }
 }

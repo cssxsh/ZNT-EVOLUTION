@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using UnityEngine;
+using UnityEngine.UI;
 
 // ReSharper disable InconsistentNaming
 namespace ZNT.Evolution.Core
@@ -106,6 +107,47 @@ namespace ZNT.Evolution.Core
             //     laser.GetComponent<LaserAttachment>().MaxDistance = __instance.Distance;
             //     laser.GetComponent<LaserRenderer>().Color = Color.red;
             // }
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(LevelEditor.SelectionMenu), "UpdateComponentMenu")]
+        public static bool UpdateComponentMenu(LevelEditor.SelectionMenu __instance)
+        {
+            var mainContainer = Traverse.Create(__instance)
+                .Field<RectTransform>("mainContainer").Value;
+            mainContainer.DestroyChildren();
+            mainContainer.anchoredPosition = Vector2.zero;
+            var serializeGameObject = Traverse.Create(__instance)
+                .Field<EditorGameObject>("serializeGameObject").Value;
+            var componentsUpdate = Traverse.Create(__instance)
+                .Field<List<IEditorUpdate>>("componentsUpdate").Value;
+            foreach (var component in serializeGameObject.Components)
+            {
+                if (component?.Data is null) continue;
+                if (component.Type == typeof(ObjectSettings)) continue;
+                if (component.Fields.Count == 0) continue;
+                if (component.Data is IEditorUpdate updater)
+                {
+                    componentsUpdate.Add(updater);
+                    updater.OnEditorOpen();
+                }
+
+                var text = __instance.SetComponentHeader(component);
+                var prev = mainContainer.childCount;
+                foreach (var key in component.Fields.Keys)
+                {
+                    if (component.Data is IEditorOverride overrider
+                        && overrider.OverrideMemberUi(__instance, component, key)) continue;
+                    __instance.SetDefaultUi(component, key);
+                }
+
+                if (prev == mainContainer.childCount) UnityEngine.Object.Destroy(text.gameObject);
+            }
+
+            var scrollRect = Traverse.Create(__instance)
+                .Field<ScrollRect>("scrollRect").Value;
+            scrollRect.Rebuild(CanvasUpdate.PostLayout);
+            return false;
         }
     }
 }
