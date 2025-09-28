@@ -27,7 +27,8 @@ namespace ZNT.Evolution.Core.Asset
                 new Vector2Converter(),
                 new Vector3Converter(),
                 new Vector4Converter(),
-                new Matrix4x4Converter()
+                new Matrix4x4Converter(),
+                new RectConverter()
             }
         };
 

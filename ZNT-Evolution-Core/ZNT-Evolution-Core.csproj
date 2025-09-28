@@ -393,6 +393,7 @@
         <Compile Include="Asset\EvolutionMerge.cs"/>
         <Compile Include="Asset\HookAsset.cs"/>
         <Compile Include="Asset\LevelElementInfo.cs"/>
+        <Compile Include="Asset\RectConverter.cs"/>
         <Compile Include="Asset\UnityEngineObjectContractResolver.cs"/>
         <Compile Include="Asset\UnityEngineObjectConverter.cs"/>
         <Compile Include="Asset\SpawnPointAsset.cs"/>
