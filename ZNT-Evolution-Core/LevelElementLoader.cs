@@ -158,17 +158,6 @@ namespace ZNT.Evolution.Core
                 Logger.LogDebug($"MergeSprite -> {sprites} from {sprites.material}");
             }
 
-            var animation = DeserializeObject<tk2dSpriteAnimation>(folder: path, file: "animation.json");
-            Logger.LogDebug($"animation.json -> {animation}");
-
-            var brush = bundle.LoadAsset<Rotorz.Tile.OrientedBrush>("brush")
-                        ?? DeserializeObject<BrushInfo>(folder: path, file: "brush.info.json").Create();
-            var variation = brush.DefaultOrientation.GetVariation(0);
-            Logger.LogDebug($"brush -> {brush} -> {variation}");
-
-            var preview = bundle.LoadAsset<Sprite>("preview");
-            if (preview) Logger.LogDebug($"preview -> {preview} -> {preview.texture}");
-
             foreach (var file in Directory.EnumerateFiles(path, "*.sprite.info.json"))
             {
                 var filename = Path.GetFileName(file);
@@ -185,12 +174,23 @@ namespace ZNT.Evolution.Core
                 Logger.LogDebug($"{filename} -> {sprites}");
             }
 
+            var animation = DeserializeObject<tk2dSpriteAnimation>(folder: path, file: "animation.json");
+            Logger.LogDebug($"animation.json -> {animation}");
+
             foreach (var file in Directory.EnumerateFiles(path, "*.animations.json"))
             {
                 var filename = Path.GetFileName(file);
                 var animations = DeserializeObject<CharacterAnimationAsset>(folder: path, file: file);
                 Logger.LogDebug($"{filename} -> {animations}");
             }
+
+            var brush = bundle.LoadAsset<Rotorz.Tile.OrientedBrush>("brush")
+                        ?? DeserializeObject<BrushInfo>(folder: path, file: "brush.info.json").Create();
+            var variation = brush.DefaultOrientation.GetVariation(0);
+            Logger.LogDebug($"brush -> {brush} -> {variation}");
+
+            var preview = bundle.LoadAsset<Sprite>("preview");
+            if (preview) Logger.LogDebug($"preview -> {preview} -> {preview.texture}");
 
             foreach (var file in Directory.EnumerateFiles(path, "*.component.json"))
             {
