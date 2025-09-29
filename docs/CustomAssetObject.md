@@ -10,8 +10,12 @@
   * <u>ref AnimationLibrary</u> `tk2dSpriteAnimation` 定义了角色的各种动作
   * <u>ref RiseAsset</u> `CustomAssetObject` 转变类型
   * MagazineSize 弹匣容量
+  * ReloadType `Automatic`/`ShellByShell`/`Stamina` 换弹类型
+  * ReloadTime 换弹时间
+  * StaminaRefillTimer 补弹时间
   * Invincible `true`/`false` 无敌
   * InvincibleOnAttack `true`/`false` 攻击时无敌
+  * IgnoreDamages `true`/`false` 忽略攻击，取消硬直动画
   * DamageMultipliers `UnityDictionary<DamageType, float>` 伤害倍率
   * RiseOnDeath `true`/`false` 死亡时感染
   * RiseAsset `CustomAssetObject` 感染后转变的单位

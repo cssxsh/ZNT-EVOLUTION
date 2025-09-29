@@ -23,6 +23,48 @@ namespace ZNT.Evolution.Core.Editor
             set => Behaviour.FleeingTimer.Duration = value;
         }
 
+        [SerializeInEditor(name: "Invincible On Attack")]
+        public bool InvincibleOnAttack
+        {
+            get => Behaviour.InvincibleOnAttack;
+            set => Behaviour.InvincibleOnAttack = value;
+        }
+
+        [SerializeInEditor(name: "Ignore Damages")]
+        public bool IgnoreDamages
+        {
+            get => Behaviour.IgnoreDamages;
+            set => Behaviour.IgnoreDamages = value;
+        }
+
+        [SerializeInEditor(name: "Weapon Magazine Size")]
+        public int WeaponMagazineSize
+        {
+            get => Behaviour.Weapon.DefaultMag.Size;
+            set => Behaviour.Weapon.DefaultMag = new Magazine(value);
+        }
+
+        [SerializeInEditor(name: "Weapon Reload Type")]
+        public ReloadType WeaponReloadType
+        {
+            get => Behaviour.Weapon.ReloadType;
+            set => Behaviour.Weapon.ReloadType = value;
+        }
+
+        [SerializeInEditor(name: "Weapon Reload Time")]
+        public float WeaponReloadTime
+        {
+            get => Behaviour.Weapon.ReloadTimer.Duration;
+            set => Behaviour.Weapon.ReloadTimer.Duration = value;
+        }
+
+        [SerializeInEditor(name: "Weapon Stamina Refill Time")]
+        public float WeaponStaminaRefillTimer
+        {
+            get => Behaviour.Weapon.StaminaRefillTimer.Duration;
+            set => Behaviour.Weapon.StaminaRefillTimer.Duration = value;
+        }
+
         [SerializeInEditor(name: "Direct Aim")]
         public bool DirectAim
         {

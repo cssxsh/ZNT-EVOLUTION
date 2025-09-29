@@ -122,12 +122,11 @@ namespace ZNT.Evolution.Core
         public static void Awake(Rotorz.Tile.OrientedBrush __instance)
         {
             var body = __instance.DefaultOrientation?.GetVariation(0) as GameObject;
+            if (body is null) return;
+            if (body.TryGetComponent<Health>(out var health)) health.EditorVisibility = true;
             switch (body)
             {
-                case null:
-                    return;
                 case var _ when body.TryGetComponent<PropBehaviour>(out _):
-                    if (body.TryGetComponent<Health>(out var health)) health.EditorVisibility = true;
                     if (body.GetComponent<LayerEditor>() is null) body.AddComponent<LayerEditor>();
                     break;
             }
