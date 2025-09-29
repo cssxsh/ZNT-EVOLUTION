@@ -84,11 +84,11 @@ namespace ZNT.Evolution.Core.Asset
             }
         }
 
-        public static IEnumerable<LevelElement> LevelElements(bool isMod = true)
+        public static IEnumerable<LevelElement> BoundLevelElements()
         {
             return LevelElementIndex.Index.Values
                 .Cast<LevelElement>()
-                .Where(element => !isMod || element.name == element.AssetId);
+                .Where(element => string.IsNullOrEmpty(element.AssetId) || element.AssetId.Length != 0x20);
         }
     }
 }

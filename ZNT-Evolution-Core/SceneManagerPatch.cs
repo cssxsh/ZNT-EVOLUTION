@@ -78,7 +78,7 @@ namespace ZNT.Evolution.Core
                 .Find("Option Panels/Video/Scroll Area/ScrollView/Content/FullScreen Entry").gameObject;
             var content = mod.GetComponentInChildren<VerticalLayoutGroup>();
 
-            foreach (var element in AssetElementBinder.LevelElements())
+            foreach (var element in AssetElementBinder.BoundLevelElements())
             {
                 var item = UnityEngine.Object.Instantiate(original: impl, parent: content.transform);
                 item.name = $"{element.Title} Entry";
