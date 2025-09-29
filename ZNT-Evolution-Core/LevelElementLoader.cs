@@ -192,10 +192,10 @@ namespace ZNT.Evolution.Core
             var preview = bundle.LoadAsset<Sprite>("preview");
             if (preview) Logger.LogDebug($"preview -> {preview} -> {preview.texture}");
 
-            foreach (var file in Directory.EnumerateFiles(path, "*.component.json"))
+            foreach (var file in Directory.EnumerateFiles(path, "*.object.merge.json"))
             {
                 var filename = Path.GetFileName(file);
-                var merge = DeserializeObject<ComponentMerge>(folder: path, file: filename);
+                var merge = DeserializeObject<ObjectMerge>(folder: path, file: filename);
                 var component = merge.Create();
                 Logger.LogDebug($"{filename} -> {component}");
             }
@@ -516,10 +516,10 @@ namespace ZNT.Evolution.Core
 
         private static void ApplyElementFromFolder(this AssetBundle _, string path)
         {
-            foreach (var file in Directory.EnumerateFiles(path, "*.component.json"))
+            foreach (var file in Directory.EnumerateFiles(path, "*.object.merge.json"))
             {
                 var filename = Path.GetFileName(file);
-                var merge = DeserializeObject<ComponentMerge>(folder: path, file: filename);
+                var merge = DeserializeObject<ObjectMerge>(folder: path, file: filename);
                 var component = merge.Create();
                 Logger.LogDebug($"{filename} -> {component}");
             }

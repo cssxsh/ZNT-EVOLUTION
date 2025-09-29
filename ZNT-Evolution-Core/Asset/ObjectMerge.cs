@@ -8,17 +8,17 @@ namespace ZNT.Evolution.Core.Asset
 {
     [JsonObject]
     [UsedImplicitly]
-    internal class ComponentMerge : EvolutionMerge<Component>
+    internal class ObjectMerge : EvolutionMerge<Object>
     {
         [JsonProperty("Fields")] public readonly Dictionary<string, string> Fields;
 
         [JsonConstructor]
-        public ComponentMerge(Component source, string name, Dictionary<string, string> fields) : base(name, source)
+        public ObjectMerge(Component source, string name, Dictionary<string, string> fields) : base(name, source)
         {
             Fields = fields;
         }
 
-        public override Component Create()
+        public override Object Create()
         {
             var clone = Object.Instantiate(Source);
 
