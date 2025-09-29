@@ -13,16 +13,17 @@ namespace ZNT.Evolution.Core
     {
         private static readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("StartManager");
 
-        private static IEnumerator Loading;
+        private static IEnumerator prefix;
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(StartManager), "Start")]
         public static void Start(StartManager __instance, ref IEnumerator __result)
         {
-            __result = Loading = LoadAsset(prefix: __result);
+            prefix = __result;
+            EvolutionCorePlugin.Instance.StartCoroutine(LoadAsset(__instance));
         }
 
-        private static IEnumerator LoadAsset(IEnumerator prefix)
+        private static IEnumerator LoadAsset(StartManager starter)
         {
             Logger.LogInfo("Initializing");
             yield return prefix;
@@ -86,10 +87,13 @@ namespace ZNT.Evolution.Core
                 if (font) TMPro.TMP_Settings.defaultFontAsset.fallbackFontAssets.Insert(0, font);
                 Logger.LogInfo($"Loaded Patch {file}");
             }
+
+            prefix = null;
+            starter.LoadNextScene();
         }
 
         [HarmonyPrefix]
         [HarmonyPatch(typeof(StartManager), "LoadNextScene")]
-        public static bool LoadNextScene(StartManager __instance) => !Loading.MoveNext();
+        public static bool LoadNextScene(StartManager __instance) => prefix is null;
     }
 }
