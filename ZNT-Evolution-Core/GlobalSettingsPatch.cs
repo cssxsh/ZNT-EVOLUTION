@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using UnityEngine;
+using UnityEngine.UI;
 
 // ReSharper disable InconsistentNaming
 namespace ZNT.Evolution.Core
@@ -83,6 +84,27 @@ namespace ZNT.Evolution.Core
         [HarmonyPostfix]
         [HarmonyPatch(typeof(LevelElement), "Useable", MethodType.Getter)]
         public static void Usable(LevelElement __instance, ref bool __result) => __result = ShowAllElement || __result;
+
+        #endregion
+
+        #region PatrolAnimationUi
+
+        private static bool ShowAllAnimationClip => EvolutionCorePlugin.ShowAllAnimationClip.Value;
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(PatrolAnimationUi), "Clips", MethodType.Getter)]
+        public static void Clips(PatrolAnimationUi __instance, List<Dropdown.OptionData> __result)
+        {
+            if (!ShowAllAnimationClip) return;
+            __result.Clear();
+            var action = Traverse.Create(__instance).Field<PatrolAction>("parameters").Value;
+            var animation = action.Patroller.Animator.AnimationLibrary;
+            __result.AddRange(animation.clips
+                .Where(clip => !string.IsNullOrEmpty(clip.name))
+                .OrderBy(clip => clip.name)
+                .Select(clip => new Dropdown.OptionData(text: clip.name))
+            );
+        }
 
         #endregion
     }

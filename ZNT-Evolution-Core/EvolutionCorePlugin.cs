@@ -13,6 +13,8 @@ namespace ZNT.Evolution.Core
 
         internal static ConfigEntry<bool> ShowAllElement;
 
+        internal static ConfigEntry<bool> ShowAllAnimationClip;
+
         public void Awake()
         {
             Harmony.CreateAndPatchAll(typeof(DebugPatch));
@@ -27,6 +29,7 @@ namespace ZNT.Evolution.Core
             CorpsesCountMax = Config.Bind("config", "CorpsesCountMax", 20, "尸体数量上限");
             RayConeFindNearest = Config.Bind("config", "RayConeFindNearest", false, "视锥邻近查找");
             ShowAllElement = Config.Bind("config", "ShowAllElement", false, "显示所有组件");
+            ShowAllAnimationClip = Config.Bind("config", "ShowAllAnimationClip", false, "显示所有动画");
         }
     }
 }
