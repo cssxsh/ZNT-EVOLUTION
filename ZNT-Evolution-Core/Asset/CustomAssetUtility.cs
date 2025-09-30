@@ -48,7 +48,6 @@ namespace ZNT.Evolution.Core.Asset
             var serializer = JsonSerializer.Create(SerializerSettings);
             using var writer = new StringWriter();
             using var json = new JsonTextWriter(writer);
-            json.Formatting = Formatting.Indented;
             serializer.Serialize(json, data);
             asset = new TextAsset(writer.ToString());
         }

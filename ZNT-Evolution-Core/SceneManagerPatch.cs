@@ -17,6 +17,13 @@ namespace ZNT.Evolution.Core
     {
         private static readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("SceneManager");
 
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(SceneLoader), "LoadNextScene")]
+        public static void LoadNextScene(ref string sceneName)
+        {
+            Logger.LogInfo($"LoadNextScene: {sceneName}");
+        }
+
         #region LanguageSource
 
         private static I2.Loc.LanguageSourceData _localization;
@@ -221,8 +228,6 @@ namespace ZNT.Evolution.Core
             return panel;
         }
 
-        #endregion
-
         private static void OnClick(this Button button, UnityAction call)
         {
             button.onClick = new Button.ButtonClickedEvent();
@@ -255,5 +260,7 @@ namespace ZNT.Evolution.Core
 
             return term;
         }
+
+        #endregion
     }
 }

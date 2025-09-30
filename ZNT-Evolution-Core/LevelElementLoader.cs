@@ -147,7 +147,7 @@ namespace ZNT.Evolution.Core
                 var material = bundle.LoadAsset<Material>("sprites");
                 var info = DeserializeObject<SpriteInfo>(folder: path, file: "sprite.info.json");
                 var sprites = info.WithMaterial(material).Create();
-                Logger.LogDebug($"CreateSprite -> {sprites} from {sprites.material}");
+                Logger.LogDebug($"sprite.info.json -> {sprites} from {sprites.material}");
             }
 
             if (File.Exists(Path.Combine(path, "sprite.merge.json")))
@@ -155,7 +155,7 @@ namespace ZNT.Evolution.Core
                 var material = bundle.LoadAsset<Material>("sprites");
                 var merge = DeserializeObject<SpriteMerge>(folder: path, file: "sprite.merge.json");
                 var sprites = merge.WithMaterial(material).Create();
-                Logger.LogDebug($"MergeSprite -> {sprites} from {sprites.material}");
+                Logger.LogDebug($"sprite.merge.json -> {sprites} from {sprites.material}");
             }
 
             foreach (var file in Directory.EnumerateFiles(path, "*.sprite.info.json"))
@@ -329,7 +329,7 @@ namespace ZNT.Evolution.Core
             {
                 var info = DeserializeObject<SpriteInfo>(folder: path, file: "sprite.info.json");
                 var sprites = info.WithMaterial(material).Create();
-                Logger.LogDebug($"CreateSprite -> {sprites} from {sprites.material}");
+                Logger.LogDebug($"sprite.info.json -> {sprites} from {sprites.material}");
 
                 if (File.Exists(Path.Combine(path, "animation.json")))
                 {
@@ -370,7 +370,7 @@ namespace ZNT.Evolution.Core
             }
             else
             {
-                var sprites = CreateSingleSprite(material);
+                var sprites = material.CreateSingleSprite();
                 Logger.LogDebug($"CreateSingleSprite -> {sprites} from {sprites.material}");
 
                 var element = DeserializeObject<LevelElement>(folder: path, file: "element.json");
@@ -483,7 +483,7 @@ namespace ZNT.Evolution.Core
                 var material = bundle.LoadAsset<Material>("sprites");
                 var info = DeserializeObject<SpriteInfo>(folder: path, file: "sprite.info.json");
                 var sprites = info.WithMaterial(material).Create();
-                Logger.LogDebug($"CreateSprite -> {sprites} from {sprites.material}");
+                Logger.LogDebug($"sprite.info.json -> {sprites} from {sprites.material}");
             }
 
             foreach (var file in Directory.EnumerateFiles(path, "*.sprite.info.json"))
@@ -543,11 +543,11 @@ namespace ZNT.Evolution.Core
             Logger.LogInfo($"{element.Targets.Length} elements apply");
         }
 
-        private static tk2dSpriteCollectionData CreateSingleSprite(Material material)
+        private static tk2dSpriteCollectionData CreateSingleSprite(this Material material)
         {
             var impl = tk2dSpriteCollectionData.CreateFromTexture(
                 texture: material.mainTexture,
-                size: tk2dSpriteCollectionSize.Explicit(0.5F, 12),
+                size: tk2dSpriteCollectionSize.Explicit(0.5f, 12.0f),
                 names: new[] { "single" },
                 regions: new[] { new Rect(0, 0, material.mainTexture.width, material.mainTexture.height) },
                 anchors: new[] { Vector2.zero }

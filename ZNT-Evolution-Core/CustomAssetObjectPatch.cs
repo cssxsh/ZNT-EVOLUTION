@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using BepInEx.Logging;
 using HarmonyLib;
 using UnityEngine;
 using ZNT.Evolution.Core.Asset;
@@ -10,6 +11,15 @@ namespace ZNT.Evolution.Core
 {
     internal static class CustomAssetObjectPatch
     {
+        private static readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("CustomAssetObject");
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(CustomAssetObject), "LoadFromAsset")]
+        public static void LoadFromAsset(CustomAssetObject __instance, GameObject gameObject)
+        {
+            Logger.LogDebug($"LoadFromAsset: {gameObject} for {__instance}");
+        }
+        
         #region MovingObjectAsset
 
         [HarmonyPostfix]
@@ -56,7 +66,7 @@ namespace ZNT.Evolution.Core
         #region PhysicObjectAsset
 
         [HarmonyPostfix]
-        [HarmonyPatch(typeof(PhysicObjectBehaviour), "OnTriggerEnter2D", typeof(Collider2D))]
+        [HarmonyPatch(typeof(PhysicObjectBehaviour), "OnTriggerEnter2D")]
         public static void OnTriggerEnter2D(PhysicObjectBehaviour __instance, Collider2D other)
         {
             var targets = other.GetComponents<BaseAnimationController>()

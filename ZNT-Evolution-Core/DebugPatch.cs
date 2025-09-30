@@ -11,22 +11,6 @@ namespace ZNT.Evolution.Core
     internal static class DebugPatch
     {
         [HarmonyPrefix]
-        [HarmonyPatch(typeof(SceneLoader), "LoadNextScene")]
-        public static void LoadNextScene(ref string sceneName)
-        {
-            BepInEx.Logging.Logger.CreateLogSource("SceneLoader")
-                .LogInfo($"LoadNextScene: {sceneName}");
-        }
-
-        [HarmonyPrefix]
-        [HarmonyPatch(typeof(CustomAssetObject), "LoadFromAsset")]
-        public static void LoadFromAsset(CustomAssetObject __instance, GameObject gameObject)
-        {
-            BepInEx.Logging.Logger.CreateLogSource("CustomAssetObject")
-                .LogDebug($"LoadFromAsset: {gameObject} for {__instance}");
-        }
-
-        [HarmonyPrefix]
         [HarmonyPatch(typeof(Challenge), "IsFailed")]
         [HarmonyPatch(typeof(Challenge), "IsCompleted")]
         public static void IsCompleted(Challenge __instance)
@@ -79,7 +63,7 @@ namespace ZNT.Evolution.Core
         }
 
         [HarmonyPostfix]
-        [HarmonyPatch(typeof(RayConeDetection), "UpdateAngles", typeof(bool))]
+        [HarmonyPatch(typeof(RayConeDetection), "UpdateAngles")]
         public static void UpdateAngles(RayConeDetection __instance)
         {
             var rays = Traverse.Create(__instance).Field<Vector2[]>("rays").Value;
