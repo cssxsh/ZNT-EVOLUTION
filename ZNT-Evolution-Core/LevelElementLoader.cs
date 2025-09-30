@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using BepInEx.Logging;
 using HarmonyLib;
 using UnityEngine;
@@ -67,20 +66,8 @@ namespace ZNT.Evolution.Core
                         Logger.LogDebug($"[{bundle.name}] {brush.DefaultOrientation.GetVariation(0)}");
                         break;
                     case TextAsset bank when name == "bank.strings" || name == "bank_":
-                    {
-                        var task = Task.Run(() =>
-                        {
-                            try
-                            {
-                                FMODUnity.RuntimeManager.LoadBank(asset: bank, loadSamples: true);
-                            }
-                            catch (FMODUnity.BankLoadException e)
-                            {
-                                Logger.LogError(e);
-                            }
-                        });
-                        yield return new WaitUntil(() => task.IsCompleted);
-                    }
+                        FMODUnity.RuntimeManager.LoadBank(asset: bank, loadSamples: true);
+                        yield return new WaitUntil(() => !FMODUnity.RuntimeManager.AnyBankLoading());
                         Logger.LogDebug($"[{bundle.name}] {asset.name}");
                         break;
                     default:
@@ -91,38 +78,23 @@ namespace ZNT.Evolution.Core
                 UnityEngine.Object.DontDestroyOnLoad(asset);
             }
 
-            switch (type)
+            try
             {
-                case LevelElement.Type.Brush:
-                    var brush = Task.Run(() =>
-                    {
-                        try
-                        {
-                            bundle.LoadBrushFromFolder(path: path);
-                        }
-                        catch (Exception e)
-                        {
-                            Logger.LogWarning(e);
-                        }
-                    });
-                    yield return new WaitUntil(() => brush.IsCompleted);
-                    break;
-                case LevelElement.Type.Decor:
-                    var decor = Task.Run(() =>
-                    {
-                        try
-                        {
-                            bundle.LoadDecorFromFolder(path: path);
-                        }
-                        catch (Exception e)
-                        {
-                            Logger.LogWarning(e);
-                        }
-                    });
-                    yield return new WaitUntil(() => decor.IsCompleted);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(type), type, null);
+                switch (type)
+                {
+                    case LevelElement.Type.Brush:
+                        bundle.LoadBrushFromFolder(path: path);
+                        break;
+                    case LevelElement.Type.Decor:
+                        bundle.LoadDecorFromFolder(path: path);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(type), type, null);
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.LogWarning(e);
             }
         }
 
@@ -429,20 +401,8 @@ namespace ZNT.Evolution.Core
                         Logger.LogDebug($"[{bundle.name}] {shader}");
                         break;
                     case TextAsset bank when name == "bank.strings" || name == "bank_":
-                    {
-                        var task = Task.Run(() =>
-                        {
-                            try
-                            {
-                                FMODUnity.RuntimeManager.LoadBank(asset: bank, loadSamples: true);
-                            }
-                            catch (FMODUnity.BankLoadException e)
-                            {
-                                Logger.LogError(e);
-                            }
-                        });
-                        yield return new WaitUntil(() => task.IsCompleted);
-                    }
+                        FMODUnity.RuntimeManager.LoadBank(asset: bank, loadSamples: true);
+                        yield return new WaitUntil(() => !FMODUnity.RuntimeManager.AnyBankLoading());
                         Logger.LogDebug($"[{bundle.name}] {asset.name}");
                         break;
                     default:
@@ -453,26 +413,22 @@ namespace ZNT.Evolution.Core
 
             foreach (var addition in Directory.EnumerateFiles(path, "*.addition.json"))
             {
-                var apply = Task.Run(() =>
+                try
                 {
-                    try
+                    switch (Path.GetFileName(addition))
                     {
-                        switch (Path.GetFileName(addition))
-                        {
-                            case "animation.addition.json":
-                                bundle.ApplyAnimationFromFolder(path: path);
-                                break;
-                            case "element.addition.json":
-                                bundle.ApplyElementFromFolder(path: path);
-                                break;
-                        }
+                        case "animation.addition.json":
+                            bundle.ApplyAnimationFromFolder(path: path);
+                            break;
+                        case "element.addition.json":
+                            bundle.ApplyElementFromFolder(path: path);
+                            break;
                     }
-                    catch (Exception e)
-                    {
-                        Logger.LogWarning(e);
-                    }
-                });
-                yield return new WaitUntil(() => apply.IsCompleted);
+                }
+                catch (Exception e)
+                {
+                    Logger.LogWarning(e);
+                }
             }
         }
 
@@ -602,21 +558,10 @@ namespace ZNT.Evolution.Core
                 var bank = Path.GetFileNameWithoutExtension(file);
                 var master = bank.ReplaceLast(".strings", "");
                 if (FMODUnity.Settings.Instance.MasterBanks.Contains(master)) continue;
-                var task = Task.Run(() =>
-                {
-                    try
-                    {
-                        Logger.LogInfo($"load Bank {bank}");
-                        FMODUnity.RuntimeManager.LoadBank(bankName: bank, loadSamples: loadSamples);
-                    }
-                    catch (FMODUnity.BankLoadException e)
-                    {
-                        Logger.LogWarning(e);
-                    }
-                });
-                yield return new WaitUntil(() => task.IsCompleted);
-
-                main.Add(item: bank.ReplaceLast(".strings", ""));
+                main.Add(item: master);
+                Logger.LogInfo($"load Bank {bank}");
+                FMODUnity.RuntimeManager.LoadBank(bankName: bank, loadSamples: loadSamples);
+                yield return new WaitUntil(() => !FMODUnity.RuntimeManager.AnyBankLoading());
             }
 
             foreach (var file in Directory.EnumerateFiles(path: folder, searchPattern: "*.bank"))
@@ -626,23 +571,13 @@ namespace ZNT.Evolution.Core
                 if (FMODUnity.Settings.Instance.MasterBanks.Contains(bank)) continue;
                 if (FMODUnity.Settings.Instance.Banks.Contains(bank)) continue;
                 if (main.Contains(bank)) continue;
-                var task = Task.Run(() =>
+                Logger.LogInfo($"load Bank {bank}");
+                FMODUnity.RuntimeManager.LoadBank(bankName: bank, loadSamples: loadSamples);
+                yield return new WaitUntil(() => !FMODUnity.RuntimeManager.AnyBankLoading());
+                foreach (var (_, asset) in AssetElementBinder.FetchFMODAsset(path: $"bank:/{bank}"))
                 {
-                    try
-                    {
-                        Logger.LogInfo($"load Bank {bank}");
-                        FMODUnity.RuntimeManager.LoadBank(bankName: bank, loadSamples: loadSamples);
-                        foreach (var (_, asset) in AssetElementBinder.FetchFMODAsset(path: $"bank:/{bank}"))
-                        {
-                            Logger.LogInfo($"[{bank}] fetch {asset.path}");
-                        }
-                    }
-                    catch (FMODUnity.BankLoadException e)
-                    {
-                        Logger.LogWarning(e);
-                    }
-                });
-                yield return new WaitUntil(() => task.IsCompleted);
+                    Logger.LogInfo($"[{bank}] fetch {asset.path}");
+                }
             }
         }
     }
