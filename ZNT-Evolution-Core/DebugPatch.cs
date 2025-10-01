@@ -145,5 +145,9 @@ namespace ZNT.Evolution.Core
                 .Field<Dictionary<string, Type>>("cachedType").Value;
             cached[typeName] = __result;
         }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(SteamManager), "Update")]
+        public static bool Update(SteamManager __instance) => Steamworks.SteamAPI.GetHSteamUser().m_HSteamUser != 1;
     }
 }
