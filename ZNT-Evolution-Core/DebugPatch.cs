@@ -146,8 +146,11 @@ namespace ZNT.Evolution.Core
             cached[typeName] = __result;
         }
 
-        [HarmonyPrefix]
-        [HarmonyPatch(typeof(SteamManager), "Update")]
-        public static bool Update(SteamManager __instance) => Steamworks.SteamAPI.GetHSteamUser().m_HSteamUser != 1;
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(SteamManager), "Initialized", MethodType.Getter)]
+        public static void Initialized(ref bool __result)
+        {
+            __result &= Steamworks.SteamFriends.GetPersonaName() != "Goldberg";
+        }
     }
 }
