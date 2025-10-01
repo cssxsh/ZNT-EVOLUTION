@@ -133,5 +133,17 @@ namespace ZNT.Evolution.Core
             scrollRect.Rebuild(CanvasUpdate.PostLayout);
             return false;
         }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(Framework.Events.SignalReceiver), "GetType")]
+        public static void GetType(string typeName, ref Type __result)
+        {
+            if (__result != null) return;
+            __result = AccessTools.TypeByName(typeName);
+            if (__result == null) return;
+            var cached = Traverse.Create<Framework.Events.SignalReceiver>()
+                .Field<Dictionary<string, Type>>("cachedType").Value;
+            cached[typeName] = __result;
+        }
     }
 }
