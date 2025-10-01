@@ -88,6 +88,11 @@ namespace ZNT.Evolution.Core
                 Logger.LogInfo($"Loaded Patch {file}");
             }
 
+            foreach (var (_, info) in BepInEx.Bootstrap.Chainloader.PluginInfos)
+            {
+                AnimationControllerPatch.RegisterAnimationEvent(info.Instance.GetType());
+            }
+
             prefix = null;
             starter.LoadNextScene();
         }

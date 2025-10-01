@@ -24,6 +24,7 @@ namespace ZNT.Evolution.Core
             Harmony.CreateAndPatchAll(typeof(GlobalSettingsPatch));
             Harmony.CreateAndPatchAll(typeof(StartManagerPatch));
             Harmony.CreateAndPatchAll(typeof(CustomAssetObjectPatch));
+            Harmony.CreateAndPatchAll(typeof(AnimationControllerPatch));
             Harmony.CreateAndPatchAll(typeof(SceneManagerPatch));
         }
 
