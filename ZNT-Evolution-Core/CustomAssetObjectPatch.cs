@@ -114,15 +114,6 @@ namespace ZNT.Evolution.Core
             }
         }
 
-        [HarmonyPrefix]
-        [HarmonyPatch(typeof(HumanAnimationController), "Initialize")]
-        public static void Initialize(HumanAnimationController __instance)
-        {
-            var asset = (HumanAsset)__instance.GetComponent<AssetComponent>().Asset;
-            CustomAssetUtility.Cache.TryGetValue($"{asset.name} : CharacterAnimationAsset", out var animations);
-            if (animations) asset.Animations = animations as CharacterAnimationAsset;
-        }
-
         #endregion
 
         #region Rotorz.Tile.Brush

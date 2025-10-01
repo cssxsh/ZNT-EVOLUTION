@@ -10,10 +10,10 @@ namespace ZNT.Evolution.Core.Asset
     [UsedImplicitly]
     internal class LevelElementAddition : EvolutionAddition<LevelElement>
     {
-        [JsonProperty("Assets")] public readonly CustomAssetObject[] Assets;
+        [JsonProperty("Assets")] public readonly CustomAsset[] Assets;
 
         [JsonConstructor]
-        public LevelElementAddition(LevelElement[] targets, CustomAssetObject[] assets) : base(targets)
+        public LevelElementAddition(LevelElement[] targets, CustomAsset[] assets) : base(targets)
         {
             if (targets.Length != assets.Length) throw new FormatException("Targets.Length != Assets.Length");
             Assets = assets;
@@ -28,13 +28,16 @@ namespace ZNT.Evolution.Core.Asset
                 switch (element.CustomAsset)
                 {
                     case null:
-                        element.CustomAsset = asset;
+                        element.CustomAsset = asset as CustomAssetObject;
                         break;
                     case HumanAsset human when asset is PhysicObjectAsset physic:
                         human.ThrowableObjects = human.ThrowableObjects.AddToArray(physic);
                         break;
                     case HumanAsset human when asset is ExplosionAsset explosion:
                         human.ExplosionAssets = human.ExplosionAssets.AddToArray(explosion);
+                        break;
+                    case HumanAsset human when asset is CharacterAnimationAsset animations:
+                        human.Animations = animations;
                         break;
                     case SentryGunAsset sentry when asset is PhysicObjectAsset physic:
                         sentry.ThrowableObjects = sentry.ThrowableObjects.AddToArray(physic);
