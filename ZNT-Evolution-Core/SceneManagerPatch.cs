@@ -113,24 +113,21 @@ namespace ZNT.Evolution.Core
 
             foreach (var (_, info) in BepInEx.Bootstrap.Chainloader.PluginInfos)
             {
-                var plugin = Traverse.Create(info.Instance);
-                foreach (var name in plugin.Fields())
+                if (info.Metadata.Name == "UnityExplorer") continue;
+                foreach (var (definition, entry) in info.Instance.Config)
                 {
-                    var field = plugin.Field(name);
-                    if (!typeof(ConfigEntryBase).IsAssignableFrom(field.GetValueType())) continue;
-                    var entry = plugin.Field(name).GetValue<ConfigEntryBase>();
-                    var term = _localization.GetTermData($"{info.Metadata.Name}/{name}")
-                               ?? _localization.AddTerm($"{info.Metadata.Name}/{name}");
-                    term.SetTranslation(0, $"[{info.Metadata.Name}] {entry.Definition.Key}");
+                    var term = _localization.GetTermData($"{info.Metadata.Name}/{definition}")
+                               ?? _localization.AddTerm($"{info.Metadata.Name}/{definition}");
+                    term.SetTranslation(0, $"[{info.Metadata.Name}] {definition.Key}");
                     term.SetTranslation(9, $"[{info.Metadata.Name}] {entry.Description.Description}");
                     if (entry.SettingType == typeof(bool))
                     {
                         var fullscreen = menu.transform
                             .Find("Option Panels/Video/Scroll Area/ScrollView/Content/FullScreen Entry").gameObject;
                         var item = UnityEngine.Object.Instantiate(original: fullscreen, parent: content.transform);
-                        item.name = $"{info.Metadata.Name} {name} Entry";
+                        item.name = $"{info.Metadata.Name} {definition} Entry";
                         item.GetComponentsInChildren<I2.Loc.Localize>(includeInactive: true)
-                            .ForEach(localize => localize.Term = $"{info.Metadata.Name}/{name}");
+                            .ForEach(localize => localize.Term = $"{info.Metadata.Name}/{definition}");
                         item.SetActive(true);
                         var toggle = item.GetComponentInChildren<Toggle>(includeInactive: true);
                         toggle.OnValueChanged(value => entry.BoxedValue = value);
@@ -141,9 +138,9 @@ namespace ZNT.Evolution.Core
                         var fps = menu.transform
                             .Find("Option Panels/Video/Scroll Area/ScrollView/Content/Max FPS Entry").gameObject;
                         var item = UnityEngine.Object.Instantiate(original: fps, parent: content.transform);
-                        item.name = $"{info.Metadata.Name} {name} Entry";
+                        item.name = $"{info.Metadata.Name} {definition} Entry";
                         item.GetComponentsInChildren<I2.Loc.Localize>(includeInactive: true)
-                            .ForEach(localize => localize.Term = $"{info.Metadata.Name}/{name}");
+                            .ForEach(localize => localize.Term = $"{info.Metadata.Name}/{definition}");
                         item.SetActive(true);
                         var input = item.GetComponentInChildren<InputField>(includeInactive: true);
                         input.OnValueChanged(value =>
