@@ -69,6 +69,12 @@ namespace ZNT.Evolution.Core
         [HarmonyPatch(typeof(PhysicObjectBehaviour), "OnTriggerEnter2D")]
         public static void OnTriggerEnter2D(PhysicObjectBehaviour __instance, Collider2D other)
         {
+            var physic = __instance.Physic;
+            var force = physic.StartDirection * physic.StartForce * physic.Body.mass;
+            physic.Body.AddForce(force * physic.Collider.friction * -1, ForceMode2D.Impulse);
+            if (physic.Body.velocity.x <= force.x * physic.Collider.bounciness) physic.Body.velocity = Vector2.zero;
+            Traverse.Create(__instance).Field<bool>("checkStuck").Value = true;
+
             var targets = other.GetComponents<BaseAnimationController>()
                 .Aggregate(ExplodeSurfaceConverter.None, (mask, controller) => mask | controller switch
                 {
@@ -78,6 +84,7 @@ namespace ZNT.Evolution.Core
                     TankAnimationController { enabled: true } => ExplodeSurfaceConverter.Tank,
                     _ => ExplodeSurfaceConverter.None
                 });
+            if (targets == ExplodeSurfaceConverter.None) return;
             if (!__instance.SharedAsset.ExplodeOn.HasFlag(targets)) return;
             __instance.OnDie(null);
         }
