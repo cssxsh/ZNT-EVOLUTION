@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using BepInEx.Logging;
 using HarmonyLib;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
@@ -11,18 +12,21 @@ namespace ZNT.Evolution.Core.Asset
     [UsedImplicitly]
     internal class AnimationAddition : EvolutionAddition<tk2dSpriteAnimation>
     {
+        private static readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("AnimationAddition");
+
         [JsonProperty("Clips")] public readonly tk2dSpriteAnimationClip[] Clips;
 
         [JsonConstructor]
         public AnimationAddition(tk2dSpriteAnimation[] targets, tk2dSpriteAnimationClip[] clips) : base(targets)
         {
-            if (targets.Length != clips.Length) throw new FormatException("Targets.Length != Clips.Length");
+            if (targets.Length != clips.Length) Logger.LogWarning("Targets.Length != Clips.Length");
             Clips = clips;
         }
 
         public override void Apply()
         {
-            for (var i = 0; i < Clips.Length; i++)
+            var length = Math.Min(Targets.Length, Clips.Length);
+            for (var i = 0; i < length; i++)
             {
                 var animation = Targets[i];
                 var clip = Clips[i];

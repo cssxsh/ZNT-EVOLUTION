@@ -39,7 +39,8 @@ namespace ZNT.Evolution.Core.Asset
 
         public static string Bind(this AssetElement asset)
         {
-            Traverse.Create(asset).Field<string>("assetId").Value ??= asset.name;
+            var assetId = Traverse.Create(asset).Field<string>("assetId");
+            if (string.IsNullOrEmpty(assetId.Value)) assetId.Value = asset.name;
             switch (asset)
             {
                 case LevelElement element:

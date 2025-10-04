@@ -1,4 +1,5 @@
 using System;
+using BepInEx.Logging;
 using HarmonyLib;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
@@ -10,18 +11,21 @@ namespace ZNT.Evolution.Core.Asset
     [UsedImplicitly]
     internal class LevelElementAddition : EvolutionAddition<LevelElement>
     {
+        private static readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("LevelElementAddition");
+
         [JsonProperty("Assets")] public readonly CustomAsset[] Assets;
 
         [JsonConstructor]
         public LevelElementAddition(LevelElement[] targets, CustomAsset[] assets) : base(targets)
         {
-            if (targets.Length != assets.Length) throw new FormatException("Targets.Length != Assets.Length");
+            if (targets.Length != assets.Length) Logger.LogWarning("Targets.Length != Assets.Length");
             Assets = assets;
         }
 
         public override void Apply()
         {
-            for (var i = 0; i < Assets.Length; i++)
+            var length = Math.Min(Targets.Length, Assets.Length);
+            for (var i = 0; i < length; i++)
             {
                 var element = Targets[i];
                 var asset = Assets[i];
