@@ -499,6 +499,48 @@ namespace ZNT.Evolution.Core
             Logger.LogInfo($"{element.Targets.Length} elements apply");
         }
 
+        public static void LoadAssetFromFolder(string path)
+        {
+            Logger.LogInfo($"load Asset from folder '{path}'.");
+
+            foreach (var file in Directory.EnumerateFiles(path, "*.sprite.info.json"))
+            {
+                var filename = Path.GetFileName(file);
+                var info = DeserializeObject<SpriteInfo>(folder: path, file: filename);
+                var sprites = info.Create();
+                Logger.LogDebug($"{filename} -> {sprites} from {sprites.material}");
+            }
+
+            foreach (var file in Directory.EnumerateFiles(path, "*.sprite.merge.json"))
+            {
+                var filename = Path.GetFileName(file);
+                var merge = DeserializeObject<SpriteMerge>(folder: path, file: file);
+                var sprites = merge.Create();
+                Logger.LogDebug($"{filename} -> {sprites} from {sprites.material}");
+            }
+
+            foreach (var file in Directory.EnumerateFiles(path, "*.animations.json"))
+            {
+                var filename = Path.GetFileName(file);
+                var animations = DeserializeObject<CharacterAnimationAsset>(folder: path, file: file);
+                Logger.LogDebug($"{filename} -> {animations}");
+            }
+
+            foreach (var file in Directory.EnumerateFiles(path, "*.explosion.json"))
+            {
+                var filename = Path.GetFileName(file);
+                var explosion = DeserializeObject<ExplosionAsset>(folder: path, file: filename);
+                Logger.LogDebug($"{filename} -> {explosion}");
+            }
+
+            foreach (var file in Directory.EnumerateFiles(path, "*.physic.json"))
+            {
+                var filename = Path.GetFileName(file);
+                var physic = DeserializeObject<PhysicObjectAsset>(folder: path, file: file);
+                Logger.LogDebug($"{filename} -> {physic} from {physic.Explosion}");
+            }
+        }
+
         private static tk2dSpriteCollectionData CreateSingleSprite(this Material material)
         {
             var impl = tk2dSpriteCollectionData.CreateFromTexture(

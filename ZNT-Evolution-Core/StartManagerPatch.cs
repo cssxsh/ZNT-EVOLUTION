@@ -46,6 +46,10 @@ namespace ZNT.Evolution.Core
                 }
             }
 
+            var assets = Path.Combine(Application.dataPath, "Asset");
+            if (!Directory.Exists(assets)) Directory.CreateDirectory(assets);
+            LevelElementLoader.LoadAssetFromFolder(path: assets);
+
             var brush = Path.Combine(Application.dataPath, nameof(LevelElement.Type.Brush));
             if (!Directory.Exists(brush)) Directory.CreateDirectory(brush);
             foreach (var directory in Directory.EnumerateDirectories(brush))
