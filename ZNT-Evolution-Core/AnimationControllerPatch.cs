@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Reflection;
@@ -56,30 +55,33 @@ namespace ZNT.Evolution.Core
             }
         }
 
-        public static void RegisterAnimationEvent(Type type)
+        public static void RegisterAnimationEvent(Assembly assembly)
         {
-            var methods = type.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-            foreach (var method in methods)
+            foreach (var type in assembly.ExportedTypes)
             {
-                var infos = method.GetParameters();
-                foreach (var description in method.GetCustomAttributes<DescriptionAttribute>())
+                var methods = type.GetMethods(BindingFlags.Static | BindingFlags.Public);
+                foreach (var method in methods)
                 {
-                    switch (description)
+                    var infos = method.GetParameters();
+                    foreach (var description in method.GetCustomAttributes<DescriptionAttribute>())
                     {
-                        case { } when description.Description.StartsWith(FrameEventPrefix):
-                            if (infos.Length != 2) continue;
-                            if (typeof(tk2dSpriteAnimationFrame) != infos[1].ParameterType) continue;
-                            if (!typeof(BaseAnimationController).IsAssignableFrom(infos[0].ParameterType)) continue;
-                            FrameEvents.Add(method);
-                            Logger.LogInfo($"Cached {method.FullDescription()}");
-                            break;
-                        case { } when description.Description.StartsWith(ClipEventPrefix):
-                            if (infos.Length != 2) continue;
-                            if (typeof(tk2dSpriteAnimationClip) != infos[1].ParameterType) continue;
-                            if (!typeof(BaseAnimationController).IsAssignableFrom(infos[0].ParameterType)) continue;
-                            ClipEvents.Add(method);
-                            Logger.LogInfo($"Cached {method.FullDescription()}");
-                            break;
+                        switch (description)
+                        {
+                            case { } when description.Description.StartsWith(FrameEventPrefix):
+                                if (infos.Length != 2) continue;
+                                if (typeof(tk2dSpriteAnimationFrame) != infos[1].ParameterType) continue;
+                                if (!typeof(BaseAnimationController).IsAssignableFrom(infos[0].ParameterType)) continue;
+                                FrameEvents.Add(method);
+                                Logger.LogInfo($"Cached {method.FullDescription()}");
+                                break;
+                            case { } when description.Description.StartsWith(ClipEventPrefix):
+                                if (infos.Length != 2) continue;
+                                if (typeof(tk2dSpriteAnimationClip) != infos[1].ParameterType) continue;
+                                if (!typeof(BaseAnimationController).IsAssignableFrom(infos[0].ParameterType)) continue;
+                                ClipEvents.Add(method);
+                                Logger.LogInfo($"Cached {method.FullDescription()}");
+                                break;
+                        }
                     }
                 }
             }

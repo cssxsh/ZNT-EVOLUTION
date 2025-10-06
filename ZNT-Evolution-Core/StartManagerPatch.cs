@@ -94,7 +94,7 @@ namespace ZNT.Evolution.Core
 
             foreach (var (_, info) in BepInEx.Bootstrap.Chainloader.PluginInfos)
             {
-                AnimationControllerPatch.RegisterAnimationEvent(info.Instance.GetType());
+                AnimationControllerPatch.RegisterAnimationEvent(info.Instance.GetType().Assembly);
             }
 
             prefix = null;
