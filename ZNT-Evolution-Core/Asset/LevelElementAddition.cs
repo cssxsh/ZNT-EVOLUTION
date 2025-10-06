@@ -28,6 +28,7 @@ namespace ZNT.Evolution.Core.Asset
             for (var i = 0; i < length; i++)
             {
                 var element = Targets[i];
+                if (element is null) continue;
                 var asset = Assets[i];
                 switch (element.CustomAsset)
                 {

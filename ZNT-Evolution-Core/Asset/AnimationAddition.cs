@@ -29,6 +29,7 @@ namespace ZNT.Evolution.Core.Asset
             for (var i = 0; i < length; i++)
             {
                 var animation = Targets[i];
+                if (animation is null) continue;
                 var clip = Clips[i];
                 animation.clips = animation.clips.AddToArray(clip);
                 Traverse.Create(animation)

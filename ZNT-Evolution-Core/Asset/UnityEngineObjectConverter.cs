@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using BepInEx.Logging;
 using HarmonyLib;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -10,6 +10,8 @@ namespace ZNT.Evolution.Core.Asset
 {
     internal class UnityEngineObjectConverter : CustomCreationConverter<UnityEngine.Object>
     {
+        private static readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("ObjectConverter");
+        
         public override bool CanWrite => true;
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
@@ -90,7 +92,8 @@ namespace ZNT.Evolution.Core.Asset
                 return asset;
             }
 
-            throw new KeyNotFoundException(message: $"{type.FullName}(name: {name})");
+            Logger.LogError($"NotFound {type.FullName} {{ name: \"{name}\" }}");
+            return null;
         }
     }
 }
