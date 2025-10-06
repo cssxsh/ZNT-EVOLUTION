@@ -1,15 +1,11 @@
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using HarmonyLib;
 using UnityEngine;
-using ZNT.LevelEditor;
 
 namespace ZNT.Evolution.Core.Editor
 {
     [SerializeInEditor(name: "Explosion")]
     [DisallowMultipleComponent]
-    public class MineTrapEditor : Editor, IEditorOverride
+    public class MineTrapEditor : Editor
     {
         private Trigger Trigger => GetComponentInChildren<Trigger>();
 
@@ -29,31 +25,98 @@ namespace ZNT.Evolution.Core.Editor
 
         private MineBehaviour Behaviour => GetComponentInChildren<MineBehaviour>();
 
+        [SerializeInEditor(name: "Delay")]
+        public float Delay
+        {
+            get => Explosion.Delay;
+            set => Explosion.Delay = value;
+        }
+
         private ExplosionAsset Explosion
         {
-            get => Traverse.Create(Behaviour).Field<ExplosionAsset>("explosion").Value;
-            set => Traverse.Create(Behaviour).Field<ExplosionAsset>("explosion").Value = value;
+            get
+            {
+                var field = Traverse.Create(Behaviour).Field<ExplosionAsset>("explosion");
+                if (field.Value.name == name) return field.Value;
+                field.Value = Instantiate(field.Value);
+                field.Value.name = name;
+                return field.Value;
+            }
         }
 
-        private Dictionary<string, ExplosionAsset> _selectable;
-
-        [SerializeInEditor(name: "Explosion")]
-        public string Selected
+        [SerializeInEditor(name: "Damage")]
+        public float Damage
         {
-            get => Explosion.HierarchyName;
-            set => Explosion = _selectable[value];
+            get => Explosion.Damage;
+            set => Explosion.Damage = value;
         }
 
-        protected override void OnCreate()
+        [SerializeInEditor(name: "Damage Radius")]
+        public float DamageRadius
         {
-            _selectable = FindObjectsOfType<ExplosionAsset>().ToDictionary(explosion => explosion.HierarchyName);
+            get => Explosion.DamageRadius;
+            set => Explosion.DamageRadius = value;
         }
 
-        public bool OverrideMemberUi(SelectionMenu menu, EditorComponent component, MemberInfo member)
+        private Tag ApplyDamageOn
         {
-            if (member.Name != nameof(Selected)) return false;
-            CustomBinder(menu).BindStringListField(component, member, _selectable.Keys.ToList());
-            return true;
+            get => Explosion.ApplyDamageOn;
+            set => Explosion.ApplyDamageOn = value;
+        }
+
+        [SerializeInEditor(name: "Damage Breakable")]
+        public bool DamageBreakable
+        {
+            get => ApplyDamageOn.HasFlag(Tag.Breakable);
+            set => ApplyDamageOn = value ? ApplyDamageOn.Add(Tag.Breakable) : ApplyDamageOn.Remove(Tag.Breakable);
+        }
+
+        [SerializeInEditor(name: "Damage Human")]
+        public bool DamageHuman
+        {
+            get => ApplyDamageOn.HasFlag(Tag.Human);
+            set => ApplyDamageOn = value ? ApplyDamageOn.Add(Tag.Human) : ApplyDamageOn.Remove(Tag.Human);
+        }
+
+        [SerializeInEditor(name: "Damage Zombie")]
+        public bool DamageZombie
+        {
+            get => ApplyDamageOn.HasFlag(Tag.Zombie);
+            set => ApplyDamageOn = value ? ApplyDamageOn.Add(Tag.Zombie) : ApplyDamageOn.Remove(Tag.Zombie);
+        }
+
+        [SerializeInEditor(name: "Force")]
+        public float Force
+        {
+            get => Explosion.Force;
+            set => Explosion.Force = value;
+        }
+
+        private Tag ApplyForceOn
+        {
+            get => Explosion.ApplyForceOn;
+            set => Explosion.ApplyForceOn = value;
+        }
+
+        [SerializeInEditor(name: "Force Human")]
+        public bool ForceHuman
+        {
+            get => ApplyForceOn.HasFlag(Tag.Human);
+            set => ApplyForceOn = value ? ApplyForceOn.Add(Tag.Human) : ApplyForceOn.Remove(Tag.Human);
+        }
+
+        [SerializeInEditor(name: "Force Zombie")]
+        public bool ForceZombie
+        {
+            get => ApplyForceOn.HasFlag(Tag.Zombie);
+            set => ApplyForceOn = value ? ApplyForceOn.Add(Tag.Zombie) : ApplyForceOn.Remove(Tag.Zombie);
+        }
+
+        [SerializeInEditor(name: "Shake Camera")]
+        public bool ShakeCamera
+        {
+            get => Explosion.ShakeCamera;
+            set => Explosion.ShakeCamera = value;
         }
     }
 }

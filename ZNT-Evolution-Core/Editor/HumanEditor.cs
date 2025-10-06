@@ -37,6 +37,20 @@ namespace ZNT.Evolution.Core.Editor
             set => Behaviour.IgnoreDamages = value;
         }
 
+        [SerializeInEditor(name: "Resist Scream")]
+        public bool ResistScream
+        {
+            get => Behaviour.ResistScream;
+            set => Behaviour.ResistScream = value;
+        }
+
+        [SerializeInEditor(name: "Grabbed On Attacked")]
+        public bool GrabbedOnAttacked
+        {
+            get => Behaviour.GrabbedOnAttacked;
+            set => Behaviour.GrabbedOnAttacked = value;
+        }
+
         [SerializeInEditor(name: "Weapon Magazine Size")]
         public int WeaponMagazineSize
         {
