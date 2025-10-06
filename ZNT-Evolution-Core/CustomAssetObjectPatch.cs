@@ -65,14 +65,15 @@ namespace ZNT.Evolution.Core
 
         #region PhysicObjectAsset
 
-        [HarmonyPostfix]
+        [HarmonyPrefix]
         [HarmonyPatch(typeof(PhysicObjectBehaviour), "OnTriggerEnter2D")]
-        public static void OnTriggerEnter2D(PhysicObjectBehaviour __instance, Collider2D other)
+        public static bool OnTriggerEnter2D(PhysicObjectBehaviour __instance, Collider2D other)
         {
+            var flag = __instance.TargetLayers.ContainsLayer(other.gameObject.layer);
             var physic = __instance.Physic;
             var force = physic.StartDirection * physic.StartForce * physic.Body.mass;
             physic.Body.AddForce(force * physic.Collider.friction * -1, ForceMode2D.Impulse);
-            if (physic.Body.velocity.x <= force.x * physic.Collider.bounciness) physic.Body.velocity = Vector2.zero;
+            if (physic.Body.velocity.magnitude <= physic.StartForce * 0.5) physic.Body.velocity = Vector2.zero;
             Traverse.Create(__instance).Field<bool>("checkStuck").Value = true;
 
             var targets = other.GetComponents<BaseAnimationController>()
@@ -84,9 +85,9 @@ namespace ZNT.Evolution.Core
                     TankAnimationController { enabled: true } => ExplodeSurfaceConverter.Tank,
                     _ => ExplodeSurfaceConverter.None
                 });
-            if (targets == ExplodeSurfaceConverter.None) return;
-            if (!__instance.SharedAsset.ExplodeOn.HasFlag(targets)) return;
-            __instance.OnDie(null);
+            if (targets == ExplodeSurfaceConverter.None) return flag;
+            if (__instance.SharedAsset.ExplodeOn.HasFlag(targets)) __instance.OnDie(null);
+            return flag;
         }
 
         #endregion
