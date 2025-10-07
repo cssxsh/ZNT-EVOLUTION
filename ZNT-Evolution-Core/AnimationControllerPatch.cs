@@ -57,9 +57,9 @@ namespace ZNT.Evolution.Core
 
         public static void RegisterAnimationEvent(Assembly assembly)
         {
-            foreach (var type in assembly.ExportedTypes)
+            foreach (var type in assembly.GetTypes())
             {
-                var methods = type.GetMethods(BindingFlags.Static | BindingFlags.Public);
+                var methods = type.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
                 foreach (var method in methods)
                 {
                     var infos = method.GetParameters();

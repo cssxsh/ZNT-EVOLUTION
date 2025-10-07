@@ -103,6 +103,7 @@ namespace ZNT.Evolution.Core
             Logger.LogInfo("Loading EventHandle");
             foreach (var (_, info) in BepInEx.Bootstrap.Chainloader.PluginInfos)
             {
+                if (info.Metadata.Name == "UnityExplorer") continue;
                 AnimationControllerPatch.RegisterAnimationEvent(info.Instance.GetType().Assembly);
             }
 
