@@ -69,7 +69,7 @@ namespace ZNT.Evolution.Core
         [HarmonyPatch(typeof(PhysicObjectBehaviour), "OnTriggerEnter2D")]
         public static bool OnTriggerEnter2D(PhysicObjectBehaviour __instance, Collider2D other)
         {
-            var flag = __instance.TargetLayers.ContainsLayer(other.gameObject.layer);
+            if (!__instance.TargetLayers.ContainsLayer(other.gameObject.layer)) return false;
             var physic = __instance.Physic;
             var force = physic.StartDirection * physic.StartForce * physic.Body.mass;
             physic.Body.AddForce(force * physic.Collider.friction * -1, ForceMode2D.Impulse);
@@ -85,9 +85,9 @@ namespace ZNT.Evolution.Core
                     TankAnimationController { enabled: true } => ExplodeSurfaceConverter.Tank,
                     _ => ExplodeSurfaceConverter.None
                 });
-            if (targets == ExplodeSurfaceConverter.None) return flag;
+            if (targets == ExplodeSurfaceConverter.None) return true;
             if (__instance.SharedAsset.ExplodeOn.HasFlag(targets)) __instance.OnDie(null);
-            return flag;
+            return true;
         }
 
         #endregion
