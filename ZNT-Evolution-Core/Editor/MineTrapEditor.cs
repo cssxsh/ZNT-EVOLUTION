@@ -7,7 +7,7 @@ namespace ZNT.Evolution.Core.Editor
     [DisallowMultipleComponent]
     public class MineTrapEditor : Editor
     {
-        private Trigger Trigger => GetComponentInChildren<Trigger>();
+        private Trigger Trigger => GetComponent<Trigger>();
 
         [SerializeInEditor(name: "Detected Human")]
         public bool DetectedHuman
@@ -23,7 +23,7 @@ namespace ZNT.Evolution.Core.Editor
             set => Trigger.WithTags = value ? Trigger.WithTags.Add(Tag.Zombie) : Trigger.WithTags.Remove(Tag.Zombie);
         }
 
-        private MineBehaviour Behaviour => GetComponentInChildren<MineBehaviour>();
+        private MineBehaviour Behaviour => GetComponent<MineBehaviour>();
 
         [SerializeInEditor(name: "Delay")]
         public float Delay

@@ -110,18 +110,17 @@ namespace ZNT.Evolution.Core
                 if (component?.Data is null) continue;
                 if (component.Type == typeof(ObjectSettings)) continue;
                 if (component.Fields.Count == 0) continue;
-                if (component.Data is IEditorUpdate updater)
-                {
-                    componentsUpdate.Add(updater);
-                    updater.OnEditorOpen();
-                }
+                var updater = component.Data as IEditorUpdate;
+                var overrider = component.Data as IEditorOverride;
+                if (updater != null) componentsUpdate.Add(updater);
+                updater?.OnEditorOpen();
 
                 var text = __instance.SetComponentHeader(component);
                 var prev = mainContainer.childCount;
+                // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
                 foreach (var key in component.Fields.Keys)
                 {
-                    if (component.Data is IEditorOverride overrider
-                        && overrider.OverrideMemberUi(__instance, component, key)) continue;
+                    if (overrider != null && overrider.OverrideMemberUi(__instance, component, key)) continue;
                     __instance.SetDefaultUi(component, key);
                 }
 
@@ -146,11 +145,8 @@ namespace ZNT.Evolution.Core
             cached[typeName] = __result;
         }
 
-        [HarmonyPostfix]
+        [HarmonyPrefix]
         [HarmonyPatch(typeof(SteamManager), "Initialized", MethodType.Getter)]
-        public static void Initialized(ref bool __result)
-        {
-            __result &= Steamworks.SteamFriends.GetPersonaName() != "Goldberg";
-        }
+        public static bool Initialized() => Steamworks.SteamFriends.GetPersonaName() != "Goldberg";
     }
 }

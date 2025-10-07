@@ -8,7 +8,7 @@ namespace ZNT.Evolution.Core
     public class EvolutionCorePlugin : BaseUnityPlugin
     {
         internal static EvolutionCorePlugin Instance;
-        
+
         internal static ConfigEntry<int> CorpsesCountMax;
 
         internal static ConfigEntry<bool> RayConeFindNearest;

@@ -135,7 +135,7 @@ namespace ZNT.Evolution.Core
                 var filename = Path.GetFileName(file);
                 var info = DeserializeObject<SpriteInfo>(folder: path, file: filename);
                 var sprites = info.Create();
-                Logger.LogDebug($"{filename} -> {sprites}");
+                Logger.LogDebug($"{filename} -> {sprites} from {sprites.material}");
             }
 
             foreach (var file in Directory.EnumerateFiles(path, "*.sprite.merge.json"))
@@ -143,7 +143,7 @@ namespace ZNT.Evolution.Core
                 var filename = Path.GetFileName(file);
                 var merge = DeserializeObject<SpriteMerge>(folder: path, file: file);
                 var sprites = merge.Create();
-                Logger.LogDebug($"{filename} -> {sprites}");
+                Logger.LogDebug($"{filename} -> {sprites} from {sprites.material}");
             }
 
             var animation = DeserializeObject<tk2dSpriteAnimation>(folder: path, file: "animation.json");
@@ -183,7 +183,7 @@ namespace ZNT.Evolution.Core
             {
                 var filename = Path.GetFileName(file);
                 var physic = DeserializeObject<PhysicObjectAsset>(folder: path, file: file);
-                Logger.LogDebug($"{filename} -> {physic}");
+                Logger.LogDebug($"{filename} -> {physic} from {physic.Explosion}");
             }
 
             foreach (var file in Directory.EnumerateFiles(path, "*.human.json"))
@@ -447,7 +447,7 @@ namespace ZNT.Evolution.Core
                 var filename = Path.GetFileName(file);
                 var info = DeserializeObject<SpriteInfo>(folder: path, file: filename);
                 var sprites = info.Create();
-                Logger.LogDebug($"{filename} -> {sprites}");
+                Logger.LogDebug($"{filename} -> {sprites} from {sprites.material}");
             }
 
             foreach (var file in Directory.EnumerateFiles(path, "*.sprite.merge.json"))
@@ -455,7 +455,7 @@ namespace ZNT.Evolution.Core
                 var filename = Path.GetFileName(file);
                 var merge = DeserializeObject<SpriteMerge>(folder: path, file: file);
                 var sprites = merge.Create();
-                Logger.LogDebug($"{filename} -> {sprites}");
+                Logger.LogDebug($"{filename} -> {sprites} from {sprites.material}");
             }
 
             foreach (var file in Directory.EnumerateFiles(path, "*.animations.json"))
@@ -491,7 +491,7 @@ namespace ZNT.Evolution.Core
             {
                 var filename = Path.GetFileName(file);
                 var physic = DeserializeObject<PhysicObjectAsset>(folder: path, file: file);
-                Logger.LogDebug($"{filename} -> {physic}");
+                Logger.LogDebug($"{filename} -> {physic} from {physic.Explosion}");
             }
 
             var element = DeserializeObject<LevelElementAddition>(folder: path, file: "element.addition.json");
@@ -600,7 +600,7 @@ namespace ZNT.Evolution.Core
                 var bank = Path.GetFileNameWithoutExtension(file);
                 var master = bank.ReplaceLast(".strings", "");
                 if (FMODUnity.Settings.Instance.MasterBanks.Contains(master)) continue;
-                main.Add(item: master);
+                main.Add(master);
                 Logger.LogInfo($"load Bank {bank}");
                 FMODUnity.RuntimeManager.LoadBank(bankName: bank, loadSamples: loadSamples);
                 yield return new WaitUntil(() => !FMODUnity.RuntimeManager.AnyBankLoading());

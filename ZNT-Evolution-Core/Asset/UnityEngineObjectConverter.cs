@@ -53,17 +53,9 @@ namespace ZNT.Evolution.Core.Asset
 
         public override UnityEngine.Object Create(Type type)
         {
-            if (typeof(ScriptableObject).IsAssignableFrom(type))
-            {
-                return ScriptableObject.CreateInstance(type);
-            }
-
-            if (typeof(Component).IsAssignableFrom(type))
-            {
-                return new GameObject(type.Name).AddComponent(type);
-            }
-
-            return type.GetConstructor(Array.Empty<Type>())?.Invoke(null) as UnityEngine.Object;
+            if (typeof(ScriptableObject).IsAssignableFrom(type)) return ScriptableObject.CreateInstance(type);
+            if (typeof(Component).IsAssignableFrom(type)) return new GameObject(type.Name).AddComponent(type);
+            return AccessTools.CreateInstance(type) as UnityEngine.Object;
         }
 
         public override object ReadJson(JsonReader reader, Type type, object _, JsonSerializer serializer)

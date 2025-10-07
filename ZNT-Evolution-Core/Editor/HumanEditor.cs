@@ -7,7 +7,7 @@ namespace ZNT.Evolution.Core.Editor
     [DisallowMultipleComponent]
     public class HumanEditor : Editor
     {
-        private HumanBehaviour Behaviour => GetComponentInChildren<HumanBehaviour>();
+        private HumanBehaviour Behaviour => GetComponent<HumanBehaviour>();
 
         [SerializeInEditor(name: "Flee Before Zombie Explode")]
         public bool FleeBeforeZombieExplode

@@ -17,9 +17,9 @@ namespace ZNT.Evolution.Core
         [HarmonyPatch(typeof(CustomAssetObject), "LoadFromAsset")]
         public static void LoadFromAsset(CustomAssetObject __instance, GameObject gameObject)
         {
-            Logger.LogDebug($"LoadFromAsset: {gameObject} for {__instance}");
+            Logger.LogDebug($"LoadFromAsset: {gameObject} {gameObject.transform.position} for {__instance}");
         }
-        
+
         #region MovingObjectAsset
 
         [HarmonyPostfix]
@@ -28,10 +28,8 @@ namespace ZNT.Evolution.Core
         {
             var controller = gameObject.GetComponent<MovingObjectAnimationController>();
             if (controller is null) return;
-            var orientation = gameObject.GetComponent<ObjectOrientation>();
-            if (orientation is null) return;
-            var current = orientation.CurrentOrientation.ToString().ToLower();
-            var clip = string.Format(__instance.StandAnimation, current);
+            var orientation = gameObject.GetComponent<ObjectOrientation>().CurrentOrientation;
+            var clip = string.Format(__instance.StandAnimation, orientation.ToString().ToLower());
             if (!controller.Animator.AnimationExists(clip)) return;
             var frame = controller.Animator.GetAnimationClip(clip).frames[0];
             controller.Animator.Sprite.SetSprite(frame.spriteCollection, frame.spriteId);
@@ -41,24 +39,90 @@ namespace ZNT.Evolution.Core
         [HarmonyPatch(typeof(ObjectOrientation), "orientation", MethodType.Setter)]
         public static void CurrentOrientation(ObjectOrientation __instance, ObjectOrientation.Orientation value)
         {
-            var controller = __instance.GetComponentInParent<MovingObjectAnimationController>();
+            var controller = __instance.GetComponent<MovingObjectAnimationController>();
             if (controller is null) return;
-            var current = value.ToString().ToLower();
-            var clip = string.Format(controller.Asset.StandAnimation, current);
-            if (!controller.Animator.AnimationExists(clip)) return;
+            if (!controller.Asset.StandAnimation.Contains('{')) return;
+            var clip = string.Format(controller.Asset.StandAnimation, value.ToString().ToLower());
             controller.Animator.Sprite.SetSprite(clip);
         }
 
         [HarmonyPrefix]
-        [HarmonyPatch(typeof(SpriteAnimator), "ForcePlay", typeof(string), typeof(bool), typeof(bool))]
-        public static void ForcePlay(SpriteAnimator __instance, ref string animName)
+        [HarmonyPatch(typeof(MovingObjectAnimationController), "OnStart")]
+        public static bool OnStart(MovingObjectAnimationController __instance)
         {
-            var controller = __instance.GetComponentInParent<MovingObjectAnimationController>();
-            if (controller is null) return;
-            var orientation = __instance.GetComponentInParent<ObjectOrientation>();
-            if (orientation is null) return;
-            var current = orientation.CurrentOrientation.ToString().ToLower();
-            animName = string.Format(animName, current);
+            if (!__instance.Asset.StandAnimation.Contains('{')) return true;
+            var orientation = __instance.GetComponent<ObjectOrientation>().CurrentOrientation;
+            var clip = string.Format(__instance.Asset.StandAnimation, orientation.ToString().ToLower());
+            if (!string.IsNullOrEmpty(clip)) __instance.ForcePlay(clip);
+            __instance.GetComponent<SoundEventPlayer>().PlaySound(__instance.Asset.StandSound);
+            return false;
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(MovingObjectAnimationController), "OnDeactivate")]
+        public static bool OnDeactivate(MovingObjectAnimationController __instance)
+        {
+            if (!__instance.Asset.DisableAnimation.Contains('{')) return true;
+            var orientation = __instance.GetComponent<ObjectOrientation>().CurrentOrientation;
+            var clip = string.Format(__instance.Asset.DisableAnimation, orientation.ToString().ToLower());
+            if (!string.IsNullOrEmpty(clip)) __instance.ForcePlay(clip);
+            __instance.GetComponent<SoundEventPlayer>().PlaySound(__instance.Asset.DisableSound);
+            return false;
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(MovingObjectAnimationController), "OnMove")]
+        public static bool OnMove(MovingObjectAnimationController __instance)
+        {
+            var behaviour = __instance.GetComponent<MovingObjectBehaviour>();
+            if (behaviour is null || !behaviour.IsActive) return true;
+            if (!__instance.Asset.MoveAnimation.Contains('{')) return true;
+            var orientation = __instance.GetComponent<ObjectOrientation>().CurrentOrientation;
+            var clip = string.Format(__instance.Asset.MoveAnimation, orientation.ToString().ToLower());
+            if (!string.IsNullOrEmpty(clip)) __instance.ForcePlay(clip);
+            __instance.GetComponent<SoundEventPlayer>().PlaySound(__instance.Asset.MoveSound);
+            return false;
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(MovingObjectAnimationController), "OnStop")]
+        public static bool OnStop(MovingObjectAnimationController __instance)
+        {
+            var behaviour = __instance.GetComponent<MovingObjectBehaviour>();
+            if (behaviour is null || !behaviour.IsActive) return true;
+            if (!__instance.Asset.StopAnimation.Contains('{')) return true;
+            var orientation = __instance.GetComponent<ObjectOrientation>().CurrentOrientation;
+            var clip = string.Format(__instance.Asset.StopAnimation, orientation.ToString().ToLower());
+            if (!string.IsNullOrEmpty(clip)) __instance.ForcePlay(clip);
+            __instance.GetComponent<SoundEventPlayer>().Stop();
+            __instance.GetComponent<SoundPlayer>().Sound = __instance.Asset.StopSound;
+            __instance.GetComponent<SoundPlayer>().Play();
+            return false;
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(MovingObjectAnimationController), "HitCharacter")]
+        public static bool HitCharacter(MovingObjectAnimationController __instance)
+        {
+            if (!__instance.Asset.HitAnimation.Contains('{')) return true;
+            var orientation = __instance.GetComponent<ObjectOrientation>().CurrentOrientation;
+            var name = string.Format(__instance.Asset.HitAnimation, orientation.ToString().ToLower());
+            if (!string.IsNullOrEmpty(name)) __instance.ForcePlay(name);
+            __instance.GetComponent<SoundPlayer>().Sound = __instance.Asset.HitSound;
+            __instance.GetComponent<SoundPlayer>().Play();
+            return false;
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(MovingObjectAnimationController), "OnDestroyed")]
+        public static bool OnDestroyed(MovingObjectAnimationController __instance)
+        {
+            if (!Application.isPlaying) return true;
+            if (!__instance.Asset.DestroyAnimation.Contains('{')) return true;
+            var orientation = __instance.GetComponent<ObjectOrientation>().CurrentOrientation;
+            var name = string.Format(__instance.Asset.DestroyAnimation, orientation.ToString().ToLower());
+            if (!string.IsNullOrEmpty(name)) __instance.ForcePlay(name);
+            return false;
         }
 
         #endregion
@@ -92,51 +156,27 @@ namespace ZNT.Evolution.Core
 
         #endregion
 
-        #region TriggerAsset
-
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(TriggerAsset), "LoadFromAsset")]
-        public static void LoadFromAsset(TriggerAsset __instance, GameObject gameObject)
-        {
-            switch (gameObject)
-            {
-                case var _ when gameObject.TryGetComponent<MineBehaviour>(out _):
-                    if (gameObject.GetComponent<MineTrapEditor>() is null) gameObject.AddComponent<MineTrapEditor>();
-                    break;
-            }
-        }
-
-        #endregion
-
-        #region CharacterAsset
-
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(CharacterAsset), "LoadFromAsset")]
-        public static void LoadFromAsset(CharacterAsset __instance, GameObject gameObject)
-        {
-            switch (__instance)
-            {
-                case HumanAsset _:
-                    if (gameObject.GetComponent<HumanEditor>() is null) gameObject.AddComponent<HumanEditor>();
-                    break;
-            }
-        }
-
-        #endregion
-
         #region Rotorz.Tile.Brush
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(Rotorz.Tile.OrientedBrush), "Awake")]
         public static void Awake(Rotorz.Tile.OrientedBrush __instance)
         {
-            var body = __instance.DefaultOrientation?.GetVariation(0) as GameObject;
-            if (body is null) return;
-            if (body.TryGetComponent<Health>(out var health)) health.EditorVisibility = true;
-            switch (body)
+            // ReSharper disable once UseNegatedPatternMatching
+            var gameObject = __instance.DefaultOrientation?.GetVariation(0) as GameObject;
+            if (gameObject is null) return;
+            if (gameObject.TryGetComponent<Health>(out var health)) health.EditorVisibility = true;
+            switch (gameObject.GetComponent<BaseBehaviour>())
             {
-                case var _ when body.TryGetComponent<PropBehaviour>(out _):
-                    if (body.GetComponent<LayerEditor>() is null) body.AddComponent<LayerEditor>();
+                case MineBehaviour _:
+                    _ = gameObject.GetComponent<LayerEditor>() ?? gameObject.AddComponent<LayerEditor>();
+                    _ = gameObject.GetComponent<MineTrapEditor>() ?? gameObject.AddComponent<MineTrapEditor>();
+                    break;
+                case PropBehaviour _:
+                    _ = gameObject.GetComponent<LayerEditor>() ?? gameObject.AddComponent<LayerEditor>();
+                    break;
+                case HumanBehaviour _:
+                    _ = gameObject.GetComponent<HumanEditor>() ?? gameObject.AddComponent<HumanEditor>();
                     break;
             }
         }
