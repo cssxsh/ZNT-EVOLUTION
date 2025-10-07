@@ -45,6 +45,8 @@ namespace ZNT.Evolution.Core.Asset
                 case { Name: nameof(UnityEngine.Object.name) }:
                 case { Name: nameof(UnityEngine.Object.hideFlags) }:
                     break;
+                case { }
+                    when member.IsDefined(typeof(ReadOnlyAttribute)):
                 case PropertyInfo _:
                     property.Readable = false;
                     break;

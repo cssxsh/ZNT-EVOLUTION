@@ -7,6 +7,7 @@ using ZNT.Evolution.Core.Asset;
 using ZNT.Evolution.Core.Editor;
 
 // ReSharper disable InconsistentNaming
+// ReSharper disable once MemberCanBePrivate.Global
 namespace ZNT.Evolution.Core
 {
     internal static class CustomAssetObjectPatch
@@ -18,6 +19,11 @@ namespace ZNT.Evolution.Core
         public static void LoadFromAsset(CustomAssetObject __instance, GameObject gameObject)
         {
             Logger.LogDebug($"LoadFromAsset: {gameObject} {gameObject.transform.position} for {__instance}");
+        }
+
+        internal static T GetOrAddComponent<T>(this GameObject gameObject) where T : Component
+        {
+            return gameObject.GetComponent<T>() ?? gameObject.AddComponent<T>();
         }
 
         #region MovingObjectAsset
@@ -169,14 +175,14 @@ namespace ZNT.Evolution.Core
             switch (gameObject.GetComponent<BaseBehaviour>())
             {
                 case MineBehaviour _:
-                    _ = gameObject.GetComponent<LayerEditor>() ?? gameObject.AddComponent<LayerEditor>();
-                    _ = gameObject.GetComponent<MineTrapEditor>() ?? gameObject.AddComponent<MineTrapEditor>();
+                    _ = gameObject.GetOrAddComponent<LayerEditor>();
+                    _ = gameObject.GetOrAddComponent<MineTrapEditor>();
                     break;
                 case PropBehaviour _:
-                    _ = gameObject.GetComponent<LayerEditor>() ?? gameObject.AddComponent<LayerEditor>();
+                    _ = gameObject.GetOrAddComponent<LayerEditor>();
                     break;
                 case HumanBehaviour _:
-                    _ = gameObject.GetComponent<HumanEditor>() ?? gameObject.AddComponent<HumanEditor>();
+                    _ = gameObject.GetOrAddComponent<HumanEditor>();
                     break;
             }
         }
