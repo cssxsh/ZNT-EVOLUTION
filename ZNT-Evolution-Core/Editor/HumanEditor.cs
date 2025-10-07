@@ -142,6 +142,13 @@ namespace ZNT.Evolution.Core.Editor
             set => ((RayConeDetection)Behaviour.Vision.Detection).CastAll = value;
         }
 
+        [SerializeInEditor(name: "Vision Keep Lost Track")]
+        public bool VisionKeepLostTrack
+        {
+            get => ((SignalEffect)Behaviour.Vision.Effects[0]).KeepLostTrack;
+            set => ((SignalEffect)Behaviour.Vision.Effects[0]).KeepLostTrack = value;
+        }
+
         [SerializeInEditor(name: "Block Opponents")]
         public bool BlockOpponents
         {

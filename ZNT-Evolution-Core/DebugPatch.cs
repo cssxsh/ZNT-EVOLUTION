@@ -62,6 +62,10 @@ namespace ZNT.Evolution.Core
             }
         }
 
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(Character), "OnVisionLost")]
+        public static bool OnVisionLost(GameObject target) => target;
+
         [HarmonyPostfix]
         [HarmonyPatch(typeof(RayConeDetection), "UpdateAngles")]
         public static void UpdateAngles(RayConeDetection __instance)
