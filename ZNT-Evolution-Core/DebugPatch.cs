@@ -66,35 +66,6 @@ internal static class DebugPatch
     [HarmonyPatch(typeof(Character), "OnVisionLost")]
     public static bool OnVisionLost(GameObject target) => target is not null;
 
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(RayConeDetection), "UpdateAngles")]
-    public static void UpdateAngles(RayConeDetection __instance)
-    {
-        var rays = Traverse.Create(__instance).Field<Vector2[]>("rays").Value;
-        rays.OrderBy(_ => Guid.NewGuid()).ToArray().CopyTo(rays);
-        // var attachment = Resources.FindObjectsOfTypeAll<LaserAttachment>().First();
-        // for (var i = __instance.transform.childCount; i < __instance.RayCount; i++)
-        // {
-        //     var laser = UnityEngine.Object.Instantiate(attachment, __instance.transform);
-        //     laser.gameObject.layer = LayerMask.NameToLayer("Renderer");
-        // }
-        //
-        // for (var i = 0; i < __instance.transform.childCount; i++)
-        // {
-        //     __instance.transform.GetChild(i).gameObject.SetActive(false);
-        // }
-        //
-        // var inverted = Traverse.Create(__instance).Field<int>("inverted").Value;
-        // for (var i = 0; i < rays.Length; i++)
-        // {
-        //     var laser = __instance.transform.GetChild(i);
-        //     laser.gameObject.SetActive(true);
-        //     laser.right = rays[i] * inverted;
-        //     laser.GetComponent<LaserAttachment>().MaxDistance = __instance.Distance;
-        //     laser.GetComponentInChildren<LaserRenderer>().Color = Color.white;
-        // }
-    }
-
     [HarmonyPrefix]
     [HarmonyPatch(typeof(LevelEditor.SelectionMenu), "UpdateComponentMenu")]
     public static bool UpdateComponentMenu(LevelEditor.SelectionMenu __instance)

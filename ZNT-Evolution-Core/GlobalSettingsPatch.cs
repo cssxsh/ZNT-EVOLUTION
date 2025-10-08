@@ -38,15 +38,13 @@ internal static class GlobalSettingsPatch
 
     #region CharacterBehaviour
 
-    private static bool RayConeFindNearest => EvolutionCorePlugin.RayConeFindNearest.Value;
+    private static bool VisionMaterialization => EvolutionCorePlugin.VisionMaterialization.Value;
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(RayConeDetection), "FindGameObjects")]
     public static void FindGameObjects(RayConeDetection __instance, C5.HashedArrayList<GameObject> __result)
     {
         if (__instance.CastAll) return;
-        if (!RayConeFindNearest) return;
-
         var rays = Traverse.Create(__instance).Field<Vector2[]>("rays").Value;
         var inverted = Traverse.Create(__instance).Field<int>("inverted").Value;
         __result.Clear();
@@ -67,13 +65,35 @@ internal static class GlobalSettingsPatch
                 __instance.Trigger.WithoutAllTags,
                 __instance.Trigger.InvertTagsMatch);
         }
+    }
 
-        if (__result.IsEmpty) return;
-        var nearest = __result
-            .OrderBy(target => Vector3.Distance(__instance.Origin.position, target.transform.position))
-            .First();
-        __result.Clear();
-        __result.Add(nearest);
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(RayConeDetection), "UpdateAngles")]
+    public static void UpdateAngles(RayConeDetection __instance)
+    {
+        if (!VisionMaterialization) return;
+        var rays = Traverse.Create(__instance).Field<Vector2[]>("rays").Value;
+        var attachment = Resources.FindObjectsOfTypeAll<LaserAttachment>().First();
+        for (var i = __instance.transform.childCount; i < __instance.RayCount; i++)
+        {
+            var laser = Object.Instantiate(attachment, __instance.transform);
+            laser.gameObject.layer = LayerMask.NameToLayer("Renderer");
+        }
+
+        for (var i = 0; i < __instance.transform.childCount; i++)
+        {
+            __instance.transform.GetChild(i).gameObject.SetActive(false);
+        }
+
+        var inverted = Traverse.Create(__instance).Field<int>("inverted").Value;
+        for (var i = 0; i < rays.Length; i++)
+        {
+            var laser = __instance.transform.GetChild(i);
+            laser.gameObject.SetActive(true);
+            laser.right = rays[i] * inverted;
+            laser.GetComponent<LaserAttachment>().MaxDistance = __instance.Distance;
+            laser.GetComponentInChildren<LaserRenderer>().Color = Color.white;
+        }
     }
 
     #endregion
