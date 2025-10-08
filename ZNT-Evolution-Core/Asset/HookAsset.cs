@@ -1,19 +1,18 @@
 using System;
 using UnityEngine;
 
-namespace ZNT.Evolution.Core.Asset
+namespace ZNT.Evolution.Core.Asset;
+
+internal class HookAsset : CustomAssetObject
 {
-    internal class HookAsset : CustomAssetObject
+    private Action<GameObject> _action;
+
+    public override void LoadFromAsset(GameObject gameObject) => _action?.Invoke(gameObject);
+
+    public static HookAsset Invoke(Action<GameObject> action)
     {
-        private Action<GameObject> _action;
-
-        public override void LoadFromAsset(GameObject gameObject) => _action?.Invoke(gameObject);
-
-        public static HookAsset Invoke(Action<GameObject> action)
-        {
-            var hook = CreateInstance<HookAsset>();
-            hook._action = action;
-            return hook;
-        }
+        var hook = CreateInstance<HookAsset>();
+        hook._action = action;
+        return hook;
     }
 }

@@ -4,29 +4,29 @@ using Newtonsoft.Json;
 using UnityEngine;
 
 // ReSharper disable MemberCanBePrivate.Global
-namespace ZNT.Evolution.Core.Asset
+namespace ZNT.Evolution.Core.Asset;
+
+[JsonObject]
+[UsedImplicitly]
+internal class ObjectMerge : EvolutionMerge<Object>
 {
-    [JsonObject]
-    [UsedImplicitly]
-    internal class ObjectMerge : EvolutionMerge<Object>
+    [JsonProperty("Fields")]
+    public readonly Dictionary<string, string> Fields;
+
+    [JsonConstructor]
+    public ObjectMerge(Component source, string name, Dictionary<string, string> fields) : base(name, source)
     {
-        [JsonProperty("Fields")] public readonly Dictionary<string, string> Fields;
+        Fields = fields;
+    }
 
-        [JsonConstructor]
-        public ObjectMerge(Component source, string name, Dictionary<string, string> fields) : base(name, source)
-        {
-            Fields = fields;
-        }
+    public override Object Create()
+    {
+        var clone = Object.Instantiate(Source);
 
-        public override Object Create()
-        {
-            var clone = Object.Instantiate(Source);
+        clone.name = Name;
+        CustomAssetUtility.Merge(clone, Fields);
 
-            clone.name = Name;
-            CustomAssetUtility.Merge(clone, Fields);
-
-            Object.DontDestroyOnLoad(clone);
-            return clone;
-        }
+        Object.DontDestroyOnLoad(clone);
+        return clone;
     }
 }
