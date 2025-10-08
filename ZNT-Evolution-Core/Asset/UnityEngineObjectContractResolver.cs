@@ -16,14 +16,14 @@ internal class UnityEngineObjectContractResolver : DefaultContractResolver
     protected override JsonObjectContract CreateObjectContract(Type type)
     {
         DefaultMembersSearchFlags = BindingFlags.Instance | BindingFlags.Public;
-        if (typeof(UnityEngine.Object).IsAssignableFrom(type)) DefaultMembersSearchFlags |= BindingFlags.NonPublic;
+        if (IsSerializable(type)) DefaultMembersSearchFlags |= BindingFlags.NonPublic;
         return base.CreateObjectContract(type);
     }
 
     protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization serialization)
     {
         var property = base.CreateProperty(member, serialization);
-        if (!typeof(UnityEngine.Object).IsAssignableFrom(member.DeclaringType)) return property;
+        if (!IsSerializable(member.DeclaringType)) return property;
         switch (member)
         {
             case not null
@@ -53,6 +53,12 @@ internal class UnityEngineObjectContractResolver : DefaultContractResolver
         }
 
         return property;
+    }
+
+    private static bool IsSerializable(Type type)
+    {
+        return type.IsDefined(typeof(SerializableAttribute))
+            || typeof(UnityEngine.Object).IsAssignableFrom(type);
     }
 
     private class LayerProvider : IValueProvider

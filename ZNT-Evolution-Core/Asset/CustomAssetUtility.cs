@@ -10,15 +10,16 @@ namespace ZNT.Evolution.Core.Asset;
 
 public static class CustomAssetUtility
 {
-    internal static readonly Dictionary<string, Object> Cache = new Dictionary<string, Object>();
+    internal static readonly Dictionary<string, Object> Cache = new();
 
-    private static JsonSerializerSettings SerializerSettings => new JsonSerializerSettings
+    private static JsonSerializerSettings SerializerSettings => new()
     {
         ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
         TypeNameHandling = TypeNameHandling.Auto,
         ContractResolver = new UnityEngineObjectContractResolver(),
         Converters =
         {
+            new FrameworkInputsConverter(),
             new UnityEngineObjectConverter(),
             new ExplodeSurfaceConverter(),
             new StringEnumConverter(),

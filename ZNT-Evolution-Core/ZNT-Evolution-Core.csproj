@@ -384,6 +384,7 @@
         <Compile Include="Asset\EvolutionAddition.cs"/>
         <Compile Include="Asset\EvolutionInfo.cs"/>
         <Compile Include="Asset\ExplodeSurfaceConverter.cs"/>
+        <Compile Include="Asset\FrameworkInputsConverter.cs"/>
         <Compile Include="Asset\ObjectMerge.cs"/>
         <Compile Include="Asset\LayerConverter.cs"/>
         <Compile Include="Asset\LayerMaskConverter.cs"/>

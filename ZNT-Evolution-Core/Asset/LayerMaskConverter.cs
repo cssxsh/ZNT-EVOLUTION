@@ -4,6 +4,7 @@ using System.Linq;
 using HarmonyLib;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Linq;
 using UnityEngine;
 
 namespace ZNT.Evolution.Core.Asset;
@@ -39,7 +40,7 @@ public class LayerMaskConverter : CustomCreationConverter<LayerMask>
     public override object ReadJson(JsonReader reader, Type type, object _, JsonSerializer serializer)
     {
         if (reader.TokenType == JsonToken.Integer) return (LayerMask)serializer.Deserialize<int>(reader);
-        if (reader.TokenType != JsonToken.String) return (LayerMask)serializer.Deserialize<Wrapper>(reader).value;
+        if (reader.TokenType != JsonToken.String) return (LayerMask)JObject.Load(reader)["value"].Value<int>();
         var names = serializer.Deserialize<string>(reader).Split(',')
             .Select(n => n.Trim()).Where(n => n.Length > 0);
         return (LayerMask)names.Aggregate(0x00000000, (mask, name) =>
@@ -48,11 +49,5 @@ public class LayerMaskConverter : CustomCreationConverter<LayerMask>
             if (layer == -1) layer = int.Parse(name);
             return mask | (0x01 << layer);
         });
-    }
-
-    [Serializable]
-    private class Wrapper
-    {
-        public int value;
     }
 }
