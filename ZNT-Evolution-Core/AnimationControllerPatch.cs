@@ -1,8 +1,11 @@
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Reflection;
 using BepInEx.Logging;
 using HarmonyLib;
+using JetBrains.Annotations;
+using UnityEngine;
 
 // ReSharper disable InconsistentNaming
 namespace ZNT.Evolution.Core;
@@ -30,7 +33,7 @@ internal static class AnimationControllerPatch
             foreach (var description in method.GetCustomAttributes<DescriptionAttribute>())
             {
                 var name = description.Description.Substring(FrameEventPrefix.Length);
-                Logger.LogDebug($"RegisterTriggerEvent(name='{name}') for {method.FullDescription()}");
+                Logger.LogDebug($"RegisterTriggerEvent(name=\"{name}\") for {method.FullDescription()}");
                 __instance.EventHandler.RegisterTriggerEvent(name, frame => method.Invoke(null, new object[]
                 {
                     __instance,
@@ -45,7 +48,7 @@ internal static class AnimationControllerPatch
             foreach (var description in method.GetCustomAttributes<DescriptionAttribute>())
             {
                 var name = description.Description.Substring(ClipEventPrefix.Length);
-                Logger.LogDebug($"RegisterEndEvent(name='{name}') for {method.FullDescription()}");
+                Logger.LogDebug($"RegisterEndEvent(name=\"{name}\") for {method.FullDescription()}");
                 __instance.EventHandler.RegisterEndEvent(name, () => method.Invoke(null, new object[]
                 {
                     __instance,
@@ -85,5 +88,24 @@ internal static class AnimationControllerPatch
                 }
             }
         }
+    }
+
+    [UsedImplicitly]
+    [Description("RegisterTriggerEvent:throw")]
+    public static void Throw(CorpseBehaviour controller, tk2dSpriteAnimationFrame frame)
+    {
+        var parameters = Traverse.Create(controller).Field<CorpseParameter>("parameters").Value;
+        if (parameters.Character.Behaviour is not HumanBehaviour human) return;
+        var definition = frame.spriteCollection.spriteDefinitions[frame.spriteId];
+        var point = definition.attachPoints.FirstOrDefault(point => point.name == "throw")
+                    ?? new tk2dSpriteDefinition.AttachPoint();
+        human.PhysicObjectThrower.Throw(
+            Traverse.Create(controller).Field<BoxCollider2D>("boxCollider").Value,
+            null,
+            null,
+            controller.transform.position + point.position,
+            controller.transform.forward,
+            frame.eventInt
+        );
     }
 }
