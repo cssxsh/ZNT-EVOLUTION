@@ -110,21 +110,30 @@
             <HintPath>$(ZNTGamePath)\znt_Data\Managed\mscorlib.dll</HintPath>
             <Private>False</Private>
         </Reference>
-        <Reference Include="System"/>
+        <Reference Include="System">
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\System.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
         <Reference Include="System.Configuration">
             <HintPath>$(ZNTGamePath)\znt_Data\Managed\System.Configuration.dll</HintPath>
             <Private>False</Private>
         </Reference>
-        <Reference Include="System.Core"/>
-        <Reference Include="System.Data"/>
+        <Reference Include="System.Core">
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\System.Core.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
         <Reference Include="System.Security">
             <HintPath>$(ZNTGamePath)\znt_Data\Managed\System.Security.dll</HintPath>
             <Private>False</Private>
         </Reference>
         <Reference Include="System.Threading">
             <HintPath>$(ZNTGamePath)\znt_Data\Managed\System.Threading.dll</HintPath>
+            <Private>False</Private>
         </Reference>
-        <Reference Include="System.Xml"/>
+        <Reference Include="System.Xml">
+            <HintPath>$(ZNTGamePath)\znt_Data\Managed\System.Xml.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
         <Reference Include="TileSystem.Runtime">
             <HintPath>$(ZNTGamePath)\znt_Data\Managed\TileSystem.Runtime.dll</HintPath>
             <Private>False</Private>
