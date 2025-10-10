@@ -12,18 +12,13 @@ namespace ZNT.Evolution.Core;
 
 internal static class CustomAssetObjectPatch
 {
-    private static readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("CustomAssetObject");
+    private static readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource(nameof(CustomAssetObject));
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(CustomAssetObject), "LoadFromAsset")]
     public static void LoadFromAsset(CustomAssetObject __instance, GameObject gameObject)
     {
         Logger.LogDebug($"LoadFromAsset: {gameObject} {gameObject.transform.position} for {__instance}");
-    }
-
-    internal static T GetOrAddComponent<T>(this GameObject gameObject) where T : Component
-    {
-        return gameObject.GetComponent<T>() ?? gameObject.AddComponent<T>();
     }
 
     #region MovingObjectAsset
@@ -169,20 +164,19 @@ internal static class CustomAssetObjectPatch
     public static void Awake(Rotorz.Tile.OrientedBrush __instance)
     {
         // ReSharper disable once UseNegatedPatternMatching
-        var gameObject = __instance.DefaultOrientation?.GetVariation(0) as GameObject;
-        if (gameObject is null) return;
-        if (gameObject.TryGetComponent<Health>(out var health)) health.EditorVisibility = true;
+        if (__instance.DefaultOrientation?.GetVariation(0) is not GameObject gameObject) return;
+        if (gameObject.GetComponentInChildren<Health>() is { } health) health.EditorVisibility = true;
         switch (gameObject.GetComponent<BaseBehaviour>())
         {
             case MineBehaviour:
-                _ = gameObject.GetOrAddComponent<LayerEditor>();
-                _ = gameObject.GetOrAddComponent<MineTrapEditor>();
+                _ = gameObject.GetComponentSafe<LayerEditor>();
+                _ = gameObject.GetComponentSafe<MineTrapEditor>();
                 break;
             case PropBehaviour:
-                _ = gameObject.GetOrAddComponent<LayerEditor>();
+                _ = gameObject.GetComponentSafe<LayerEditor>();
                 break;
             case HumanBehaviour:
-                _ = gameObject.GetOrAddComponent<HumanEditor>();
+                _ = gameObject.GetComponentSafe<HumanEditor>();
                 break;
         }
     }
