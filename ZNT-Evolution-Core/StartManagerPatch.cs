@@ -11,7 +11,7 @@ namespace ZNT.Evolution.Core;
 
 internal static class StartManagerPatch
 {
-    private static readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("StartManager");
+    private static readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource(nameof(StartManager));
 
     private static IEnumerator prefix;
 
@@ -115,10 +115,3 @@ internal static class StartManagerPatch
     [HarmonyPatch(typeof(StartManager), "LoadNextScene")]
     public static bool LoadNextScene(StartManager __instance) => prefix is null;
 }
-// foreach (var sprites in Resources.FindObjectsOfTypeAll<tk2dSpriteCollectionData>())
-// {
-//     Logger.LogDebug($"{sprites}");
-//     CustomAssetUtility.SerializeObjectToPath(
-//         target: $@"D:\Users\CSSXSH\RiderProjects\ZNT-DATA\Asset\tk2dSpriteCollectionData\{sprites.name}.sprite.info.json",
-//         data: sprites.FetchSpriteInfo());
-// }

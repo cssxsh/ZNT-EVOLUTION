@@ -37,17 +37,15 @@ public class LayerEditor : Editor, IEditorOverride
 
     private static string[] _names;
 
-    private string[] LayerNames()
+    protected override void OnCreate()
     {
-        if (_names != null) return _names;
+        if (_names != null) return;
         _names = new string[0x20];
         for (var i = 0; i < 0x20; i++)
         {
             _names[i] = LayerMask.LayerToName(i);
             if (string.IsNullOrEmpty(_names[i])) _names[i] = i.ToString();
         }
-
-        return _names;
     }
 
     public bool OverrideMemberUi(SelectionMenu menu, EditorComponent component, MemberInfo member)
@@ -55,13 +53,13 @@ public class LayerEditor : Editor, IEditorOverride
         switch (member.Name)
         {
             case nameof(Main):
-                CustomBinder(menu).BindIndexListField(component, member, LayerNames());
+                CustomBinder(menu).BindIndexListField(component, member, _names);
                 return true;
             case nameof(Top):
-                if (Child("TopCollider")) CustomBinder(menu).BindIndexListField(component, member, LayerNames());
+                if (Child("TopCollider")) CustomBinder(menu).BindIndexListField(component, member, _names);
                 return true;
             case nameof(Bottom):
-                if (Child("BottomCollider")) CustomBinder(menu).BindIndexListField(component, member, LayerNames());
+                if (Child("BottomCollider")) CustomBinder(menu).BindIndexListField(component, member, _names);
                 return true;
             default:
                 return false;

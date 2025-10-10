@@ -25,7 +25,7 @@ public class EvolutionCorePlugin : BaseUnityPlugin
         Harmony.CreateAndPatchAll(typeof(StartManagerPatch));
         Harmony.CreateAndPatchAll(typeof(CustomAssetObjectPatch));
         Harmony.CreateAndPatchAll(typeof(AnimationControllerPatch));
-        Harmony.CreateAndPatchAll(typeof(SceneManagerPatch));
+        Harmony.CreateAndPatchAll(typeof(SceneLoaderPatch));
     }
 
     public void Start()

@@ -12,7 +12,7 @@ namespace ZNT.Evolution.Core.Asset;
 [UsedImplicitly]
 internal class AnimationAddition : EvolutionAddition<tk2dSpriteAnimation>
 {
-    private static readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("AnimationAddition");
+    private static readonly ManualLogSource LogSource = Logger.CreateLogSource(nameof(AnimationAddition));
 
     [JsonProperty("Clips")]
     public readonly tk2dSpriteAnimationClip[] Clips;
@@ -20,7 +20,7 @@ internal class AnimationAddition : EvolutionAddition<tk2dSpriteAnimation>
     [JsonConstructor]
     public AnimationAddition(tk2dSpriteAnimation[] targets, tk2dSpriteAnimationClip[] clips) : base(targets)
     {
-        if (targets.Length != clips.Length) Logger.LogWarning("Targets.Length != Clips.Length");
+        if (targets.Length != clips.Length) LogSource.LogWarning("Targets.Length != Clips.Length");
         Clips = clips;
     }
 

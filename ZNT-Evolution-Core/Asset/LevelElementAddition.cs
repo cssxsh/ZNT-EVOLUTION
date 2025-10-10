@@ -11,7 +11,7 @@ namespace ZNT.Evolution.Core.Asset;
 [UsedImplicitly]
 internal class LevelElementAddition : EvolutionAddition<LevelElement>
 {
-    private static readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("LevelElementAddition");
+    private static readonly ManualLogSource LogSource = Logger.CreateLogSource(nameof(LevelElementAddition));
 
     [JsonProperty("Assets")]
     public readonly CustomAsset[] Assets;
@@ -19,7 +19,7 @@ internal class LevelElementAddition : EvolutionAddition<LevelElement>
     [JsonConstructor]
     public LevelElementAddition(LevelElement[] targets, CustomAsset[] assets) : base(targets)
     {
-        if (targets.Length != assets.Length) Logger.LogWarning("Targets.Length != Assets.Length");
+        if (targets.Length != assets.Length) LogSource.LogWarning("Targets.Length != Assets.Length");
         Assets = assets;
     }
 

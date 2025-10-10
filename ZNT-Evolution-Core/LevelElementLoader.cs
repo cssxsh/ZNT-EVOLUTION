@@ -12,7 +12,7 @@ namespace ZNT.Evolution.Core;
 
 public static class LevelElementLoader
 {
-    private static readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("LevelElementLoader");
+    private static readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource(nameof(LevelElementLoader));
 
     public static IEnumerator LoadFromFolder(string path, LevelElement.Type type)
     {

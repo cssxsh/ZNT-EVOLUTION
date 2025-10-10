@@ -19,7 +19,7 @@
         <DebugSymbols>true</DebugSymbols>
         <DebugType>full</DebugType>
         <Optimize>false</Optimize>
-        <OutputPath>$(ZNTGamePath)\BepInEx\plugins\$(MSBuildProjectName)</OutputPath>
+        <OutputPath>bin\Debug\</OutputPath>
         <DefineConstants>DEBUG;TRACE</DefineConstants>
         <ErrorReport>prompt</ErrorReport>
         <WarningLevel>4</WarningLevel>
@@ -28,7 +28,7 @@
         <PlatformTarget>AnyCPU</PlatformTarget>
         <DebugType>pdbonly</DebugType>
         <Optimize>true</Optimize>
-        <OutputPath>$(ZNTGamePath)\BepInEx\plugins\$(MSBuildProjectName)</OutputPath>
+        <OutputPath>bin\Release\</OutputPath>
         <DefineConstants>TRACE</DefineConstants>
         <ErrorReport>prompt</ErrorReport>
         <WarningLevel>4</WarningLevel>
@@ -388,45 +388,54 @@
         </Reference>
     </ItemGroup>
     <ItemGroup>
+        <Compile Include="Properties\AssemblyInfo.cs"/>
+        <Compile Include="AnimationControllerPatch.cs"/>
+        <Compile Include="CustomAssetObjectPatch.cs"/>
+        <Compile Include="DebugPatch.cs"/>
+        <Compile Include="EvolutionCorePlugin.cs"/>
+        <Compile Include="GlobalSettingsPatch.cs"/>
+        <Compile Include="LevelElementLoader.cs"/>
+        <Compile Include="SceneLoaderPatch.cs"/>
+        <Compile Include="StartManagerPatch.cs"/>
         <Compile Include="Asset\AnimationAddition.cs"/>
+        <Compile Include="Asset\AssetElementBinder.cs"/>
         <Compile Include="Asset\BrushInfo.cs"/>
+        <Compile Include="Asset\CustomAssetUtility.cs"/>
         <Compile Include="Asset\EvolutionAddition.cs"/>
         <Compile Include="Asset\EvolutionInfo.cs"/>
+        <Compile Include="Asset\EvolutionMerge.cs"/>
         <Compile Include="Asset\ExplodeSurfaceConverter.cs"/>
         <Compile Include="Asset\FrameworkInputsConverter.cs"/>
-        <Compile Include="Asset\ObjectMerge.cs"/>
+        <Compile Include="Asset\HookAsset.cs"/>
         <Compile Include="Asset\LayerConverter.cs"/>
         <Compile Include="Asset\LayerMaskConverter.cs"/>
         <Compile Include="Asset\LevelElementAddition.cs"/>
-        <Compile Include="Asset\CustomAssetUtility.cs"/>
-        <Compile Include="Asset\AssetElementBinder.cs"/>
-        <Compile Include="Asset\EvolutionMerge.cs"/>
-        <Compile Include="Asset\HookAsset.cs"/>
         <Compile Include="Asset\LevelElementInfo.cs"/>
+        <Compile Include="Asset\ObjectMerge.cs"/>
         <Compile Include="Asset\RectConverter.cs"/>
-        <Compile Include="Asset\UnityEngineObjectContractResolver.cs"/>
-        <Compile Include="Asset\UnityEngineObjectConverter.cs"/>
         <Compile Include="Asset\SpawnPointAsset.cs"/>
         <Compile Include="Asset\SpriteInfo.cs"/>
         <Compile Include="Asset\SpriteMerge.cs"/>
-        <Compile Include="AnimationControllerPatch.cs"/>
+        <Compile Include="Asset\UnityEngineObjectContractResolver.cs"/>
+        <Compile Include="Asset\UnityEngineObjectConverter.cs"/>
         <Compile Include="Editor\Editor.cs"/>
         <Compile Include="Editor\LayerEditor.cs"/>
         <Compile Include="Editor\MineTrapEditor.cs"/>
         <Compile Include="Editor\HumanEditor.cs"/>
-        <Compile Include="EvolutionCorePlugin.cs"/>
-        <Compile Include="DebugPatch.cs"/>
-        <Compile Include="GlobalSettingsPatch.cs"/>
-        <Compile Include="LevelElementLoader.cs"/>
-        <Compile Include="CustomAssetObjectPatch.cs"/>
-        <Compile Include="Properties\AssemblyInfo.cs"/>
-        <Compile Include="SceneManagerPatch.cs"/>
-        <Compile Include="StartManagerPatch.cs"/>
     </ItemGroup>
     <ItemGroup>
         <EmbeddedResource Include="Resources\**"/>
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets"/>
+    <Target Name="AfterBuild">
+        <ItemGroup>
+            <Plugin Include="$(ZNTGamePath)\BepInEx\plugins\$(MSBuildProjectName)\*.dll"/>
+            <Plugin Include="$(ZNTGamePath)\BepInEx\plugins\$(MSBuildProjectName)\*.pdb"/>
+        </ItemGroup>
+        <Delete Files="@(Plugin)"/>
+        <Copy SourceFiles="$(OutputPath)$(AssemblyName).dll" DestinationFiles="$(ZNTGamePath)\BepInEx\plugins\$(MSBuildProjectName)\$(AssemblyName).$(Version).dll"/>
+        <Copy SourceFiles="$(OutputPath)$(AssemblyName).pdb" DestinationFiles="$(ZNTGamePath)\BepInEx\plugins\$(MSBuildProjectName)\$(AssemblyName).$(Version).pdb"/>
+    </Target>
     <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
          Other similar extension points exist, see Microsoft.Common.targets.
     <Target Name="BeforeBuild">

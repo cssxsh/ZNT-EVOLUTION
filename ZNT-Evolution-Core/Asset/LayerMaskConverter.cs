@@ -40,10 +40,9 @@ public class LayerMaskConverter : CustomCreationConverter<LayerMask>
     public override object ReadJson(JsonReader reader, Type type, object _, JsonSerializer serializer)
     {
         if (reader.TokenType == JsonToken.Integer) return (LayerMask)serializer.Deserialize<int>(reader);
-        if (reader.TokenType != JsonToken.String) return (LayerMask)JObject.Load(reader)["value"].Value<int>();
-        var names = serializer.Deserialize<string>(reader).Split(',')
-            .Select(n => n.Trim()).Where(n => n.Length > 0);
-        return (LayerMask)names.Aggregate(0x00000000, (mask, name) =>
+        if (reader.TokenType != JsonToken.String) return JToken.Load(reader).ToObject<LayerMask>();
+        var names = serializer.Deserialize<string>(reader).Split(',');
+        return (LayerMask)names.Select(n => n.Trim()).Aggregate(0x00000000, (mask, name) =>
         {
             var layer = LayerMask.NameToLayer(name);
             if (layer == -1) layer = int.Parse(name);

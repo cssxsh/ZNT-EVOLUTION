@@ -58,7 +58,7 @@ internal class UnityEngineObjectContractResolver : DefaultContractResolver
     private static bool IsSerializable(Type type)
     {
         return type.IsDefined(typeof(SerializableAttribute))
-            || typeof(UnityEngine.Object).IsAssignableFrom(type);
+               || typeof(UnityEngine.Object).IsAssignableFrom(type);
     }
 
     private class LayerProvider : IValueProvider

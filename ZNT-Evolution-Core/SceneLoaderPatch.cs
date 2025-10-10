@@ -13,9 +13,9 @@ using ZNT.Evolution.Core.Asset;
 // ReSharper disable InconsistentNaming
 namespace ZNT.Evolution.Core;
 
-internal static class SceneManagerPatch
+internal static class SceneLoaderPatch
 {
-    private static readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("SceneManager");
+    private static readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource(nameof(SceneLoader));
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(SceneLoader), "LoadNextScene")]
@@ -142,8 +142,8 @@ internal static class SceneManagerPatch
                     var input = item.GetComponentInChildren<InputField>(includeInactive: true);
                     input.OnValueChanged(value =>
                     {
-                        if (value == "") value = "20";
-                        entry.SetSerializedValue(value);
+                        if (string.IsNullOrEmpty(value)) entry.BoxedValue = entry.DefaultValue;
+                        else entry.SetSerializedValue(value);
                     });
                     input.SetTextWithoutNotify(((int)entry.BoxedValue & int.MaxValue).ToString());
                     input.interactable = (int)entry.BoxedValue >= 0;
