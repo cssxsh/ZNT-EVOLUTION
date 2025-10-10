@@ -36,36 +36,9 @@ internal static class GlobalSettingsPatch
 
     #endregion
 
-    #region CharacterBehaviour
+    #region RayConeDetection
 
     private static bool VisionMaterialization => EvolutionCorePlugin.VisionMaterialization.Value;
-
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(RayConeDetection), "FindGameObjects")]
-    public static void FindGameObjects(RayConeDetection __instance, C5.HashedArrayList<GameObject> __result)
-    {
-        if (__instance.CastAll) return;
-        var rays = Traverse.Create(__instance).Field<Vector2[]>("rays").Value;
-        var inverted = Traverse.Create(__instance).Field<int>("inverted").Value;
-        __result.Clear();
-        foreach (var ray in rays)
-        {
-            DetectionHelper.RayCast(
-                __result,
-                __instance.Origin.position,
-                ray * inverted,
-                __instance.Distance,
-                __instance.Trigger.IgnoreLayers,
-                __instance.Trigger.Layers,
-                __instance.Trigger.IgnoreWithTags,
-                __instance.Trigger.WithTags,
-                __instance.Trigger.IgnoreWithoutTags,
-                __instance.Trigger.WithoutTags,
-                __instance.Trigger.WithAllTags,
-                __instance.Trigger.WithoutAllTags,
-                __instance.Trigger.InvertTagsMatch);
-        }
-    }
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(RayConeDetection), "UpdateAngles")]
@@ -73,26 +46,43 @@ internal static class GlobalSettingsPatch
     {
         if (!VisionMaterialization) return;
         var rays = Traverse.Create(__instance).Field<Vector2[]>("rays").Value;
-        var attachment = Resources.FindObjectsOfTypeAll<LaserAttachment>().First();
-        for (var i = __instance.transform.childCount; i < __instance.RayCount; i++)
+        for (var i = __instance.Origin.childCount; i < __instance.RayCount; i++)
         {
-            var laser = Object.Instantiate(attachment, __instance.transform);
+            var laser = ComponentSingleton<GamePoolManager>.Instance
+                .Spawn("LaserAttachment", __instance.Origin);
             laser.gameObject.layer = LayerMask.NameToLayer("Renderer");
         }
 
-        for (var i = 0; i < __instance.transform.childCount; i++)
+        for (var i = 0; i < __instance.Origin.childCount; i++)
         {
-            __instance.transform.GetChild(i).gameObject.SetActive(false);
+            __instance.Origin.GetChild(i).gameObject.SetActive(false);
         }
 
+        if (!__instance.Trigger.enabled) return;
         var inverted = Traverse.Create(__instance).Field<int>("inverted").Value;
         for (var i = 0; i < rays.Length; i++)
         {
-            var laser = __instance.transform.GetChild(i);
-            laser.gameObject.SetActive(true);
+            var laser = __instance.Origin.GetChild(i);
             laser.right = rays[i] * inverted;
-            laser.GetComponent<LaserAttachment>().MaxDistance = __instance.Distance;
-            laser.GetComponentInChildren<LaserRenderer>().Color = Color.white;
+            var attachment = laser.GetComponent<LaserAttachment>();
+            attachment.MaxDistance = __instance.Distance;
+            Traverse.Create(attachment).Field<LayerMask>("obstacleLayers").Value = __instance.Trigger.Layers;
+            var renderer = laser.GetComponentInChildren<LaserRenderer>();
+            renderer.Color = Color.white;
+            laser.gameObject.SetActive(true);
+            laser.BroadcastMessage("Update");
+        }
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(TriggerDetection), "OnDespawned")]
+    public static void OnDespawned(TriggerDetection __instance)
+    {
+        if (__instance is not RayConeDetection) return;
+        for (var i = 0; i < __instance.Origin.childCount; i++)
+        {
+            ComponentSingleton<GamePoolManager>.Instance
+                .Despawn(__instance.Origin.GetChild(i));
         }
     }
 
