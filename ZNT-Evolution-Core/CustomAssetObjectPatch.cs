@@ -130,17 +130,46 @@ internal static class CustomAssetObjectPatch
 
     #region PhysicObjectAsset
 
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(PhysicObjectBehaviour), "Initialize")]
+    public static void Initialize(PhysicObjectBehaviour __instance)
+    {
+        __instance.DamageTriger.enabled |= __instance.ExplodeOn.HasFlag(ExplodeSurfaceConverter.Zombie);
+        __instance.DamageTriger.enabled |= __instance.ExplodeOn.HasFlag(ExplodeSurfaceConverter.Climber);
+        __instance.DamageTriger.enabled |= __instance.ExplodeOn.HasFlag(ExplodeSurfaceConverter.Blocker);
+        __instance.DamageTriger.enabled |= __instance.ExplodeOn.HasFlag(ExplodeSurfaceConverter.Tank);
+
+        if (__instance.DamageTriger.enabled && __instance.ExplodeOn.HasFlag(ExplodeSurfaceConverter.Target))
+        {
+            Logger.LogWarning($"{__instance} ExplodeOn is invalid");
+        }
+    }
+
     [HarmonyPrefix]
     [HarmonyPatch(typeof(PhysicObjectBehaviour), "OnTriggerEnter2D")]
     public static bool OnTriggerEnter2D(PhysicObjectBehaviour __instance, Collider2D other)
     {
-        if (!__instance.TargetLayers.ContainsLayer(other.gameObject.layer)) return false;
-        var physic = __instance.Physic;
-        var force = physic.StartDirection * physic.StartForce * physic.Body.mass;
-        physic.Body.AddForce(force * physic.Collider.friction * -1, ForceMode2D.Impulse);
-        if (physic.Body.velocity.magnitude <= physic.StartForce * 0.5) physic.Body.velocity = Vector2.zero;
-        Traverse.Create(__instance).Field<bool>("checkStuck").Value = true;
+        var flag = __instance.DamageCharacterOnTrigger;
+        flag &= __instance.TargetLayers.ContainsLayer(other.gameObject.layer);
+        // TODO param by setting
+        // ReSharper disable once InvertIf
+        if (flag || __instance.Physic.GravityScale == 0.0f)
+        {
+            var physic = __instance.Physic;
+            var direction = physic.Body.velocity.normalized;
+            var force = direction * physic.StartForce * physic.Body.mass * physic.Collider.friction * -1;
+            physic.Body.AddForce(force, ForceMode2D.Impulse);
+            if (physic.Body.velocity.normalized != direction) physic.Body.ResetVelocity();
+            if (physic.Body.velocity.magnitude <= physic.StartForce * 0.5) __instance.OnDie(null);
+        }
 
+        return flag;
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(PhysicObjectBehaviour), "OnTriggerExit2D")]
+    public static void OnTriggerExit2D(PhysicObjectBehaviour __instance, Collider2D other)
+    {
         var targets = other.GetComponents<BaseAnimationController>()
             .Aggregate(ExplodeSurfaceConverter.None, (mask, controller) => mask | controller switch
             {
@@ -150,9 +179,8 @@ internal static class CustomAssetObjectPatch
                 TankAnimationController { enabled: true } => ExplodeSurfaceConverter.Tank,
                 _ => ExplodeSurfaceConverter.None
             });
-        if (targets == ExplodeSurfaceConverter.None) return true;
-        if (__instance.SharedAsset.ExplodeOn.HasFlag(targets)) __instance.OnDie(null);
-        return true;
+        if (targets == ExplodeSurfaceConverter.None) return;
+        if (__instance.ExplodeOn.HasFlag(targets)) __instance.OnDie(null);
     }
 
     #endregion

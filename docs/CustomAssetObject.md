@@ -180,7 +180,7 @@
 ## PhysicObjectAsset
 
 * name
-* ignoreCollisionDuration 碰撞忽略事件
+* ignoreCollisionDuration 碰撞忽略时间
 * startDirection 初始方向
 * startForce 初始力，可视为初始速度
 * Friction 摩擦系数
@@ -196,8 +196,8 @@
 * TargetLayers `UnityEngine.LayerMask` 伤害触发图层
 * <u>ref Explosion</u> `ExplosionAsset` 爆炸
 
-当 `ExplodeOn` 包含 `Target` 会对角色图层产生碰撞，并且关闭穿透检测，  ren
-当 `DamageCharacterOnTrigger` 开启且 `ExplodeOn` 不包含 `Target` 会开启穿透检测。
+当 `ignoreCollisionDuration` 开启且已渡过，会检查是否卡住（速度为零时爆炸）。  
+当 `ExplodeOn` 包含 `Target` 会对角色图层产生碰撞（使用默认图层，反之使用忽略角色的图层）。
 
 ## ExplosionAsset
 
