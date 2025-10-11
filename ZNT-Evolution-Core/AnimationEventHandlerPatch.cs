@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
@@ -13,77 +12,70 @@ internal static class AnimationEventHandlerPatch
 {
     private static readonly ManualLogSource LogSource = Logger.CreateLogSource(nameof(AnimationEventHandler));
 
-    private const string FrameEventPrefix = "RegisterTriggerEvent:";
-
-    private static readonly List<MethodInfo> FrameEvents = new();
-
-    private const string ClipEventPrefix = "RegisterEndEvent:";
-
-    private static readonly List<MethodInfo> ClipEvents = new();
+    private static readonly C5.HashedArrayList<MethodInfo> EventHandles = new();
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(BaseAnimationController), "Initialize")]
     public static void Initialize(BaseAnimationController __instance)
     {
         if (__instance.EventHandler is null) return;
-        foreach (var method in FrameEvents)
+        foreach (var method in EventHandles)
         {
             if (!method.GetParameters()[0].ParameterType.IsInstanceOfType(__instance)) continue;
             foreach (var description in method.GetCustomAttributes<DescriptionAttribute>())
             {
-                var name = description.Description.Substring(FrameEventPrefix.Length);
-                LogSource.LogDebug($"RegisterTriggerEvent(name=\"{name}\") for {method.FullDescription()}");
-                __instance.EventHandler.RegisterTriggerEvent(name, frame => method.Invoke(null, new object[]
+                var index = description.Description.IndexOf(':');
+                var name = description.Description.Substring(index + 1);
+                switch (description.Description.Substring(0, index))
                 {
-                    __instance,
-                    frame
-                }));
-            }
-        }
-
-        foreach (var method in ClipEvents)
-        {
-            if (!method.GetParameters()[0].ParameterType.IsInstanceOfType(__instance)) continue;
-            foreach (var description in method.GetCustomAttributes<DescriptionAttribute>())
-            {
-                var name = description.Description.Substring(ClipEventPrefix.Length);
-                LogSource.LogDebug($"RegisterEndEvent(name=\"{name}\") for {method.FullDescription()}");
-                __instance.EventHandler.RegisterEndEvent(name, () => method.Invoke(null, new object[]
-                {
-                    __instance,
-                    __instance.AnimationLibrary.GetClipByName(name)
-                }));
+                    case nameof(AnimationEventHandler.RegisterTriggerEvent):
+                        LogSource.LogDebug($"RegisterTriggerEvent(name=\"{name}\") for {method.FullDescription()}");
+                        __instance.EventHandler.RegisterTriggerEvent(name, frame => method.Invoke(null, new object[]
+                        {
+                            __instance,
+                            frame
+                        }));
+                        break;
+                    case nameof(AnimationEventHandler.RegisterEndEvent):
+                        LogSource.LogDebug($"RegisterEndEvent(name=\"{name}\") for {method.FullDescription()}");
+                        __instance.EventHandler.RegisterEndEvent(name, () => method.Invoke(null, new object[]
+                        {
+                            __instance,
+                            __instance.AnimationLibrary.GetClipByName(name)
+                        }));
+                        break;
+                }
             }
         }
     }
 
+    [UsedImplicitly]
     public static void RegisterAnimationEvent(Assembly assembly)
     {
-        foreach (var type in assembly.GetTypes())
+        foreach (var type in assembly.GetTypes()) RegisterAnimationEvent(type);
+    }
+
+    [UsedImplicitly]
+    public static void RegisterAnimationEvent(System.Type type)
+    {
+        var methods = type.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+        foreach (var method in methods)
         {
-            var methods = type.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-            foreach (var method in methods)
+            var infos = method.GetParameters();
+            if (infos.Length != 2) continue;
+            if (!typeof(BaseAnimationController).IsAssignableFrom(infos[0].ParameterType)) continue;
+            foreach (var description in method.GetCustomAttributes<DescriptionAttribute>())
             {
-                var infos = method.GetParameters();
-                foreach (var description in method.GetCustomAttributes<DescriptionAttribute>())
+                var index = description.Description.IndexOf(':');
+                if (index == -1) continue;
+                switch (description.Description.Substring(0, index))
                 {
-                    switch (infos)
-                    {
-                        case { Length: 2 }
-                            when description.Description.StartsWith(FrameEventPrefix):
-                            if (typeof(tk2dSpriteAnimationFrame) != infos[1].ParameterType) continue;
-                            if (!typeof(BaseAnimationController).IsAssignableFrom(infos[0].ParameterType)) continue;
-                            FrameEvents.Add(method);
-                            LogSource.LogInfo($"Cached {method.FullDescription()}");
-                            break;
-                        case { Length: 2 }
-                            when description.Description.StartsWith(ClipEventPrefix):
-                            if (typeof(tk2dSpriteAnimationClip) != infos[1].ParameterType) continue;
-                            if (!typeof(BaseAnimationController).IsAssignableFrom(infos[0].ParameterType)) continue;
-                            ClipEvents.Add(method);
-                            LogSource.LogInfo($"Cached {method.FullDescription()}");
-                            break;
-                    }
+                    case nameof(AnimationEventHandler.RegisterTriggerEvent)
+                        when infos[1].ParameterType.IsAssignableFrom(typeof(tk2dSpriteAnimationFrame)):
+                    case nameof(AnimationEventHandler.RegisterEndEvent)
+                        when infos[1].ParameterType.IsAssignableFrom(typeof(tk2dSpriteAnimationClip)):
+                        if (EventHandles.Add(method)) LogSource.LogInfo($"Cached {method.FullDescription()}");
+                        break;
                 }
             }
         }
