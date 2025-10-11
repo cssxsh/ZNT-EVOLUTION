@@ -104,7 +104,7 @@ internal static class StartManagerPatch
         foreach (var (_, info) in BepInEx.Bootstrap.Chainloader.PluginInfos)
         {
             if (info.Metadata.Name == "UnityExplorer") continue;
-            AnimationControllerPatch.RegisterAnimationEvent(info.Instance.GetType().Assembly);
+            AnimationEventHandlerPatch.RegisterAnimationEvent(info.Instance.GetType().Assembly);
         }
 
         prefix = null;

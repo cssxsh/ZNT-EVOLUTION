@@ -5,14 +5,13 @@ using System.Reflection;
 using BepInEx.Logging;
 using HarmonyLib;
 using JetBrains.Annotations;
-using UnityEngine;
 
 // ReSharper disable InconsistentNaming
 namespace ZNT.Evolution.Core;
 
-internal static class AnimationControllerPatch
+internal static class AnimationEventHandlerPatch
 {
-    private static readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("AnimationController");
+    private static readonly ManualLogSource LogSource = Logger.CreateLogSource(nameof(AnimationEventHandler));
 
     private const string FrameEventPrefix = "RegisterTriggerEvent:";
 
@@ -33,7 +32,7 @@ internal static class AnimationControllerPatch
             foreach (var description in method.GetCustomAttributes<DescriptionAttribute>())
             {
                 var name = description.Description.Substring(FrameEventPrefix.Length);
-                Logger.LogDebug($"RegisterTriggerEvent(name=\"{name}\") for {method.FullDescription()}");
+                LogSource.LogDebug($"RegisterTriggerEvent(name=\"{name}\") for {method.FullDescription()}");
                 __instance.EventHandler.RegisterTriggerEvent(name, frame => method.Invoke(null, new object[]
                 {
                     __instance,
@@ -48,7 +47,7 @@ internal static class AnimationControllerPatch
             foreach (var description in method.GetCustomAttributes<DescriptionAttribute>())
             {
                 var name = description.Description.Substring(ClipEventPrefix.Length);
-                Logger.LogDebug($"RegisterEndEvent(name=\"{name}\") for {method.FullDescription()}");
+                LogSource.LogDebug($"RegisterEndEvent(name=\"{name}\") for {method.FullDescription()}");
                 __instance.EventHandler.RegisterEndEvent(name, () => method.Invoke(null, new object[]
                 {
                     __instance,
@@ -75,14 +74,14 @@ internal static class AnimationControllerPatch
                             if (typeof(tk2dSpriteAnimationFrame) != infos[1].ParameterType) continue;
                             if (!typeof(BaseAnimationController).IsAssignableFrom(infos[0].ParameterType)) continue;
                             FrameEvents.Add(method);
-                            Logger.LogInfo($"Cached {method.FullDescription()}");
+                            LogSource.LogInfo($"Cached {method.FullDescription()}");
                             break;
                         case { Length: 2 }
                             when description.Description.StartsWith(ClipEventPrefix):
                             if (typeof(tk2dSpriteAnimationClip) != infos[1].ParameterType) continue;
                             if (!typeof(BaseAnimationController).IsAssignableFrom(infos[0].ParameterType)) continue;
                             ClipEvents.Add(method);
-                            Logger.LogInfo($"Cached {method.FullDescription()}");
+                            LogSource.LogInfo($"Cached {method.FullDescription()}");
                             break;
                     }
                 }
@@ -100,7 +99,7 @@ internal static class AnimationControllerPatch
         var point = definition.attachPoints.FirstOrDefault(point => point.name == "throw")
                     ?? new tk2dSpriteDefinition.AttachPoint();
         human.PhysicObjectThrower.Throw(
-            Traverse.Create(controller).Field<BoxCollider2D>("boxCollider").Value,
+            Traverse.Create(controller).Field<UnityEngine.BoxCollider2D>("boxCollider").Value,
             null,
             null,
             controller.transform.position + point.position,
