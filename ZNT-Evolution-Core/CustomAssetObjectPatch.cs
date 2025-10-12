@@ -153,7 +153,7 @@ internal static class CustomAssetObjectPatch
         flag &= __instance.TargetLayers.ContainsLayer(other.gameObject.layer);
         // TODO param by setting
         // ReSharper disable once InvertIf
-        if (flag || __instance.Physic.GravityScale == 0.0f)
+        if (flag && __instance.Physic.GravityScale == 0.0f)
         {
             var physic = __instance.Physic;
             var direction = physic.Body.velocity.normalized;
