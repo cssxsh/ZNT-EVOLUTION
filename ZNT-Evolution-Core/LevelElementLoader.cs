@@ -275,6 +275,7 @@ public static class LevelElementLoader
                 break;
             case var _ when asset.EndsWith("ExplosionAsset"):
                 var explosion = DeserializeObject<ExplosionAsset>(folder: path, file: "asset.json");
+                Traverse.Create(explosion).Field<bool>("autoExplode").Value = false;
                 Logger.LogDebug($"asset.json -> {explosion}");
                 break;
             case var _ when asset.EndsWith("ScreamAsset"):

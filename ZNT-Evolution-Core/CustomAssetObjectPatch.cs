@@ -21,6 +21,19 @@ internal static class CustomAssetObjectPatch
         Logger.LogDebug($"LoadFromAsset: {gameObject} {gameObject.transform.position} for {__instance}");
     }
 
+    #region ExplosionAsset
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(ExplosionAsset), "LoadFromAsset")]
+    public static void LoadFromAsset(ExplosionAsset __instance, GameObject gameObject)
+    {
+        if (Traverse.Create(__instance).Field<bool>("autoExplode").Value) return;
+        gameObject.GetComponentSafe<ExplosionEditor>();
+        gameObject.GetComponentSafe<SignalReceiverLinker>();
+    }
+
+    #endregion
+
     #region MovingObjectAsset
 
     [HarmonyPostfix]

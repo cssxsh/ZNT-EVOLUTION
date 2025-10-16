@@ -419,6 +419,7 @@
         <Compile Include="Asset\UnityEngineObjectContractResolver.cs"/>
         <Compile Include="Asset\UnityEngineObjectConverter.cs"/>
         <Compile Include="Editor\Editor.cs"/>
+        <Compile Include="Editor\ExplosionEditor.cs"/>
         <Compile Include="Editor\LayerEditor.cs"/>
         <Compile Include="Editor\MineTrapEditor.cs"/>
         <Compile Include="Editor\HumanEditor.cs"/>
