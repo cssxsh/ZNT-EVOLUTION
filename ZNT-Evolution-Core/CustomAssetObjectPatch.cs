@@ -32,6 +32,32 @@ internal static class CustomAssetObjectPatch
         gameObject.GetComponentSafe<SignalReceiverLinker>();
     }
 
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(MineBehaviour), "OnCreate")]
+    public static void OnCreate(MineBehaviour __instance)
+    {
+        var prefab = Traverse.Create(__instance).Field<Transform>("explosionPrefab");
+        if (prefab.Value.IsChildOf(__instance.transform)) return;
+        var explosion = Traverse.Create(__instance).Field<ExplosionAsset>("explosion").Value;
+        var explode = Traverse.Create(explosion).Field<bool>("autoExplode");
+        var auto = explode.Value;
+        explode.Value = false;
+        prefab.Value = explosion.CreateGameObject(parent: __instance.transform).transform;
+        explode.Value = auto;
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(MineBehaviour), "Explode")]
+    public static bool Explode(MineBehaviour __instance)
+    {
+        var prefab = Traverse.Create(__instance).Field<Transform>("explosionPrefab").Value;
+        if (!prefab.IsChildOf(__instance.transform)) return true;
+        Traverse.Create(__instance).Field<Trigger>("trigger").Value.enabled = false;
+        prefab.GetComponent<ExplosionEditor>().StartExplosion();
+        Traverse.Create(__instance).Field<MineAnimationController>("animation").Value.PlayExplosion();
+        return false;
+    }
+
     #endregion
 
     #region MovingObjectAsset
