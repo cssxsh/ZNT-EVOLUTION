@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -5,6 +6,7 @@ using HarmonyLib;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace ZNT.Evolution.Core.Asset;
 
@@ -82,38 +84,23 @@ public static class CustomAssetUtility
         }
     }
 
-    // internal static SpriteInfo FetchSpriteInfo(this tk2dSpriteCollectionData sprites)
-    // {
-    //     var material = sprites.material ?? sprites.materials[0];
-    //     var texture = sprites.textures[0] ?? material.mainTexture;
-    //     var names = new string[sprites.spriteDefinitions.Length];
-    //     var regions = new Rect[sprites.spriteDefinitions.Length];
-    //     var anchors = new Vector2[sprites.spriteDefinitions.Length];
-    //     var points = new Dictionary<int, tk2dSpriteDefinition.AttachPoint[]>();
-    //     const float t = 1f / 1000f;
-    //     for (var i = 0; i < sprites.spriteDefinitions.Length; i++)
-    //     {
-    //         var definition = sprites.spriteDefinitions[i];
-    //         names[i] = definition.name;
-    //         regions[i].x = definition.uvs[0].x * texture.width - t;
-    //         regions[i].y = (1.0f - definition.uvs[2].y) * texture.height + t;
-    //         regions[i].width = definition.uvs[3].x * texture.width + t - regions[i].x;
-    //         regions[i].height = (1.0f - definition.uvs[1].y) * texture.height - t - regions[i].y;
-    //         anchors[i].x = (0.0f - definition.positions[0].x) / definition.texelSize.x;
-    //         anchors[i].y = definition.positions[2].y / definition.texelSize.y;
-    //         if (definition.attachPoints.Length == 0) continue;
-    //         points[i] = definition.attachPoints;
-    //     }
-    //
-    //     return new SpriteInfo(
-    //         orthoSize: 1.0f / sprites.invOrthoSize,
-    //         targetHeight: 2.0f * sprites.halfTargetHeight,
-    //         names: names,
-    //         regions: regions,
-    //         anchors: anchors,
-    //         points: points,
-    //         name: sprites.name,
-    //         material: material
-    //     );
-    // }
+    internal static IEnumerator LoadBuildIn<T>(UnityAction<T[]> action)
+    {
+        var assembly = typeof(CustomAssetUtility).Assembly;
+        using var fs = assembly.GetManifestResourceStream("ZNT.Evolution.Core.Resources.index.bundle")
+                       ?? throw new FileNotFoundException("index.bundle");
+        var create = AssetBundle.LoadFromStreamAsync(fs);
+        yield return create;
+        var bundle = create.assetBundle;
+        var path = "all";
+        if (typeof(CustomAsset).IsAssignableFrom(typeof(T))) path = "asset";
+        if (typeof(tk2dSpriteCollectionData) == typeof(T)) path = "tk2d";
+        if (typeof(tk2dSpriteAnimation) == typeof(T)) path = "tk2d";
+        var request = bundle.LoadAssetAsync(path);
+        yield return request;
+        var source = ((I2.Loc.LanguageSourceAsset)request.asset).SourceData;
+        var assets = source.Assets.OfType<T>().ToArray();
+        bundle.Unload(true);
+        action.Invoke(assets);
+    }
 }

@@ -27,30 +27,31 @@ internal static class StartManagerPatch
     {
         Logger.LogInfo("Initializing");
         yield return prefix;
+        yield return CustomAssetUtility.LoadBuildIn<CustomAsset>(assets =>
+        {
+            foreach (var asset in assets)
+            {
+                CustomAssetUtility.Cache[asset.NameAndType()] = asset;
+                switch (asset)
+                {
+                    case HumanAsset { BlockOpponents: true, MaxOpponentsBlock: 0 } human:
+                        human.BlockOpponents = false;
+                        Logger.LogDebug($"Fix BlockOpponents for {human}");
+                        break;
+                    case ExplosionAsset { HierarchyName: "" } explosion:
+                        explosion.HierarchyName = explosion.name.SpacedPascalCase();
+                        Logger.LogDebug($"Fix HierarchyName for {explosion}");
+                        break;
+                    case PhysicObjectAsset { DamageCharacterOnTrigger: true, DamageRadius: 0 } physic:
+                        physic.DamageRadius = physic.ColliderRadius;
+                        Logger.LogDebug($"Fix DamageRadius for {physic}");
+                        break;
+                }
+            }
+        });
         Logger.LogInfo("Loading Bank");
         yield return LevelElementLoader.LoadBanks(folder: Application.streamingAssetsPath, loadSamples: true);
         Logger.LogInfo("Loading LevelElement");
-        // ReSharper disable once Unity.PerformanceCriticalCodeInvocation
-        foreach (var asset in Resources.FindObjectsOfTypeAll<CustomAsset>())
-        {
-            CustomAssetUtility.Cache[asset.NameAndType()] = asset;
-            switch (asset)
-            {
-                case HumanAsset { BlockOpponents: true, MaxOpponentsBlock: 0 } human:
-                    human.BlockOpponents = false;
-                    Logger.LogDebug($"Fix BlockOpponents for {human}");
-                    break;
-                case ExplosionAsset { HierarchyName: "" } explosion:
-                    explosion.HierarchyName = explosion.name.SpacedPascalCase();
-                    Logger.LogDebug($"Fix HierarchyName for {explosion}");
-                    break;
-                case PhysicObjectAsset { DamageCharacterOnTrigger: true, DamageRadius: 0 } physic:
-                    physic.DamageRadius = physic.ColliderRadius;
-                    Logger.LogDebug($"Fix DamageRadius for {physic}");
-                    break;
-            }
-        }
-
         var assets = Path.Combine(Application.dataPath, "Asset");
         if (!Directory.Exists(assets)) Directory.CreateDirectory(assets);
         LevelElementLoader.LoadAssetFromFolder(path: assets);
