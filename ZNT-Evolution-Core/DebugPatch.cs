@@ -94,6 +94,36 @@ internal static class DebugPatch
     public static bool OnVisionLost(GameObject target) => target is not null;
 
     [HarmonyPrefix]
+    [HarmonyPatch(typeof(Moveable), "SetSpeed")]
+    public static void SetSpeed(Moveable __instance)
+    {
+        __instance.UpdateIsGrounded();
+        if (!__instance.IsGrounded) return;
+        // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
+        switch (__instance.State)
+        {
+            case MoveableState.Jumping:
+            case MoveableState.JumpFalling:
+            case MoveableState.Falling:
+            case MoveableState.Pushed:
+                __instance.SendMessage(methodName: "HitGround", value: 0.0f);
+                break;
+            default:
+                return;
+        }
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(HumanBehaviour), "AttackTarget")]
+    public static bool AttackTarget(HumanBehaviour __instance, bool moveToTarget, Transform target)
+    {
+        __instance.Mover.UpdateIsGrounded();
+        if (moveToTarget || !__instance.CanAttack()) return true;
+        __instance.SendMessage(methodName: "SetTarget", value: target);
+        return false;
+    }
+
+    [HarmonyPrefix]
     [HarmonyPatch(typeof(LevelEditor.SelectionMenu), "UpdateComponentMenu")]
     public static bool UpdateComponentMenu(LevelEditor.SelectionMenu __instance)
     {
