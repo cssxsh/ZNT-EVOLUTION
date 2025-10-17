@@ -540,6 +540,15 @@ public static class LevelElementLoader
             var physic = DeserializeObject<PhysicObjectAsset>(folder: path, file: file);
             Logger.LogDebug($"{filename} -> {physic} from {physic.Explosion}");
         }
+
+        foreach (var file in Directory.EnumerateFiles(path, "*.rage.json"))
+        {
+            var filename = Path.GetFileName(file);
+            var rage = DeserializeObject<RageAsset>(folder: path, file: file);
+            var attachment = rage.CreateGameObject();
+            UnityEngine.Object.DontDestroyOnLoad(attachment);
+            Logger.LogDebug($"{filename} -> {rage} -> {rage.ExplosionAssets.Keys.Join()}");
+        }
     }
 
     private static tk2dSpriteCollectionData CreateSingleSprite(this Material material)

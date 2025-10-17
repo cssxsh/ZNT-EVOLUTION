@@ -14,6 +14,11 @@ internal static class CustomAssetObjectPatch
 {
     private static readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource(nameof(CustomAssetObject));
 
+    private static DamageType GetDamageType(this Parameters parameters, string key = nameof(DamageType))
+    {
+        return parameters.ContainsKey(key) ? parameters.GetValue<DamageType>(key) : DamageType.None;
+    }
+
     [HarmonyPrefix]
     [HarmonyPatch(typeof(CustomAssetObject), "LoadFromAsset")]
     public static void LoadFromAsset(CustomAssetObject __instance, GameObject gameObject)
@@ -220,6 +225,55 @@ internal static class CustomAssetObjectPatch
             });
         if (targets == ExplodeSurfaceConverter.None) return;
         if (__instance.ExplodeOn.HasFlag(targets)) __instance.OnDie(null);
+    }
+
+    #endregion
+
+    #region HumanAsset
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(HumanBehaviour), "Initialize")]
+    public static void Initialize(HumanBehaviour __instance)
+    {
+        foreach (var (key, attachment) in __instance.SharedAsset.Attachments as IDictionary<string, GameObject>)
+        {
+            if (attachment is null) continue;
+            attachment.GetComponentSafe<PoolRetriever>();
+            switch (key)
+            {
+                case "rage":
+                    if (__instance.transform.Find("Rage")) continue;
+                    Logger.LogDebug($"Rage {attachment} with {__instance.gameObject} {__instance.transform.position}");
+                    ComponentSingleton<GamePoolManager>.Instance
+                        .Spawn(attachment.transform, __instance.transform)
+                        .name = "Rage";
+                    break;
+            }
+        }
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(Rage), "OnHit")]
+    public static void OnHit(Rage __instance, Parameters param)
+    {
+        if (__instance.name is not nameof(Character.Components)) return;
+        var rage = __instance.transform.parent.Find("Rage");
+        if (rage is null) return;
+        var editor = rage.GetComponent<RageEditor>();
+        var type = param.GetDamageType();
+        if (!editor.ExplosionAssets.TryGetValue(type, out var explosion)) return;
+        __instance.DamageType = type;
+        __instance.Repulsion = explosion;
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(Rage), "OnDespawned")]
+    public static void OnDespawned(Rage __instance)
+    {
+        if (__instance.name is not nameof(Character.Components)) return;
+        var rage = __instance.transform.parent.Find("Rage");
+        if (rage is null) return;
+        ComponentSingleton<GamePoolManager>.Instance.Despawn(rage);
     }
 
     #endregion
