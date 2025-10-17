@@ -16,14 +16,16 @@ Zombie Night Terror
 │   │   └───<...>
 │   └───<...>
 ├───znt_Data
-│   ├───Apply
-│   │   ├───stand_smoke
+│   ├───Asset
 │   │   └───<...>
 │   ├───Brush
 │   │   ├───arknights_311
 │   │   └───<...>
 │   ├───Decor
 │   │   ├───fire_copter
+│   │   └───<...>
+│   ├───Apply
+│   │   ├───stand_smoke
 │   │   └───<...>
 │   ├───StreamingAssets
 │   │   ├───MOD.strings.bank
@@ -93,7 +95,7 @@ Zombie Night Terror
 
 [tk2dSpriteAnimation](docs/tk2dSpriteAnimation.md)
 
-- `new GameObject("Animation").AddComponent<tk2dSpriteAnimation>()`
+- `new GameObject("SpriteAnimation").AddComponent<tk2dSpriteAnimation>()`
 
 ### 创建关卡单位
 

@@ -65,7 +65,7 @@ public static class LevelElementLoader
                     Logger.LogDebug($"[{bundle.name}] {brush}");
                     Logger.LogDebug($"[{bundle.name}] {brush.DefaultOrientation.GetVariation(0)}");
                     break;
-                case TextAsset bank when name == "bank.strings" || name == "bank_":
+                case TextAsset bank when name is "bank.strings" or "bank_":
                     FMODUnity.RuntimeManager.LoadBank(asset: bank, loadSamples: true);
                     yield return new WaitUntil(() => !FMODUnity.RuntimeManager.AnyBankLoading());
                     Logger.LogDebug($"[{bundle.name}] {asset.name}");
@@ -111,7 +111,7 @@ public static class LevelElementLoader
         if (File.Exists(Path.Combine(path, "sprites.json")))
         {
             var sprites = DeserializeObject<tk2dSpriteCollectionData>(folder: path, file: "sprites.json");
-            Logger.LogDebug($"sprites.json -> {sprites} -> {sprites.materials[0]}");
+            Logger.LogWarning($"sprites.json -> {sprites} -> {sprites.materials[0]}");
         }
 
         if (File.Exists(Path.Combine(path, "sprite.info.json")))
@@ -214,22 +214,22 @@ public static class LevelElementLoader
             case var _ when asset.EndsWith("DecorAsset"):
                 var decor = DeserializeObject<DecorAsset>(folder: path, file: "asset.json");
                 Logger.LogDebug($"asset.json -> {decor} from {decor.Animation}");
-                if (animation.GetClipByName(decor.ActivateAnimation) == null)
+                if (decor.Animation.GetClipByName(decor.ActivateAnimation) == null)
                 {
                     var source = DeserializeObject<LevelElement>(folder: path, file: "element.json");
                     Logger.LogDebug($"element.json -> {source} to {source.Title}");
-                    for (var index = 0; index < animation.clips.Length; index++)
+                    for (var index = 0; index < decor.Animation.clips.Length; index++)
                     {
                         var clone = UnityEngine.Object.Instantiate(decor);
                         clone.name = string.Format(decor.name, index + 1);
                         clone.ActivateAnimation = string.Format(decor.ActivateAnimation, index + 1);
-                        if (animation.GetClipByName(clone.ActivateAnimation) == null) break;
+                        if (decor.Animation.GetClipByName(clone.ActivateAnimation) == null) break;
                         clone.DeactivateAnimation = string.Format(decor.DeactivateAnimation, index + 1);
-                        if (animation.GetClipByName(clone.DeactivateAnimation) == null) break;
+                        if (decor.Animation.GetClipByName(clone.DeactivateAnimation) == null) break;
                         clone.ActiveAnimation = string.Format(decor.ActiveAnimation, index + 1);
-                        if (animation.GetClipByName(clone.ActiveAnimation) == null) break;
+                        if (decor.Animation.GetClipByName(clone.ActiveAnimation) == null) break;
                         clone.InactiveAnimation = string.Format(decor.InactiveAnimation, index + 1);
-                        if (animation.GetClipByName(clone.InactiveAnimation) == null) break;
+                        if (decor.Animation.GetClipByName(clone.InactiveAnimation) == null) break;
 
                         var impl = UnityEngine.Object.Instantiate(source);
                         impl.name = string.Format(source.name, index + 1);
@@ -401,7 +401,7 @@ public static class LevelElementLoader
                 case Shader shader:
                     Logger.LogDebug($"[{bundle.name}] {shader}");
                     break;
-                case TextAsset bank when name == "bank.strings" || name == "bank_":
+                case TextAsset bank when name is "bank.strings" or "bank_":
                     FMODUnity.RuntimeManager.LoadBank(asset: bank, loadSamples: true);
                     yield return new WaitUntil(() => !FMODUnity.RuntimeManager.AnyBankLoading());
                     Logger.LogDebug($"[{bundle.name}] {asset.name}");

@@ -10,6 +10,7 @@
         <AppDesignerFolder>Properties</AppDesignerFolder>
         <RootNamespace>ZNT.Evolution.Core</RootNamespace>
         <AssemblyName>ZNT-Evolution-Core</AssemblyName>
+        <Version>0.7.1</Version>
         <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
         <FileAlignment>512</FileAlignment>
         <LangVersion>10</LangVersion>
@@ -389,7 +390,7 @@
     </ItemGroup>
     <ItemGroup>
         <Compile Include="Properties\AssemblyInfo.cs"/>
-        <Compile Include="AnimationEventHandlerPatch.cs" />
+        <Compile Include="AnimationEventHandlerPatch.cs"/>
         <Compile Include="CustomAssetObjectPatch.cs"/>
         <Compile Include="DebugPatch.cs"/>
         <Compile Include="EvolutionCorePlugin.cs"/>

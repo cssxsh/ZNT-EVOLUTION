@@ -71,7 +71,7 @@ public static class CustomAssetUtility
         return serializer.Deserialize<T>(json);
     }
 
-    public static void Merge(Object o, IDictionary<string, string> fields)
+    internal static void Merge(Object o, IDictionary<string, string> fields)
     {
         var serializer = JsonSerializer.Create(SerializerSettings);
         foreach (var (path, text) in fields)

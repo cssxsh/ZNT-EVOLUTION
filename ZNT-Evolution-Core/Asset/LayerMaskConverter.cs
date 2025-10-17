@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using BepInEx.Logging;
 using HarmonyLib;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -11,6 +12,8 @@ namespace ZNT.Evolution.Core.Asset;
 
 public class LayerMaskConverter : CustomCreationConverter<LayerMask>
 {
+    private static readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource(nameof(LayerMaskConverter));
+
     public override bool CanWrite => true;
 
     public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
@@ -45,7 +48,7 @@ public class LayerMaskConverter : CustomCreationConverter<LayerMask>
         return (LayerMask)names.Select(n => n.Trim()).Aggregate(0x00000000, (mask, name) =>
         {
             var layer = LayerMask.NameToLayer(name);
-            if (layer == -1) layer = int.Parse(name);
+            if (layer == -1 && !int.TryParse(name, out layer)) Logger.LogError($"Invalid Layer '{name}'");
             return mask | (0x01 << layer);
         });
     }

@@ -7,7 +7,6 @@ using ZNT.Evolution.Core.Asset;
 using ZNT.Evolution.Core.Editor;
 
 // ReSharper disable InconsistentNaming
-// ReSharper disable once MemberCanBePrivate.Global
 namespace ZNT.Evolution.Core;
 
 internal static class CustomAssetObjectPatch
@@ -284,7 +283,6 @@ internal static class CustomAssetObjectPatch
     [HarmonyPatch(typeof(Rotorz.Tile.OrientedBrush), "Awake")]
     public static void Awake(Rotorz.Tile.OrientedBrush __instance)
     {
-        // ReSharper disable once UseNegatedPatternMatching
         if (__instance.DefaultOrientation?.GetVariation(0) is not GameObject gameObject) return;
         if (gameObject.GetComponentInChildren<Health>() is { } health) health.EditorVisibility = true;
         switch (gameObject.GetComponent<BaseBehaviour>())

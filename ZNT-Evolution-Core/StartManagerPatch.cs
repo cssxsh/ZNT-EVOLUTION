@@ -96,9 +96,9 @@ internal static class StartManagerPatch
             yield return request;
             var fonts = request.assetBundle.LoadAllAssets<TMPro.TMP_FontAsset>();
             TMPro.TMP_Settings.fallbackFontAssets.AddRange(fonts);
-            var font = request.assetBundle.LoadAsset<TMPro.TMP_FontAsset>("wqy-microhei_CN SDF.asset");
-            if (font) TMPro.TMP_Settings.defaultFontAsset.fallbackFontAssets.Insert(0, font);
-            Logger.LogInfo($"Loaded Patch {file}");
+            var wqy = request.assetBundle.LoadAsset<TMPro.TMP_FontAsset>("wqy-microhei_CN SDF.asset");
+            if (wqy) TMPro.TMP_Settings.defaultFontAsset.fallbackFontAssets.Insert(0, wqy);
+            Logger.LogInfo($"Loaded Patch '{file}'");
         }
 
         Logger.LogInfo("Loading EventHandle");

@@ -31,21 +31,21 @@ internal class LevelElementAddition : EvolutionAddition<LevelElement>
             var element = Targets[i];
             if (element is null) continue;
             var asset = Assets[i];
-            switch (element.CustomAsset)
+            switch (element.CustomAsset, asset)
             {
-                case null when asset is CustomAssetObject cao:
+                case (null, CustomAssetObject cao):
                     element.CustomAsset = cao;
                     break;
-                case HumanAsset human when asset is PhysicObjectAsset physic:
+                case (HumanAsset human, PhysicObjectAsset physic):
                     human.ThrowableObjects = human.ThrowableObjects.AddToArray(physic);
                     break;
-                case HumanAsset human when asset is ExplosionAsset explosion:
+                case (HumanAsset human, ExplosionAsset explosion):
                     human.ExplosionAssets = human.ExplosionAssets.AddToArray(explosion);
                     break;
-                case HumanAsset human when asset is CharacterAnimationAsset animations:
+                case (HumanAsset human, CharacterAnimationAsset animations):
                     human.Animations = animations;
                     break;
-                case SentryGunAsset sentry when asset is PhysicObjectAsset physic:
+                case (SentryGunAsset sentry, PhysicObjectAsset physic):
                     sentry.ThrowableObjects = sentry.ThrowableObjects.AddToArray(physic);
                     break;
                 default:

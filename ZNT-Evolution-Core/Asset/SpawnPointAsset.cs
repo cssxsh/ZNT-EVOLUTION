@@ -1,7 +1,9 @@
 using System.Linq;
 using UnityEngine;
 
-// ReSharper disable ClassNeverInstantiated.Global
+// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable FieldCanBeMadeReadOnly.Global
+// ReSharper disable ConvertToConstant.Global
 // ReSharper disable UnassignedField.Global
 namespace ZNT.Evolution.Core.Asset;
 
@@ -39,7 +41,7 @@ public class SpawnPointAsset : CustomAssetObject
     {
         base.LoadFromAsset(gameObject);
         var spawn = gameObject.GetComponent<SpawnPoint>();
-        spawn.SpawnableObjects = spawnableObjects.ToList();
+        spawn.SpawnableObjects = spawnableObjects?.ToList();
         spawn.Interval = interval;
         spawn.StartDelay = startDelay;
         spawn.Count = count;

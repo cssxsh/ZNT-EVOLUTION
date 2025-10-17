@@ -1,3 +1,4 @@
+using System.Reflection;
 using ZNT.LevelEditor;
 
 namespace ZNT.Evolution.Core.Editor;
@@ -6,7 +7,7 @@ public abstract class Editor : BaseComponent
 {
     protected Editor()
     {
-        EditorVisibility = true;
+        EditorVisibility = GetType().GetCustomAttribute<SerializeInEditorAttribute>()?.VisibleInEditor ?? true;
     }
 
     protected static SupportedTypeBinder CustomBinder(SelectionMenu menu)

@@ -50,7 +50,9 @@ internal static class GlobalSettingsPatch
         {
             var laser = ComponentSingleton<GamePoolManager>.Instance
                 .Spawn("LaserAttachment", __instance.Origin);
-            laser.gameObject.layer = LayerMask.NameToLayer("Renderer");
+            laser.gameObject.layer = LayerMask.NameToLayer("Ignore Collisions");
+            var renderer = laser.GetComponentInChildren<LaserRenderer>();
+            renderer.Color = Color.white;
         }
 
         for (var i = 0; i < __instance.Origin.childCount; i++)
@@ -67,9 +69,7 @@ internal static class GlobalSettingsPatch
             var attachment = laser.GetComponent<LaserAttachment>();
             attachment.MaxDistance = __instance.Distance;
             Traverse.Create(attachment).Field<LayerMask>("obstacleLayers").Value = __instance.Trigger.Layers;
-            var renderer = laser.GetComponentInChildren<LaserRenderer>();
-            renderer.Color = Color.white;
-            laser.gameObject.SetActive(true);
+            laser.gameObject.SetActive(__instance.Trigger.enabled);
             laser.BroadcastMessage("Update");
         }
     }
@@ -79,10 +79,9 @@ internal static class GlobalSettingsPatch
     public static void OnDespawned(TriggerDetection __instance)
     {
         if (__instance is not RayConeDetection) return;
-        for (var i = 0; i < __instance.Origin.childCount; i++)
+        foreach (var attachment in __instance.Origin.GetComponentsInChildren<LaserAttachment>())
         {
-            ComponentSingleton<GamePoolManager>.Instance
-                .Despawn(__instance.Origin.GetChild(i));
+            ComponentSingleton<GamePoolManager>.Instance.Despawn(attachment);
         }
     }
 

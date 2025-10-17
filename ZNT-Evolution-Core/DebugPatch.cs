@@ -143,15 +143,14 @@ internal static class DebugPatch
             var updater = component.Data as IEditorUpdate;
             var overrider = component.Data as IEditorOverride;
             if (updater != null) componentsUpdate.Add(updater);
-            updater?.OnEditorOpen();
 
+            updater?.OnEditorOpen();
             var text = __instance.SetComponentHeader(component);
             var prev = mainContainer.childCount;
-            // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
-            foreach (var key in component.Fields.Keys)
+            foreach (var (member, _) in component.Fields)
             {
-                if (overrider != null && overrider.OverrideMemberUi(__instance, component, key)) continue;
-                __instance.SetDefaultUi(component, key);
+                if (overrider != null && overrider.OverrideMemberUi(__instance, component, member)) continue;
+                __instance.SetDefaultUi(component, member);
             }
 
             if (prev == mainContainer.childCount) UnityEngine.Object.Destroy(text.gameObject);
