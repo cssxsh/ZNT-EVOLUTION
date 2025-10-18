@@ -97,6 +97,19 @@ internal static class GlobalSettingsPatch
 
     #endregion
 
+    #region UserManager
+
+    private static bool ShowDevComponent => EvolutionCorePlugin.ShowDevComponent.Value;
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(DevControl), "OnAwake")]
+    public static void OnAwake()
+    {
+        Traverse.Create(typeof(UserManager)).Field<bool>("IsUserDev").Value = ShowDevComponent;
+    }
+
+    #endregion
+
     #region PatrolAnimationUi
 
     private static bool ShowAllAnimationClip => EvolutionCorePlugin.ShowAllAnimationClip.Value;

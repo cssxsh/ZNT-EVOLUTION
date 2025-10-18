@@ -17,6 +17,8 @@ public class EvolutionCorePlugin : BaseUnityPlugin
 
     internal static ConfigEntry<bool> ShowAllAnimationClip;
 
+    internal static ConfigEntry<bool> ShowDevComponent;
+
     public void Awake()
     {
         Instance = this;
@@ -30,9 +32,10 @@ public class EvolutionCorePlugin : BaseUnityPlugin
 
     public void Start()
     {
-        CorpsesCountMax = Config.Bind("config", "CorpsesCountMax", 20, "尸体数量上限");
-        VisionMaterialization = Config.Bind("config", "VisionMaterialization", false, "视觉射线渲染");
-        ShowAllElement = Config.Bind("config", "ShowAllElement", false, "显示所有组件");
-        ShowAllAnimationClip = Config.Bind("config", "ShowAllAnimationClip", false, "显示所有动画");
+        CorpsesCountMax = Config.Bind("config", nameof(CorpsesCountMax), 20, "尸体数量上限");
+        VisionMaterialization = Config.Bind("config", nameof(VisionMaterialization), false, "视觉射线渲染");
+        ShowAllElement = Config.Bind("config", nameof(ShowAllElement), false, "显示所有组件");
+        ShowAllAnimationClip = Config.Bind("config", nameof(ShowAllAnimationClip), false, "显示所有动画");
+        ShowDevComponent = Config.Bind("config", nameof(ShowDevComponent), false, "显示实验组件");
     }
 }
