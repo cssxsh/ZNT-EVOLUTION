@@ -162,6 +162,32 @@ internal static class DebugPatch
         return false;
     }
 
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(ObjectSettings), "CopyObject")]
+    private static bool CopyObject(ObjectSettings __instance, Rotorz.Tile.TileIndex ti)
+    {
+        if (__instance.Type != ObjectSettings.ElementType.Brush) return true;
+        var element = Traverse.Create(__instance).Field<LevelElement>("element").Value;
+        var level = Traverse.Create(__instance).Field<LevelLoaderManager>("levelManager").Value;
+        var system = Traverse.Create(__instance).Field<Rotorz.Tile.TileSystem>("tileSystem").Value;
+        level.PaintTile(
+            system: system,
+            element: element,
+            index: ti,
+            paintShape: LevelEditor.Toolbox.PaintShape.Square,
+            paintSize: 1U,
+            refreshSurrounding: true);
+        var tile = system.GetTileOrNull(ti);
+        if (tile == null) return false;
+        __instance.gameObject.CopyTo(tile.gameObject);
+        __instance.OnCopy?.Invoke(tile.gameObject, true);
+        tile.gameObject.BroadcastMessage(
+            methodName: "ObjectCopiedInEditor",
+            parameter: true,
+            options: SendMessageOptions.DontRequireReceiver);
+        return false;
+    }
+
     [HarmonyPostfix]
     [HarmonyPatch(typeof(Framework.Events.SignalReceiver), "GetType")]
     public static void GetType(string typeName, ref Type __result)

@@ -9,6 +9,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 using ZNT.Evolution.Core.Asset;
+using ZNT.LevelEditor;
 
 // ReSharper disable InconsistentNaming
 namespace ZNT.Evolution.Core;
@@ -16,6 +17,24 @@ namespace ZNT.Evolution.Core;
 internal static class SceneLoaderPatch
 {
     private static readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource(nameof(SceneLoader));
+
+    private static void OnClick(this Button button, UnityAction call)
+    {
+        button.onClick = new Button.ButtonClickedEvent();
+        button.onClick.AddListener(call);
+    }
+
+    private static void OnValueChanged(this Toggle toggle, UnityAction<bool> call)
+    {
+        toggle.onValueChanged = new Toggle.ToggleEvent();
+        toggle.onValueChanged.AddListener(call);
+    }
+
+    private static void OnValueChanged(this InputField input, UnityAction<string> call)
+    {
+        input.onValueChanged = new InputField.OnChangeEvent();
+        input.onValueChanged.AddListener(call);
+    }
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(SceneLoader), "LoadNextScene")]
@@ -60,6 +79,22 @@ internal static class SceneLoaderPatch
         using var fs = assembly.GetManifestResourceStream(path) ?? throw new FileNotFoundException(name);
         using var reader = new StreamReader(fs);
         return reader.ReadToEnd();
+    }
+
+    private static I2.Loc.TermData GetTermData(this LevelElement element)
+    {
+        var term = _localization.GetTermData($"Evolution/{element.name}");
+        if (term != null) return term;
+        term = _localization.AddTerm($"Evolution/{element.name}");
+        var info = element.ElementType switch
+        {
+            LevelElement.Type.Brush => $"{element.Title} [{element.AllowedTileSystems}]",
+            LevelElement.Type.Decor => $"{element.Title} [{element.AllowedDecorSystems}]",
+            _ => throw new ArgumentOutOfRangeException(element.name)
+        };
+        term.SetTranslation(0, info);
+
+        return term;
     }
 
     #endregion
@@ -222,37 +257,25 @@ internal static class SceneLoaderPatch
         return panel;
     }
 
-    private static void OnClick(this Button button, UnityAction call)
-    {
-        button.onClick = new Button.ButtonClickedEvent();
-        button.onClick.AddListener(call);
-    }
+    #endregion
 
-    private static void OnValueChanged(this Toggle toggle, UnityAction<bool> call)
-    {
-        toggle.onValueChanged = new Toggle.ToggleEvent();
-        toggle.onValueChanged.AddListener(call);
-    }
+    #region EditorMainScene
 
-    private static void OnValueChanged(this InputField input, UnityAction<string> call)
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(SelectionMenu), "OnAwake")]
+    public static void EditorMainScene(SelectionMenu __instance)
     {
-        input.onValueChanged = new InputField.OnChangeEvent();
-        input.onValueChanged.AddListener(call);
-    }
-
-    private static I2.Loc.TermData GetTermData(this LevelElement element)
-    {
-        var info = element.ElementType switch
+        Logger.LogInfo("Update EditorMainScene");
+        var move = Traverse.Create(__instance).Field<Toggle>("moveButton").Value;
+        var copy = UnityEngine.Object.Instantiate(original: move, parent: move.transform.parent);
+        copy.name = "Copy Button";
+        copy.OnValueChanged(value =>
         {
-            LevelElement.Type.Brush => $"{element.Title} [{element.AllowedTileSystems}]",
-            LevelElement.Type.Decor => $"{element.Title} [{element.AllowedDecorSystems}]",
-            _ => throw new ArgumentOutOfRangeException(element.name)
-        };
-        var term = _localization.GetTermData($"Evolution/{element.name}")
-                   ?? _localization.AddTerm($"Evolution/{element.name}");
-        term.SetTranslation(0, info);
-
-        return term;
+            var target = Traverse.Create(__instance).Field<EditorGameObject>("serializeGameObject").Value;
+            target.ObjectSettings.Activate(value, ObjectSettings.Control.Copy);
+        });
+        var icon = copy.transform.Find("Icon").GetComponent<Image>();
+        icon.sprite = Resources.FindObjectsOfTypeAll<Sprite>().FirstOrDefault(sprite => sprite.name == "icon_plus");
     }
 
     #endregion
