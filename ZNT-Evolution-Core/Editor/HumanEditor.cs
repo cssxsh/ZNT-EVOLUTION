@@ -51,6 +51,13 @@ public class HumanEditor : Editor
         set => Behaviour.GrabbedOnAttacked = value;
     }
 
+    [SerializeInEditor(name: "Senses Ignored", devOnly: true)]
+    public bool SensesIgnored
+    {
+        get => Behaviour.SensesIgnored;
+        set => Behaviour.SensesIgnored = value;
+    }
+
     [SerializeInEditor(name: "Weapon Magazine Size")]
     public int WeaponMagazineSize
     {
@@ -135,14 +142,14 @@ public class HumanEditor : Editor
         set => Behaviour.RelayAlertOverTime = value;
     }
 
-    [SerializeInEditor(name: "Vision Cast All")]
+    [SerializeInEditor(name: "Vision Cast All", devOnly: true)]
     public bool VisionCastAll
     {
         get => ((RayConeDetection)Behaviour.Vision.Detection).CastAll;
         set => ((RayConeDetection)Behaviour.Vision.Detection).CastAll = value;
     }
 
-    [SerializeInEditor(name: "Vision Keep Lost Track")]
+    [SerializeInEditor(name: "Vision Keep Lost Track", devOnly: true)]
     public bool VisionKeepLostTrack
     {
         get => ((SignalEffect)Behaviour.Vision.Effects[0]).KeepLostTrack;
@@ -168,5 +175,13 @@ public class HumanEditor : Editor
     {
         get => Behaviour.Patroller.Voice;
         set => Behaviour.Patroller.Voice = value;
+    }
+
+    private void OnDespawned()
+    {
+        SensesIgnored = false;
+        VisionCastAll = false;
+        VisionKeepLostTrack = Traverse.Create((SignalEffect)Behaviour.Vision.Effects[0])
+            .Field("events").Field<GameObjectEvent>("OnDetectedExit").Value.GetPersistentEventCount() != 0;
     }
 }

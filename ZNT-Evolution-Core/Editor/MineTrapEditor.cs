@@ -31,4 +31,9 @@ public class MineTrapEditor : Editor
         get => Traverse.Create(Behaviour).Field<float>("Delay").Value;
         set => Traverse.Create(Behaviour).Field<float>("Delay").Value = value;
     }
+
+    private void OnDespawned()
+    {
+        Delay = 0.15f;
+    }
 }
