@@ -102,10 +102,24 @@ internal static class GlobalSettingsPatch
     private static bool ShowDevComponent => EvolutionCorePlugin.ShowDevComponent.Value;
 
     [HarmonyPrefix]
-    [HarmonyPatch(typeof(DevControl), "OnAwake")]
-    public static void OnAwake()
+    [HarmonyPatch(typeof(SignalSenderLinker), "Start")]
+    [HarmonyPatch(typeof(SignalReceiverLinker), "OnAwake")]
+    [HarmonyPatch(typeof(EditorComponent), "FromComponent")]
+    [HarmonyPatch(typeof(SerializableComponent), "SetComponentValues")]
+    public static void IsUserDev(out bool __state)
     {
-        Traverse.Create(typeof(UserManager)).Field<bool>("IsUserDev").Value = ShowDevComponent;
+        __state = UserManager.IsUserDev;
+        Traverse.Create(typeof(UserManager)).Field<bool>(nameof(UserManager.IsUserDev)).Value |= ShowDevComponent;
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(SignalSenderLinker), "Start")]
+    [HarmonyPatch(typeof(SignalReceiverLinker), "OnAwake")]
+    [HarmonyPatch(typeof(EditorComponent), "FromComponent")]
+    [HarmonyPatch(typeof(SerializableComponent), "SetComponentValues")]
+    public static void IsUserDev(bool __state)
+    {
+        Traverse.Create(typeof(UserManager)).Field<bool>(nameof(UserManager.IsUserDev)).Value = __state;
     }
 
     #endregion
