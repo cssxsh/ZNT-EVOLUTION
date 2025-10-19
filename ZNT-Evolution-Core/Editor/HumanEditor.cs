@@ -51,13 +51,6 @@ public class HumanEditor : Editor
         set => Behaviour.GrabbedOnAttacked = value;
     }
 
-    [SerializeInEditor(name: "Senses Ignored", devOnly: true)]
-    public bool SensesIgnored
-    {
-        get => Behaviour.SensesIgnored;
-        set => Behaviour.SensesIgnored = value;
-    }
-
     [SerializeInEditor(name: "Weapon Magazine Size")]
     public int WeaponMagazineSize
     {
@@ -65,25 +58,11 @@ public class HumanEditor : Editor
         set => Behaviour.Weapon.DefaultMag = new Magazine(value);
     }
 
-    [SerializeInEditor(name: "Weapon Reload Type")]
-    public ReloadType WeaponReloadType
-    {
-        get => Behaviour.Weapon.ReloadType;
-        set => Behaviour.Weapon.ReloadType = value;
-    }
-
     [SerializeInEditor(name: "Weapon Reload Time")]
     public float WeaponReloadTime
     {
         get => Behaviour.Weapon.ReloadTimer.Duration;
         set => Behaviour.Weapon.ReloadTimer.Duration = value;
-    }
-
-    [SerializeInEditor(name: "Weapon Stamina Refill Time")]
-    public float WeaponStaminaRefillTimer
-    {
-        get => Behaviour.Weapon.StaminaRefillTimer.Duration;
-        set => Behaviour.Weapon.StaminaRefillTimer.Duration = value;
     }
 
     [SerializeInEditor(name: "Direct Aim")]
@@ -107,39 +86,67 @@ public class HumanEditor : Editor
         set => Behaviour.Attacker.AimRange = value;
     }
 
-    [SerializeInEditor(name: "Alert Duration")]
-    public float AlertDuration
+    [SerializeInEditor(name: "Attack Frequency")]
+    public float AttackFrequency
     {
-        get => Behaviour.AlertedTimer.Duration;
-        set => Behaviour.AlertedTimer.Duration = value;
+        get => Behaviour.Attacker.AttackFrequency;
+        set => Behaviour.Attacker.AttackFrequency = value;
     }
 
-    [SerializeInEditor(name: "Alert Radius")]
-    public float AlertRadius
+    [SerializeInEditor(name: "Attack Range")]
+    public float AttackRange
     {
-        get => ((SphereDetection)Behaviour.Character.Components.AlertZone.Detection).Radius;
-        set => ((SphereDetection)Behaviour.Character.Components.AlertZone.Detection).Radius = value;
+        get => Behaviour.Attacker.AttackRange;
+        set => Behaviour.Attacker.AttackRange = value;
     }
 
-    [SerializeInEditor(name: "Alert Relay Radius")]
-    public float AlertRelayRadius
+    [SerializeInEditor(name: "Moving Attack Range")]
+    public float MovingAttackRange
     {
-        get => Behaviour.AlertRelayRadius;
-        set => Behaviour.AlertRelayRadius = value;
+        get => Behaviour.Attacker.MovingAttackRange;
+        set => Behaviour.Attacker.MovingAttackRange = value;
     }
 
-    [SerializeInEditor(name: "Alert Relay Ratio")]
-    public float AlertRelayRatio
+    [SerializeInEditor(name: "Damage")]
+    public float Damage
     {
-        get => Behaviour.AlertRelayRatio;
-        set => Behaviour.AlertRelayRatio = value;
+        get => Behaviour.Attacker.Damage;
+        set => Behaviour.Attacker.Damage = value;
     }
 
-    [SerializeInEditor(name: "Alert Relay Over Time")]
-    public bool AlertRelayOverTime
+    [SerializeInEditor(name: "Damage Type")]
+    public DamageType DamageType
     {
-        get => Behaviour.RelayAlertOverTime;
-        set => Behaviour.RelayAlertOverTime = value;
+        get => Behaviour.Attacker.DamageType;
+        set => Behaviour.Attacker.DamageType = value;
+    }
+
+    [SerializeInEditor(name: "Damage Range")]
+    public float DamageRange
+    {
+        get => Behaviour.Attacker.DamageRange;
+        set => Behaviour.Attacker.DamageRange = value;
+    }
+
+    [SerializeInEditor(name: "Hit Multiple Targets")]
+    public bool HitMultipleTargets
+    {
+        get => Behaviour.Attacker.HitMultipleTargets;
+        set => Behaviour.Attacker.HitMultipleTargets = value;
+    }
+
+    [SerializeInEditor(name: "Hit Max Targets")]
+    public int MaxTargets
+    {
+        get => Behaviour.Attacker.MaxTargets;
+        set => Behaviour.Attacker.MaxTargets = value;
+    }
+
+    [SerializeInEditor(name: "Hit Targets Damage Multiplier")]
+    public float NextTargetsDamageMultiplier
+    {
+        get => Behaviour.Attacker.NextTargetsDamageMultiplier;
+        set => Behaviour.Attacker.NextTargetsDamageMultiplier = value;
     }
 
     [SerializeInEditor(name: "Vision Cast All", devOnly: true)]
@@ -179,9 +186,9 @@ public class HumanEditor : Editor
 
     private void OnDespawned()
     {
-        SensesIgnored = false;
-        VisionCastAll = false;
-        VisionKeepLostTrack = Traverse.Create((SignalEffect)Behaviour.Vision.Effects[0])
-            .Field("events").Field<GameObjectEvent>("OnDetectedExit").Value.GetPersistentEventCount() != 0;
+        var prefab = Behaviour.SharedAsset?.Prefab.GetComponent<HumanEditor>();
+        if (prefab is null) return;
+        VisionCastAll = prefab.VisionCastAll;
+        VisionKeepLostTrack = prefab.VisionKeepLostTrack;
     }
 }

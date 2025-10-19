@@ -123,6 +123,15 @@ internal static class DebugPatch
         return false;
     }
 
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(HumanBehaviour), "OnDespawned")]
+    public static void OnDespawned(HumanBehaviour __instance)
+    {
+        var prefab = __instance.SharedAsset?.Prefab.GetComponent<HumanBehaviour>();
+        if (prefab is null) return;
+        __instance.SensesIgnored = prefab.SensesIgnored;
+    }
+
     [HarmonyPrefix]
     [HarmonyPatch(typeof(LevelEditor.SelectionMenu), "UpdateComponentMenu")]
     public static bool UpdateComponentMenu(LevelEditor.SelectionMenu __instance)
