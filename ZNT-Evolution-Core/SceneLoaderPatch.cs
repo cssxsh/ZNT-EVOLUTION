@@ -38,7 +38,7 @@ internal static class SceneLoaderPatch
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(SceneLoader), "LoadNextScene")]
-    public static void LoadNextScene(ref string sceneName)
+    public static void LoadNextScene(string sceneName)
     {
         Logger.LogInfo($"LoadNextScene: {sceneName}");
     }
@@ -112,10 +112,10 @@ internal static class SceneLoaderPatch
 
     private static void AddMod(this SettingsMenu menu)
     {
-        var mod = menu.AddPanel("Mod");
+        var panel = menu.AddPanel("Mod");
         var impl = menu.transform
             .Find("Option Panels/Video/Scroll Area/ScrollView/Content/FullScreen Entry").gameObject;
-        var content = mod.GetComponentInChildren<VerticalLayoutGroup>();
+        var content = panel.GetComponentInChildren<VerticalLayoutGroup>();
 
         foreach (var element in AssetElementBinder.BoundLevelElements())
         {
@@ -130,7 +130,7 @@ internal static class SceneLoaderPatch
             toggle.SetIsOnWithoutNotify(enable.Value);
         }
 
-        var reload = mod.transform.Find("Reset Entry").GetComponentInChildren<Button>();
+        var reload = panel.transform.Find("Reset Entry").GetComponentInChildren<Button>();
         reload.OnClick(() =>
         {
             Logger.LogInfo("Reload MOD ...");
@@ -140,8 +140,8 @@ internal static class SceneLoaderPatch
 
     private static void AddPlugin(this SettingsMenu menu)
     {
-        var mod = menu.AddPanel("Plugin");
-        var content = mod.GetComponentInChildren<VerticalLayoutGroup>();
+        var panel = menu.AddPanel("Plugin");
+        var content = panel.GetComponentInChildren<VerticalLayoutGroup>();
 
         foreach (var (_, info) in BepInEx.Bootstrap.Chainloader.PluginInfos)
         {
@@ -193,7 +193,7 @@ internal static class SceneLoaderPatch
             }
         }
 
-        var reload = mod.transform.Find("Reset Entry").GetComponentInChildren<Button>();
+        var reload = panel.transform.Find("Reset Entry").GetComponentInChildren<Button>();
         reload.OnClick(() =>
         {
             foreach (var (_, info) in BepInEx.Bootstrap.Chainloader.PluginInfos)
@@ -239,7 +239,7 @@ internal static class SceneLoaderPatch
 
         var container = Traverse.Create(menu).Field<GameObject[]>("settingsContainer");
         var index = container.Value.Length;
-        container.Value = container.Value.AddItem(panel).ToArray();
+        container.Value = container.Value.AddToArray(panel);
 
         var tab = UnityEngine.Object.Instantiate(original: tabs.GetChild(0).gameObject, parent: tabs);
         tab.name = name;
@@ -266,16 +266,43 @@ internal static class SceneLoaderPatch
     public static void EditorMainScene(SelectionMenu __instance)
     {
         Logger.LogInfo("Update EditorMainScene");
-        var move = Traverse.Create(__instance).Field<Toggle>("moveButton").Value;
+        __instance.AddCopy();
+    }
+
+    private static void AddCopy(this SelectionMenu menu)
+    {
+        var move = Traverse.Create(menu).Field<Toggle>("moveButton").Value;
         var copy = UnityEngine.Object.Instantiate(original: move, parent: move.transform.parent);
         copy.name = "Copy Button";
         copy.OnValueChanged(value =>
         {
-            var target = Traverse.Create(__instance).Field<EditorGameObject>("serializeGameObject").Value;
+            var target = Traverse.Create(menu).Field<EditorGameObject>("serializeGameObject").Value;
             target.ObjectSettings.Activate(value, ObjectSettings.Control.Copy);
         });
         var icon = copy.transform.Find("Icon").GetComponent<Image>();
         icon.sprite = Resources.FindObjectsOfTypeAll<Sprite>().FirstOrDefault(sprite => sprite.name == "icon_plus");
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(SelectionMenu), "LateUpdate")]
+    public static void LateUpdate(SelectionMenu __instance)
+    {
+        if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl) || Input.GetKey(KeyCode.Mouse2))
+        {
+            var move = Traverse.Create(__instance).Field<Toggle>("moveButton").Value;
+            move.isOn = true;
+        }
+        else if (Input.GetKey(KeyCode.Escape) || Input.GetKey(KeyCode.Mouse1))
+        {
+            var move = Traverse.Create(__instance).Field<Toggle>("moveButton").Value;
+            var panel = move.transform.parent;
+            foreach (var trigger in panel.GetComponentsInChildren<Toggle>()) trigger.isOn = false;
+        }
+        else if (Input.GetKey(KeyCode.Delete))
+        {
+            var delete = Traverse.Create(__instance).Field<Button>("deleteButton").Value;
+            delete.onClick.Invoke();
+        }
     }
 
     #endregion

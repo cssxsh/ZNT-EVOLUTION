@@ -5,6 +5,7 @@ namespace ZNT.Evolution.Core.Asset;
 
 internal class HookAsset : CustomAssetObject
 {
+    [SerializeField]
     private UnityAction<GameObject> _action;
 
     public override void LoadFromAsset(GameObject gameObject) => _action?.Invoke(gameObject);

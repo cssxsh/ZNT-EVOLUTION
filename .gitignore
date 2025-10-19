@@ -3,7 +3,9 @@ obj/
 /packages/
 riderModule.iml
 /_ReSharper.Caches/
+*.user
 
 .idea
 
-*.DotSettings.user
+docs/Log.md
+docs/#*.md

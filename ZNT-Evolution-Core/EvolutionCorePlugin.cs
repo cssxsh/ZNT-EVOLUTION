@@ -4,7 +4,7 @@ using HarmonyLib;
 
 namespace ZNT.Evolution.Core;
 
-[BepInPlugin(GUID: "xyz.cssxsh.znt.evolution.core", Name: "Evolution Core", Version: "0.7.1")]
+[BepInPlugin(GUID: "xyz.cssxsh.znt.evolution.core", Name: "Evolution Core", Version: "0.7.2")]
 public class EvolutionCorePlugin : BaseUnityPlugin
 {
     internal static EvolutionCorePlugin Instance;

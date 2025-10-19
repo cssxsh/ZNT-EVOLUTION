@@ -17,7 +17,7 @@ public class LayerEditor : Editor, IEditorOverride
 
     private GameObject Child(string n) => gameObject.transform.Find(n)?.gameObject;
 
-    private GameObject TopCollider => Child("TopCollider") ?? gameObject;
+    private GameObject TopCollider => Child(nameof(TopCollider)) ?? gameObject;
 
     [SerializeInEditor(name: "Top Layer")]
     public int Top
@@ -26,7 +26,7 @@ public class LayerEditor : Editor, IEditorOverride
         set => TopCollider.layer = value;
     }
 
-    private GameObject BottomCollider => Child("BottomCollider") ?? gameObject;
+    private GameObject BottomCollider => Child(nameof(BottomCollider)) ?? gameObject;
 
     [SerializeInEditor(name: "Bottom Layer")]
     public int Bottom
@@ -56,10 +56,10 @@ public class LayerEditor : Editor, IEditorOverride
                 CustomBinder(menu).BindIndexListField(component, member, _names);
                 return true;
             case nameof(Top):
-                if (Child("TopCollider")) CustomBinder(menu).BindIndexListField(component, member, _names);
+                if (Child(nameof(TopCollider))) CustomBinder(menu).BindIndexListField(component, member, _names);
                 return true;
             case nameof(Bottom):
-                if (Child("BottomCollider")) CustomBinder(menu).BindIndexListField(component, member, _names);
+                if (Child(nameof(BottomCollider))) CustomBinder(menu).BindIndexListField(component, member, _names);
                 return true;
             default:
                 return false;

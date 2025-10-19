@@ -45,6 +45,9 @@ internal class LevelElementAddition : EvolutionAddition<LevelElement>
                 case (HumanAsset human, CharacterAnimationAsset animations):
                     human.Animations = animations;
                     break;
+                case (HumanAsset human, CustomAssetObject cao):
+                    human.RiseAsset = cao;
+                    break;
                 case (SentryGunAsset sentry, PhysicObjectAsset physic):
                     sentry.ThrowableObjects = sentry.ThrowableObjects.AddToArray(physic);
                     break;

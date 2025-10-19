@@ -596,9 +596,10 @@ public static class LevelElementLoader
         return impl;
     }
 
-    private static T DeserializeObject<T>(string folder, string file)
+    private static T DeserializeObject<T>(string folder, string file) where T : class
     {
-        return CustomAssetUtility.DeserializeObjectFromPath<T>(source: Path.Combine(folder, file));
+        var path = Path.Combine(folder, file);
+        return File.Exists(path) ? CustomAssetUtility.DeserializeObjectFromPath<T>(source: path) : null;
     }
 
     public static IEnumerator LoadBanks(string folder, bool loadSamples = false)

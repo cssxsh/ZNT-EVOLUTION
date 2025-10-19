@@ -173,7 +173,7 @@ internal static class DebugPatch
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(ObjectSettings), "CopyObject")]
-    private static bool CopyObject(ObjectSettings __instance, Rotorz.Tile.TileIndex ti)
+    public static bool CopyObject(ObjectSettings __instance, Rotorz.Tile.TileIndex ti)
     {
         if (__instance.Type != ObjectSettings.ElementType.Brush) return true;
         var element = Traverse.Create(__instance).Field<LevelElement>("element").Value;
@@ -200,14 +200,14 @@ internal static class DebugPatch
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(Framework.Events.SignalReceiver), "GetType")]
-    public static void GetType(string typeName, ref Type __result)
+    public static Type GetType(Type __result, string typeName)
     {
-        if (__result != null) return;
+        if (__result != null) return __result;
         __result = AccessTools.TypeByName(typeName);
-        if (__result == null) return;
+        if (__result == null) return null;
         var cached = Traverse.Create<Framework.Events.SignalReceiver>()
             .Field<Dictionary<string, Type>>("cachedType").Value;
-        cached[typeName] = __result;
+        return cached[typeName] = __result;
     }
 
     [HarmonyPrefix]

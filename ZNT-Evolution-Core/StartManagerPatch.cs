@@ -2,7 +2,6 @@ using System.Collections;
 using System.IO;
 using BepInEx.Logging;
 using HarmonyLib;
-using MonoMod.Utils;
 using UnityEngine;
 using ZNT.Evolution.Core.Asset;
 
@@ -17,7 +16,7 @@ internal static class StartManagerPatch
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(StartManager), "Start")]
-    public static void Start(StartManager __instance, ref IEnumerator __result)
+    public static void Start(StartManager __instance, IEnumerator __result)
     {
         prefix = __result;
         EvolutionCorePlugin.Instance.StartCoroutine(LoadAsset(__instance));
@@ -37,10 +36,6 @@ internal static class StartManagerPatch
                     case HumanAsset { BlockOpponents: true, MaxOpponentsBlock: 0 } human:
                         human.BlockOpponents = false;
                         Logger.LogDebug($"Fix BlockOpponents for {human}");
-                        break;
-                    case ExplosionAsset { HierarchyName: "" } explosion:
-                        explosion.HierarchyName = explosion.name.SpacedPascalCase();
-                        Logger.LogDebug($"Fix HierarchyName for {explosion}");
                         break;
                     case PhysicObjectAsset { DamageCharacterOnTrigger: true, DamageRadius: 0 } physic:
                         physic.DamageRadius = physic.ColliderRadius;

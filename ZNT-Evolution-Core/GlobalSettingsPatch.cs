@@ -14,22 +14,18 @@ internal static class GlobalSettingsPatch
 
     private static int CorpsesCountMax => EvolutionCorePlugin.CorpsesCountMax.Value;
 
-    [HarmonyPrefix]
+    [HarmonyPostfix]
     [HarmonyPatch(typeof(CorpseBehaviour), "AddAliveCorpse")]
-    public static bool AddAliveCorpse(CorpseBehaviour __instance, ref IEnumerator __result)
+    public static IEnumerator AddAliveCorpse(IEnumerator __result, CorpseBehaviour __instance)
     {
-        if (Traverse.Create(__instance).Field<CorpseParameter>("parameters").Value.Rise) return true;
-        __result = __instance.AddAliveCorpse();
-        return false;
-    }
-
-    private static IEnumerator AddAliveCorpse(this CorpseBehaviour corpseBehaviour)
-    {
+        if (CorpsesCountMax < 0) yield break;
+        var parameters = Traverse.Create(__instance)
+            .Field<CorpseParameter>("parameters").Value;
+        if (parameters.Rise) yield break;
         yield return Wait.ForFiveSeconds;
         var aliveCorpses = Traverse.Create<CorpseBehaviour>()
             .Field<Queue<CorpseBehaviour>>("aliveCorpses").Value;
-        aliveCorpses.Enqueue(corpseBehaviour);
-        if (CorpsesCountMax < 0) yield break;
+        aliveCorpses.Enqueue(__instance);
         if (aliveCorpses.Count <= CorpsesCountMax) yield break;
         aliveCorpses.Dequeue().Dissolve();
     }
@@ -52,7 +48,13 @@ internal static class GlobalSettingsPatch
                 .Spawn("LaserAttachment", __instance.Origin);
             laser.gameObject.layer = LayerMask.NameToLayer("Ignore Collisions");
             var renderer = laser.GetComponentInChildren<LaserRenderer>();
-            renderer.Color = Color.white;
+            renderer.Color = __instance.GetComponentInParent<BaseBehaviour>() switch
+            {
+                HumanBehaviour => Color.white,
+                ZombieBehaviour => Color.black,
+                PropBehaviour => Color.red,
+                _ => Color.gray
+            };
         }
 
         for (var i = 0; i < __instance.Origin.childCount; i++)
@@ -62,14 +64,14 @@ internal static class GlobalSettingsPatch
 
         if (!__instance.Trigger.enabled) return;
         var inverted = Traverse.Create(__instance).Field<int>("inverted").Value;
-        for (var i = 0; i < rays.Length; i++)
+        for (var i = 0; i < __instance.RayCount; i++)
         {
             var laser = __instance.Origin.GetChild(i);
             laser.right = rays[i] * inverted;
             var attachment = laser.GetComponent<LaserAttachment>();
             attachment.MaxDistance = __instance.Distance;
             Traverse.Create(attachment).Field<LayerMask>("obstacleLayers").Value = __instance.Trigger.Layers;
-            laser.gameObject.SetActive(__instance.Trigger.enabled);
+            laser.gameObject.SetActive(true);
             laser.BroadcastMessage("Update");
         }
     }
@@ -93,7 +95,7 @@ internal static class GlobalSettingsPatch
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(LevelElement), "Useable", MethodType.Getter)]
-    public static void Usable(LevelElement __instance, ref bool __result) => __result = ShowAllElement || __result;
+    public static bool Usable(bool __result) => ShowAllElement || __result;
 
     #endregion
 
