@@ -412,7 +412,6 @@
         <Compile Include="Asset\LayerConverter.cs"/>
         <Compile Include="Asset\LayerMaskConverter.cs"/>
         <Compile Include="Asset\LevelElementAddition.cs"/>
-        <Compile Include="Asset\LevelElementInfo.cs"/>
         <Compile Include="Asset\ObjectMerge.cs"/>
         <Compile Include="Asset\RageAsset.cs"/>
         <Compile Include="Asset\RectConverter.cs"/>

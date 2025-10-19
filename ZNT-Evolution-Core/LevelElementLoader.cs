@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using BepInEx.Logging;
 using HarmonyLib;
+using Newtonsoft.Json.Linq;
 using UnityEngine;
 using ZNT.Evolution.Core.Asset;
 
@@ -193,8 +194,7 @@ public static class LevelElementLoader
             Logger.LogDebug($"{filename} -> {human} from {human.AnimationLibrary}");
         }
 
-        var asset = DeserializeObject<LevelElementInfo>(folder: path, file: "element.json").CustomAsset;
-        if (!File.Exists(Path.Combine(path, "asset.json"))) asset = null;
+        var asset = DeserializeObject<JObject>(folder: path, file: "element.json").Value<string>("CustomAsset");
         switch (asset)
         {
             case null:
