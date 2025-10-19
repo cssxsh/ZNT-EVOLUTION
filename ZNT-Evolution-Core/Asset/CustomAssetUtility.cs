@@ -22,6 +22,7 @@ public static class CustomAssetUtility
         Converters =
         {
             new FrameworkInputsConverter(),
+            new GenericDictionaryConverter(),
             new UnityEngineObjectConverter(),
             new ExplodeSurfaceConverter(),
             new StringEnumConverter(),

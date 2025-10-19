@@ -408,6 +408,7 @@
         <Compile Include="Asset\EvolutionMerge.cs"/>
         <Compile Include="Asset\ExplodeSurfaceConverter.cs"/>
         <Compile Include="Asset\FrameworkInputsConverter.cs"/>
+        <Compile Include="Asset\GenericDictionaryConverter.cs"/>
         <Compile Include="Asset\HookAsset.cs"/>
         <Compile Include="Asset\LayerConverter.cs"/>
         <Compile Include="Asset\LayerMaskConverter.cs"/>
