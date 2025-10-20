@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using BepInEx.Configuration;
@@ -267,6 +268,7 @@ internal static class SceneLoaderPatch
     {
         Logger.LogInfo("Update EditorMainScene");
         __instance.AddCopy();
+        __instance.AddEmpty();
     }
 
     private static void AddCopy(this SelectionMenu menu)
@@ -281,6 +283,58 @@ internal static class SceneLoaderPatch
         });
         var icon = copy.transform.Find("Icon").GetComponent<Image>();
         icon.sprite = Resources.FindObjectsOfTypeAll<Sprite>().FirstOrDefault(sprite => sprite.name == "icon_plus");
+    }
+
+    private static void AddEmpty(this SelectionMenu menu)
+    {
+        if (menu.transform.Find("Empty")) return;
+        var container = Traverse.Create(menu).Field<RectTransform>("mainContainer").Value;
+        var empty = UnityEngine.Object.Instantiate(original: container, parent: menu.transform);
+        empty.name = "Empty";
+        empty.gameObject.SetActive(false);
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(SelectionMenu), "UpdateComponentMenu")]
+    public static bool UpdateComponentMenu(SelectionMenu __instance)
+    {
+        var container = Traverse.Create(__instance).Field<RectTransform>("mainContainer").Value;
+        var target = Traverse.Create(__instance).Field<EditorGameObject>("serializeGameObject").Value;
+        var updaters = Traverse.Create(__instance).Field<List<IEditorUpdate>>("componentsUpdate").Value;
+        var scroll = Traverse.Create(__instance).Field<ScrollRect>("scrollRect").Value;
+        var empty = __instance.transform.Find("Empty") as RectTransform;
+
+        container.DestroyChildren();
+        container.anchoredPosition = Vector2.zero;
+        updaters.Clear();
+        // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
+        foreach (var component in target.Components)
+        {
+            if (component?.Data is null or ObjectSettings) continue;
+            if (component.Data is IEditorUpdate updater) updaters.Add(updater);
+            var overrider = component.Data as IEditorOverride;
+
+            var header = __instance.SetComponentHeader(component).gameObject;
+            header.name = $"{component.Name} Header";
+            var panel = UnityEngine.Object.Instantiate(original: empty, parent: container);
+            panel.name = $"{component.Name} Panel";
+            Traverse.Create(__instance).Field<RectTransform>("mainContainer").Value = panel;
+            foreach (var (member, _) in component.Fields)
+            {
+                if (overrider != null && overrider.OverrideMemberUi(__instance, component, member)) continue;
+                __instance.SetDefaultUi(component, member);
+            }
+
+            Traverse.Create(__instance).Field<RectTransform>("mainContainer").Value = container;
+            header.AddComponent<Button>()
+                .onClick.AddListener(() => panel.gameObject.SetActive(!panel.gameObject.activeSelf));
+            header.SetActive(panel.childCount != 0);
+        }
+
+        scroll.Rebuild(CanvasUpdate.PostLayout);
+        foreach (var updater in updaters) updater?.OnEditorOpen();
+
+        return false;
     }
 
     [HarmonyPostfix]

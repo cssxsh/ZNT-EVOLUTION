@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using UnityEngine;
-using UnityEngine.UI;
+using ZNT.LevelEditor;
 
 // ReSharper disable InconsistentNaming
 namespace ZNT.Evolution.Core;
@@ -133,45 +133,6 @@ internal static class DebugPatch
     }
 
     [HarmonyPrefix]
-    [HarmonyPatch(typeof(LevelEditor.SelectionMenu), "UpdateComponentMenu")]
-    public static bool UpdateComponentMenu(LevelEditor.SelectionMenu __instance)
-    {
-        var mainContainer = Traverse.Create(__instance)
-            .Field<RectTransform>("mainContainer").Value;
-        mainContainer.DestroyChildren();
-        mainContainer.anchoredPosition = Vector2.zero;
-        var serializeGameObject = Traverse.Create(__instance)
-            .Field<EditorGameObject>("serializeGameObject").Value;
-        var componentsUpdate = Traverse.Create(__instance)
-            .Field<List<IEditorUpdate>>("componentsUpdate").Value;
-        foreach (var component in serializeGameObject.Components)
-        {
-            if (component?.Data is null) continue;
-            if (component.Type == typeof(ObjectSettings)) continue;
-            if (component.Fields.Count == 0) continue;
-            var updater = component.Data as IEditorUpdate;
-            var overrider = component.Data as IEditorOverride;
-            if (updater != null) componentsUpdate.Add(updater);
-
-            updater?.OnEditorOpen();
-            var text = __instance.SetComponentHeader(component);
-            var prev = mainContainer.childCount;
-            foreach (var (member, _) in component.Fields)
-            {
-                if (overrider != null && overrider.OverrideMemberUi(__instance, component, member)) continue;
-                __instance.SetDefaultUi(component, member);
-            }
-
-            if (prev == mainContainer.childCount) UnityEngine.Object.Destroy(text.gameObject);
-        }
-
-        var scrollRect = Traverse.Create(__instance)
-            .Field<ScrollRect>("scrollRect").Value;
-        scrollRect.Rebuild(CanvasUpdate.PostLayout);
-        return false;
-    }
-
-    [HarmonyPrefix]
     [HarmonyPatch(typeof(ObjectSettings), "CopyObject")]
     public static bool CopyObject(ObjectSettings __instance, Rotorz.Tile.TileIndex ti)
     {
@@ -184,7 +145,7 @@ internal static class DebugPatch
             system: system,
             element: element,
             index: ti,
-            paintShape: LevelEditor.Toolbox.PaintShape.Square,
+            paintShape: Toolbox.PaintShape.Square,
             paintSize: 1U,
             refreshSurrounding: true);
         var tile = system.GetTileOrNull(ti);
