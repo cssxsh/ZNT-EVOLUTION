@@ -9,6 +9,19 @@ public class HumanEditor : Editor
 {
     private HumanBehaviour Behaviour => GetComponent<HumanBehaviour>();
 
+    private Tag Tags
+    {
+        get => gameObject.GetTags();
+        set => gameObject.SetTags(value);
+    }
+
+    [SerializeInEditor(name: "Cannot Attack")]
+    public bool CannotAttack
+    {
+        get => Tags.HasFlag(Tag.CannotAttack);
+        set => Tags = value ? Tags.Add(Tag.CannotAttack) : Tags.Remove(Tag.CannotAttack);
+    }
+
     [SerializeInEditor(name: "Flee Before Zombie Explode")]
     public bool FleeBeforeZombieExplode
     {
