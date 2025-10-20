@@ -36,10 +36,20 @@ internal static class GlobalSettingsPatch
 
     private static bool VisionMaterialization => EvolutionCorePlugin.VisionMaterialization.Value;
 
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(RayConeDetection), "UpdateAngles")]
+    public static void UpdateAngles(RayConeDetection __instance, out bool __state, bool force)
+    {
+        __state = force
+                  || Traverse.Create(__instance).Field<bool>("needUpdate").Value
+                  || __instance.transform.forward != Traverse.Create(__instance).Field<Vector3>("previousFoward").Value;
+    }
+
     [HarmonyPostfix]
     [HarmonyPatch(typeof(RayConeDetection), "UpdateAngles")]
-    public static void UpdateAngles(RayConeDetection __instance)
+    public static void UpdateAngles(RayConeDetection __instance, bool __state)
     {
+        if (!__state) return;
         if (!VisionMaterialization) return;
         var rays = Traverse.Create(__instance).Field<Vector2[]>("rays").Value;
         for (var i = __instance.Origin.childCount; i < __instance.RayCount; i++)
@@ -51,7 +61,7 @@ internal static class GlobalSettingsPatch
             renderer.Color = __instance.GetComponentInParent<BaseBehaviour>() switch
             {
                 HumanBehaviour => Color.white,
-                ZombieBehaviour => Color.black,
+                ZombieBehaviour => Color.yellow,
                 PropBehaviour => Color.red,
                 _ => Color.gray
             };
