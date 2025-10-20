@@ -35,11 +35,27 @@ internal static class StartManagerPatch
                 {
                     case HumanAsset { BlockOpponents: true, MaxOpponentsBlock: 0 } human:
                         human.BlockOpponents = false;
-                        Logger.LogDebug($"Fix BlockOpponents for {human}");
+                        Logger.LogInfo($"Fix BlockOpponents for {human}");
                         break;
                     case PhysicObjectAsset { DamageCharacterOnTrigger: true, DamageRadius: 0 } physic:
                         physic.DamageRadius = physic.ColliderRadius;
-                        Logger.LogDebug($"Fix DamageRadius for {physic}");
+                        Logger.LogInfo($"Fix DamageRadius for {physic}");
+                        break;
+                    case LevelElement { CustomAsset: not null, Brush: Rotorz.Tile.OrientedBrush brush } element:
+                        if (brush.DefaultOrientation.GetVariation(0) is not GameObject prefab) continue;
+                        if (element.CustomAsset.Prefab == prefab.transform) continue;
+                    {
+                        if (element.CustomAsset.name == prefab.name)
+                        {
+                            element.CustomAsset.Prefab = prefab.transform;
+                            Logger.LogInfo($"Fix Prefab for {element.CustomAsset}");
+                        }
+                        else
+                        {
+                            brush.DefaultOrientation.SetVariation(0, element.CustomAsset.Prefab.gameObject);
+                            Logger.LogInfo($"Fix Brush for {element}");
+                        }
+                    }
                         break;
                 }
             }
