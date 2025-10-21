@@ -142,12 +142,13 @@ internal static class GlobalSettingsPatch
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(PatrolAnimationUi), "Clips", MethodType.Getter)]
-    public static void Clips(PatrolAnimationUi __instance, List<Dropdown.OptionData> __result)
+    public static void GetClips(PatrolAnimationUi __instance, List<Dropdown.OptionData> __result)
     {
         if (!ShowAllAnimationClip) return;
-        __result.Clear();
-        var action = Traverse.Create(__instance).Field<PatrolAction>("parameters").Value;
+        var action = Traverse.Create(__instance).Field<PatrolAction>("Action").Value;
         var animation = action.Patroller.Animator.AnimationLibrary;
+        if (__result.Count == animation.clips.Count(clip => !string.IsNullOrEmpty(clip.name))) return;
+        __result.Clear();
         __result.AddRange(animation.clips
             .Where(clip => !string.IsNullOrEmpty(clip.name))
             .OrderBy(clip => clip.name)
