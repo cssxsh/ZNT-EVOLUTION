@@ -192,10 +192,10 @@ internal static class CustomAssetObjectPatch
     [HarmonyPatch(typeof(PhysicObjectBehaviour), "OnTriggerEnter2D")]
     public static bool OnTriggerEnter2D(PhysicObjectBehaviour __instance, Collider2D other)
     {
-        var flag = __instance.DamageCharacterOnTrigger;
-        flag &= __instance.TargetLayers.ContainsLayer(other.gameObject.layer);
+        var flag = __instance.DamageCharacterOnTrigger
+                   && __instance.TargetLayers.ContainsLayer(other.gameObject.layer);
+        if (flag) __instance.SendMessage(methodName: "SendTargetDamage", value: other.gameObject);
         // TODO param by setting
-        // ReSharper disable once InvertIf
         if (flag && __instance.Physic.GravityScale == 0.0f)
         {
             var physic = __instance.Physic;
@@ -206,13 +206,6 @@ internal static class CustomAssetObjectPatch
             if (physic.Body.velocity.magnitude <= physic.StartForce * 0.5) __instance.OnDie(null);
         }
 
-        return flag;
-    }
-
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(PhysicObjectBehaviour), "OnTriggerExit2D")]
-    public static void OnTriggerExit2D(PhysicObjectBehaviour __instance, Collider2D other)
-    {
         var targets = other.GetComponents<BaseAnimationController>()
             .Aggregate(ExplodeSurfaceConverter.None, (mask, controller) => mask | controller switch
             {
@@ -222,8 +215,9 @@ internal static class CustomAssetObjectPatch
                 TankAnimationController { enabled: true } => ExplodeSurfaceConverter.Tank,
                 _ => ExplodeSurfaceConverter.None
             });
-        if (targets == ExplodeSurfaceConverter.None) return;
+        if (targets == ExplodeSurfaceConverter.None) return false;
         if (__instance.ExplodeOn.HasFlag(targets)) __instance.OnDie(null);
+        return false;
     }
 
     #endregion
