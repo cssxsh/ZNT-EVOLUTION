@@ -18,6 +18,16 @@ internal static class CustomAssetObjectPatch
         return parameters.ContainsKey(key) ? parameters.GetValue<DamageType>(key) : DamageType.None;
     }
 
+    private static Transform CreatePrefab(this ExplosionAsset explosion, Transform parent = null)
+    {
+        var explode = Traverse.Create(explosion).Field<bool>("autoExplode");
+        var auto = explode.Value;
+        explode.Value = false;
+        var prefab = explosion.CreateGameObject(parent: parent);
+        explode.Value = auto;
+        return prefab.transform;
+    }
+
     [HarmonyPrefix]
     [HarmonyPatch(typeof(CustomAssetObject), "LoadFromAsset")]
     public static void LoadFromAsset(CustomAssetObject __instance, GameObject gameObject)
@@ -43,11 +53,7 @@ internal static class CustomAssetObjectPatch
         var prefab = Traverse.Create(__instance).Field<Transform>("explosionPrefab");
         if (prefab.Value.IsChildOf(__instance.transform)) return;
         var explosion = Traverse.Create(__instance).Field<ExplosionAsset>("explosion").Value;
-        var explode = Traverse.Create(explosion).Field<bool>("autoExplode");
-        var auto = explode.Value;
-        explode.Value = false;
-        prefab.Value = explosion.CreateGameObject(parent: __instance.transform).transform;
-        explode.Value = auto;
+        prefab.Value = explosion.CreatePrefab(parent: __instance.transform);
     }
 
     [HarmonyPrefix]
