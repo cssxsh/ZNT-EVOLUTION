@@ -5,6 +5,7 @@ using System.Linq;
 using HarmonyLib;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Linq;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -72,14 +73,13 @@ public static class CustomAssetUtility
         return serializer.Deserialize<T>(json);
     }
 
-    internal static void Merge(Object o, IDictionary<string, string> fields)
+    internal static void Merge(Object o, IDictionary<string, JToken> fields)
     {
         var serializer = JsonSerializer.Create(SerializerSettings);
-        foreach (var (path, text) in fields)
+        foreach (var (path, token) in fields)
         {
             var field = path.Split('.').Aggregate(Traverse.Create(o), (t, name) => t.Field(name));
-            using var reader = new StringReader(text);
-            using var json = new JsonTextReader(reader);
+            using var json = new JTokenReader(token);
             var value = serializer.Deserialize(json, field.GetValueType());
             field.SetValue(value);
         }

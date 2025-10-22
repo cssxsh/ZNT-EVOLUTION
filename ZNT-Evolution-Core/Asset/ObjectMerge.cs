@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using UnityEngine;
 
 // ReSharper disable MemberCanBePrivate.Global
@@ -11,10 +12,10 @@ namespace ZNT.Evolution.Core.Asset;
 internal class ObjectMerge : EvolutionMerge<Object>
 {
     [JsonProperty("Fields")]
-    public readonly Dictionary<string, string> Fields;
+    public readonly Dictionary<string, JToken> Fields;
 
     [JsonConstructor]
-    public ObjectMerge(Component source, string name, Dictionary<string, string> fields) : base(name, source)
+    public ObjectMerge(Object source, string name, Dictionary<string, JToken> fields) : base(name, source)
     {
         Fields = fields;
     }
