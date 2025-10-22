@@ -172,6 +172,24 @@ internal static class DebugPatch
     }
 
     [HarmonyPrefix]
+    [HarmonyPatch(typeof(SignalReceiverLinker), "OnAwake")]
+    public static void OnAwake(SignalReceiverLinker __instance)
+    {
+        __instance.ExcludedComponents ??= __instance.GetComponentsInChildren<BaseComponent>(includeInactive: true)
+            .Where(component => !component.EditorVisibility).ToList();
+        __instance.ExcludedGameObjects ??= new List<GameObject>();
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(SignalSenderLinker), "OnAwake")]
+    public static void OnAwake(SignalSenderLinker __instance)
+    {
+        __instance.ExcludedComponents ??= __instance.GetComponentsInChildren<BaseComponent>(includeInactive: true)
+            .Where(component => !component.EditorVisibility).ToList();
+        __instance.ExcludedGameObjects ??= new List<GameObject>();
+    }
+
+    [HarmonyPrefix]
     [HarmonyPatch(typeof(SteamManager), "Initialized", MethodType.Getter)]
     public static bool Initialized() => Steamworks.SteamFriends.GetPersonaName() != "Goldberg";
 }
