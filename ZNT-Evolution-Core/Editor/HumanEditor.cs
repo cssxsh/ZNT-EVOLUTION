@@ -64,6 +64,13 @@ public class HumanEditor : Editor
         set => Behaviour.GrabbedOnAttacked = value;
     }
 
+    [SerializeInEditor(name: "Freeze On Rage")]
+    public bool FreezeOnRage
+    {
+        get => Behaviour.Rage.FreezeOnRage;
+        set => Behaviour.Rage.FreezeOnRage = value;
+    }
+
     [SerializeInEditor(name: "Weapon Magazine Size")]
     public int WeaponMagazineSize
     {

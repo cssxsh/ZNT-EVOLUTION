@@ -26,6 +26,7 @@ public static class CustomAssetUtility
             new GenericDictionaryConverter(),
             new UnityEngineObjectConverter(),
             new ExplodeSurfaceConverter(),
+            new DamageFlagsConverter(),
             new StringEnumConverter(),
             new LayerMaskConverter(),
             new ColorConverter(),

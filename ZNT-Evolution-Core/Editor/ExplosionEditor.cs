@@ -99,6 +99,7 @@ public class ExplosionEditor : Editor
     [SignalReceiver]
     public void StartExplosion()
     {
+        if (Effect.Started) return;
         foreach (var effect in GetComponentsInChildren<ExplosionEffect>().Reverse()) effect.StartExplosion(Asset.Delay);
     }
 }

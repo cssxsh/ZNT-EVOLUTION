@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Linq;
 using BepInEx.Logging;
 using HarmonyLib;
@@ -234,45 +233,55 @@ internal static class CustomAssetObjectPatch
     [HarmonyPatch(typeof(HumanBehaviour), "Initialize")]
     public static void Initialize(HumanBehaviour __instance)
     {
-        foreach (var (key, attachment) in __instance.SharedAsset.Attachments as IDictionary<string, GameObject>)
+        // ReSharper disable once InvertIf
+        if (__instance.Rage.Repulsion)
         {
-            if (attachment is null) continue;
-            attachment.GetComponentSafe<PoolRetriever>();
-            switch (key)
-            {
-                case "rage":
-                    if (__instance.transform.Find("Rage")) continue;
-                    Logger.LogDebug($"Rage {attachment} with {__instance.gameObject} {__instance.transform.position}");
-                    ComponentSingleton<GamePoolManager>.Instance
-                        .Spawn(attachment.transform, __instance.transform)
-                        .name = "Rage";
-                    break;
-            }
+            var repulse = __instance.Rage.Repulsion.CreatePrefab(parent: __instance.Rage.transform);
+            repulse.name = "Repulse";
+            repulse.GetComponent<ExplosionEditor>().EditorVisibility.CustomName = "Repulsion";
+            repulse.GetComponent<ExplosionEffect>().DespawnOnEnd = false;
         }
     }
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(Rage), "OnHit")]
-    public static void OnHit(Rage __instance, Parameters param)
+    public static bool OnHit(Rage __instance, Parameters param)
     {
-        if (__instance.name is not nameof(Character.Components)) return;
-        var rage = __instance.transform.parent.Find("Rage");
-        if (rage is null) return;
-        var editor = rage.GetComponent<RageEditor>();
-        var type = param.GetDamageType();
-        if (!editor.ExplosionAssets.TryGetValue(type, out var explosion)) return;
-        __instance.DamageType = type;
-        __instance.Repulsion = explosion;
+        if (!__instance.enabled) return false;
+        var repulse = __instance.transform.Find("Repulse");
+        if (repulse is null) return false;
+        var flags = DamageFlagsConverter.GetDamageFlags(__instance.DamageType);
+        var damage = param.GetDamageType();
+        if (flags.All(flag => flag != DamageType.None && flag != damage)) return false;
+        var timer = Traverse.Create(__instance).Field<Timer>("refillTimer").Value;
+        var hits = Traverse.Create(__instance).Field<int>("currentHitCount").Value;
+        if (--hits > 0)
+        {
+            timer.Start();
+            Traverse.Create(__instance).Field<Timer>("refillTimer").Value = timer;
+            Traverse.Create(__instance).Field<int>("currentHitCount").Value = hits;
+            return false;
+        }
+
+        hits = __instance.RefillOnEnraged ? __instance.TargetHitCount : 0;
+        timer.Stop();
+        Traverse.Create(__instance).Field<Timer>("refillTimer").Value = timer;
+        Traverse.Create(__instance).Field<int>("currentHitCount").Value = hits;
+        repulse.GetComponent<ExplosionEditor>().StartExplosion();
+        Traverse.Create(__instance).Field("events").Field<BoolEvent>("OnRage").Value
+            .Invoke(__instance.FreezeOnRage);
+        return false;
     }
 
-    [HarmonyPrefix]
+    [HarmonyPostfix]
     [HarmonyPatch(typeof(Rage), "OnDespawned")]
     public static void OnDespawned(Rage __instance)
     {
-        if (__instance.name is not nameof(Character.Components)) return;
-        var rage = __instance.transform.parent.Find("Rage");
-        if (rage is null) return;
-        ComponentSingleton<GamePoolManager>.Instance.Despawn(rage);
+        var repulse = __instance.transform.Find("Repulse");
+        if (repulse is null) return;
+        repulse.GetComponent<ExplosionEditor>().EditorVisibility.CustomName = null;
+        repulse.GetComponent<ExplosionEffect>().DespawnOnEnd = true;
+        ComponentSingleton<GamePoolManager>.Instance.Despawn(repulse);
     }
 
     #endregion

@@ -403,6 +403,7 @@
         <Compile Include="Asset\BrushInfo.cs"/>
         <Compile Include="Asset\CustomAssetUtility.cs"/>
         <Compile Include="Asset\DamageDictionary.cs"/>
+        <Compile Include="Asset\DamageFlagsConverter.cs"/>
         <Compile Include="Asset\EvolutionAddition.cs"/>
         <Compile Include="Asset\EvolutionInfo.cs"/>
         <Compile Include="Asset\EvolutionMerge.cs"/>
@@ -414,7 +415,6 @@
         <Compile Include="Asset\LayerMaskConverter.cs"/>
         <Compile Include="Asset\LevelElementAddition.cs"/>
         <Compile Include="Asset\ObjectMerge.cs"/>
-        <Compile Include="Asset\RageAsset.cs"/>
         <Compile Include="Asset\RectConverter.cs"/>
         <Compile Include="Asset\SpawnPointAsset.cs"/>
         <Compile Include="Asset\SpriteInfo.cs"/>
@@ -426,7 +426,6 @@
         <Compile Include="Editor\LayerEditor.cs"/>
         <Compile Include="Editor\MineTrapEditor.cs"/>
         <Compile Include="Editor\HumanEditor.cs"/>
-        <Compile Include="Editor\RageEditor.cs"/>
     </ItemGroup>
     <ItemGroup>
         <EmbeddedResource Include="Resources\**"/>
