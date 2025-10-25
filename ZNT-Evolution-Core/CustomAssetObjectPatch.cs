@@ -286,8 +286,6 @@ internal static class CustomAssetObjectPatch
         ComponentSingleton<GamePoolManager>.Instance.Despawn(repulse);
     }
 
-    private static readonly Dictionary<CharacterType, Dictionary<GameObject, CharacterAllocationEffect>> Group = new();
-
     [HarmonyPostfix]
     [HarmonyPatch(typeof(Stopper), "Initialize")]
     public static void Initialize(Stopper __instance, bool block, int maxOpponents)
@@ -296,15 +294,11 @@ internal static class CustomAssetObjectPatch
         var effect = detector.gameObject.GetComponentSafe<CharacterAllocationEffect>();
         if (block)
         {
-            var type = __instance.transform.GetComponentInParent<Character>().CharacterType;
-            if (!Group.ContainsKey(type)) Group[type] = new Dictionary<GameObject, CharacterAllocationEffect>();
             effect.capacity = maxOpponents;
-            effect.Context = Group;
             effect.StartEffect();
         }
         else
         {
-            effect.Context = null;
             effect.StopEffect();
         }
     }

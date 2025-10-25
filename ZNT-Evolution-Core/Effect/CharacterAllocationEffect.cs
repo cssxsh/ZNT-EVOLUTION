@@ -1,8 +1,6 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
-using Newtonsoft.Json;
 using UnityEngine;
 
 namespace ZNT.Evolution.Core.Effect;
@@ -13,9 +11,20 @@ public class CharacterAllocationEffect : TriggerEffect
     [SerializeField]
     private Character character;
 
-    [JsonIgnore]
-    [NonSerialized]
-    public Dictionary<CharacterType, Dictionary<GameObject, CharacterAllocationEffect>> Context;
+    private static Dictionary<CharacterType, Dictionary<GameObject, CharacterAllocationEffect>> _stopper;
+
+    private Dictionary<GameObject, CharacterAllocationEffect> Context()
+    {
+        switch (name)
+        {
+            case nameof(Character.Components.Stopper):
+                _stopper ??= new Dictionary<CharacterType, Dictionary<GameObject, CharacterAllocationEffect>>();
+                if (_stopper.TryGetValue(character.CharacterType, out var result)) return result;
+                return _stopper[character.CharacterType] = new Dictionary<GameObject, CharacterAllocationEffect>();
+            default:
+                return new Dictionary<GameObject, CharacterAllocationEffect>();
+        }
+    }
 
     private Dictionary<GameObject, CharacterAllocationEffect> _allocated;
 
@@ -36,7 +45,7 @@ public class CharacterAllocationEffect : TriggerEffect
     public override void OnStartEffect()
     {
         character ??= GetComponentInParent<Character>();
-        _allocated = Context?[character.CharacterType];
+        _allocated = Context();
         _cache.Clear();
     }
 
