@@ -274,13 +274,10 @@ internal static class SceneLoaderPatch
     private static void AddCopy(this SelectionMenu menu)
     {
         var move = Traverse.Create(menu).Field<Toggle>("moveButton").Value;
+        var target = Traverse.Create(menu).Field<EditorGameObject>("serializeGameObject");
         var copy = UnityEngine.Object.Instantiate(original: move, parent: move.transform.parent);
         copy.name = "Copy Button";
-        copy.OnValueChanged(value =>
-        {
-            var target = Traverse.Create(menu).Field<EditorGameObject>("serializeGameObject").Value;
-            target.ObjectSettings.Activate(value, ObjectSettings.Control.Copy);
-        });
+        copy.OnValueChanged(value => target.Value.ObjectSettings.Activate(value, ObjectSettings.Control.Copy));
         var icon = copy.transform.Find("Icon").GetComponent<Image>();
         icon.sprite = Resources.FindObjectsOfTypeAll<Sprite>().FirstOrDefault(sprite => sprite.name == "icon_plus");
     }
@@ -304,6 +301,10 @@ internal static class SceneLoaderPatch
         var scroll = Traverse.Create(__instance).Field<ScrollRect>("scrollRect").Value;
         var empty = __instance.transform.Find("Empty") as RectTransform;
 
+        var activated = container.Cast<Transform>()
+            .Where(transform => transform.gameObject.activeSelf)
+            .Select(transform => transform.name)
+            .ToHashSet();
         container.DestroyChildren();
         container.anchoredPosition = Vector2.zero;
         updaters.Clear();
@@ -329,6 +330,7 @@ internal static class SceneLoaderPatch
             header.AddComponent<Button>()
                 .onClick.AddListener(() => panel.gameObject.SetActive(!panel.gameObject.activeSelf));
             header.SetActive(panel.childCount != 0);
+            panel.gameObject.SetActive(panel.childCount != 0 && activated.Contains(panel.name));
         }
 
         scroll.Rebuild(CanvasUpdate.PostLayout);
@@ -341,12 +343,7 @@ internal static class SceneLoaderPatch
     [HarmonyPatch(typeof(SelectionMenu), "LateUpdate")]
     public static void LateUpdate(SelectionMenu __instance)
     {
-        if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl) || Input.GetKey(KeyCode.Mouse2))
-        {
-            var move = Traverse.Create(__instance).Field<Toggle>("moveButton").Value;
-            move.isOn = true;
-        }
-        else if (Input.GetKey(KeyCode.Escape) || Input.GetKey(KeyCode.Mouse1))
+        if (Input.GetKey(KeyCode.Escape))
         {
             var move = Traverse.Create(__instance).Field<Toggle>("moveButton").Value;
             var panel = move.transform.parent;
