@@ -426,6 +426,7 @@
         <Compile Include="Editor\LayerEditor.cs"/>
         <Compile Include="Editor\MineTrapEditor.cs"/>
         <Compile Include="Editor\HumanEditor.cs"/>
+        <Compile Include="Effect\CharacterAllocationEffect.cs"/>
     </ItemGroup>
     <ItemGroup>
         <EmbeddedResource Include="Resources\**"/>

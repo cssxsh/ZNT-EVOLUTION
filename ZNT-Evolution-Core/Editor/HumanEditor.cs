@@ -187,14 +187,14 @@ public class HumanEditor : Editor
     public bool BlockOpponents
     {
         get => Traverse.Create(Behaviour.Stopper).Field<bool>("blockOpponents").Value;
-        set => Traverse.Create(Behaviour.Stopper).Field<bool>("blockOpponents").Value = value;
+        set => Behaviour.Stopper.Initialize(value, MaxOpponentsBlock, Behaviour.OnStopperBreak);
     }
 
     [SerializeInEditor(name: "Max Opponents Block")]
     public int MaxOpponentsBlock
     {
         get => Traverse.Create(Behaviour.Stopper).Field<int>("MaxOpponents").Value;
-        set => Traverse.Create(Behaviour.Stopper).Field<int>("MaxOpponents").Value = value;
+        set => Behaviour.Stopper.Initialize(BlockOpponents, value, Behaviour.OnStopperBreak);
     }
 
     [SerializeInEditor(name: "Voice")]

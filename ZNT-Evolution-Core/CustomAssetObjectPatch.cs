@@ -1,9 +1,11 @@
+using System.Collections.Generic;
 using System.Linq;
 using BepInEx.Logging;
 using HarmonyLib;
 using UnityEngine;
 using ZNT.Evolution.Core.Asset;
 using ZNT.Evolution.Core.Editor;
+using ZNT.Evolution.Core.Effect;
 
 // ReSharper disable InconsistentNaming
 namespace ZNT.Evolution.Core;
@@ -282,6 +284,38 @@ internal static class CustomAssetObjectPatch
         repulse.GetComponent<ExplosionEditor>().EditorVisibility.CustomName = null;
         repulse.GetComponent<ExplosionEffect>().DespawnOnEnd = true;
         ComponentSingleton<GamePoolManager>.Instance.Despawn(repulse);
+    }
+
+    private static readonly Dictionary<CharacterType, Dictionary<GameObject, CharacterAllocationEffect>> Group = new();
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(Stopper), "Initialize")]
+    public static void Initialize(Stopper __instance, bool block, int maxOpponents)
+    {
+        var detector = Traverse.Create(__instance).Field<BoxDetection>("detector").Value;
+        var effect = detector.gameObject.GetComponentSafe<CharacterAllocationEffect>();
+        if (block)
+        {
+            var type = __instance.transform.GetComponentInParent<Character>().CharacterType;
+            if (!Group.ContainsKey(type)) Group[type] = new Dictionary<GameObject, CharacterAllocationEffect>();
+            effect.capacity = maxOpponents;
+            effect.Context = Group;
+            effect.StartEffect();
+        }
+        else
+        {
+            effect.Context = null;
+            effect.StopEffect();
+        }
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(Stopper), "OnDespawned")]
+    public static void OnDespawned(Stopper __instance)
+    {
+        var detector = Traverse.Create(__instance).Field<BoxDetection>("detector").Value;
+        var effect = detector.GetComponent<CharacterAllocationEffect>();
+        effect.StopEffect();
     }
 
     #endregion
