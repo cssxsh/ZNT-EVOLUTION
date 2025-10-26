@@ -320,21 +320,31 @@ internal static class CustomAssetObjectPatch
     [HarmonyPatch(typeof(Rotorz.Tile.OrientedBrush), "Awake")]
     public static void Awake(Rotorz.Tile.OrientedBrush __instance)
     {
-        if (__instance.DefaultOrientation?.GetVariation(0) is not GameObject gameObject) return;
-        if (gameObject.GetComponentInChildren<Health>() is { } health) health.EditorVisibility = true;
-        switch (gameObject.GetComponent<BaseBehaviour>())
+        if (__instance.DefaultOrientation.GetVariation(0) is not GameObject prefab) return;
+        if (prefab.GetComponentInChildren<Health>() is { } health) health.EditorVisibility = true;
+        if (prefab.TryGetComponent(out OneWayCollider _)) prefab.FixResizeHandles().GetComponentSafe<OneWayEditor>();
+        switch (prefab.GetComponent<BaseBehaviour>())
         {
             case MineBehaviour:
-                _ = gameObject.GetComponentSafe<LayerEditor>();
-                _ = gameObject.GetComponentSafe<MineTrapEditor>();
+                _ = prefab.GetComponentSafe<LayerEditor>();
+                _ = prefab.GetComponentSafe<MineTrapEditor>();
                 break;
             case PropBehaviour:
-                _ = gameObject.GetComponentSafe<LayerEditor>();
+                _ = prefab.GetComponentSafe<LayerEditor>();
                 break;
             case HumanBehaviour:
-                _ = gameObject.GetComponentSafe<HumanEditor>();
+                _ = prefab.GetComponentSafe<HumanEditor>();
                 break;
         }
+    }
+
+    private static GameObject FixResizeHandles(this GameObject prefab)
+    {
+        var resize = prefab.GetComponent<ResizeHandles>();
+        resize.MinBounds = new Bounds(center: Vector2.zero, size: Vector2.one * 0.6f);
+        resize.RoundToNearest = 1f / 4f;
+        resize.Bounds = new Bounds(center: Vector2.zero, size: Vector2.one);
+        return prefab;
     }
 
     #endregion
