@@ -19,6 +19,11 @@ internal static class SceneLoaderPatch
 {
     private static readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource(nameof(SceneLoader));
 
+    private static void ToggleActivation(this RectTransform transform)
+    {
+        transform.gameObject.SetActive(!transform.gameObject.activeSelf);
+    }
+
     private static void OnClick(this Button button, UnityAction call)
     {
         button.onClick = new Button.ButtonClickedEvent();
@@ -291,6 +296,8 @@ internal static class SceneLoaderPatch
         empty.gameObject.SetActive(false);
     }
 
+    private static readonly HashSet<string> Activated = new();
+
     [HarmonyPrefix]
     [HarmonyPatch(typeof(SelectionMenu), "UpdateComponentMenu")]
     public static bool UpdateComponentMenu(SelectionMenu __instance)
@@ -301,11 +308,12 @@ internal static class SceneLoaderPatch
         var scroll = Traverse.Create(__instance).Field<ScrollRect>("scrollRect").Value;
         var empty = __instance.transform.Find("Empty") as RectTransform;
 
-        var activated = container.Cast<Transform>()
-            .Where(transform => transform.gameObject.activeSelf)
-            .Select(transform => transform.name)
-            .ToHashSet();
-        container.DestroyChildren();
+        foreach (var transform in container.Cast<Transform>())
+        {
+            _ = transform.gameObject.activeSelf ? Activated.Add(transform.name) : Activated.Remove(transform.name);
+            UnityEngine.Object.Destroy(transform.gameObject);
+        }
+
         container.anchoredPosition = Vector2.zero;
         updaters.Clear();
         // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
@@ -327,10 +335,9 @@ internal static class SceneLoaderPatch
             }
 
             Traverse.Create(__instance).Field<RectTransform>("mainContainer").Value = container;
-            header.AddComponent<Button>()
-                .onClick.AddListener(() => panel.gameObject.SetActive(!panel.gameObject.activeSelf));
+            header.AddComponent<Button>().onClick.AddListener(panel.ToggleActivation);
             header.SetActive(panel.childCount != 0);
-            panel.gameObject.SetActive(panel.childCount != 0 && activated.Contains(panel.name));
+            panel.gameObject.SetActive(panel.childCount != 0 && Activated.Contains(panel.name));
         }
 
         scroll.Rebuild(CanvasUpdate.PostLayout);
