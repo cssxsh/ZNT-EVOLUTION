@@ -104,4 +104,24 @@ public static class CustomAssetUtility
         foreach (var asset in source.Assets.OfType<T>()) action.Invoke(asset);
         bundle.Unload(true);
     }
+
+    public static bool TryGetPrefab(string name, out Transform prefab)
+    {
+        foreach (var (_, pool) in PathologicalGames.PoolManager.Pools)
+        {
+            if (pool.prefabs.TryGetValue(name, out prefab)) return true;
+        }
+
+        foreach (var pool in Resources.LoadAll<PoolSettingsAsset>(""))
+        {
+            foreach (var info in pool.Prefabs)
+            {
+                prefab = info.Prefab;
+                if (info.Prefab.name == name) return true;
+            }
+        }
+
+        prefab = null;
+        return false;
+    }
 }
