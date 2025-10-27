@@ -291,6 +291,11 @@ public static class LevelElementLoader
         var element = DeserializeObject<LevelElement>(folder: path, file: "element.json");
         Logger.LogDebug($"element.json -> {element} to {element.Title}");
 
+        if (element.CustomAsset is { Prefab: { } prefab } && prefab.gameObject != variation)
+        {
+            Logger.LogWarning($"Prefab {prefab.gameObject} != {variation}");
+        }
+
         var id = element.Bind();
         Logger.LogInfo($"LevelElement {id} - {element.Title} Loaded");
     }

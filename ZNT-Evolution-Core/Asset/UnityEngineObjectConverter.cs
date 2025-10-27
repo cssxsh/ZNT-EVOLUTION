@@ -76,7 +76,9 @@ internal class UnityEngineObjectConverter : CustomCreationConverter<UnityEngine.
 
         if (CustomAssetUtility.Cache.TryGetValue(key, out var value)) return value;
         var name = key.Split(':')[0].Trim();
-        if (key.Split(':').Length > 1) type = AccessTools.TypeByName(key.Split(':')[1].Trim()) ?? type;
+        if (key.IndexOf(':') >= 0) type = AccessTools.TypeByName(key.Split(':')[1].Trim()) ?? type;
+        if (type == typeof(Transform) && TryGetPrefab(name, out var prefab)) return prefab;
+        if (type == typeof(GameObject) && TryGetPrefab(name, out var transform)) return transform.gameObject;
         foreach (var asset in Resources.FindObjectsOfTypeAll(type))
         {
             if (asset.name != name) continue;
@@ -86,5 +88,11 @@ internal class UnityEngineObjectConverter : CustomCreationConverter<UnityEngine.
 
         Logger.LogError($"NotFound {type.FullName} {{ name: \"{name}\" }}");
         return null;
+    }
+
+    private static bool TryGetPrefab(string name, out Transform prefab)
+    {
+        return ComponentSingleton<GamePoolManager>.Instance
+            .SpawnPool.prefabs.TryGetValue(name, out prefab);
     }
 }
