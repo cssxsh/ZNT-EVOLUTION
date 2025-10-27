@@ -28,9 +28,9 @@ public class LayerMaskConverter : CustomCreationConverter<LayerMask>
         var names = new List<string>();
         for (var layer = 0x00; layer < 0x20; layer++)
         {
+            if (((0x01 << layer) & mask.value) == 0x00000000) continue;
             var name = LayerMask.LayerToName(layer);
-            if (string.IsNullOrEmpty(name)) name = layer.ToString();
-            if (BitMask.HasAny(mask.value, 0x01 << layer)) names.Add(name);
+            names.Add(string.IsNullOrEmpty(name) ? layer.ToString() : name);
         }
 
         writer.WriteValue(names.Join());
