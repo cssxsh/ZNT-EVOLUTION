@@ -132,6 +132,14 @@ internal static class DebugPatch
         __instance.SensesIgnored = prefab.SensesIgnored;
     }
 
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(PhysicObjectBehaviour), "Health", MethodType.Getter)]
+    public static Health GetHealth(Health __result, PhysicObjectBehaviour __instance)
+    {
+        if (__result) return __result;
+        return Traverse.Create(__instance).Field<Health>("health").Value = __instance.GetComponent<Health>();
+    }
+
     [HarmonyPrefix]
     [HarmonyPatch(typeof(ObjectSettings), "CopyObject")]
     public static bool CopyObject(ObjectSettings __instance, Rotorz.Tile.TileIndex ti)
