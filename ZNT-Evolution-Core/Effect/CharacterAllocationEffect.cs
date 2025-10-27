@@ -11,28 +11,44 @@ public class CharacterAllocationEffect : TriggerEffect
     [SerializeField]
     private Character character;
 
-    private static Dictionary<CharacterType, Dictionary<GameObject, CharacterAllocationEffect>> _stopper;
+    private class Context : Dictionary<GameObject, CharacterAllocationEffect>
+    {
+        public void Remove(CharacterAllocationEffect effect)
+        {
+            foreach (var target in effect._cache) Remove(target);
+        }
+    }
 
-    private Dictionary<GameObject, CharacterAllocationEffect> Context()
+    private static Dictionary<CharacterType, Context> _stopper;
+
+    private static Dictionary<CharacterType, Context> _attacker;
+
+    private Context FetchContext()
     {
         switch (name)
         {
             case nameof(Character.Components.Stopper):
-                _stopper ??= new Dictionary<CharacterType, Dictionary<GameObject, CharacterAllocationEffect>>();
-                if (_stopper.TryGetValue(character.CharacterType, out var result)) return result;
-                return _stopper[character.CharacterType] = new Dictionary<GameObject, CharacterAllocationEffect>();
+                character ??= GetComponentInParent<Character>();
+                _stopper ??= new Dictionary<CharacterType, Context>();
+                if (_stopper.TryGetValue(character.CharacterType, out var stop)) return stop;
+                return _stopper[character.CharacterType] = new Context();
+            case nameof(Character.Components.Attacker):
+                character ??= GetComponentInParent<Character>();
+                _attacker ??= new Dictionary<CharacterType, Context>();
+                if (_attacker.TryGetValue(character.CharacterType, out var attack)) return attack;
+                return _attacker[character.CharacterType] = new Context();
             default:
-                return new Dictionary<GameObject, CharacterAllocationEffect>();
+                return null;
         }
     }
 
-    private Dictionary<GameObject, CharacterAllocationEffect> _allocated;
+    private Context _allocated;
 
     private readonly C5.HashedArrayList<GameObject> _cache = new();
 
     public int capacity = 114514;
 
-    private int Spare => capacity - DetectedGameObjects.Count;
+    private int Spare => capacity - _cache.Count;
 
     protected override void OnCreate()
     {
@@ -44,16 +60,16 @@ public class CharacterAllocationEffect : TriggerEffect
 
     public override void OnStartEffect()
     {
-        character ??= GetComponentInParent<Character>();
-        _allocated = Context();
+        _allocated = FetchContext();
         _cache.Clear();
     }
 
     public override void OnApplyEffect()
     {
         if (_allocated == null) return;
-        foreach (var target in _cache) _allocated.Remove(target);
+        _allocated.Remove(this);
         _cache.Clear();
+        _cache.AddAll(DetectedGameObjects);
     }
 
     public override void OnApplyOnGameObject(GameObject target)
@@ -61,9 +77,9 @@ public class CharacterAllocationEffect : TriggerEffect
         if (_allocated == null) return;
         if (_allocated.TryGetValue(target, out var other))
         {
-            if (other.Spare >= Spare + _cache.Count)
+            if (other.Spare >= Spare)
             {
-                _cache.Add(target);
+                _cache.Remove(target);
                 return;
             }
 
@@ -76,16 +92,15 @@ public class CharacterAllocationEffect : TriggerEffect
 
     public override void OnEffectApplied()
     {
-        if (DetectedGameObjects == null) return;
-        DetectedGameObjects.RemoveAll(_cache);
-        _cache.Clear();
-        _cache.AddAll(DetectedGameObjects);
+        if (_allocated == null) return;
+        DetectedGameObjects.Clear();
+        DetectedGameObjects.AddAll(_cache);
     }
 
     public override void OnEffectDone()
     {
         if (_allocated == null) return;
-        foreach (var target in _cache) _allocated.Remove(target);
+        _allocated.Remove(this);
         _cache.Clear();
         _allocated = null;
     }
