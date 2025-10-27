@@ -124,10 +124,10 @@ internal static class DebugPatch
     }
 
     [HarmonyPostfix]
-    [HarmonyPatch(typeof(HumanBehaviour), "OnDespawned")]
-    public static void OnDespawned(HumanBehaviour __instance)
+    [HarmonyPatch(typeof(CharacterBehaviour), "OnDespawned")]
+    public static void OnDespawned(CharacterBehaviour __instance)
     {
-        var prefab = __instance.SharedAsset?.Prefab.GetComponent<HumanBehaviour>();
+        var prefab = __instance.Character.Components.Asset.Asset?.Prefab.GetComponent<CharacterBehaviour>();
         if (prefab is null) return;
         __instance.SensesIgnored = prefab.SensesIgnored;
     }
