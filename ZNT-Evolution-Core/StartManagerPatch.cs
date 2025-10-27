@@ -26,39 +26,44 @@ internal static class StartManagerPatch
     {
         Logger.LogInfo("Initializing");
         yield return prefix;
-        yield return CustomAssetUtility.LoadBuildIn<CustomAsset>(assets =>
+        yield return CustomAssetUtility.LoadBuildIn<CustomAsset>(asset =>
         {
-            foreach (var asset in assets)
+            CustomAssetUtility.Cache[asset.NameAndType()] = asset;
+            switch (asset)
             {
-                CustomAssetUtility.Cache[asset.NameAndType()] = asset;
-                switch (asset)
+                case HumanAsset { BlockOpponents: true, MaxOpponentsBlock: 0 } human:
+                    human.BlockOpponents = false;
+                    Logger.LogInfo($"Fix BlockOpponents for {human}");
+                    break;
+                case PhysicObjectAsset { DamageCharacterOnTrigger: true, DamageRadius: 0 } physic:
+                    physic.DamageRadius = physic.ColliderRadius;
+                    Logger.LogInfo($"Fix DamageRadius for {physic}");
+                    break;
+                case LevelElement { CustomAsset: not null, Brush: Rotorz.Tile.OrientedBrush brush } element:
                 {
-                    case HumanAsset { BlockOpponents: true, MaxOpponentsBlock: 0 } human:
-                        human.BlockOpponents = false;
-                        Logger.LogInfo($"Fix BlockOpponents for {human}");
-                        break;
-                    case PhysicObjectAsset { DamageCharacterOnTrigger: true, DamageRadius: 0 } physic:
-                        physic.DamageRadius = physic.ColliderRadius;
-                        Logger.LogInfo($"Fix DamageRadius for {physic}");
-                        break;
-                    case LevelElement { CustomAsset: not null, Brush: Rotorz.Tile.OrientedBrush brush } element:
-                        if (brush.DefaultOrientation.GetVariation(0) is not GameObject prefab) continue;
-                        if (element.CustomAsset.Prefab == prefab.transform) continue;
+                    if (brush.DefaultOrientation.GetVariation(0) is not GameObject prefab) return;
+                    if (element.CustomAsset.Prefab == prefab.transform) return;
+                    if (element.CustomAsset.name == prefab.name)
                     {
-                        if (element.CustomAsset.name == prefab.name)
-                        {
-                            element.CustomAsset.Prefab = prefab.transform;
-                            Logger.LogInfo($"Fix Prefab for {element.CustomAsset}");
-                        }
-                        else
-                        {
-                            brush.DefaultOrientation.SetVariation(0, element.CustomAsset.Prefab.gameObject);
-                            Logger.LogInfo($"Fix Brush for {element}");
-                        }
+                        element.CustomAsset.Prefab = prefab.transform;
+                        Logger.LogInfo($"Fix Prefab for {element.CustomAsset}");
                     }
-                        break;
+                    else
+                    {
+                        brush.DefaultOrientation.SetVariation(0, element.CustomAsset.Prefab.gameObject);
+                        Logger.LogInfo($"Fix Brush for {element}");
+                    }
                 }
+                    break;
             }
+        });
+        yield return CustomAssetUtility.LoadBuildIn<tk2dSpriteCollectionData>(sprites =>
+        {
+            CustomAssetUtility.Cache[sprites.NameAndType()] = sprites;
+        });
+        yield return CustomAssetUtility.LoadBuildIn<tk2dSpriteAnimation>(animation =>
+        {
+            CustomAssetUtility.Cache[animation.NameAndType()] = animation;
         });
         Logger.LogInfo("Loading Bank");
         yield return LevelElementLoader.LoadBanks(folder: Application.streamingAssetsPath, loadSamples: true);

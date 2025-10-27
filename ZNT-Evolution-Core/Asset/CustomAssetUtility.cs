@@ -86,7 +86,7 @@ public static class CustomAssetUtility
         }
     }
 
-    internal static IEnumerator LoadBuildIn<T>(UnityAction<T[]> action)
+    internal static IEnumerator LoadBuildIn<T>(UnityAction<T> action)
     {
         var assembly = typeof(CustomAssetUtility).Assembly;
         using var fs = assembly.GetManifestResourceStream("ZNT.Evolution.Core.Resources.index.bundle")
@@ -101,8 +101,7 @@ public static class CustomAssetUtility
         var request = bundle.LoadAssetAsync(path);
         yield return request;
         var source = ((I2.Loc.LanguageSourceAsset)request.asset).SourceData;
-        var assets = source.Assets.OfType<T>().ToArray();
+        foreach (var asset in source.Assets.OfType<T>()) action.Invoke(asset);
         bundle.Unload(true);
-        action.Invoke(assets);
     }
 }
