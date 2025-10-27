@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using BepInEx.Logging;
@@ -322,7 +323,7 @@ internal static class CustomAssetObjectPatch
     {
         if (__instance.DefaultOrientation.GetVariation(0) is not GameObject prefab) return;
         if (prefab.GetComponentInChildren<Health>() is { } health) health.EditorVisibility = true;
-        if (prefab.TryGetComponent(out OneWayCollider _)) prefab.FixResizeHandles().GetComponentSafe<OneWayEditor>();
+        if (prefab.TryGetComponent(out OneWayCollider _)) prefab.GetComponentSafe<OneWayEditor>().FixResizeHandles();
         switch (prefab.GetComponent<BaseBehaviour>())
         {
             case MineBehaviour:
@@ -338,13 +339,20 @@ internal static class CustomAssetObjectPatch
         }
     }
 
-    private static GameObject FixResizeHandles(this GameObject prefab)
+    private static void FixResizeHandles(this OneWayEditor prefab)
     {
         var resize = prefab.GetComponent<ResizeHandles>();
         resize.MinBounds = new Bounds(center: Vector2.zero, size: Vector2.one * 0.6f);
         resize.RoundToNearest = 1f / 4f;
         resize.Bounds = new Bounds(center: Vector2.zero, size: Vector2.one);
-        return prefab;
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(OneWayCollider), "Start")]
+    private static IEnumerator Start(IEnumerator __result, OneWayCollider __instance)
+    {
+        if (__instance.GetComponent<OneWayEditor>()) yield break;
+        yield return __result;
     }
 
     #endregion
