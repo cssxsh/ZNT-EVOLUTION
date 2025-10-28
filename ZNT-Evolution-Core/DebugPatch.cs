@@ -137,7 +137,7 @@ internal static class DebugPatch
     [HarmonyPatch(typeof(CharacterBehaviour), "OnDespawned")]
     public static void OnDespawned(CharacterBehaviour __instance)
     {
-        var prefab = __instance.Character.Components.Asset.Asset?.Prefab.GetComponent<CharacterBehaviour>();
+        var prefab = __instance.GetComponent<PoolRetriever>()?.Prefab?.GetComponent<CharacterBehaviour>();
         if (prefab is null) return;
         __instance.SensesIgnored = prefab.SensesIgnored;
     }

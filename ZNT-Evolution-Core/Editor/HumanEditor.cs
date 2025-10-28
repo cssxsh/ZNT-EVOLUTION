@@ -206,7 +206,7 @@ public class HumanEditor : Editor
 
     private void OnDespawned()
     {
-        var prefab = Behaviour.SharedAsset?.Prefab.GetComponent<HumanEditor>();
+        var prefab = GetComponent<PoolRetriever>()?.Prefab?.GetComponent<HumanEditor>();
         if (prefab is null) return;
         VisionCastAll = prefab.VisionCastAll;
         VisionKeepLostTrack = prefab.VisionKeepLostTrack;
