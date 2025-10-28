@@ -132,6 +132,8 @@ internal static class DebugPatch
     }
 
     [HarmonyPostfix]
+    [HarmonyPatch(typeof(HumanBehaviour), "OnDespawned")]
+    [HarmonyPatch(typeof(ZombieBehaviour), "OnDespawned")]
     [HarmonyPatch(typeof(CharacterBehaviour), "OnDespawned")]
     public static void OnDespawned(CharacterBehaviour __instance)
     {
