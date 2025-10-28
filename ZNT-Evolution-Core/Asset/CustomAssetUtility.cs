@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using HarmonyLib;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -88,10 +89,9 @@ public static class CustomAssetUtility
 
     internal static IEnumerator LoadBuildIn<T>(UnityAction<T> action)
     {
-        var assembly = typeof(CustomAssetUtility).Assembly;
-        using var fs = assembly.GetManifestResourceStream("ZNT.Evolution.Core.Resources.index.bundle")
-                       ?? throw new FileNotFoundException("index.bundle");
-        var create = AssetBundle.LoadFromStreamAsync(fs);
+        using var fs = Assembly.GetExecutingAssembly()
+            .GetManifestResourceStream("ZNT.Evolution.Core.Resources.index.bundle");
+        var create = AssetBundle.LoadFromStreamAsync(fs ?? throw new FileNotFoundException("index.bundle"));
         yield return create;
         var bundle = create.assetBundle;
         var path = "all";

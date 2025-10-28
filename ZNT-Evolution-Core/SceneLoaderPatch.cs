@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using BepInEx.Configuration;
+using System.Reflection;
 using BepInEx.Logging;
 using HarmonyLib;
 using UIWidgets;
@@ -57,34 +57,22 @@ internal static class SceneLoaderPatch
     [HarmonyPatch(typeof(I2.Loc.LocalizationManager), "UpdateSources")]
     public static void UpdateSources()
     {
-        if (I2.Loc.LocalizationManager.Sources
-            .SelectMany(loaded => loaded.GetCategories())
-            .Any(category => category == "Evolution"))
-        {
-            return;
-        }
-
-        _localization ??= new I2.Loc.LanguageSourceData();
+        if (_localization != null) return;
+        var localization = new I2.Loc.LanguageSourceData();
         try
         {
-            _localization.Import_CSV(Category: "Evolution", CSVstring: Resource("Evolution.csv"));
+            using var fs = Assembly.GetExecutingAssembly()
+                .GetManifestResourceStream("ZNT.Evolution.Core.Resources.Evolution.csv");
+            using var reader = new StreamReader(fs ?? throw new FileNotFoundException("Evolution.csv"));
+            localization.Import_CSV(Category: "Evolution", CSVstring: reader.ReadToEnd());
         }
         catch (FileNotFoundException e)
         {
             Logger.LogError(e);
         }
 
-        I2.Loc.LocalizationManager.Sources.Add(_localization);
+        I2.Loc.LocalizationManager.Sources.Add(_localization = localization);
         Logger.LogInfo("Evolution LanguageSource Loaded.");
-    }
-
-    private static string Resource(string name)
-    {
-        var assembly = typeof(EvolutionCorePlugin).Assembly;
-        var path = assembly.GetManifestResourceNames().FirstOrDefault(path => path.EndsWith(name));
-        using var fs = assembly.GetManifestResourceStream(path) ?? throw new FileNotFoundException(name);
-        using var reader = new StreamReader(fs);
-        return reader.ReadToEnd();
     }
 
     private static I2.Loc.TermData GetTermData(this LevelElement element)
