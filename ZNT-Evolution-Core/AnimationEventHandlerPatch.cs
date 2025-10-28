@@ -4,6 +4,7 @@ using System.Reflection;
 using BepInEx.Logging;
 using HarmonyLib;
 using JetBrains.Annotations;
+using ZNT.Evolution.Core.Editor;
 
 // ReSharper disable InconsistentNaming
 namespace ZNT.Evolution.Core;
@@ -98,5 +99,14 @@ internal static class AnimationEventHandlerPatch
             controller.transform.forward,
             frame.eventInt
         );
+    }
+
+    [UsedImplicitly]
+    [Description("RegisterTriggerEvent:repulse")]
+    public static void Repulse(HumanAnimationController controller, tk2dSpriteAnimationFrame frame)
+    {
+        var behaviour = Traverse.Create(controller).Field<HumanBehaviour>("Behaviour").Value;
+        var repulse = behaviour.Rage.transform.Find("Repulse");
+        if (repulse) repulse.GetComponent<ExplosionEditor>().StartExplosion();
     }
 }
