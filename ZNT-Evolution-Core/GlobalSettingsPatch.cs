@@ -87,10 +87,9 @@ internal static class GlobalSettingsPatch
     }
 
     [HarmonyPostfix]
-    [HarmonyPatch(typeof(TriggerDetection), "OnDespawned")]
-    public static void OnDespawned(TriggerDetection __instance)
+    [HarmonyPatch(typeof(RayConeDetection), "ResetDeviatonAngle")]
+    public static void OnDespawned(RayConeDetection __instance)
     {
-        if (__instance is not RayConeDetection) return;
         foreach (var attachment in __instance.Origin.GetComponentsInChildren<LaserAttachment>())
         {
             ComponentSingleton<GamePoolManager>.Instance.Despawn(attachment);
