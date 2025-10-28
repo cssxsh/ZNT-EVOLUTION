@@ -139,7 +139,7 @@ internal static class SceneLoaderPatch
 
         foreach (var (_, info) in BepInEx.Bootstrap.Chainloader.PluginInfos)
         {
-            if (info.Metadata.Name == "UnityExplorer") continue;
+            if (!info.Metadata.GUID.Contains("znt")) continue;
             foreach (var (definition, entry) in info.Instance.Config)
             {
                 var term = _localization.GetTermData($"{info.Metadata.Name}/{definition}")
@@ -187,19 +187,16 @@ internal static class SceneLoaderPatch
             }
         }
 
-        var reload = panel.transform.Find("Reset Entry").GetComponentInChildren<Button>();
-        reload.OnClick(() =>
+        var reset = panel.transform.Find("Reset Entry").GetComponentInChildren<Button>();
+        reset.OnClick(() =>
         {
             foreach (var (_, info) in BepInEx.Bootstrap.Chainloader.PluginInfos)
             {
-                var plugin = Traverse.Create(info.Instance);
-                foreach (var name in plugin.Fields())
+                if (!info.Metadata.GUID.Contains("znt")) continue;
+                foreach (var (definition, entry) in info.Instance.Config)
                 {
-                    var field = plugin.Field(name);
-                    if (!typeof(ConfigEntryBase).IsAssignableFrom(field.GetValueType())) continue;
-                    var entry = field.GetValue<ConfigEntryBase>();
                     entry.BoxedValue = entry.DefaultValue;
-                    var item = content.transform.Find($"{info.Metadata.Name} {name} Entry");
+                    var item = content.transform.Find($"{info.Metadata.Name} {definition} Entry");
                     switch (entry.BoxedValue)
                     {
                         case bool value:

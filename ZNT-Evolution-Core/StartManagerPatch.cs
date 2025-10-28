@@ -120,7 +120,7 @@ internal static class StartManagerPatch
         Logger.LogInfo("Loading EventHandle");
         foreach (var (_, info) in BepInEx.Bootstrap.Chainloader.PluginInfos)
         {
-            if (info.Metadata.Name == "UnityExplorer") continue;
+            if (!info.Metadata.GUID.Contains("znt")) continue;
             AnimationEventHandlerPatch.RegisterAnimationEvent(info.Instance.GetType().Assembly);
         }
 
