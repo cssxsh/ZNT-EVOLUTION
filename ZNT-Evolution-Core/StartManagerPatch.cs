@@ -12,20 +12,18 @@ internal static class StartManagerPatch
 {
     private static readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource(nameof(StartManager));
 
-    private static IEnumerator prefix;
-
     [HarmonyPostfix]
     [HarmonyPatch(typeof(StartManager), "Start")]
-    public static void Start(StartManager __instance, IEnumerator __result)
+    public static IEnumerator Start(IEnumerator __result, StartManager __instance)
     {
-        prefix = __result;
+        yield return __result;
         EvolutionCorePlugin.Instance.StartCoroutine(LoadAsset(__instance));
     }
 
     private static IEnumerator LoadAsset(StartManager starter)
     {
         Logger.LogInfo("Initializing");
-        yield return prefix;
+        Traverse.Create(starter).Field<bool>("isLoading").Value = true;
         yield return CustomAssetUtility.LoadBuildIn<CustomAsset>(asset =>
         {
             CustomAssetUtility.Cache[asset.NameAndType()] = asset;
@@ -124,11 +122,7 @@ internal static class StartManagerPatch
             AnimationEventHandlerPatch.RegisterAnimationEvent(info.Instance.GetType().Assembly);
         }
 
-        prefix = null;
+        Traverse.Create(starter).Field<bool>("isLoading").Value = false;
         starter.LoadNextScene();
     }
-
-    [HarmonyPrefix]
-    [HarmonyPatch(typeof(StartManager), "LoadNextScene")]
-    public static bool LoadNextScene(StartManager __instance) => prefix is null;
 }
