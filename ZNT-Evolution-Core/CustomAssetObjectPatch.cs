@@ -185,10 +185,11 @@ internal static class CustomAssetObjectPatch
     [HarmonyPatch(typeof(PhysicObjectBehaviour), "Initialize")]
     public static void Initialize(PhysicObjectBehaviour __instance)
     {
-        __instance.DamageTriger.enabled |= __instance.ExplodeOn.HasFlag(ExplodeSurfaceConverter.Zombie);
-        __instance.DamageTriger.enabled |= __instance.ExplodeOn.HasFlag(ExplodeSurfaceConverter.Climber);
-        __instance.DamageTriger.enabled |= __instance.ExplodeOn.HasFlag(ExplodeSurfaceConverter.Blocker);
-        __instance.DamageTriger.enabled |= __instance.ExplodeOn.HasFlag(ExplodeSurfaceConverter.Tank);
+        __instance.DamageTriger.enabled = __instance.DamageCharacterOnTrigger
+                                          || __instance.ExplodeOn.HasFlag(ExplodeSurfaceConverter.Zombie)
+                                          || __instance.ExplodeOn.HasFlag(ExplodeSurfaceConverter.Climber)
+                                          || __instance.ExplodeOn.HasFlag(ExplodeSurfaceConverter.Blocker)
+                                          || __instance.ExplodeOn.HasFlag(ExplodeSurfaceConverter.Tank);
 
         if (__instance.DamageTriger.enabled && __instance.ExplodeOn.HasFlag(ExplodeSurfaceConverter.Target))
         {
