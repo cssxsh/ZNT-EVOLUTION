@@ -60,8 +60,8 @@ internal class ExplodeSurfaceConverter : CustomCreationConverter<ExplodeSurface>
     public override object ReadJson(JsonReader reader, Type type, object _, JsonSerializer serializer)
     {
         if (reader.TokenType == JsonToken.Integer) return (ExplodeSurface)serializer.Deserialize<int>(reader);
-        var flags = serializer.Deserialize<string>(reader).Split(',', ' ');
-        return flags.Aggregate(None, (mask, flag) => mask | flag switch
+        var flags = serializer.Deserialize<string>(reader).Split(',');
+        return flags.Aggregate(None, (mask, flag) => mask | flag.Trim() switch
         {
             nameof(Wall) => Wall,
             nameof(Ground) => Ground,

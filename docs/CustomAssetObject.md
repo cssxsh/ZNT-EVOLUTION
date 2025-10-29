@@ -210,3 +210,6 @@
 * Damage 伤害值
 * ApplyForceOn `Tag` 力作用于
 * Force 爆炸推力
+* CustomForceDirection `true`/`false` 锁定推力方向
+* ForceDirection `UnityEngine.Vector2` 锁定推力方向
+* TransformForceDirection `true`/`false` 锁定推力方向

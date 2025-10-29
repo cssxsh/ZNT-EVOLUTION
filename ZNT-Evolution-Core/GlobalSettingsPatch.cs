@@ -19,15 +19,13 @@ internal static class GlobalSettingsPatch
     public static IEnumerator AddAliveCorpse(IEnumerator __result, CorpseBehaviour __instance)
     {
         if (CorpsesCountMax < 0) yield break;
-        var parameters = Traverse.Create(__instance)
-            .Field<CorpseParameter>("parameters").Value;
+        var parameters = Traverse.Create(__instance).Field<CorpseParameter>("parameters").Value;
         if (parameters.Rise) yield break;
         yield return Wait.ForFiveSeconds;
-        var aliveCorpses = Traverse.Create<CorpseBehaviour>()
-            .Field<Queue<CorpseBehaviour>>("aliveCorpses").Value;
-        aliveCorpses.Enqueue(__instance);
-        if (aliveCorpses.Count <= CorpsesCountMax) yield break;
-        aliveCorpses.Dequeue().Dissolve();
+        var corpses = Traverse.Create<CorpseBehaviour>().Field<Queue<CorpseBehaviour>>("aliveCorpses").Value;
+        corpses.Enqueue(__instance);
+        if (corpses.Count <= CorpsesCountMax) yield break;
+        corpses.Dequeue().Dissolve();
     }
 
     #endregion
@@ -55,8 +53,7 @@ internal static class GlobalSettingsPatch
         for (var i = __instance.Origin.childCount; i < __instance.RayCount; i++)
         {
             var laser = ComponentSingleton<GamePoolManager>.Instance
-                .Spawn("LaserAttachment", __instance.Origin);
-            laser.gameObject.layer = LayerMask.NameToLayer("Ignore Collisions");
+                .Spawn(nameof(LaserAttachment), __instance.Origin);
             var renderer = laser.GetComponentInChildren<LaserRenderer>();
             renderer.Color = __instance.GetComponentInParent<BaseBehaviour>() switch
             {

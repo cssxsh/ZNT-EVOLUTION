@@ -21,7 +21,7 @@ public class ExplosionEditor : Editor
         set => Effect.Damage = value;
     }
 
-    [SerializeInEditor(name: "DamageType")]
+    [SerializeInEditor(name: "Damage Type")]
     public DamageType DamageType
     {
         get => Effect.DamageType;

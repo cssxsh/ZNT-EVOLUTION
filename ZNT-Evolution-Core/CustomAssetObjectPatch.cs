@@ -89,7 +89,7 @@ internal static class CustomAssetObjectPatch
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(ObjectOrientation), "orientation", MethodType.Setter)]
-    public static void CurrentOrientation(ObjectOrientation __instance, ObjectOrientation.Orientation value)
+    public static void SetOrientation(ObjectOrientation __instance, ObjectOrientation.Orientation value)
     {
         var controller = __instance.GetComponent<MovingObjectAnimationController>();
         if (controller is null) return;
@@ -237,13 +237,27 @@ internal static class CustomAssetObjectPatch
     [HarmonyPatch(typeof(HumanBehaviour), "Initialize")]
     public static void Initialize(HumanBehaviour __instance)
     {
-        // ReSharper disable once InvertIf
         if (__instance.Rage.Repulsion)
         {
             var repulse = __instance.Rage.Repulsion.CreatePrefab(parent: __instance.Rage.transform);
             repulse.name = "Repulse";
-            repulse.GetComponent<ExplosionEditor>().EditorVisibility.CustomName = "Repulsion";
+            repulse.GetComponent<ExplosionEditor>().EditorVisibility.CustomName = nameof(Rage.Repulsion);
             repulse.GetComponent<ExplosionEffect>().DespawnOnEnd = false;
+        }
+
+        foreach (var (key, attachment) in __instance.SharedAsset.Attachments as IDictionary<string, GameObject>)
+        {
+            switch (key)
+            {
+                case "moving_attack":
+                case "shield_attack":
+                case "shield_effect":
+                case "attach_laser":
+                    continue;
+                default:
+                    Logger.LogWarning($"Attachments {key} not supported for {attachment}");
+                    break;
+            }
         }
     }
 
@@ -324,7 +338,7 @@ internal static class CustomAssetObjectPatch
     {
         if (__instance.DefaultOrientation.GetVariation(0) is not GameObject prefab) return;
         if (prefab.GetComponentInChildren<Health>() is { } health) health.EditorVisibility = true;
-        if (prefab.TryGetComponent(out OneWayCollider _)) prefab.GetComponentSafe<OneWayEditor>().FixResizeHandles();
+        if (prefab.TryGetComponent(out OneWayCollider _)) prefab.AddComponent<OneWayEditor>().FixResizeHandles();
         switch (prefab.GetComponent<BaseBehaviour>())
         {
             case MineBehaviour:

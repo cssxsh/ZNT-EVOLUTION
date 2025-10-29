@@ -80,14 +80,12 @@ internal static class SceneLoaderPatch
         var term = _localization.GetTermData($"Evolution/{element.name}");
         if (term != null) return term;
         term = _localization.AddTerm($"Evolution/{element.name}");
-        var info = element.ElementType switch
+        term.SetTranslation(0, element.ElementType switch
         {
             LevelElement.Type.Brush => $"{element.Title} [{element.AllowedTileSystems}]",
             LevelElement.Type.Decor => $"{element.Title} [{element.AllowedDecorSystems}]",
             _ => throw new ArgumentOutOfRangeException(element.name)
-        };
-        term.SetTranslation(0, info);
-
+        });
         return term;
     }
 
@@ -153,7 +151,7 @@ internal static class SceneLoaderPatch
                     var item = UnityEngine.Object.Instantiate(original: fullscreen, parent: content.transform);
                     item.name = $"{info.Metadata.Name} {definition} Entry";
                     item.GetComponentsInChildren<I2.Loc.Localize>(includeInactive: true)
-                        .ForEach(localize => localize.Term = $"{info.Metadata.Name}/{definition}");
+                        .ForEach(localize => localize.Term = term.Term);
                     item.SetActive(true);
                     var toggle = item.GetComponentInChildren<Toggle>(includeInactive: true);
                     toggle.OnValueChanged(value => entry.BoxedValue = value);
@@ -166,7 +164,7 @@ internal static class SceneLoaderPatch
                     var item = UnityEngine.Object.Instantiate(original: fps, parent: content.transform);
                     item.name = $"{info.Metadata.Name} {definition} Entry";
                     item.GetComponentsInChildren<I2.Loc.Localize>(includeInactive: true)
-                        .ForEach(localize => localize.Term = $"{info.Metadata.Name}/{definition}");
+                        .ForEach(localize => localize.Term = term.Term);
                     item.SetActive(true);
                     var input = item.GetComponentInChildren<InputField>(includeInactive: true);
                     input.OnValueChanged(value =>
@@ -326,7 +324,7 @@ internal static class SceneLoaderPatch
         }
 
         scroll.Rebuild(CanvasUpdate.PostLayout);
-        foreach (var updater in updaters) updater?.OnEditorOpen();
+        foreach (var updater in updaters) updater.OnEditorOpen();
 
         return false;
     }

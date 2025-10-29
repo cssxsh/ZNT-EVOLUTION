@@ -31,7 +31,7 @@ internal class FrameworkInputsConverter : CustomCreationConverter<Framework.Inpu
     public override object ReadJson(JsonReader reader, Type type, object _, JsonSerializer serializer)
     {
         var jObject = JObject.Load(reader);
-        type = Type.GetType(jObject["$type"].Value<string>()) ?? type;
+        type = Type.GetType(jObject.Value<string>("$type")) ?? type;
         using var jReader = new JTokenReader(jObject);
         return base.ReadJson(jReader, type, _, serializer);
     }

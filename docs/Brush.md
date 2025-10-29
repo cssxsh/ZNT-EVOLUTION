@@ -28,3 +28,32 @@
 - `PhysicObject`: `4088`
 - `MovingObject`: `4106`
 - `SentryGun`: `4359`
+
+## Vision
+
+> RayConeDetection
+
+| name         | Layers                                                           | WithTags                             | WithoutTags    |
+|:-------------|:-----------------------------------------------------------------|:-------------------------------------|:---------------|
+| `Human`      | `Zombie, Crate, Gameplay, Stairs Top, Block Humans, World Enemy` | `Zombie, WorldEnemy`                 | `IgnoreAttack` |
+| `WorldEnemy` | `Zombie, Human, Gameplay, Stairs Top, Block Humans`              | `Human, Zombie`                      |                |
+| `Zombie`     | `Human, Prop, World Enemy`                                       | `Door, Human, Breakable, WorldEnemy` | `CannotAttack` |
+
+## AlertZone
+
+> SphereDetection
+
+| name         | Layers                | WithTags             | WithoutTags    |
+|:-------------|:----------------------|:---------------------|:---------------|
+| `Human`      | `Zombie, World Enemy` | `Zombie, WorldEnemy` | `IgnoreAttack` |
+| `WorldEnemy` | `Zombie, Human`       | `Human, Zombie`      |                |
+
+## DangerZone
+
+> SphereDetection
+
+| name         | Layers                     | WithTags                             | WithoutTags    | 
+|:-------------|:---------------------------|:-------------------------------------|:---------------|
+| `Human`      | `Zombie, World Enemy`      | `Zombie, WorldEnemy`                 | `IgnoreAttack` |
+| `WorldEnemy` | `Zombie, Human`            | `Human, Zombie`                      |                |
+| `Zombie`     | `Human, Prop, World Enemy` | `Door, Human, Breakable, WorldEnemy` | `CannotAttack` |
