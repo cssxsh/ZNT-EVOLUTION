@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using UnityEngine;
+using ZNT.Evolution.Core.Editor;
 using ZNT.LevelEditor;
 
 // ReSharper disable InconsistentNaming
@@ -92,6 +93,54 @@ internal static class DebugPatch
     [HarmonyPrefix]
     [HarmonyPatch(typeof(Character), "OnVisionLost")]
     public static bool OnVisionLost(GameObject target) => target is not null;
+
+    private static bool CheckOneWay(this Collider2D collider, Moveable mover)
+    {
+        if (!OneWayEditor.TryGetOneWay(collider, out var wall)) return true;
+        return wall.Direction == Vector2.up && wall.BlockLayer(mover.Body.gameObject.layer);
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(Moveable), "UpdateIsGrounded")]
+    public static void UpdateIsGrounded(Moveable __instance, out LayerMask __state)
+    {
+        __state = __instance.GroundLayers;
+        if (__instance.State is MoveableState.Climbing or MoveableState.Stepping or MoveableState.StartClimbing) return;
+        var mask = LayerMask.GetMask("Stairs", "Stairs Top");
+        var hit = Physics2D.RaycastNonAlloc(
+            origin: __instance.Body.position,
+            direction: Vector2.down,
+            results: DetectionHelper.CastCheck,
+            distance: 0.9f,
+            layerMask: mask) > 0;
+        if (hit && DetectionHelper.CastCheck[0].collider.CheckOneWay(__instance)) return;
+        Traverse.Create(__instance).Field<LayerMask>("groundLayers").Value = __state & ~mask;
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(Moveable), "UpdateIsGrounded")]
+    public static void UpdateIsGrounded(Moveable __instance, LayerMask __state)
+    {
+        Traverse.Create(__instance).Field<LayerMask>("groundLayers").Value = __state;
+    }
+    
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(TankBehaviour), "AfterStepping")]
+    [HarmonyPatch(typeof(CharacterBehaviour), "AfterStepping")]
+    public static void AfterStepping(CharacterBehaviour __instance, out LayerMask __state)
+    {
+        __state = __instance.Mover.GroundLayers;
+        var mask = LayerMask.GetMask("Stairs", "Stairs Top");
+        Traverse.Create(__instance.Mover).Field<LayerMask>("groundLayers").Value = __state & ~mask;
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(TankBehaviour), "AfterStepping")]
+    [HarmonyPatch(typeof(CharacterBehaviour), "AfterStepping")]
+    public static void AfterStepping(CharacterBehaviour __instance, LayerMask __state)
+    {
+        Traverse.Create(__instance.Mover).Field<LayerMask>("groundLayers").Value = __state;
+    }
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(Moveable), "SetSpeed")]
