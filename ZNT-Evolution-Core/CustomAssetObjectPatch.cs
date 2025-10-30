@@ -237,14 +237,6 @@ internal static class CustomAssetObjectPatch
     [HarmonyPatch(typeof(HumanBehaviour), "Initialize")]
     public static void Initialize(HumanBehaviour __instance)
     {
-        if (__instance.Rage.Repulsion)
-        {
-            var repulse = __instance.Rage.Repulsion.CreatePrefab(parent: __instance.Rage.transform);
-            repulse.name = "Repulse";
-            repulse.GetComponent<ExplosionEditor>().EditorVisibility.CustomName = nameof(Rage.Repulsion);
-            repulse.GetComponent<ExplosionEffect>().DespawnOnEnd = false;
-        }
-
         foreach (var (key, attachment) in __instance.SharedAsset.Attachments as IDictionary<string, GameObject>)
         {
             switch (key)
@@ -261,12 +253,39 @@ internal static class CustomAssetObjectPatch
         }
     }
 
+    internal static GameObject GetRepulse(this Rage __instance)
+    {
+        var repulse = Traverse.Create(__instance).Field<GameObject>("repulse");
+        if (repulse.Value) return repulse.Value;
+        return repulse.Value = __instance.transform.Find("Repulse")?.gameObject;
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(Rage), "Repulsion", MethodType.Setter)]
+    public static void SetRepulsion(Rage __instance, ExplosionAsset value)
+    {
+        var repulse = __instance.GetRepulse();
+        if (repulse)
+        {
+            repulse.GetComponent<ExplosionEditor>().EditorVisibility.CustomName = null;
+            repulse.GetComponent<ExplosionEffect>().DespawnOnEnd = true;
+            ComponentSingleton<GamePoolManager>.Instance.Despawn(repulse);
+        }
+
+        if (value is null) return;
+        var prefab = value.CreatePrefab(parent: __instance.transform);
+        prefab.name = "Repulse";
+        prefab.GetComponent<ExplosionEditor>().EditorVisibility.CustomName = nameof(Rage.Repulsion);
+        prefab.GetComponent<ExplosionEffect>().DespawnOnEnd = false;
+        Traverse.Create(__instance).Field<GameObject>("repulse").Value = prefab.gameObject;
+    }
+
     [HarmonyPrefix]
     [HarmonyPatch(typeof(Rage), "OnHit")]
     public static bool OnHit(Rage __instance, Parameters param)
     {
         if (!__instance.enabled) return false;
-        var repulse = __instance.transform.Find("Repulse");
+        var repulse = __instance.GetRepulse();
         if (repulse is null) return false;
         var flags = DamageFlagsConverter.GetDamageFlags(__instance.DamageType);
         var damage = param.GetDamageType();
@@ -295,11 +314,7 @@ internal static class CustomAssetObjectPatch
     [HarmonyPatch(typeof(Rage), "OnDespawned")]
     public static void OnDespawned(Rage __instance)
     {
-        var repulse = __instance.transform.Find("Repulse");
-        if (repulse is null) return;
-        repulse.GetComponent<ExplosionEditor>().EditorVisibility.CustomName = null;
-        repulse.GetComponent<ExplosionEffect>().DespawnOnEnd = true;
-        ComponentSingleton<GamePoolManager>.Instance.Despawn(repulse);
+        __instance.Repulsion = null;
     }
 
     [HarmonyPostfix]

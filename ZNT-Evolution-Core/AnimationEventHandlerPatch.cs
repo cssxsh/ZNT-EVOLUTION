@@ -106,7 +106,7 @@ internal static class AnimationEventHandlerPatch
     public static void Repulse(HumanAnimationController controller, tk2dSpriteAnimationFrame frame)
     {
         var behaviour = Traverse.Create(controller).Field<HumanBehaviour>("Behaviour").Value;
-        var repulse = behaviour.Rage.transform.Find("Repulse");
+        var repulse = behaviour.Rage.GetRepulse();
         if (repulse) repulse.GetComponent<ExplosionEditor>().StartExplosion();
     }
 }
