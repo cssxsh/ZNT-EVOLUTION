@@ -150,6 +150,13 @@ internal static class DebugPatch
         return Traverse.Create(__instance).Field<Health>("health").Value = __instance.GetComponent<Health>();
     }
 
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(PathologicalGames.PrefabPool), "nameInstance")]
+    public static void AddPoolRetriever(Transform instance)
+    {
+        instance.gameObject.GetComponentSafe<PoolRetriever>();
+    }
+
     [HarmonyPrefix]
     [HarmonyPatch(typeof(ObjectSettings), "CopyObject")]
     public static bool CopyObject(ObjectSettings __instance, Rotorz.Tile.TileIndex ti)
