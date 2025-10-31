@@ -206,6 +206,21 @@ internal static class DebugPatch
         instance.gameObject.GetComponentSafe<PoolRetriever>();
     }
 
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(AbstractPoolManager<GamePoolManager>), "Spawn", 
+        typeof(Transform), typeof(Transform), typeof(Vector3), typeof(Quaternion), typeof(bool), typeof(bool))]
+    public static void Spawn(
+        AbstractPoolManager<GamePoolManager> __instance, Transform __result,
+        Transform prefab, Transform parent, Vector3 position, Quaternion rotation, bool receiveDespawn, bool cleanName)
+    {
+        if (cleanName) __result.name = $"{prefab.name}({__instance.PoolName})";
+        if (__instance.ExecutionMode.HasAny(Execution.SceneMode)) return;
+        if (rotation == default) rotation = Quaternion.identity;
+        __result.SetParent(parent ?? __instance.SpawnPool.group, true);
+        __result.localPosition = position;
+        __result.localRotation = rotation;
+    }
+
     [HarmonyPrefix]
     [HarmonyPatch(typeof(ObjectSettings), "CopyObject")]
     public static bool CopyObject(ObjectSettings __instance, Rotorz.Tile.TileIndex ti)
