@@ -75,12 +75,7 @@ public class CharacterAllocationEffect : TriggerEffect
         if (_allocated == null) return;
         if (_allocated.TryGetValue(target, out var other))
         {
-            if (other.Spare >= Spare)
-            {
-                _cache.Remove(target);
-                return;
-            }
-
+            if (other.Spare >= Spare && _cache.Remove(target)) return;
             other.DetectedGameObjects.Remove(target);
             other._cache.Remove(target);
         }
