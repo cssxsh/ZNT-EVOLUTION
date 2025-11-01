@@ -214,7 +214,8 @@ internal static class DebugPatch
     }
 
     [HarmonyPostfix]
-    [HarmonyPatch(typeof(AbstractPoolManager<GamePoolManager>), "Spawn", 
+    [HarmonyPatch(
+        typeof(AbstractPoolManager<GamePoolManager>), "Spawn", 
         typeof(Transform), typeof(Transform), typeof(Vector3), typeof(Quaternion), typeof(bool), typeof(bool))]
     public static void Spawn(
         AbstractPoolManager<GamePoolManager> __instance, Transform __result,
@@ -223,9 +224,20 @@ internal static class DebugPatch
         if (cleanName) __result.name = $"{prefab.name}({__instance.PoolName})";
         if (__instance.ExecutionMode.HasAny(Execution.SceneMode)) return;
         if (rotation == default) rotation = Quaternion.identity;
-        __result.SetParent(parent ?? __instance.SpawnPool.group, true);
+        __result.SetParent(parent, true);
         __result.localPosition = position;
         __result.localRotation = rotation;
+        __result.BroadcastMessage(methodName: "OnSpawned", options: SendMessageOptions.DontRequireReceiver);
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(AbstractPoolManager<GamePoolManager>), "Despawn", typeof(Transform))]
+    public static void Despawn(AbstractPoolManager<GamePoolManager> __instance, Transform despawn)
+    {
+        if (despawn is null) return;
+        if (__instance.ExecutionMode.HasAny(Execution.SceneMode)) return;
+        despawn.SetParent(null, true);
+        despawn.BroadcastMessage(methodName: "OnDespawned", options: SendMessageOptions.DontRequireReceiver);
     }
 
     [HarmonyPrefix]
