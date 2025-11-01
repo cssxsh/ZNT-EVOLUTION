@@ -19,9 +19,9 @@ public class CharacterAllocationEffect : TriggerEffect
         }
     }
 
-    private static Dictionary<CharacterType, Context> _stopper;
+    private static readonly Dictionary<CharacterType, Context> Stopper = new();
 
-    private static Dictionary<CharacterType, Context> _attacker;
+    private static readonly Dictionary<CharacterType, Context> Vision = new();
 
     private Context FetchContext()
     {
@@ -29,14 +29,12 @@ public class CharacterAllocationEffect : TriggerEffect
         {
             case nameof(Character.Components.Stopper):
                 character ??= GetComponentInParent<Character>();
-                _stopper ??= new Dictionary<CharacterType, Context>();
-                if (_stopper.TryGetValue(character.CharacterType, out var stop)) return stop;
-                return _stopper[character.CharacterType] = new Context();
-            case nameof(Character.Components.Attacker):
+                if (Stopper.TryGetValue(character.CharacterType, out var stop)) return stop;
+                return Stopper[character.CharacterType] = new Context();
+            case nameof(Character.Components.Vision):
                 character ??= GetComponentInParent<Character>();
-                _attacker ??= new Dictionary<CharacterType, Context>();
-                if (_attacker.TryGetValue(character.CharacterType, out var attack)) return attack;
-                return _attacker[character.CharacterType] = new Context();
+                if (Vision.TryGetValue(character.CharacterType, out var vision)) return vision;
+                return Vision[character.CharacterType] = new Context();
             default:
                 return null;
         }
