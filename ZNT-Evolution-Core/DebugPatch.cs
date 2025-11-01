@@ -28,6 +28,13 @@ internal static class DebugPatch
     [HarmonyPatch(typeof(I2.Loc.LocalizationManager), "GetTermTranslation")]
     public static string GetTermTranslation(string __result, string Term) => __result ?? Term;
 
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(AchievementManager), "OnCreate")]
+    public static void OnCreate(AchievementManager __instance)
+    {
+        __instance.enabled = Steamworks.SteamFriends.GetPersonaName() != "Goldberg";
+    }
+
     [HarmonyPrefix]
     [HarmonyPatch(typeof(SpawnCharacterChooser), "OnCreate")]
     public static void OnCreate(SpawnCharacterChooser __instance)
@@ -278,8 +285,4 @@ internal static class DebugPatch
             .Where(component => !component.EditorVisibility).ToList();
         __instance.ExcludedGameObjects ??= new List<GameObject>();
     }
-
-    [HarmonyPrefix]
-    [HarmonyPatch(typeof(SteamManager), "Initialized", MethodType.Getter)]
-    public static bool Initialized() => Steamworks.SteamFriends.GetPersonaName() != "Goldberg";
 }
