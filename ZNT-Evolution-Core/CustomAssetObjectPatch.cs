@@ -70,6 +70,14 @@ internal static class CustomAssetObjectPatch
         return false;
     }
 
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(MineBehaviour), "Destroy")]
+    public static void Destroy(MineBehaviour __instance)
+    {
+        var prefab = Traverse.Create(__instance).Field<Transform>("explosionPrefab").Value;
+        ComponentSingleton<GamePoolManager>.Instance.Despawn(prefab);
+    }
+
     #endregion
 
     #region MovingObjectAsset
