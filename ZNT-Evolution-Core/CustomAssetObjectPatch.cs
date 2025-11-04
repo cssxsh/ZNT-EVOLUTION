@@ -25,9 +25,10 @@ internal static class CustomAssetObjectPatch
         var explode = Traverse.Create(explosion).Field<bool>("autoExplode");
         var auto = explode.Value;
         explode.Value = false;
-        var prefab = explosion.CreateGameObject(parent: parent);
+        var prefab = ComponentSingleton<GamePoolManager>.Instance.Spawn(explosion.Prefab, parent);
+        explosion.LoadFromAsset(prefab.gameObject);
         explode.Value = auto;
-        return prefab.transform;
+        return prefab;
     }
 
     [HarmonyPrefix]
@@ -255,7 +256,11 @@ internal static class CustomAssetObjectPatch
                 case "attach_laser":
                     continue;
                 default:
-                    Logger.LogWarning($"Attachments {key} not supported for {attachment}");
+                    if (attachment is null) continue;
+                    if (__instance.transform.Find(key)) continue;
+                    Logger.LogDebug($"Spawn {attachment} for {__instance.gameObject} Attachments[\"{key}\"]");
+                    // 'OnSpawned' triggered by 'BroadcastMessage'
+                    ComponentSingleton<GamePoolManager>.Instance.Spawn(attachment, __instance.transform).name = key;
                     break;
             }
         }
