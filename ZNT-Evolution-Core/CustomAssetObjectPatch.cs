@@ -398,5 +398,12 @@ internal static class CustomAssetObjectPatch
         yield return __result;
     }
 
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(StairBehaviour), "OnAwake")]
+    private static void OnAwake(StairBehaviour __instance)
+    {
+        _ = __instance.gameObject.GetComponentSafe<StairEditor>();
+    }
+
     #endregion
 }
