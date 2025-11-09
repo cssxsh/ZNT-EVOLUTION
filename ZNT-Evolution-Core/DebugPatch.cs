@@ -145,7 +145,7 @@ internal static class DebugPatch
             results: DetectionHelper.CastCheck,
             distance: 0.9f,
             layerMask: mask) > 0;
-        if (hit && DetectionHelper.CastCheck[0].collider.CheckOneWay(__instance)) return;
+        if (!hit || DetectionHelper.CastCheck[0].collider.CheckOneWay(__instance)) return;
         Traverse.Create(__instance).Field<LayerMask>("groundLayers").Value = __state & ~mask;
     }
 
@@ -155,7 +155,7 @@ internal static class DebugPatch
     {
         Traverse.Create(__instance).Field<LayerMask>("groundLayers").Value = __state;
     }
-    
+
     [HarmonyPrefix]
     [HarmonyPatch(typeof(TankBehaviour), "AfterStepping")]
     [HarmonyPatch(typeof(CharacterBehaviour), "AfterStepping")]
