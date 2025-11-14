@@ -1,8 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using HarmonyLib;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 using ZNT.Evolution.Core.Editor;
 using ZNT.LevelEditor;
 
@@ -291,6 +294,16 @@ internal static class DebugPatch
             parameter: true,
             options: SendMessageOptions.DontRequireReceiver);
         return false;
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(SupportedTypeBinder), "BindVector4Field")]
+    private static void BindVector4Field(SupportedTypeBinder __instance, EditorComponent component, MemberInfo member)
+    {
+        var value = member.GetMemberValue<Vector4>(component.Data);
+        var components = Traverse.Create(__instance).Field<UIBehaviour[]>("uiComponents").Value;
+        ((InputField)components[2]).text = $"{value.z}";
+        ((InputField)components[3]).text = $"{value.w}";
     }
 
     [HarmonyPostfix]

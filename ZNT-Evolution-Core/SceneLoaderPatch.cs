@@ -8,6 +8,7 @@ using HarmonyLib;
 using UIWidgets;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using ZNT.Evolution.Core.Asset;
 using ZNT.LevelEditor;
@@ -255,6 +256,7 @@ internal static class SceneLoaderPatch
     public static void EditorMainScene(SelectionMenu __instance)
     {
         Logger.LogInfo("Update EditorMainScene");
+        __instance.FixBinder();
         __instance.AddCopy();
         __instance.AddEmpty();
     }
@@ -277,6 +279,15 @@ internal static class SceneLoaderPatch
         var empty = UnityEngine.Object.Instantiate(original: container, parent: menu.transform);
         empty.name = "Empty";
         empty.gameObject.SetActive(false);
+    }
+
+    private static void FixBinder(this SelectionMenu menu)
+    {
+        var prefabs = Traverse.Create(menu).Field<SupportedTypePrefabs>("typePrefabs").Value;
+        var binder = prefabs[EditorComponent.SupportedType.Vector4];
+        var fields = binder.GetComponentsInChildren<InputField>();
+        // ReSharper disable once CoVariantArrayConversion
+        Traverse.Create(binder).Field<UIBehaviour[]>("uiComponents").Value = fields;
     }
 
     private static readonly HashSet<string> Activated = new();
