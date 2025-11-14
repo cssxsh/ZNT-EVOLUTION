@@ -234,6 +234,35 @@ internal static class DebugPatch
         return Traverse.Create(__instance).Field<Health>("health").Value = __instance.GetComponent<Health>();
     }
 
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(WeatherRain), "CreateEffect")]
+    public static bool CreateEffect(WeatherRain __instance)
+    {
+        var rain = Traverse.Create(__instance).Field<RainEffect>("rainEffect").Value;
+        return rain is null;
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(WeatherRain), "OnEditorClose")]
+    public static void OnEditorClose(WeatherRain __instance)
+    {
+        var rain = Traverse.Create(__instance).Field<RainEffect>("rainEffect").Value;
+        var intensity = Traverse.Create(__instance).Field<float>("intensity").Value;
+        var length = Traverse.Create(__instance).Field<float>("length").Value;
+        var angle = Traverse.Create(__instance).Field<float>("angle").Value;
+        var speed = Traverse.Create(__instance).Field<Vector2>("speed").Value;
+        var density = Traverse.Create(__instance).Field<Vector4>("density").Value;
+        rain?.UpdateSettings(intensity, length, angle, speed, density);
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(WeatherRain), "CreateEffect")]
+    public static void OnDestroy(WeatherRain __instance)
+    {
+        var rain = Traverse.Create(__instance).Field<RainEffect>("rainEffect").Value;
+        rain?.gameObject.SetActive(false);
+    }
+
     [HarmonyPostfix]
     [HarmonyPatch(typeof(PathologicalGames.PrefabPool), "nameInstance")]
     public static void AddPoolRetriever(Transform instance)
