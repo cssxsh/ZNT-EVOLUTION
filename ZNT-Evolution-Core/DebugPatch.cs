@@ -129,6 +129,26 @@ internal static class DebugPatch
         return false;
     }
 
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(Attacker), "ApplyDamage", typeof(GameObject))]
+    public static bool ApplyDamage(Attacker __instance, GameObject go)
+    {
+        if (go is null) return false;
+        var target = go.transform;
+        if (target == __instance.SelfTarget) return true;
+        return __instance.OverrideAimDirection
+            ? DetectionHelper.GetObjectDistanceFromDirection(
+                origin: __instance.AttackOrigin.position,
+                target: target,
+                direction: __instance.AttackOrigin.right,
+                blockingMask: __instance.BlockingView) <= __instance.DamageRange
+            : DetectionHelper.ObjectInRange(
+                origin: __instance.AttackOrigin.position,
+                target: target,
+                range: __instance.DamageRange,
+                blockingMask: __instance.BlockingView);
+    }
+
     private static bool CheckOneWay(this Collider2D collider, Moveable mover)
     {
         if (!OneWayEditor.TryGetOneWay(collider, out var wall)) return true;
