@@ -108,47 +108,6 @@ internal static class DebugPatch
     [HarmonyPatch(typeof(Character), "OnVisionLost")]
     public static bool OnVisionLost(GameObject target) => target is not null;
 
-    [HarmonyPrefix]
-    [HarmonyPatch(typeof(Attacker), "AttackHit")]
-    public static bool AttackHit(Attacker __instance)
-    {
-        if (!__instance.HitMultipleTargets) return true;
-        var rays = __instance.GetComponentInChildren<RayConeDetection>();
-        if (rays is null) return true;
-        var layer = Traverse.Create(__instance).Field<int>("currentTargetLayer");
-        var index = Traverse.Create(__instance).Field<int>("currentTargetIndex");
-        if (__instance.Target) layer.Value = __instance.Target.gameObject.layer;
-        index.Value = 0;
-        var detector = __instance.AttackTrigger.Detection;
-        var all = rays.CastAll;
-        rays.CastAll = true;
-        __instance.AttackTrigger.Detection = rays;
-        __instance.AttackTrigger.StartManualTrigger();
-        __instance.AttackTrigger.Detection = detector;
-        rays.CastAll = all;
-        return false;
-    }
-
-    [HarmonyPrefix]
-    [HarmonyPatch(typeof(Attacker), "ApplyDamage", typeof(GameObject))]
-    public static bool ApplyDamage(Attacker __instance, GameObject go)
-    {
-        if (go is null) return false;
-        var target = go.transform;
-        if (target == __instance.SelfTarget) return true;
-        return __instance.OverrideAimDirection
-            ? DetectionHelper.GetObjectDistanceFromDirection(
-                origin: __instance.AttackOrigin.position,
-                target: target,
-                direction: __instance.AttackOrigin.right,
-                blockingMask: __instance.BlockingView) <= __instance.DamageRange
-            : DetectionHelper.ObjectInRange(
-                origin: __instance.AttackOrigin.position,
-                target: target,
-                range: __instance.DamageRange,
-                blockingMask: __instance.BlockingView);
-    }
-
     private static bool CheckOneWay(this Collider2D collider, Moveable mover)
     {
         if (!OneWayEditor.TryGetOneWay(collider, out var wall)) return true;

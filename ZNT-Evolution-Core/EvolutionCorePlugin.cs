@@ -28,6 +28,7 @@ public class EvolutionCorePlugin : BaseUnityPlugin
         Harmony.CreateAndPatchAll(typeof(CustomAssetObjectPatch));
         Harmony.CreateAndPatchAll(typeof(AnimationEventHandlerPatch));
         Harmony.CreateAndPatchAll(typeof(SceneLoaderPatch));
+        Harmony.CreateAndPatchAll(typeof(SnakeFeetPatch));
     }
 
     public void Start()

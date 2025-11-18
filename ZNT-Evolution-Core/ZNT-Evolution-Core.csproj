@@ -397,6 +397,7 @@
         <Compile Include="GlobalSettingsPatch.cs"/>
         <Compile Include="LevelElementLoader.cs"/>
         <Compile Include="SceneLoaderPatch.cs"/>
+        <Compile Include="SnakeFeetPatch.cs"/>
         <Compile Include="StartManagerPatch.cs"/>
         <Compile Include="Asset\AnimationAddition.cs"/>
         <Compile Include="Asset\AssetElementBinder.cs"/>
