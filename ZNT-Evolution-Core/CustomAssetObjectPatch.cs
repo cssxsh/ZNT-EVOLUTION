@@ -264,6 +264,15 @@ internal static class CustomAssetObjectPatch
                     break;
             }
         }
+
+        // ReSharper disable once InvertIf
+        if (__instance.SharedAsset.BlockOpponents && !StopperShield.ContainsKey(__instance.Stopper))
+        {
+            var shield = StopperShield[__instance.Stopper] = ComponentSingleton<GamePoolManager>.Instance
+                    .Spawn(InvisibleShield.PoolPrefab().Prefab, __instance.transform)
+                    .GetComponent<InvisibleShield>();
+            shield.name = nameof(StopperShield);
+        }
     }
 
     internal static GameObject GetRepulse(this Rage __instance)
@@ -330,6 +339,8 @@ internal static class CustomAssetObjectPatch
         __instance.Repulsion = null;
     }
 
+    private static readonly Dictionary<Stopper, InvisibleShield> StopperShield = new();
+
     [HarmonyPostfix]
     [HarmonyPatch(typeof(Stopper), "Initialize")]
     public static void Initialize(Stopper __instance, bool block, int maxOpponents)
@@ -348,12 +359,26 @@ internal static class CustomAssetObjectPatch
     }
 
     [HarmonyPostfix]
+    [HarmonyPatch(typeof(Stopper), "SetActive")]
+    public static void SetActive(Stopper __instance)
+    {
+        if (StopperShield.TryGetValue(__instance, out var shield))
+        {
+            shield.gameObject.SetActive(__instance.enabled);
+        }
+    }
+
+    [HarmonyPostfix]
     [HarmonyPatch(typeof(Stopper), "OnDespawned")]
     public static void OnDespawned(Stopper __instance)
     {
         var detector = Traverse.Create(__instance).Field<BoxDetection>("detector").Value;
         var effect = detector.GetComponent<CharacterAllocationEffect>();
         effect.StopEffect();
+        if (StopperShield.Remove(__instance, out var shield))
+        {
+            ComponentSingleton<GamePoolManager>.Instance.Despawn(shield);
+        }
     }
 
     #endregion

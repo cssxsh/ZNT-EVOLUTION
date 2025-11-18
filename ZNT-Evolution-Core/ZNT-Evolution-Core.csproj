@@ -428,6 +428,7 @@
         <Compile Include="Editor\LayerEditor.cs"/>
         <Compile Include="Editor\MineTrapEditor.cs"/>
         <Compile Include="Editor\HumanEditor.cs"/>
+        <Compile Include="Editor\InvisibleShield.cs"/>
         <Compile Include="Editor\OneWayEditor.cs"/>
         <Compile Include="Editor\StairEditor.cs"/>
         <Compile Include="Effect\CharacterAllocationEffect.cs"/>
