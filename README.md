@@ -41,8 +41,8 @@ Zombie Night Terror
 
 - [x] FMODAsset 声音资源
 - [x] tk2dSpriteCollectionData 精灵图资源
-- [ ] ~~VisualEffect~~
 - [x] tk2dSpriteAnimation 精灵图动画
+- [x] VisualEffect 特效
 - [x] ExplosionAsset 爆炸
 - [x] PhysicObjectAsset 物理对象
 - [x] CharacterAnimationAsset 动作-动画

@@ -66,9 +66,9 @@ internal static class StartManagerPatch
         Logger.LogInfo("Loading Bank");
         yield return LevelElementLoader.LoadBanks(folder: Application.streamingAssetsPath, loadSamples: true);
         Logger.LogInfo("Loading LevelElement");
-        var assets = Path.Combine(Application.dataPath, "Asset");
-        if (!Directory.Exists(assets)) Directory.CreateDirectory(assets);
-        LevelElementLoader.LoadAssetFromFolder(path: assets);
+        var asset = Path.Combine(Application.dataPath, "Asset");
+        if (!Directory.Exists(asset)) Directory.CreateDirectory(asset);
+        yield return LevelElementLoader.LoadAssetFromFolder(path: asset);
 
         var brush = Path.Combine(Application.dataPath, nameof(LevelElement.Type.Brush));
         if (!Directory.Exists(brush)) Directory.CreateDirectory(brush);

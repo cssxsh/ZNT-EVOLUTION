@@ -358,6 +358,35 @@ internal static class CustomAssetObjectPatch
 
     #endregion
 
+    #region VisualEffect
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(EffectManager), "GetEffect")]
+    public static void GetEffect(EffectManager __instance, VisualEffect effect, Transform __result)
+    {
+        if (effect is not CustomVisualEffect custom) return;
+        var animator = __result.GetComponentInChildren<SpriteAnimator>();
+        if (animator is not null && custom.animation is not null) animator.ForcePlay(custom.animation);
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(VisualEffectController), "OnDespawned")]
+    public static void OnDespawned(VisualEffectController __instance)
+    {
+        var prefab = __instance.GetComponent<PoolRetriever>()?.Prefab;
+        if (prefab is null) return;
+        var animator = __instance.GetComponentInChildren<tk2dSpriteAnimator>();
+        // ReSharper disable once InvertIf
+        if (animator)
+        {
+            var origin = prefab.GetComponent<tk2dSpriteAnimator>();
+            animator.Library = origin.Library;
+            animator.DefaultClipId = origin.DefaultClipId;
+        }
+    }
+
+    #endregion
+
     #region Rotorz.Tile.Brush
 
     [HarmonyPostfix]

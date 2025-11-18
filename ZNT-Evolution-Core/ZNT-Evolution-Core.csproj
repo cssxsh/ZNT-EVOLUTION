@@ -402,6 +402,7 @@
         <Compile Include="Asset\AssetElementBinder.cs"/>
         <Compile Include="Asset\BrushInfo.cs"/>
         <Compile Include="Asset\CustomAssetUtility.cs"/>
+        <Compile Include="Asset\CustomVisualEffect.cs"/>
         <Compile Include="Asset\DamageDictionary.cs"/>
         <Compile Include="Asset\DamageFlagsConverter.cs"/>
         <Compile Include="Asset\EvolutionAddition.cs"/>

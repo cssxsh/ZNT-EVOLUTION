@@ -505,9 +505,60 @@ public static class LevelElementLoader
         Logger.LogInfo($"{element.Targets.Length} elements apply");
     }
 
-    public static void LoadAssetFromFolder(string path)
+    public static IEnumerator LoadAssetFromFolder(string path)
     {
         Logger.LogInfo($"load Asset from folder '{path}'.");
+
+        foreach (var file in Directory.EnumerateFiles(path, "*.bundle"))
+        {
+            AssetBundle bundle;
+            {
+                var request = AssetBundle.LoadFromFileAsync(file);
+                yield return request;
+                bundle = request.assetBundle;
+                if (bundle is null)
+                {
+                    Logger.LogWarning($"AssetBundle '{file}' cannot read");
+                    yield break;
+                }
+            }
+
+            var filename = Path.GetFileName(file);
+            Logger.LogDebug($"{filename} -> {bundle} -> {bundle.GetAllAssetNames().Join()}");
+
+            foreach (var name in bundle.GetAllAssetNames())
+            {
+                Logger.LogDebug($"[{bundle.name}] load path: {name}");
+                var request = bundle.LoadAssetAsync(name);
+                yield return request;
+                var asset = request.asset;
+                if (asset is null) continue;
+
+                switch (asset)
+                {
+                    case Sprite sprite:
+                        Logger.LogDebug($"[{bundle.name}] {sprite}");
+                        Logger.LogDebug($"[{bundle.name}] {sprite.texture}");
+                        break;
+                    case Material material:
+                        Logger.LogDebug($"[{bundle.name}] {material}");
+                        Logger.LogDebug($"[{bundle.name}] {material.mainTexture}");
+                        Logger.LogDebug($"[{bundle.name}] {material.shader}");
+                        break;
+                    case Shader shader:
+                        Logger.LogDebug($"[{bundle.name}] {shader}");
+                        break;
+                    case TextAsset bank when name is "bank.strings" or "bank_":
+                        FMODUnity.RuntimeManager.LoadBank(asset: bank, loadSamples: true);
+                        yield return new WaitUntil(() => !FMODUnity.RuntimeManager.AnyBankLoading());
+                        Logger.LogDebug($"[{bundle.name}] {asset.name}");
+                        break;
+                    default:
+                        Logger.LogDebug($"[{bundle.name}] {asset.name}");
+                        break;
+                }
+            }
+        }
 
         foreach (var file in Directory.EnumerateFiles(path, "*.sprite.info.json"))
         {
@@ -530,6 +581,13 @@ public static class LevelElementLoader
             var filename = Path.GetFileName(file);
             var animations = DeserializeObject<CharacterAnimationAsset>(folder: path, file: file);
             Logger.LogDebug($"{filename} -> {animations}");
+        }
+
+        foreach (var file in Directory.EnumerateFiles(path, "*.visual.json"))
+        {
+            var filename = Path.GetFileName(file);
+            var visual = DeserializeObject<CustomVisualEffect>(folder: path, file: file);
+            Logger.LogDebug($"{filename} -> {visual}");
         }
 
         foreach (var file in Directory.EnumerateFiles(path, "*.explosion.json"))
