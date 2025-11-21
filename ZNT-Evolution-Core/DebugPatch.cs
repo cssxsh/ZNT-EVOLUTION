@@ -77,6 +77,13 @@ internal static class DebugPatch
     [HarmonyPatch(typeof(SpawnPoint), "OverrideMemberUi")]
     public static bool OverrideMemberUi(SpawnPoint __instance) => __instance is CharacterSpawnPoint;
 
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(Trigger), "OnCreate")]
+    public static void OnCreate(Trigger __instance)
+    {
+        __instance.Detection ??= __instance.GetComponent<TriggerDetection>();
+    }
+
     [HarmonyPostfix]
     [HarmonyPatch(typeof(RayConeDetection), "FindGameObjects")]
     public static void FindGameObjects(RayConeDetection __instance, C5.HashedArrayList<GameObject> __result)
