@@ -39,41 +39,6 @@ internal static class DebugPatch
     }
 
     [HarmonyPrefix]
-    [HarmonyPatch(typeof(SpawnCharacterChooser), "OnCreate")]
-    public static void OnCreate(SpawnCharacterChooser __instance)
-    {
-        var spawn = Traverse.Create(__instance).Field("spawn").Field<Enum>("spawnType").Value;
-        var characters = Traverse.Create(__instance).Field<List<CharacterAsset>>("selectableCharacters").Value;
-        switch (spawn.ToString())
-        {
-            case "Human":
-                characters.AddRange(LevelElementIndex.Index.Values.Cast<LevelElement>()
-                    .Where(element => element.Useable)
-                    .Select(element => element.CustomAsset)
-                    .OfType<HumanAsset>()
-                    .Where(asset => !characters.Contains(asset))
-                    .Distinct());
-                break;
-            case "Zombie":
-                characters.AddRange(LevelElementIndex.Index.Values.Cast<LevelElement>()
-                    .Where(element => element.Useable)
-                    .Select(element => element.CustomAsset)
-                    .OfType<ZombieAsset>()
-                    .Where(asset => !characters.Contains(asset))
-                    .Distinct());
-                break;
-            default:
-                characters.AddRange(LevelElementIndex.Index.Values.Cast<LevelElement>()
-                    .Where(element => element.Useable)
-                    .Select(element => element.CustomAsset)
-                    .OfType<CharacterAsset>()
-                    .Where(asset => !characters.Contains(asset))
-                    .Distinct());
-                break;
-        }
-    }
-
-    [HarmonyPrefix]
     [HarmonyPatch(typeof(SpawnPoint), "OverrideMemberUi")]
     public static bool OverrideMemberUi(SpawnPoint __instance) => __instance is CharacterSpawnPoint;
 
@@ -82,33 +47,6 @@ internal static class DebugPatch
     public static void OnCreate(Trigger __instance)
     {
         __instance.Detection ??= __instance.GetComponent<TriggerDetection>();
-    }
-
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(RayConeDetection), "FindGameObjects")]
-    public static void FindGameObjects(RayConeDetection __instance, C5.HashedArrayList<GameObject> __result)
-    {
-        if (__instance.CastAll) return;
-        var rays = Traverse.Create(__instance).Field<Vector2[]>("rays").Value;
-        var inverted = Traverse.Create(__instance).Field<int>("inverted").Value;
-        __result.Clear();
-        foreach (var ray in rays)
-        {
-            DetectionHelper.RayCast(
-                __result,
-                __instance.Origin.position,
-                ray * inverted,
-                __instance.Distance,
-                __instance.Trigger.IgnoreLayers,
-                __instance.Trigger.Layers,
-                __instance.Trigger.IgnoreWithTags,
-                __instance.Trigger.WithTags,
-                __instance.Trigger.IgnoreWithoutTags,
-                __instance.Trigger.WithoutTags,
-                __instance.Trigger.WithAllTags,
-                __instance.Trigger.WithoutAllTags,
-                __instance.Trigger.InvertTagsMatch);
-        }
     }
 
     [HarmonyPrefix]
@@ -258,7 +196,7 @@ internal static class DebugPatch
 
     [HarmonyPostfix]
     [HarmonyPatch(
-        typeof(AbstractPoolManager<GamePoolManager>), "Spawn", 
+        typeof(AbstractPoolManager<GamePoolManager>), "Spawn",
         typeof(Transform), typeof(Transform), typeof(Vector3), typeof(Quaternion), typeof(bool), typeof(bool))]
     public static void Spawn(
         AbstractPoolManager<GamePoolManager> __instance, Transform __result,
@@ -313,7 +251,7 @@ internal static class DebugPatch
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(SupportedTypeBinder), "BindVector4Field")]
-    private static void BindVector4Field(SupportedTypeBinder __instance, EditorComponent component, MemberInfo member)
+    public static void BindVector4Field(SupportedTypeBinder __instance, EditorComponent component, MemberInfo member)
     {
         var value = member.GetMemberValue<Vector4>(component.Data);
         var components = Traverse.Create(__instance).Field<UIBehaviour[]>("uiComponents").Value;
