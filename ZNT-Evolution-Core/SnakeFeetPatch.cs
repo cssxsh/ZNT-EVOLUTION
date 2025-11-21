@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
+using UIWidgets;
 using UnityEngine;
+using ZNT.LevelEditor;
 
 // ReSharper disable InconsistentNaming
 namespace ZNT.Evolution.Core;
@@ -80,5 +82,14 @@ internal class SnakeFeetPatch
                 __instance.Trigger.WithoutAllTags,
                 __instance.Trigger.InvertTagsMatch);
         }
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(LevelSettingsMenu), "InitGeneralSettings")]
+    public static void InitGeneralSettings(LevelSettingsMenu __instance)
+    {
+        Traverse.Create(__instance).Field<Spinner>("maxZombieSpinner").Value.Max = 1024;
+        Traverse.Create(__instance).Field<Spinner>("maxEnemySpinner").Value.Max = 1024;
+        Traverse.Create(__instance).Field<SpinnerFloat>("maxZoomSpinner").Value.Max = 1024f;
     }
 }
