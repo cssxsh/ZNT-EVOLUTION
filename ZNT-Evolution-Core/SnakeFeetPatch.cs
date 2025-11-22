@@ -16,9 +16,10 @@ internal class SnakeFeetPatch
     public static void OnAttackHit(HumanBehaviour __instance)
     {
         if (__instance.Frozen) return;
+        if (__instance.Weapon.Attack.HasTarget()) return;
         var frequency = __instance.Vision.Frequency;
         __instance.Vision.Frequency = 1748;
-        if (__instance.Weapon.Attack.Target is null) __instance.Vision.Update();
+        __instance.Vision.Update();
         __instance.Vision.Frequency = frequency;
     }
 
