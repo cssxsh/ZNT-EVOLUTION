@@ -95,10 +95,55 @@ internal static class AnimationEventHandlerPatch
             Traverse.Create(controller).Field<UnityEngine.BoxCollider2D>("boxCollider").Value,
             null,
             null,
-            controller.transform.position + point.position,
-            controller.transform.forward,
+            parameters.Position + point.position,
+            parameters.Direction,
             frame.eventInt
         );
+    }
+
+    [UsedImplicitly]
+    [Description("RegisterTriggerEvent:weapon_fire")]
+    public static void Fire(CorpseBehaviour controller, tk2dSpriteAnimationFrame frame)
+    {
+        var parameters = Traverse.Create(controller).Field<CorpseParameter>("parameters").Value;
+        if (parameters.Character.Behaviour is not HumanBehaviour human) return;
+        var detected = new C5.HashedArrayList<UnityEngine.GameObject>();
+        DetectionHelper.RayCastAll(
+            detected,
+            DetectionHelper.DistanceCheck,
+            parameters.Position,
+            controller.transform.right,
+            parameters.CharacterAsset.DamageRange + 0.5f,
+            human.Attacker.AttackTrigger.IgnoreLayers,
+            human.Attacker.AttackTrigger.Layers,
+            human.Attacker.AttackTrigger.IgnoreWithTags,
+            human.Attacker.AttackTrigger.WithTags,
+            human.Attacker.AttackTrigger.IgnoreWithoutTags,
+            human.Attacker.AttackTrigger.WithoutTags,
+            human.Attacker.AttackTrigger.WithAllTags,
+            human.Attacker.AttackTrigger.WithoutAllTags,
+            human.Attacker.AttackTrigger.InvertTagsMatch);
+        var count = parameters.CharacterAsset.HitMultipleTargets ? parameters.CharacterAsset.MaxTargets : 1;
+        var damage = parameters.CharacterAsset.Damage;
+        foreach (var target in detected)
+        {
+            if (!DetectionHelper.ObjectInRange(
+                    parameters.Position,
+                    target.transform,
+                    parameters.CharacterAsset.DamageRange,
+                    human.Attacker.BlockingView)) continue;
+            var health = target.GetComponentInChildren<Health>();
+            if (health)
+            {
+                var distance = DetectionHelper.GetObjectDistance(parameters.Position, target.transform);
+                var time = UnityEngine.Mathf.Clamp01(distance / parameters.CharacterAsset.DamageRange);
+                var amount = damage * parameters.CharacterAsset.DamageFalloff.Evaluate(time);
+                health.ReceiveDamage(amount, controller.transform, parameters.CharacterAsset.DamageType);
+            }
+
+            damage *= parameters.CharacterAsset.NextTargetsDamageMultiplier;
+            if (--count == 0) break;
+        }
     }
 
     [UsedImplicitly]
