@@ -191,16 +191,17 @@ internal static class CustomAssetObjectPatch
     #region PhysicObjectAsset
 
     [HarmonyPostfix]
-    [HarmonyPatch(typeof(PhysicObjectBehaviour), "Initialize")]
-    public static void Initialize(PhysicObjectBehaviour __instance)
+    [HarmonyPatch(typeof(PhysicObjectAsset), "LoadFromAsset")]
+    public static void LoadFromAsset(PhysicObjectAsset __instance, GameObject gameObject)
     {
-        __instance.DamageTriger.enabled = __instance.DamageCharacterOnTrigger
-                                          || __instance.ExplodeOn.HasFlag(ExplodeSurfaceConverter.Zombie)
-                                          || __instance.ExplodeOn.HasFlag(ExplodeSurfaceConverter.Climber)
-                                          || __instance.ExplodeOn.HasFlag(ExplodeSurfaceConverter.Blocker)
-                                          || __instance.ExplodeOn.HasFlag(ExplodeSurfaceConverter.Tank);
+        var behaviour = gameObject.GetComponent<PhysicObjectBehaviour>();
+        behaviour.DamageTriger.enabled = behaviour.DamageCharacterOnTrigger
+                                         || behaviour.ExplodeOn.HasFlag(ExplodeSurfaceConverter.Zombie)
+                                         || behaviour.ExplodeOn.HasFlag(ExplodeSurfaceConverter.Climber)
+                                         || behaviour.ExplodeOn.HasFlag(ExplodeSurfaceConverter.Blocker)
+                                         || behaviour.ExplodeOn.HasFlag(ExplodeSurfaceConverter.Tank);
 
-        if (__instance.DamageTriger.enabled && __instance.ExplodeOn.HasFlag(ExplodeSurfaceConverter.Target))
+        if (behaviour.DamageTriger.enabled && behaviour.ExplodeOn.HasFlag(ExplodeSurfaceConverter.Target))
         {
             Logger.LogWarning($"{__instance} ExplodeOn is invalid");
         }
@@ -224,15 +225,14 @@ internal static class CustomAssetObjectPatch
             if (physic.Body.velocity.magnitude <= physic.StartForce * 0.5) __instance.OnDie(null);
         }
 
-        var targets = other.GetComponents<BaseAnimationController>()
-            .Aggregate(ExplodeSurfaceConverter.None, (mask, controller) => mask | controller switch
-            {
-                ZombieAnimationController { enabled: true } => ExplodeSurfaceConverter.Zombie,
-                ClimberAnimationController { enabled: true } => ExplodeSurfaceConverter.Climber,
-                BlockerAnimationController { enabled: true } => ExplodeSurfaceConverter.Blocker,
-                TankAnimationController { enabled: true } => ExplodeSurfaceConverter.Tank,
-                _ => ExplodeSurfaceConverter.None
-            });
+        var targets = other.GetComponent<Character>().AnimationController switch
+        {
+            ZombieAnimationController => ExplodeSurfaceConverter.Zombie,
+            ClimberAnimationController => ExplodeSurfaceConverter.Climber,
+            BlockerAnimationController => ExplodeSurfaceConverter.Blocker,
+            TankAnimationController => ExplodeSurfaceConverter.Tank,
+            _ => ExplodeSurfaceConverter.None
+        };
         if (targets == ExplodeSurfaceConverter.None) return false;
         if (__instance.ExplodeOn.HasFlag(targets)) __instance.OnDie(null);
         return false;
@@ -448,7 +448,7 @@ internal static class CustomAssetObjectPatch
     [HarmonyPatch(typeof(OneWayCollider), "Start")]
     private static IEnumerator Start(IEnumerator __result, OneWayCollider __instance)
     {
-        if (__instance.GetComponent<OneWayEditor>()) yield break;
+        if (__instance.TryGetComponent(out OneWayEditor _)) yield break;
         yield return __result;
     }
 
