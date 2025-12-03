@@ -157,6 +157,13 @@ public static class LevelElementLoader
             Logger.LogDebug($"{filename} -> {animations}");
         }
 
+        foreach (var file in Directory.EnumerateFiles(path, "*.visual.json"))
+        {
+            var filename = Path.GetFileName(file);
+            var visual = DeserializeObject<CustomVisualEffect>(folder: path, file: file);
+            Logger.LogDebug($"{filename} -> {visual}");
+        }
+
         var brush = bundle.LoadAsset<Rotorz.Tile.OrientedBrush>("brush")
                     ?? DeserializeObject<BrushInfo>(folder: path, file: "brush.info.json").Create();
         var variation = brush.DefaultOrientation.GetVariation(0);
