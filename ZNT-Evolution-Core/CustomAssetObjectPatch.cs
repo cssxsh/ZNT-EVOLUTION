@@ -366,6 +366,11 @@ internal static class CustomAssetObjectPatch
         {
             shield.gameObject.SetActive(__instance.enabled);
         }
+
+        var mover = __instance.GetComponent<Moveable>();
+        if (mover is null) return;
+        mover.UpdateIsGrounded();
+        mover.Body.isKinematic = mover.IsGrounded && __instance.enabled;
     }
 
     [HarmonyPostfix]
