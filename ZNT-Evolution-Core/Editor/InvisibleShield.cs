@@ -30,18 +30,6 @@ public class InvisibleShield : Editor, IActivable, IDeserializable
         };
     }
 
-    [SerializeInEditor(name: "Direction")]
-    public Vector2 Direction
-    {
-        get => (_collider ??= GetComponent<BoxCollider2D>()).offset;
-        set => (_collider ??= GetComponent<BoxCollider2D>()).offset = value;
-    }
-
-    protected override void OnCreate()
-    {
-        Direction = Vector2.right;
-    }
-
     public void OnDeserialized()
     {
         // ...
@@ -65,13 +53,12 @@ public class InvisibleShield : Editor, IActivable, IDeserializable
 
     private void OnSpawned()
     {
-        transform.localPosition = new Vector2(0.0f, 1.0f);
+        // transform.localPosition = Vector3.right;
     }
 
     private void OnDespawned()
     {
         Type = WallType.Explosion;
-        Direction = Vector2.right;
     }
 
     private static PoolSettingsAsset.PoolPrefab _prefab;
@@ -81,11 +68,15 @@ public class InvisibleShield : Editor, IActivable, IDeserializable
     {
         if (_prefab != null) return _prefab;
         var prefab = new GameObject(name: nameof(InvisibleShield));
-        prefab.AddComponent<BoxCollider2D>().size = new Vector2(0.3f, 1.95f);
+        DontDestroyOnLoad(prefab);
+        prefab.SetActive(false);
+        var collider = prefab.AddComponent<BoxCollider2D>();
+        collider.size = new Vector2(0.3f, 1.95f);
+        collider.offset = new Vector2(0.65f, 0.975f);
         prefab.AddComponent<InvisibleShield>();
         prefab.AddTags(Tag.Indestructible);
         prefab.layer = LayerMask.NameToLayer("Block Explosion");
-        DontDestroyOnLoad(prefab);
+        prefab.SetActive(true);
         // ReSharper disable once Unity.UnknownResource
         var pool = Resources.Load<PoolSettingsAsset>("Assets/GamePoolSettings");
         pool.Prefabs.Add(_prefab = new PoolSettingsAsset.PoolPrefab
