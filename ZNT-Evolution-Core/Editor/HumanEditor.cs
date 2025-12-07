@@ -22,6 +22,13 @@ public class HumanEditor : Editor
         set => Tags = value ? Tags.Add(Tag.CannotAttack) : Tags.Remove(Tag.CannotAttack);
     }
 
+    [SerializeInEditor(name: "Attitude")]
+    public HumanAttitude Attitude
+    {
+        get => Behaviour.Attitude;
+        set => Behaviour.Attitude = value;
+    }
+
     [SerializeInEditor(name: "Flee Before Zombie Explode")]
     public bool FleeBeforeZombieExplode
     {
