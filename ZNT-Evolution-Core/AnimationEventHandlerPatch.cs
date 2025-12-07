@@ -107,7 +107,8 @@ internal static class AnimationEventHandlerPatch
     {
         var parameters = Traverse.Create(controller).Field<CorpseParameter>("parameters").Value;
         if (parameters.Character.Behaviour is not HumanBehaviour human) return;
-        var detected = new C5.HashedArrayList<UnityEngine.GameObject>();
+        var detected = Traverse.Create(typeof(DetectionHelper))
+            .Field<C5.HashedArrayList<UnityEngine.GameObject>>("Covered").Value;
         DetectionHelper.RayCastAll(
             detected,
             DetectionHelper.DistanceCheck,
@@ -127,6 +128,7 @@ internal static class AnimationEventHandlerPatch
         var damage = parameters.CharacterAsset.Damage;
         foreach (var target in detected)
         {
+            if (count == 0) break;
             if (!DetectionHelper.ObjectInRange(
                     parameters.Position,
                     target.transform,
@@ -142,7 +144,7 @@ internal static class AnimationEventHandlerPatch
             }
 
             damage *= parameters.CharacterAsset.NextTargetsDamageMultiplier;
-            if (--count == 0) break;
+            count--;
         }
     }
 

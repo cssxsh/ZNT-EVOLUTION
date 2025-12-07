@@ -33,7 +33,7 @@ public class EvolutionCorePlugin : BaseUnityPlugin
 
     public void Start()
     {
-        CorpsesCountMax = Config.Bind("config", nameof(CorpsesCountMax), 20, "尸体数量上限");
+        CorpsesCountMax = Config.Bind("config", nameof(CorpsesCountMax), GameConf.MaxAliveCorpses, "尸体数量上限");
         VisionMaterialization = Config.Bind("config", nameof(VisionMaterialization), false, "视觉射线渲染");
         ShowAllElement = Config.Bind("config", nameof(ShowAllElement), false, "显示所有组件");
         ShowAllAnimationClip = Config.Bind("config", nameof(ShowAllAnimationClip), false, "显示所有动画");

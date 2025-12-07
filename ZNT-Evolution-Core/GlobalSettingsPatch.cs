@@ -79,7 +79,7 @@ internal static class GlobalSettingsPatch
             attachment.MaxDistance = __instance.Distance;
             Traverse.Create(attachment).Field<LayerMask>("obstacleLayers").Value = __instance.Trigger.Layers;
             laser.gameObject.SetActive(true);
-            laser.BroadcastMessage("Update");
+            laser.BroadcastMessage(methodName: "Update");
         }
     }
 

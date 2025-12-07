@@ -225,7 +225,7 @@ internal static class CustomAssetObjectPatch
             if (physic.Body.velocity.magnitude <= physic.StartForce * 0.5) __instance.OnDie(null);
         }
 
-        var targets = other.GetComponent<Character>().AnimationController switch
+        var targets = other.GetComponent<Character>()?.AnimationController switch
         {
             ZombieAnimationController => ExplodeSurfaceConverter.Zombie,
             ClimberAnimationController => ExplodeSurfaceConverter.Climber,
