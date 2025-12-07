@@ -82,7 +82,8 @@ public class HumanEditor : Editor
     public int WeaponMagazineSize
     {
         get => Behaviour.Weapon.DefaultMag.Size;
-        set => Behaviour.Weapon.DefaultMag = new Magazine(value);
+        set => Traverse.Create(Behaviour.Weapon).Field<Magazine>("currentMagazine").Value =
+            Behaviour.Weapon.DefaultMag = new Magazine(value);
     }
 
     [SerializeInEditor(name: "Weapon Reload Time")]
