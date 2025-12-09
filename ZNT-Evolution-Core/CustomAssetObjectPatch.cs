@@ -31,6 +31,29 @@ internal static class CustomAssetObjectPatch
         return prefab;
     }
 
+    private static void Apply(
+        this DamageMultiplierDictionary multipliers,
+        float value,
+        params DamageType[] types)
+    {
+        foreach (var type in types)
+        {
+            multipliers[type] = value;
+        }
+    }
+
+    private static void Apply(
+        this DamageMultiplierDictionary multipliers,
+        DamageMultiplierDictionary other,
+        params DamageType[] types)
+    {
+        foreach (var type in types)
+        {
+            if (other.TryGetValue(type, out var value)) multipliers[type] = value;
+            else multipliers.Remove(type);
+        }
+    }
+
     [HarmonyPrefix]
     [HarmonyPatch(typeof(CustomAssetObject), "LoadFromAsset")]
     public static void LoadFromAsset(CustomAssetObject __instance, GameObject gameObject)
@@ -269,8 +292,8 @@ internal static class CustomAssetObjectPatch
         if (__instance.SharedAsset.BlockOpponents && !StopperShield.ContainsKey(__instance.Stopper))
         {
             var shield = StopperShield[__instance.Stopper] = ComponentSingleton<GamePoolManager>.Instance
-                    .Spawn(InvisibleShield.PoolPrefab().Prefab, __instance.transform)
-                    .GetComponent<InvisibleShield>();
+                .Spawn(InvisibleShield.PoolPrefab().Prefab, __instance.Stopper.transform)
+                .GetComponent<InvisibleShield>();
             shield.name = nameof(StopperShield);
         }
     }
@@ -364,7 +387,19 @@ internal static class CustomAssetObjectPatch
     {
         if (StopperShield.TryGetValue(__instance, out var shield))
         {
-            shield.gameObject.SetActive(__instance.enabled);
+            shield.SetActive(__instance.enabled);
+            var behaviour = __instance.GetComponentInParent<HumanBehaviour>();
+            var health = behaviour.Health;
+            var asset = behaviour.SharedAsset;
+            if (__instance.enabled)
+            {
+                var multiplier = 1.0f - behaviour.SharedAsset.MaxOpponentsBlock * 0.1f;
+                health.DamageMultipliers.Apply(multiplier, DamageType.Boomer);
+            }
+            else
+            {
+                health.DamageMultipliers.Apply(asset.DamageMultipliers, DamageType.Boomer);
+            }
         }
 
         var mover = __instance.GetComponent<Moveable>();

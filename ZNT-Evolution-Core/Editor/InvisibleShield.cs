@@ -73,9 +73,9 @@ public class InvisibleShield : Editor, IActivable, IDeserializable
         var collider = prefab.AddComponent<BoxCollider2D>();
         collider.size = new Vector2(0.3f, 1.95f);
         collider.offset = new Vector2(0.65f, 0.975f);
-        prefab.AddComponent<InvisibleShield>();
+        var shield = prefab.AddComponent<InvisibleShield>();
+        shield.Type = WallType.Explosion;
         prefab.AddTags(Tag.Indestructible);
-        prefab.layer = LayerMask.NameToLayer("Block Explosion");
         prefab.SetActive(true);
         // ReSharper disable once Unity.UnknownResource
         var pool = Resources.Load<PoolSettingsAsset>("Assets/GamePoolSettings");
