@@ -164,15 +164,11 @@ internal static class DebugPatch
         return false;
     }
 
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(HumanBehaviour), "OnDespawned")]
-    [HarmonyPatch(typeof(ZombieBehaviour), "OnDespawned")]
-    [HarmonyPatch(typeof(CharacterBehaviour), "OnDespawned")]
-    public static void OnDespawned(CharacterBehaviour __instance)
+    [HarmonyPrefix]
+    [HarmonyPatch("CharacterBehaviour+ResetCharacterBehaviour, Assembly-CSharp", "Reset")]
+    public static void Reset(CharacterBehaviour __instance)
     {
-        var prefab = __instance.GetComponent<PoolRetriever>()?.Prefab?.GetComponent<CharacterBehaviour>();
-        if (prefab is null) return;
-        __instance.SensesIgnored = prefab.SensesIgnored;
+        __instance.SensesIgnored = false;
     }
 
     [HarmonyPostfix]
