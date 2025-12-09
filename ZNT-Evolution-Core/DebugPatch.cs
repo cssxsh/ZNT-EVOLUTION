@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using HarmonyLib;
+using MonoMod.Utils;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -127,6 +128,30 @@ internal static class DebugPatch
     {
         Traverse.Create(__instance).Field<bool>("isProxy").Value = value is not null;
         Traverse.Create(__instance).Field<string>("proxyId").Value ??= __instance.name;
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(CharacterAsset), "SetHealth")]
+    public static bool SetHealth(CharacterAsset __instance, Character character)
+    {
+        var health = character.Behaviour.Health;
+        health.MaxHp = health.Hp = __instance.Hp;
+        health.Invincible = __instance.Invincible;
+        health.DamageMultipliers.Clear();
+        health.DamageMultipliers.AddRange(__instance.DamageMultipliers);
+        return false;
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(SentryGunAsset), "SetHealth")]
+    public static bool SetHealth(SentryGunAsset __instance, SentryGunBehaviour behaviour)
+    {
+        var health = behaviour.Health;
+        health.MaxHp = health.Hp = __instance.Hp;
+        health.Invincible = __instance.Invincible;
+        health.DamageMultipliers.Clear();
+        health.DamageMultipliers.AddRange(__instance.DamageMultipliers);
+        return false;
     }
 
     [HarmonyPrefix]
