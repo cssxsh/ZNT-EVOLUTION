@@ -22,62 +22,6 @@ public class HumanEditor : Editor
         set => Tags = value ? Tags.Add(Tag.CannotAttack) : Tags.Remove(Tag.CannotAttack);
     }
 
-    [SerializeInEditor(name: "Attitude")]
-    public HumanAttitude Attitude
-    {
-        get => Behaviour.Attitude;
-        set => Behaviour.Attitude = value;
-    }
-
-    [SerializeInEditor(name: "Flee Before Zombie Explode")]
-    public bool FleeBeforeZombieExplode
-    {
-        get => Behaviour.FleeBeforeZombieExplode;
-        set => Behaviour.FleeBeforeZombieExplode = value;
-    }
-
-    [SerializeInEditor(name: "Flee Duration")]
-    public float FleeDuration
-    {
-        get => Behaviour.FleeingTimer.Duration;
-        set => Behaviour.FleeingTimer.Duration = value;
-    }
-
-    [SerializeInEditor(name: "Invincible On Attack")]
-    public bool InvincibleOnAttack
-    {
-        get => Behaviour.InvincibleOnAttack;
-        set => Behaviour.InvincibleOnAttack = value;
-    }
-
-    [SerializeInEditor(name: "Ignore Damages")]
-    public bool IgnoreDamages
-    {
-        get => Behaviour.IgnoreDamages;
-        set => Behaviour.IgnoreDamages = value;
-    }
-
-    [SerializeInEditor(name: "Resist Scream")]
-    public bool ResistScream
-    {
-        get => Behaviour.ResistScream;
-        set => Behaviour.ResistScream = value;
-    }
-
-    [SerializeInEditor(name: "Grabbed On Attacked")]
-    public bool GrabbedOnAttacked
-    {
-        get => Behaviour.GrabbedOnAttacked;
-        set => Behaviour.GrabbedOnAttacked = value;
-    }
-
-    [SerializeInEditor(name: "Freeze On Rage")]
-    public bool FreezeOnRage
-    {
-        get => Behaviour.Rage.FreezeOnRage;
-        set => Behaviour.Rage.FreezeOnRage = value;
-    }
-
     [SerializeInEditor(name: "Weapon Magazine Size")]
     public int WeaponMagazineSize
     {
@@ -203,13 +147,6 @@ public class HumanEditor : Editor
     {
         get => Traverse.Create(Behaviour.Stopper).Field<int>("MaxOpponents").Value;
         set => Behaviour.Stopper.Initialize(BlockOpponents, value, Behaviour.OnStopperBreak);
-    }
-
-    [SerializeInEditor(name: "Voice")]
-    public Voice Voice
-    {
-        get => Behaviour.Patroller.Voice;
-        set => Behaviour.Patroller.Voice = value;
     }
 
     private void OnDespawned()

@@ -270,6 +270,15 @@ internal static class DebugPatch
         return false;
     }
 
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(SupportedTypeBinder), "SetName")]
+    public static bool SetName(SupportedTypeBinder __instance, MemberInfo member)
+    {
+        if (member.IsDefined(typeof(SerializeInEditorAttribute))) return true;
+        Traverse.Create(__instance).Field<Text>("text").Value.text = member.Name;
+        return false;
+    }
+
     [HarmonyPostfix]
     [HarmonyPatch(typeof(SupportedTypeBinder), "BindVector4Field")]
     public static void BindVector4Field(SupportedTypeBinder __instance, EditorComponent component, MemberInfo member)
