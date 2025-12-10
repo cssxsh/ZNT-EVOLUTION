@@ -31,29 +31,6 @@ internal static class CustomAssetObjectPatch
         return prefab;
     }
 
-    private static void Apply(
-        this DamageMultiplierDictionary multipliers,
-        float value,
-        params DamageType[] types)
-    {
-        foreach (var type in types)
-        {
-            multipliers[type] = value;
-        }
-    }
-
-    private static void Apply(
-        this DamageMultiplierDictionary multipliers,
-        DamageMultiplierDictionary other,
-        params DamageType[] types)
-    {
-        foreach (var type in types)
-        {
-            if (other.TryGetValue(type, out var value)) multipliers[type] = value;
-            else multipliers.Remove(type);
-        }
-    }
-
     [HarmonyPrefix]
     [HarmonyPatch(typeof(CustomAssetObject), "LoadFromAsset")]
     public static void LoadFromAsset(CustomAssetObject __instance, GameObject gameObject)
@@ -287,15 +264,6 @@ internal static class CustomAssetObjectPatch
                     break;
             }
         }
-
-        // ReSharper disable once InvertIf
-        if (__instance.SharedAsset.BlockOpponents && !StopperShield.ContainsKey(__instance.Stopper))
-        {
-            var shield = StopperShield[__instance.Stopper] = ComponentSingleton<GamePoolManager>.Instance
-                .Spawn(InvisibleShield.PoolPrefab().Prefab, __instance.Stopper.transform)
-                .GetComponent<InvisibleShield>();
-            shield.name = nameof(StopperShield);
-        }
     }
 
     internal static GameObject GetRepulse(this Rage __instance)
@@ -362,50 +330,55 @@ internal static class CustomAssetObjectPatch
         __instance.Repulsion = null;
     }
 
-    private static readonly Dictionary<Stopper, InvisibleShield> StopperShield = new();
-
     [HarmonyPostfix]
     [HarmonyPatch(typeof(Stopper), "Initialize")]
     public static void Initialize(Stopper __instance, bool block, int maxOpponents)
     {
         var detector = Traverse.Create(__instance).Field<BoxDetection>("detector").Value;
         var effect = detector.gameObject.GetComponentSafe<CharacterAllocationEffect>();
-        if (block)
-        {
-            effect.capacity = maxOpponents;
-            effect.StartEffect();
-        }
-        else
-        {
-            effect.StopEffect();
-        }
+        effect.capacity = block ? maxOpponents : 0;
+        if (block) effect.StartEffect();
+        else effect.StopEffect();
     }
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(Stopper), "SetActive")]
     public static void SetActive(Stopper __instance)
     {
-        if (StopperShield.TryGetValue(__instance, out var shield))
-        {
-            shield.SetActive(__instance.enabled);
-            var behaviour = __instance.GetComponentInParent<HumanBehaviour>();
-            var health = behaviour.Health;
-            var asset = behaviour.SharedAsset;
-            if (__instance.enabled)
-            {
-                var multiplier = 1.0f - behaviour.SharedAsset.MaxOpponentsBlock * 0.1f;
-                health.DamageMultipliers.Apply(multiplier, DamageType.Boomer);
-            }
-            else
-            {
-                health.DamageMultipliers.Apply(asset.DamageMultipliers, DamageType.Boomer);
-            }
-        }
-
         var mover = __instance.GetComponent<Moveable>();
         if (mover is null) return;
         mover.UpdateIsGrounded();
         mover.Body.isKinematic = mover.IsGrounded && __instance.enabled;
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(ExplosionEffect), "OnApplyOnGameObject")]
+    public static void OnApplyOnGameObject(ExplosionEffect __instance, GameObject target, out float __state)
+    {
+        __state = __instance.Damage;
+        if (!target.HasAnyTags(Tag.Human)) return;
+        var count = Physics2D.LinecastNonAlloc(
+            start: __instance.Trigger.Detection.Origin.position,
+            end: target.transform.position,
+            results: DetectionHelper.DistanceCheck,
+            layerMask: LayerMask.GetMask("Zombie Stopper"));
+        var total = 0;
+        for (var i = 0; i < count; i++)
+        {
+            var hit = DetectionHelper.DistanceCheck[i];
+            var effect = hit.collider.GetComponent<CharacterAllocationEffect>();
+            if (effect is null) continue;
+            total += effect.capacity;
+        }
+
+        __instance.Damage -= total * 50.0f;
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(ExplosionEffect), "OnApplyOnGameObject")]
+    public static void OnApplyOnGameObject(ExplosionEffect __instance, float __state)
+    {
+        __instance.Damage = __state;
     }
 
     [HarmonyPostfix]
@@ -415,10 +388,6 @@ internal static class CustomAssetObjectPatch
         var detector = Traverse.Create(__instance).Field<BoxDetection>("detector").Value;
         var effect = detector.GetComponent<CharacterAllocationEffect>();
         effect.StopEffect();
-        if (StopperShield.Remove(__instance, out var shield))
-        {
-            ComponentSingleton<GamePoolManager>.Instance.Despawn(shield);
-        }
     }
 
     #endregion
