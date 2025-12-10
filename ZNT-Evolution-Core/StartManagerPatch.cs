@@ -34,6 +34,10 @@ internal static class StartManagerPatch
                     human.BlockOpponents = false;
                     Logger.LogInfo($"Fix BlockOpponents for {human}");
                     break;
+                case HumanAsset { name: "Bishop" or "Priest" or "Virgin" or "Preacher" } human:
+                    human.CharacterType = CharacterType.Cultist;
+                    Logger.LogInfo($"Fix CharacterType for {human}");
+                    break;
                 case PhysicObjectAsset { DamageCharacterOnTrigger: true, DamageRadius: 0 } physic:
                     physic.DamageRadius = physic.ColliderRadius;
                     Logger.LogInfo($"Fix DamageRadius for {physic}");
