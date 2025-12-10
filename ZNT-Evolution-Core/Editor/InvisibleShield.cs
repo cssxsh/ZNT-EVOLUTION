@@ -30,6 +30,13 @@ public class InvisibleShield : Editor, IActivable, IDeserializable
         };
     }
 
+    [SerializeInEditor(name: "Offset")]
+    public Vector2 Offset
+    {
+        get => (_collider ??= GetComponent<BoxCollider2D>()).offset;
+        set => (_collider ??= GetComponent<BoxCollider2D>()).offset = value;
+    }
+
     public void OnDeserialized()
     {
         // ...
@@ -53,11 +60,14 @@ public class InvisibleShield : Editor, IActivable, IDeserializable
 
     private void OnSpawned()
     {
-        // transform.localPosition = Vector3.right;
+        _collider ??= GetComponent<BoxCollider2D>();
     }
 
     private void OnDespawned()
     {
+        _collider ??= GetComponent<BoxCollider2D>();
+        _collider.size = new Vector2(0.3f, 1.95f);
+        _collider.offset = new Vector2(0.65f, 0.975f);
         Type = WallType.Explosion;
     }
 
