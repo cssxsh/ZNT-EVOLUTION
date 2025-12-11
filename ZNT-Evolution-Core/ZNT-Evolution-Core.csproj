@@ -423,6 +423,7 @@
         <Compile Include="Asset\SpriteMerge.cs"/>
         <Compile Include="Asset\UnityEngineObjectContractResolver.cs"/>
         <Compile Include="Asset\UnityEngineObjectConverter.cs"/>
+        <Compile Include="Editor\CharacterEditor.cs"/>
         <Compile Include="Editor\Editor.cs"/>
         <Compile Include="Editor\ExplosionEditor.cs"/>
         <Compile Include="Editor\LayerEditor.cs"/>
@@ -432,6 +433,8 @@
         <Compile Include="Editor\OneWayEditor.cs"/>
         <Compile Include="Editor\StairEditor.cs"/>
         <Compile Include="Effect\CharacterAllocationEffect.cs"/>
+        <Compile Include="Effect\CharacterBuff.cs"/>
+        <Compile Include="Effect\SphereBuffEffect.cs"/>
     </ItemGroup>
     <ItemGroup>
         <EmbeddedResource Include="Resources\**"/>

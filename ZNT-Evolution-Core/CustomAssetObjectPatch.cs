@@ -246,6 +246,15 @@ internal static class CustomAssetObjectPatch
     [HarmonyPatch(typeof(HumanBehaviour), "Initialize")]
     public static void Initialize(HumanBehaviour __instance)
     {
+        if (__instance.SharedAsset.CharacterType == CharacterType.Cultist
+            && !CultistBuff.ContainsKey(__instance.Character))
+        {
+            var effect = CultistBuff[__instance.Character] = ComponentSingleton<GamePoolManager>.Instance
+                .Spawn(SphereBuffEffect.PoolPrefab().Prefab, __instance.Character.transform)
+                .GetComponent<SphereBuffEffect>();
+            effect.name = nameof(CultistBuff);
+        }
+
         foreach (var (key, attachment) in __instance.SharedAsset.Attachments as IDictionary<string, GameObject>)
         {
             switch (key)
@@ -263,6 +272,19 @@ internal static class CustomAssetObjectPatch
                     ComponentSingleton<GamePoolManager>.Instance.Spawn(attachment, __instance.transform).name = key;
                     break;
             }
+        }
+    }
+
+    private static readonly Dictionary<Character, SphereBuffEffect> CultistBuff = new();
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(HumanBehaviour), "OnDespawned")]
+    public static void OnDespawned(HumanBehaviour __instance)
+    {
+        // ReSharper disable once InvertIf
+        if (CultistBuff.Remove(__instance.Character, out var effect))
+        {
+            ComponentSingleton<GamePoolManager>.Instance.Despawn(effect);
         }
     }
 

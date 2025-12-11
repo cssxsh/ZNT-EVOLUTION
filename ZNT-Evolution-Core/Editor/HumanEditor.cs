@@ -5,9 +5,9 @@ namespace ZNT.Evolution.Core.Editor;
 
 [SerializeInEditor(name: "Human")]
 [DisallowMultipleComponent]
-public class HumanEditor : Editor
+public class HumanEditor : CharacterEditor
 {
-    private HumanBehaviour Behaviour => GetComponent<HumanBehaviour>();
+    private HumanBehaviour Behaviour => (HumanBehaviour)Character?.Behaviour ?? GetComponent<HumanBehaviour>();
 
     private Tag Tags
     {
@@ -151,6 +151,8 @@ public class HumanEditor : Editor
 
     private void OnDespawned()
     {
+        foreach (var (_, buff) in Records) buff.Remove(Character);
+        Records.Clear();
         var prefab = GetComponent<PoolRetriever>()?.Prefab?.GetComponent<HumanEditor>();
         if (prefab is null) return;
         VisionCastAll = prefab.VisionCastAll;

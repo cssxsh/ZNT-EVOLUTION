@@ -5,6 +5,7 @@ using HarmonyLib;
 using UnityEngine;
 using ZNT.Evolution.Core.Asset;
 using ZNT.Evolution.Core.Editor;
+using ZNT.Evolution.Core.Effect;
 
 // ReSharper disable InconsistentNaming
 namespace ZNT.Evolution.Core;
@@ -69,6 +70,7 @@ internal static class StartManagerPatch
             CustomAssetUtility.Cache[animation.NameAndType()] = animation;
         });
         InvisibleShield.PoolPrefab();
+        SphereBuffEffect.PoolPrefab();
         Logger.LogInfo("Loading Bank");
         yield return LevelElementLoader.LoadBanks(folder: Application.streamingAssetsPath, loadSamples: true);
         Logger.LogInfo("Loading LevelElement");
