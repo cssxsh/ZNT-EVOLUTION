@@ -275,16 +275,31 @@ internal static class CustomAssetObjectPatch
         }
     }
 
-    private static readonly Dictionary<Character, SphereBuffEffect> CultistBuff = new();
-
     [HarmonyPostfix]
     [HarmonyPatch(typeof(HumanBehaviour), "OnDespawned")]
     public static void OnDespawned(HumanBehaviour __instance)
     {
-        // ReSharper disable once InvertIf
         if (CultistBuff.Remove(__instance.Character, out var effect))
         {
             ComponentSingleton<GamePoolManager>.Instance.Despawn(effect);
+        }
+
+        foreach (var (key, attachment) in __instance.SharedAsset.Attachments as IDictionary<string, GameObject>)
+        {
+            switch (key)
+            {
+                case "moving_attack":
+                case "shield_attack":
+                case "shield_effect":
+                case "attach_laser":
+                    continue;
+                default:
+                    if (attachment is null) continue;
+                    Logger.LogDebug($"Despawn {attachment} for {__instance.gameObject} Attachments[\"{key}\"]");
+                    // 'OnDespawned' triggered by 'BroadcastMessage'
+                    ComponentSingleton<GamePoolManager>.Instance.Despawn(__instance.transform.Find(key));
+                    break;
+            }
         }
     }
 
@@ -411,6 +426,8 @@ internal static class CustomAssetObjectPatch
         var effect = detector.GetComponent<CharacterAllocationEffect>();
         effect.StopEffect();
     }
+
+    private static readonly Dictionary<Character, SphereBuffEffect> CultistBuff = new();
 
     #endregion
 
