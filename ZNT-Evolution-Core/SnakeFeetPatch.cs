@@ -100,7 +100,6 @@ internal class SnakeFeetPatch
     public static void FromComponent(BaseComponent component, EditorComponent __result)
     {
         if (__result == null) return;
-        // ReSharper disable once ConvertSwitchStatementToSwitchExpression
         switch (component)
         {
             case Patroller patroller:

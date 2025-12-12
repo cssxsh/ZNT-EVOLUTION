@@ -151,8 +151,8 @@ public class HumanEditor : CharacterEditor
 
     private void OnDespawned()
     {
-        foreach (var (_, buff) in Records) buff.Remove(Character);
-        Records.Clear();
+        foreach (var (_, buff) in Buffs) buff.Remove(Character);
+        Buffs.Clear();
         var prefab = GetComponent<PoolRetriever>()?.Prefab?.GetComponent<HumanEditor>();
         if (prefab is null) return;
         VisionCastAll = prefab.VisionCastAll;

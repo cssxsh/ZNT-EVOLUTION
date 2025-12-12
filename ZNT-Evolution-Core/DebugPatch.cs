@@ -166,9 +166,9 @@ internal static class DebugPatch
 
     [HarmonyPrefix]
     [HarmonyPatch("CharacterBehaviour+ResetCharacterBehaviour, Assembly-CSharp", "Reset")]
-    public static void Reset(CharacterBehaviour __instance)
+    public static void Reset(CharacterBehaviour component)
     {
-        __instance.SensesIgnored = false;
+        component.SensesIgnored = false;
     }
 
     [HarmonyPostfix]
