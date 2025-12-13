@@ -134,3 +134,31 @@ public enum Animations
   Empty,
 }
 ```
+
+## 角色类型
+
+```csharp
+public enum CharacterType
+{
+  // 僵尸
+  Zombie,
+  // 平民
+  Civilian,
+  // 武装平民
+  ArmedCivilian,
+  // 幸存者
+  Survivor,
+  // 警察
+  Cop,
+  // 黑衣人
+  MenInBlack,
+  // 非人
+  Inhuman,
+  // 老闆
+  Boss,
+  // 宇航员
+  Astronaut,
+  // 邪教徒
+  Cultist,
+}
+```
