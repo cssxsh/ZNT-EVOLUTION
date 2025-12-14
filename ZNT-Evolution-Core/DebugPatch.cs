@@ -40,10 +40,6 @@ internal static class DebugPatch
     }
 
     [HarmonyPrefix]
-    [HarmonyPatch(typeof(SpawnPoint), "OverrideMemberUi")]
-    public static bool OverrideMemberUi(SpawnPoint __instance) => __instance is CharacterSpawnPoint;
-
-    [HarmonyPrefix]
     [HarmonyPatch(typeof(Trigger), "OnCreate")]
     public static void OnCreate(Trigger __instance)
     {

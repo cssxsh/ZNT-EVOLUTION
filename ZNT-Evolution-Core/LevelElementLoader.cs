@@ -171,27 +171,6 @@ public static class LevelElementLoader
 
         var preview = bundle.LoadAsset<Sprite>("preview");
         if (preview) Logger.LogDebug($"preview -> {preview} -> {preview.texture}");
-        if (File.Exists(Path.Combine(path, "preview.png")))
-        {
-            Logger.LogDebug("preview -> preview.png");
-            var texture = new Texture2D(
-                width: 128,
-                height: 128,
-                textureFormat: TextureFormat.DXT1,
-                mipChain: false,
-                linear: true);
-            texture.LoadImage(data: File.ReadAllBytes(path: Path.Combine(path, "preview.png")));
-            preview = Sprite.Create(
-                texture: texture,
-                rect: new Rect(0, 0, texture.width, texture.height),
-                pivot: Vector2.one * 0.5f,
-                pixelsPerUnit: 100.0f,
-                extrude: 1,
-                meshType: SpriteMeshType.FullRect,
-                border: Vector4.zero,
-                generateFallbackPhysicsShape: false);
-            texture.name = preview.name = $"preview_{Path.GetFileName(path)}";
-        }
 
         foreach (var file in Directory.EnumerateFiles(path, "*.object.merge.json"))
         {
@@ -320,6 +299,29 @@ public static class LevelElementLoader
         Logger.LogDebug($"element.json -> {element} to {element.Title}");
         element.Brush ??= brush;
         element.Preview ??= preview;
+
+        if (File.Exists(Path.Combine(path, "preview.png")))
+        {
+            var texture = new Texture2D(
+                width: 128,
+                height: 128,
+                textureFormat: TextureFormat.DXT1,
+                mipChain: false,
+                linear: true);
+            texture.LoadImage(data: File.ReadAllBytes(path: Path.Combine(path, "preview.png")));
+            UnityEngine.Object.DontDestroyOnLoad(texture);
+            element.Preview = Sprite.Create(
+                texture: texture,
+                rect: new Rect(
+                    x: (texture.width - 128) / 2.0f,
+                    y: (texture.height - 128) / 2.0f,
+                    width: texture.width,
+                    height: texture.height),
+                pivot: Vector2.one / 2.0f);
+            UnityEngine.Object.DontDestroyOnLoad(element.Preview);
+            texture.name = element.Preview.name = $"preview_{element.name}";
+            Logger.LogDebug($"preview.png -> {element.Preview}");
+        }
 
         if (element.CustomAsset is { Prefab: { } prefab } && prefab.gameObject != variation)
         {

@@ -59,6 +59,10 @@ internal class SnakeFeetPatch
         }
     }
 
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(SpawnPoint), "OverrideMemberUi")]
+    public static bool OverrideMemberUi(SpawnPoint __instance) => __instance is CharacterSpawnPoint;
+
     [HarmonyPostfix]
     [HarmonyPatch(typeof(RayConeDetection), "FindGameObjects")]
     public static void FindGameObjects(RayConeDetection __instance, C5.HashedArrayList<GameObject> __result)

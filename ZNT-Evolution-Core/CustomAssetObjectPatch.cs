@@ -115,7 +115,8 @@ internal static class CustomAssetObjectPatch
         var orientation = __instance.GetComponent<ObjectOrientation>().CurrentOrientation;
         var clip = string.Format(__instance.Asset.StandAnimation, orientation.ToString().ToLower());
         if (!string.IsNullOrEmpty(clip)) __instance.ForcePlay(clip);
-        __instance.GetComponent<SoundEventPlayer>().PlaySound(__instance.Asset.StandSound);
+        Traverse.Create(__instance).Field<SoundEventPlayer>("soundEventPlayer").Value
+            .PlaySound(__instance.Asset.StandSound);
         return false;
     }
 
@@ -127,7 +128,8 @@ internal static class CustomAssetObjectPatch
         var orientation = __instance.GetComponent<ObjectOrientation>().CurrentOrientation;
         var clip = string.Format(__instance.Asset.DisableAnimation, orientation.ToString().ToLower());
         if (!string.IsNullOrEmpty(clip)) __instance.ForcePlay(clip);
-        __instance.GetComponent<SoundEventPlayer>().PlaySound(__instance.Asset.DisableSound);
+        Traverse.Create(__instance).Field<SoundEventPlayer>("soundEventPlayer").Value
+            .PlaySound(__instance.Asset.DisableSound);
         return false;
     }
 
@@ -141,7 +143,8 @@ internal static class CustomAssetObjectPatch
         var orientation = __instance.GetComponent<ObjectOrientation>().CurrentOrientation;
         var clip = string.Format(__instance.Asset.MoveAnimation, orientation.ToString().ToLower());
         if (!string.IsNullOrEmpty(clip)) __instance.ForcePlay(clip);
-        __instance.GetComponent<SoundEventPlayer>().PlaySound(__instance.Asset.MoveSound);
+        Traverse.Create(__instance).Field<SoundEventPlayer>("soundEventPlayer").Value
+            .PlaySound(__instance.Asset.MoveSound);
         return false;
     }
 
@@ -155,9 +158,9 @@ internal static class CustomAssetObjectPatch
         var orientation = __instance.GetComponent<ObjectOrientation>().CurrentOrientation;
         var clip = string.Format(__instance.Asset.StopAnimation, orientation.ToString().ToLower());
         if (!string.IsNullOrEmpty(clip)) __instance.ForcePlay(clip);
-        __instance.GetComponent<SoundEventPlayer>().Stop();
-        __instance.GetComponent<SoundPlayer>().Sound = __instance.Asset.StopSound;
-        __instance.GetComponent<SoundPlayer>().Play();
+        Traverse.Create(__instance).Field<SoundEventPlayer>("soundEventPlayer").Value.Stop();
+        Traverse.Create(__instance).Field<SoundPlayer>("soundPlayer").Value.Sound = __instance.Asset.StopSound;
+        Traverse.Create(__instance).Field<SoundPlayer>("soundPlayer").Value.Play();
         return false;
     }
 
@@ -169,8 +172,8 @@ internal static class CustomAssetObjectPatch
         var orientation = __instance.GetComponent<ObjectOrientation>().CurrentOrientation;
         var name = string.Format(__instance.Asset.HitAnimation, orientation.ToString().ToLower());
         if (!string.IsNullOrEmpty(name)) __instance.ForcePlay(name);
-        __instance.GetComponent<SoundPlayer>().Sound = __instance.Asset.HitSound;
-        __instance.GetComponent<SoundPlayer>().Play();
+        Traverse.Create(__instance).Field<SoundPlayer>("soundPlayer").Value.Sound = __instance.Asset.HitSound;
+        Traverse.Create(__instance).Field<SoundPlayer>("soundPlayer").Value.Play();
         return false;
     }
 
