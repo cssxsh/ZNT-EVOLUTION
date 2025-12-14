@@ -43,10 +43,49 @@ internal static class StartManagerPatch
                     physic.DamageRadius = physic.ColliderRadius;
                     Logger.LogInfo($"Fix DamageRadius for {physic}");
                     break;
+                case LevelElement { name: "drone_exterminator" } drone:
+                    drone.Title = "Drone Exterminator";
+                    Logger.LogInfo($"Fix Title for {drone}");
+                    break;
+                case LevelElement { name: "human_daftpunk_1" } daft:
+                    daft.Title = "Human Daft Punk 1";
+                    Logger.LogInfo($"Fix Title for {daft}");
+                    daft.CustomAsset.HierarchyName = "Daft Punk 1";
+                    Logger.LogInfo($"Fix HierarchyName for {daft.CustomAsset}");
+                    break;
+                case LevelElement { name: "human_daftpunk_2" } daft:
+                    daft.Title = "Human Daft Punk 2";
+                    Logger.LogInfo($"Fix Title for {daft}");
+                    break;
+                case LevelElement { name: "human_perchman" } man:
+                    man.Title = "Human Soundman";
+                    Logger.LogInfo($"Fix Title for {man}");
+                    man.CustomAsset.HierarchyName = "Soundman";
+                    Logger.LogInfo($"Fix HierarchyName for {man.CustomAsset}");
+                    break;
+                case LevelElement { name: "human_sniper" } sniper:
+                    sniper.Title = "Human Sniper 1";
+                    Logger.LogInfo($"Fix Title for {sniper}");
+                    sniper.CustomAsset.HierarchyName = "Sniper 1";
+                    Logger.LogInfo($"Fix HierarchyName for {sniper.CustomAsset}");
+                    break;
+                case LevelElement { name: "human_survivor_molotov" } survivor:
+                    survivor.Title = "Human Survivor Molotov";
+                    Logger.LogInfo($"Fix Title for {survivor}");
+                    survivor.CustomAsset.HierarchyName = "Survivor Molotov";
+                    Logger.LogInfo($"Fix HierarchyName for {survivor.CustomAsset}");
+                    break;
+                case LevelElement { CustomAsset: HumanAsset human } element:
+                {
+                    if (element.Title.Replace("Human ", "") == human.HierarchyName) break;
+                    element.CustomAsset.HierarchyName = element.Title.Replace("Human ", "");
+                    Logger.LogInfo($"Fix HierarchyName for {element.CustomAsset}");
+                }
+                    break;
                 case LevelElement { CustomAsset: not null, Brush: Rotorz.Tile.OrientedBrush brush } element:
                 {
-                    if (brush.DefaultOrientation.GetVariation(0) is not GameObject prefab) return;
-                    if (element.CustomAsset.Prefab == prefab.transform) return;
+                    if (brush.DefaultOrientation.GetVariation(0) is not GameObject prefab) break;
+                    if (element.CustomAsset.Prefab == prefab.transform) break;
                     if (element.CustomAsset.name == prefab.name)
                     {
                         element.CustomAsset.Prefab = prefab.transform;
