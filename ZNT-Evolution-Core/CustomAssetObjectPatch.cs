@@ -306,18 +306,11 @@ internal static class CustomAssetObjectPatch
         }
     }
 
-    internal static GameObject GetRepulse(this Rage __instance)
-    {
-        var repulse = Traverse.Create(__instance).Field<GameObject>("repulse");
-        if (repulse.Value) return repulse.Value;
-        return repulse.Value = __instance.transform.Find("Repulse")?.gameObject;
-    }
-
     [HarmonyPrefix]
     [HarmonyPatch(typeof(Rage), "Repulsion", MethodType.Setter)]
     public static void SetRepulsion(Rage __instance, ExplosionAsset value)
     {
-        var repulse = __instance.GetRepulse();
+        var repulse = Traverse.Create(__instance).Field<GameObject>("repulse").Value;
         if (repulse)
         {
             repulse.GetComponent<ExplosionEditor>().EditorVisibility.CustomName = null;
@@ -338,7 +331,7 @@ internal static class CustomAssetObjectPatch
     public static bool OnHit(Rage __instance, Parameters param)
     {
         if (!__instance.enabled) return false;
-        var repulse = __instance.GetRepulse();
+        var repulse = Traverse.Create(__instance).Field<GameObject>("repulse").Value;
         if (repulse is null) return false;
         var flags = DamageFlagsConverter.GetDamageFlags(__instance.DamageType);
         var damage = param.GetDamageType();
@@ -363,7 +356,7 @@ internal static class CustomAssetObjectPatch
         return false;
     }
 
-    [HarmonyPostfix]
+    [HarmonyPrefix]
     [HarmonyPatch(typeof(Rage), "OnDespawned")]
     public static void OnDespawned(Rage __instance)
     {
