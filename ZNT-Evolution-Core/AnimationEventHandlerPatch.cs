@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
@@ -14,6 +15,25 @@ internal static class AnimationEventHandlerPatch
     private static readonly ManualLogSource LogSource = Logger.CreateLogSource(nameof(AnimationEventHandler));
 
     private static readonly C5.HashedArrayList<MethodInfo> EventHandles = new();
+
+    [UsedImplicitly]
+    internal static bool ExistsTriggerEvent(this AnimationEventHandler handler, string name)
+    {
+        return Traverse.Create(handler)
+                   .Field<Dictionary<string, System.Action>>("triggerEvents").Value
+                   .ContainsKey(name)
+               || Traverse.Create(handler)
+                   .Field<Dictionary<string, AnimationEventHandler.EventAction>>("triggerEventsParams").Value
+                   .ContainsKey(name);
+    }
+
+    [UsedImplicitly]
+    internal static bool ExistsEndEvent(this AnimationEventHandler handler, string name)
+    {
+        return Traverse.Create(handler)
+            .Field<Dictionary<string, System.Action>>("endEvents").Value
+            .ContainsKey(name);
+    }
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(BaseAnimationController), "Initialize")]
@@ -152,8 +172,23 @@ internal static class AnimationEventHandlerPatch
     [Description("RegisterTriggerEvent:repulse")]
     public static void Repulse(HumanAnimationController controller, tk2dSpriteAnimationFrame frame)
     {
-        var behaviour = Traverse.Create(controller).Field<HumanBehaviour>("Behaviour").Value;
-        var repulse = Traverse.Create(behaviour.Rage).Field<UnityEngine.GameObject>("repulse").Value;
+        var human = Traverse.Create(controller).Field<HumanBehaviour>("Behaviour").Value;
+        var repulse = Traverse.Create(human.Rage).Field<UnityEngine.GameObject>("repulse").Value;
         if (repulse) repulse.GetComponent<ExplosionEditor>().StartExplosion();
+    }
+
+    [UsedImplicitly]
+    [Description("RegisterTriggerEvent:summon_human")]
+    public static void Summon(BaseAnimationController controller, tk2dSpriteAnimationFrame frame)
+    {
+        if (string.IsNullOrEmpty(frame.soundParamName)) return;
+        var element = LevelElementIndex.Index.Values
+            .FirstOrDefault(element => element.AssetId == frame.soundParamName || element.name == frame.soundParamName);
+        if (element is not LevelElement { CustomAsset: HumanAsset asset }) return;
+        var human = asset.CreateGameObject(position: controller.transform.position).GetComponent<HumanBehaviour>();
+        human.Character.OnSpawn(new Parameters(id: frame.eventInfo)
+            .Update("spawn_animations", human.HumanAnimation.AnimationExists("rise_2") ? new[] { "rise_2" } : null)
+            .Update("move_on_start", false)
+            .Update("orientation", controller.transform.forward));
     }
 }
