@@ -83,10 +83,18 @@ internal static class DebugPatch
     [HarmonyPrefix]
     [HarmonyPatch(typeof(TankBehaviour), "AfterStepping")]
     [HarmonyPatch(typeof(CharacterBehaviour), "AfterStepping")]
-    public static void AfterStepping(CharacterBehaviour __instance, out LayerMask __state)
+    public static void AfterStepping(CharacterBehaviour __instance, bool move, out LayerMask __state)
     {
         __state = __instance.Mover.GroundLayers;
+        if (!move) return;
         var mask = LayerMask.GetMask("Stairs", "Stairs Top");
+        var hit = Physics2D.RaycastNonAlloc(
+            origin: __instance.Body.position + Vector2.up * (__instance is TankBehaviour ? 1.2f : 0.85f),
+            direction: Vector2.down,
+            results: DetectionHelper.CastCheck,
+            distance: __instance is TankBehaviour ? 1.5f : 1.0f,
+            layerMask: mask) > 0;
+        if (!hit || DetectionHelper.CastCheck[0].collider.CheckOneWay(__instance.Mover)) return;
         Traverse.Create(__instance.Mover).Field<LayerMask>("groundLayers").Value = __state & ~mask;
     }
 
