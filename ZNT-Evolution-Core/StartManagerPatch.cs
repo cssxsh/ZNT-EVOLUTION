@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using BepInEx.Logging;
 using HarmonyLib;
@@ -107,6 +108,38 @@ internal static class StartManagerPatch
         yield return CustomAssetUtility.LoadBuildIn<tk2dSpriteAnimation>(animation =>
         {
             CustomAssetUtility.Cache[animation.NameAndType()] = animation;
+            switch (animation)
+            {
+                case { name: "anim_blood" }:
+                {
+                    var explosion = animation.GetClipByName("blood_explosion");
+                    var sprites = animation.FirstValidClip.frames[0].spriteCollection;
+                    foreach (var frame in explosion.frames) frame.spriteCollection = sprites;
+                    Logger.LogInfo($"Fix blood_explosion for {animation}");
+                }
+                    break;
+                case { name: "anim_traps" }:
+                {
+                    var missile = animation.GetClipByName("sentry_moon_canon_missile");
+                    animation.clips = animation.clips.AddToArray(new tk2dSpriteAnimationClip
+                    {
+                        name = "empty",
+                        frames = new[] { missile.frames[1] },
+                        fps = 1.0f,
+                        loopStart = 0,
+                        useableInLevelEditor = false,
+                        staticAnimation = false,
+                        wrapMode = tk2dSpriteAnimationClip.WrapMode.Single
+                    });
+                    Traverse.Create(animation)
+                        .Field<Dictionary<string, tk2dSpriteAnimationClip>>("clipNameCache").Value = null;
+                    Traverse.Create(animation)
+                        .Field<Dictionary<string, int>>("idNameCache").Value = null;
+                    animation.InitializeClipCache();
+                    Logger.LogInfo($"Feat empty for {animation}");
+                }
+                    break;
+            }
         });
         InvisibleShield.PoolPrefab();
         SphereBuffEffect.PoolPrefab();
