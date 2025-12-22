@@ -28,11 +28,11 @@ internal static class AnimationEventHandlerPatch
     }
 
     [UsedImplicitly]
-    internal static bool ExistsEndEvent(this AnimationEventHandler handler, string name)
+    internal static bool ExistsEndEvent(this AnimationEventHandler handler, tk2dSpriteAnimationClip clip)
     {
         return Traverse.Create(handler)
-            .Field<Dictionary<string, System.Action>>("endEvents").Value
-            .ContainsKey(name);
+            .Field<Dictionary<tk2dSpriteAnimationClip, System.Action>>("endEvents").Value
+            .ContainsKey(clip);
     }
 
     [HarmonyPostfix]
