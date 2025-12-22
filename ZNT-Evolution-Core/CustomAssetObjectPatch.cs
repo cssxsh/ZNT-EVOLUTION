@@ -434,8 +434,20 @@ internal static class CustomAssetObjectPatch
     public static void GetEffect(EffectManager __instance, VisualEffect effect, Transform __result)
     {
         if (effect is not CustomVisualEffect custom) return;
-        var animator = __result.GetComponentInChildren<SpriteAnimator>();
-        if (animator is not null && custom.animation is not null) animator.ForcePlay(custom.animation);
+        var animator = __result.GetComponent<SpriteAnimator>();
+        // ReSharper disable once InvertIf
+        if (animator is not null && custom.animation is not null)
+        {
+            if (__result.TryGetComponent(out AnimationDespawner despawn))
+            {
+                Traverse.Create(despawn)
+                    .Field<AnimationEventHandler>("eventHandler").Value
+                    .RegisterEndEvent(custom.animation, () => despawn.SendMessage(methodName: "Despawn"));
+            }
+
+            animator.Animator.playAutomatically = false;
+            animator.ForcePlay(custom.animation);
+        }
     }
 
     [HarmonyPostfix]
@@ -443,14 +455,12 @@ internal static class CustomAssetObjectPatch
     public static void OnDespawned(VisualEffectController __instance)
     {
         var prefab = __instance.GetComponent<PoolRetriever>()?.Prefab;
-        if (prefab is null) return;
-        var animator = __instance.GetComponentInChildren<tk2dSpriteAnimator>();
+        var animator = prefab?.GetComponent<SpriteAnimator>();
         // ReSharper disable once InvertIf
-        if (animator)
+        if (animator is not null)
         {
-            var origin = prefab.GetComponent<tk2dSpriteAnimator>();
-            animator.Library = origin.Library;
-            animator.DefaultClipId = origin.DefaultClipId;
+            __instance.GetComponent<SpriteAnimator>().Animator.playAutomatically = animator.Animator.playAutomatically;
+            __instance.GetComponent<SpriteAnimator>().Library = animator.Library;
         }
     }
 
