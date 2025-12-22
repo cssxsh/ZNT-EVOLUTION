@@ -76,14 +76,24 @@ internal class UnityEngineObjectConverter : CustomCreationConverter<UnityEngine.
 
         if (CustomAssetUtility.Cache.TryGetValue(key, out var value)) return value;
         var name = key.Split(':')[0].Trim();
-        if (key.IndexOf(':') >= 0) type = AccessTools.TypeByName(key.Split(':')[1].Trim()) ?? type;
-        if (type == typeof(Transform) && CustomAssetUtility.TryGetPrefab(name, out var prefab)) return prefab;
-        if (type == typeof(GameObject) && CustomAssetUtility.TryGetPrefab(name, out var t)) return t.gameObject;
-        foreach (var asset in Resources.FindObjectsOfTypeAll(type))
+        var t = key.IndexOf(':') >= 0 ? AccessTools.TypeByName(key.Split(':')[1].Trim()) ?? type : type;
+        if (t == typeof(Transform)
+            && CustomAssetUtility.TryGetPrefab(name, out var prefab)) return prefab;
+        if (t == typeof(GameObject)
+            && CustomAssetUtility.TryGetPrefab(name, out var transform)) return transform.gameObject;
+        foreach (var asset in Resources.FindObjectsOfTypeAll(t))
         {
             if (asset.name != name) continue;
             CustomAssetUtility.Cache[key] = asset;
             return asset;
+        }
+
+        if (type == typeof(CustomAssetObject))
+        {
+            var lazy = ScriptableObject.CreateInstance<LazyRef>();
+            lazy.HierarchyName = key;
+            lazy.name = name;
+            return lazy;
         }
 
         Logger.LogError($"NotFound {type.FullName} {{ name: \"{name}\" }}");

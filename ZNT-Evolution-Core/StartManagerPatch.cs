@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using BepInEx.Logging;
 using HarmonyLib;
 using UnityEngine;
@@ -181,6 +182,16 @@ internal static class StartManagerPatch
             if (directory.EndsWith("新建文件夹")) continue;
             var target = Path.GetFullPath(directory);
             yield return LevelElementLoader.ApplyFromFolder(path: target);
+        }
+
+        foreach (var element in LevelElementIndex.Index.Values.Cast<LevelElement>())
+        {
+            switch (element.CustomAsset)
+            {
+                case HumanAsset { RiseAsset: LazyRef lazy } human:
+                    human.RiseAsset = lazy.Fetch() ?? lazy;
+                    break;
+            }
         }
 
         Logger.LogInfo("Loading Patch");

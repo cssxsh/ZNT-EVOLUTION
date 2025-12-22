@@ -415,6 +415,7 @@
         <Compile Include="Asset\HookAsset.cs"/>
         <Compile Include="Asset\LayerConverter.cs"/>
         <Compile Include="Asset\LayerMaskConverter.cs"/>
+        <Compile Include="Asset\LazyRef.cs"/>
         <Compile Include="Asset\LevelElementAddition.cs"/>
         <Compile Include="Asset\ObjectMerge.cs"/>
         <Compile Include="Asset\RectConverter.cs"/>
