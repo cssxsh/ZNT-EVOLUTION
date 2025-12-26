@@ -31,6 +31,13 @@ internal static class CustomAssetObjectPatch
         return prefab;
     }
 
+    private static void Despawn(this AnimationDespawner despawn, AnimationSettings animation)
+    {
+        if (animation == null) return;
+        Traverse.Create(despawn).Field<AnimationEventHandler>("eventHandler").Value
+            .RegisterEndEvent(animation, () => despawn.SendMessage(methodName: "Despawn"));
+    }
+
     [HarmonyPrefix]
     [HarmonyPatch(typeof(CustomAssetObject), "LoadFromAsset")]
     public static void LoadFromAsset(CustomAssetObject __instance, GameObject gameObject)
@@ -430,38 +437,31 @@ internal static class CustomAssetObjectPatch
     #region VisualEffect
 
     [HarmonyPostfix]
-    [HarmonyPatch(typeof(EffectManager), "GetEffect")]
-    public static void GetEffect(EffectManager __instance, VisualEffect effect, Transform __result)
+    [HarmonyPatch(typeof(EffectManager), "OnAwake")]
+    public static void OnAwake(EffectManager __instance)
     {
-        if (effect is not CustomVisualEffect custom) return;
-        var animator = __result.GetComponent<SpriteAnimator>();
-        // ReSharper disable once InvertIf
-        if (animator is not null && custom.animation is not null)
+        foreach (var effect in VisualEffectIndex.Index.Values.OfType<CustomVisualEffect>())
         {
-            if (__result.TryGetComponent(out AnimationDespawner despawn))
-            {
-                Traverse.Create(despawn)
-                    .Field<AnimationEventHandler>("eventHandler").Value
-                    .RegisterEndEvent(custom.animation, () => despawn.SendMessage(methodName: "Despawn"));
-            }
-
-            animator.Animator.playAutomatically = false;
-            animator.ForcePlay(custom.animation);
+            Logger.LogDebug($"Rebuild {effect}");
+            Traverse.Create(effect).Field<Transform>("prefab").Value = Object.Instantiate(effect.Prefab);
+            Object.DontDestroyOnLoad(effect.Prefab);
+            effect.Prefab.gameObject.SetActive(false);
+            var animator = effect.Prefab.GetComponent<SpriteAnimator>();
+            if (animator) animator.Animator.playAutomatically &= !(effect.animation?.PlayAnimation ?? false);
+            effect.Prefab.gameObject.SetActive(true);
+            effect.Prefab.name = effect.name;
         }
     }
 
     [HarmonyPostfix]
-    [HarmonyPatch(typeof(VisualEffectController), "OnDespawned")]
-    public static void OnDespawned(VisualEffectController __instance)
+    [HarmonyPatch(typeof(EffectManager), "GetEffect")]
+    public static void GetEffect(EffectManager __instance, VisualEffect effect, Transform __result)
     {
-        var prefab = __instance.GetComponent<PoolRetriever>()?.Prefab;
-        var animator = prefab?.GetComponent<SpriteAnimator>();
-        // ReSharper disable once InvertIf
-        if (animator is not null)
-        {
-            __instance.GetComponent<SpriteAnimator>().Animator.playAutomatically = animator.Animator.playAutomatically;
-            __instance.GetComponent<SpriteAnimator>().Library = animator.Library;
-        }
+        if (effect is not CustomVisualEffect custom) return;
+        var despawn = __result.GetComponent<AnimationDespawner>();
+        if (despawn) despawn.Despawn(custom.animation);
+        var animator = __result.GetComponent<SpriteAnimator>();
+        if (animator) animator.ForcePlay(custom.animation);
     }
 
     #endregion

@@ -162,6 +162,7 @@ public static class LevelElementLoader
             var filename = Path.GetFileName(file);
             var visual = DeserializeObject<CustomVisualEffect>(folder: path, file: file);
             Logger.LogDebug($"{filename} -> {visual}");
+            visual.Bind();
         }
 
         var brush = bundle.LoadAsset<Rotorz.Tile.OrientedBrush>("brush")
@@ -620,6 +621,7 @@ public static class LevelElementLoader
             var filename = Path.GetFileName(file);
             var visual = DeserializeObject<CustomVisualEffect>(folder: path, file: file);
             Logger.LogDebug($"{filename} -> {visual}");
+            visual.Bind();
         }
 
         foreach (var file in Directory.EnumerateFiles(path, "*.explosion.json"))
