@@ -176,6 +176,13 @@ internal static class DebugPatch
     }
 
     [HarmonyPostfix]
+    [HarmonyPatch("PhysicObjectBehaviour+ResetPhysicBarrelBehaviour, Assembly-CSharp", "Reset")]
+    public static void Reset(PhysicObjectBehaviour component)
+    {
+        Traverse.Create(component).Field<bool>("exploded").Value = true;
+    }
+
+    [HarmonyPostfix]
     [HarmonyPatch(typeof(PhysicObjectBehaviour), "Health", MethodType.Getter)]
     public static Health GetHealth(Health __result, PhysicObjectBehaviour __instance)
     {
