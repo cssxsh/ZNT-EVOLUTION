@@ -19,9 +19,15 @@ internal class SnakeFeetPatch
         if (__instance.Frozen || !__instance.Vision.enabled) return;
         if (__instance.Weapon.Attack.HasTarget()) return;
         var frequency = __instance.Vision.Frequency;
-        __instance.Vision.Frequency = 1748;
-        __instance.Vision.Update();
-        __instance.Vision.Frequency = frequency;
+        try
+        {
+            __instance.Vision.Frequency = 1748;
+            __instance.Vision.Update();
+        }
+        finally
+        {
+            __instance.Vision.Frequency = frequency;
+        }
     }
 
     [HarmonyPrefix]

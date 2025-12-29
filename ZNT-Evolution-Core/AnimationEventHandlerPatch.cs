@@ -62,7 +62,7 @@ internal static class AnimationEventHandlerPatch
                         __instance.EventHandler.RegisterEndEvent(name, () => method.Invoke(null, new object[]
                         {
                             __instance,
-                            __instance.AnimationLibrary.GetClipByName(name)
+                            __instance.Animator.CurrentClip
                         }));
                         break;
                 }

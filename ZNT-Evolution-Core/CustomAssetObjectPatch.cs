@@ -22,12 +22,19 @@ internal static class CustomAssetObjectPatch
 
     private static Transform CreatePrefab(this ExplosionAsset explosion, Transform parent = null)
     {
+        var prefab = ComponentSingleton<GamePoolManager>.Instance.Spawn(explosion.Prefab, parent);
         var explode = Traverse.Create(explosion).Field<bool>("autoExplode");
         var auto = explode.Value;
-        explode.Value = false;
-        var prefab = ComponentSingleton<GamePoolManager>.Instance.Spawn(explosion.Prefab, parent);
-        explosion.LoadFromAsset(prefab.gameObject);
-        explode.Value = auto;
+        try
+        {
+            explode.Value = false;
+            explosion.LoadFromAsset(prefab.gameObject);
+        }
+        finally
+        {
+            explode.Value = auto;
+        }
+
         return prefab;
     }
 

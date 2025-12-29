@@ -15,7 +15,7 @@ public class HumanEditor : CharacterEditor
         set => gameObject.SetTags(value);
     }
 
-    [SerializeInEditor(name: "Cannot Attack")]
+    [SerializeInEditor(name: "Zombie Ignore")]
     public bool CannotAttack
     {
         get => Tags.HasFlag(Tag.CannotAttack);

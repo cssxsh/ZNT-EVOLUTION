@@ -43,6 +43,9 @@ public class SphereBuffEffect : TriggerEffect
     public float MaxHpDiff = 100.0f;
 
     // ReSharper disable once InconsistentNaming
+    private readonly Parameters MaxHpParameters = new(id: nameof(Health.MaxHp));
+
+    // ReSharper disable once InconsistentNaming
     [SerializeInEditor(name: "Hp Buff")]
     public bool Hp;
 
@@ -55,16 +58,22 @@ public class SphereBuffEffect : TriggerEffect
     public float HpDiff = 10.0f;
 
     // ReSharper disable once InconsistentNaming
+    private readonly Parameters HpParameters = new(id: nameof(Health.Hp));
+
+    // ReSharper disable once InconsistentNaming
     [SerializeInEditor(name: "Damage Buff")]
     public bool Damage;
-    
+
     // ReSharper disable once InconsistentNaming
     [SerializeInEditor(name: "Damage Duration")]
     public float DamageDuration = 60.0f;
-    
+
     // ReSharper disable once InconsistentNaming
     [SerializeInEditor(name: "Damage Diff")]
     public float DamageDiff = 100.0f;
+
+    // ReSharper disable once InconsistentNaming
+    private readonly Parameters DamageParameters = new(id: nameof(Attacker.Damage));
 
     public override bool CheckConditions(GameObject target)
     {
@@ -77,7 +86,7 @@ public class SphereBuffEffect : TriggerEffect
         {
             target.SendMessage(
                 methodName: nameof(HumanEditor.ApplyBuff),
-                value: new Parameters(id: nameof(Health.MaxHp))
+                value: MaxHpParameters
                     .Update("repeat", new Timer { Duration = float.NaN, Loop = true })
                     .Update("expire", new Timer { Duration = MaxHpDuration, Loop = false })
                     .Update("diff", MaxHpDiff)
@@ -87,11 +96,12 @@ public class SphereBuffEffect : TriggerEffect
                     .Update("tick", null),
                 options: SendMessageOptions.DontRequireReceiver);
         }
+
         if (Hp)
         {
             target.SendMessage(
                 methodName: nameof(HumanEditor.ApplyBuff),
-                value: new Parameters(id: nameof(Health.Hp))
+                value: HpParameters
                     .Update("repeat", new Timer { Duration = 1.0f, Loop = true })
                     .Update("expire", new Timer { Duration = HpDuration, Loop = false })
                     .Update("diff", HpDiff)
@@ -101,11 +111,12 @@ public class SphereBuffEffect : TriggerEffect
                     .Update("tick", new UnityAction<Character, CustomAsset>(HpTick)),
                 options: SendMessageOptions.DontRequireReceiver);
         }
+
         if (Damage)
         {
             target.SendMessage(
                 methodName: nameof(HumanEditor.ApplyBuff),
-                value: new Parameters(id: nameof(Attacker.Damage))
+                value: DamageParameters
                     .Update("repeat", new Timer { Duration = float.NaN, Loop = true })
                     .Update("expire", new Timer { Duration = DamageDuration, Loop = false })
                     .Update("diff", DamageDiff)
