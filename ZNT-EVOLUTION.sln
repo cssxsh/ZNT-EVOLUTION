@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZNT-Evolution-Core", "ZNT-Evolution-Core\ZNT-Evolution-Core.csproj", "{C11AAB89-8B7D-443E-9E44-2072FECF6FD0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZNT-Evolution-Live", "ZNT-Evolution-Live\ZNT-Evolution-Live.csproj", "{A9B5CA39-B6FC-49A8-A6CF-2B751F625333}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{C11AAB89-8B7D-443E-9E44-2072FECF6FD0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C11AAB89-8B7D-443E-9E44-2072FECF6FD0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C11AAB89-8B7D-443E-9E44-2072FECF6FD0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A9B5CA39-B6FC-49A8-A6CF-2B751F625333}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A9B5CA39-B6FC-49A8-A6CF-2B751F625333}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A9B5CA39-B6FC-49A8-A6CF-2B751F625333}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A9B5CA39-B6FC-49A8-A6CF-2B751F625333}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
