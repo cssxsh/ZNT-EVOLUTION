@@ -1,6 +1,7 @@
 using System;
 using System.Buffers.Binary;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Net.WebSockets;
 using System.Security.Cryptography;
@@ -26,8 +27,16 @@ public class BiliApi : MonoBehaviour
     private AnchorInfo AnchorInfo;
     private long LastHeartBeat;
     private readonly ClientWebSocket WebSocketImpl = new();
-    private readonly ArraySegment<byte> Buffer = WebSocket.CreateClientBuffer(0x00004000, 0x00004000);
     // ReSharper restore InconsistentNaming
+
+    private static readonly ConcurrentBag<ArraySegment<byte>> BufferPooling = new();
+    private ArraySegment<byte> AuthPacket => Packet(WsOperation.OP_AUTH, JObject.Parse(WebsocketInfo.AuthBody));
+    private static readonly ArraySegment<byte> HeartBeatPacket = Packet(WsOperation.OP_HEARTBEAT, null);
+    private static ArraySegment<byte> Buffer
+    {
+        get => BufferPooling.TryTake(out var buffer) ? buffer : WebSocket.CreateServerBuffer(0x00002000);
+        set => BufferPooling.Add(value);
+    }
 
     // ReSharper disable InconsistentNaming
     public event Action<JObject, int, string> OnError;
@@ -146,9 +155,8 @@ public class BiliApi : MonoBehaviour
     protected IEnumerator WsAuth()
     {
         if (WebSocketImpl.State != WebSocketState.Open) yield break;
-        var body = JObject.Parse(WebsocketInfo.AuthBody);
         var auth = WebSocketImpl.SendAsync(
-            Packet(WsOperation.OP_AUTH, body),
+            AuthPacket,
             WebSocketMessageType.Binary,
             true,
             CancellationToken.None);
@@ -160,7 +168,7 @@ public class BiliApi : MonoBehaviour
     {
         if (WebSocketImpl.State != WebSocketState.Open) yield break;
         var hb = WebSocketImpl.SendAsync(
-            Packet(WsOperation.OP_HEARTBEAT, null),
+            HeartBeatPacket,
             WebSocketMessageType.Binary,
             true,
             CancellationToken.None);
@@ -172,16 +180,18 @@ public class BiliApi : MonoBehaviour
     {
         while (WebSocketImpl.State == WebSocketState.Open)
         {
-            var receive = WebSocketImpl.ReceiveAsync(Buffer, CancellationToken.None);
+            var buffer = Buffer;
+            var receive = WebSocketImpl.ReceiveAsync(buffer, CancellationToken.None);
             yield return new WaitUntil(() => receive.IsCompleted);
-            if (receive.IsFaulted) yield break;
-            if (receive.Result.MessageType != WebSocketMessageType.Binary) continue;
             try
             {
-                Handle();
+                if (receive.IsFaulted) yield break;
+                if (receive.Result.MessageType != WebSocketMessageType.Binary) continue;
+                HandlePacket(buffer);
             }
             catch (Exception e)
             {
+                Buffer = buffer;
                 OnWsError?.Invoke(WebsocketInfo, e);
             }
         }
@@ -218,12 +228,13 @@ public class BiliApi : MonoBehaviour
         return request;
     }
 
-    private void Handle()
+    private void HandlePacket(ArraySegment<byte> buffer)
     {
-        var length = BinaryPrimitives.ReadInt32BigEndian(Buffer.AsReadOnlySpan().Slice(0x00));
-        var version = BinaryPrimitives.ReadInt16BigEndian(Buffer.AsReadOnlySpan().Slice(0x06));
+        var length = BinaryPrimitives.ReadInt32BigEndian(buffer.AsReadOnlySpan().Slice(0x00));
+        var version = BinaryPrimitives.ReadInt16BigEndian(buffer.AsReadOnlySpan().Slice(0x06));
         if (version != 0x00) throw new NotSupportedException($"Packet Version: {version}");
-        var operation = (WsOperation)BinaryPrimitives.ReadInt32BigEndian(Buffer.AsReadOnlySpan().Slice(0x08));
+        var operation = (WsOperation)BinaryPrimitives.ReadInt32BigEndian(buffer.AsReadOnlySpan().Slice(0x08));
+        var body = Encoding.UTF8.GetString(buffer.Array!, 0x10, length - 0x10);
         // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
         switch (operation)
         {
@@ -234,42 +245,45 @@ public class BiliApi : MonoBehaviour
                 OnWsHeartBeat?.Invoke(WebsocketInfo);
                 break;
             case WsOperation.OP_SEND_SMS_REPLY:
-                var content = JObject.Parse(Encoding.UTF8.GetString(Buffer.Array!, 0x10, length - 0x10));
-                var command = content.Value<string>("cmd");
-                switch (command)
-                {
-                    case "LIVE_OPEN_PLATFORM_DM":
-                        OnDanmaku?.Invoke(content, content["data"].ToObject<Danmaku>());
-                        break;
-                    case "LIVE_OPEN_PLATFORM_SEND_GIFT":
-                        OnGift?.Invoke(content, content["data"].ToObject<Gift>());
-                        break;
-                    case "LIVE_OPEN_PLATFORM_SUPER_CHAT":
-                        OnSuperChat?.Invoke(content, content["data"].ToObject<SuperChat>());
-                        break;
-                    case "LIVE_OPEN_PLATFORM_SUPER_CHAT_DEL":
-                        OnSuperChatDelete?.Invoke(content, content["data"].ToObject<SuperChatDelete>());
-                        break;
-                    case "LIVE_OPEN_PLATFORM_GUARD":
-                        OnGuard?.Invoke(content, content["data"].ToObject<Guard>());
-                        break;
-                    case "LIVE_OPEN_PLATFORM_LIKE":
-                        // TODO LIVE_OPEN_PLATFORM_LIKE
-                        break;
-                    case "LIVE_OPEN_PLATFORM_LIVE_START":
-                        // TODO LIVE_OPEN_PLATFORM_LIVE_START
-                        break;
-                    case "LIVE_OPEN_PLATFORM_LIVE_END":
-                        // TODO LIVE_OPEN_PLATFORM_LIVE_END
-                        break;
-                    case "LIVE_OPEN_PLATFORM_INTERACTION_END":
-                        WebSocketImpl.CloseAsync(WebSocketCloseStatus.NormalClosure, command, CancellationToken.None);
-                        break;
-                }
-
+                HandleMessage(JObject.Parse(body));
                 break;
             default:
                 throw new NotSupportedException($"Packet Operation: {operation}");
+        }
+    }
+
+    private void HandleMessage(JObject content)
+    {
+        var command = content.Value<string>("cmd");
+        switch (command)
+        {
+            case "LIVE_OPEN_PLATFORM_DM":
+                OnDanmaku?.Invoke(content, content["data"].ToObject<Danmaku>());
+                break;
+            case "LIVE_OPEN_PLATFORM_SEND_GIFT":
+                OnGift?.Invoke(content, content["data"].ToObject<Gift>());
+                break;
+            case "LIVE_OPEN_PLATFORM_SUPER_CHAT":
+                OnSuperChat?.Invoke(content, content["data"].ToObject<SuperChat>());
+                break;
+            case "LIVE_OPEN_PLATFORM_SUPER_CHAT_DEL":
+                OnSuperChatDelete?.Invoke(content, content["data"].ToObject<SuperChatDelete>());
+                break;
+            case "LIVE_OPEN_PLATFORM_GUARD":
+                OnGuard?.Invoke(content, content["data"].ToObject<Guard>());
+                break;
+            case "LIVE_OPEN_PLATFORM_LIKE":
+                // TODO LIVE_OPEN_PLATFORM_LIKE
+                break;
+            case "LIVE_OPEN_PLATFORM_LIVE_START":
+                // TODO LIVE_OPEN_PLATFORM_LIVE_START
+                break;
+            case "LIVE_OPEN_PLATFORM_LIVE_END":
+                // TODO LIVE_OPEN_PLATFORM_LIVE_END
+                break;
+            case "LIVE_OPEN_PLATFORM_INTERACTION_END":
+                WebSocketImpl.CloseAsync(WebSocketCloseStatus.NormalClosure, command, CancellationToken.None);
+                break;
         }
     }
 
