@@ -398,36 +398,6 @@ internal static class CustomAssetObjectPatch
         mover.Body.isKinematic = mover.IsGrounded && __instance.enabled;
     }
 
-    [HarmonyPrefix]
-    [HarmonyPatch(typeof(ExplosionEffect), "OnApplyOnGameObject")]
-    public static void OnApplyOnGameObject(ExplosionEffect __instance, GameObject target, out float __state)
-    {
-        __state = __instance.Damage;
-        if (!target.HasAnyTags(Tag.Human)) return;
-        var count = Physics2D.LinecastNonAlloc(
-            start: __instance.Trigger.Detection.Origin.position,
-            end: target.transform.position,
-            results: DetectionHelper.DistanceCheck,
-            layerMask: LayerMask.GetMask("Zombie Stopper"));
-        var total = 0;
-        for (var i = 0; i < count; i++)
-        {
-            var hit = DetectionHelper.DistanceCheck[i];
-            var effect = hit.collider.GetComponent<CharacterAllocationEffect>();
-            if (effect is null) continue;
-            total += effect.capacity;
-        }
-
-        __instance.Damage -= total * 50.0f;
-    }
-
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(ExplosionEffect), "OnApplyOnGameObject")]
-    public static void OnApplyOnGameObject(ExplosionEffect __instance, float __state)
-    {
-        __instance.Damage = __state;
-    }
-
     [HarmonyPostfix]
     [HarmonyPatch(typeof(Stopper), "OnDespawned")]
     public static void OnDespawned(Stopper __instance)

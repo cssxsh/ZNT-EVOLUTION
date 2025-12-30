@@ -97,6 +97,39 @@ internal class SnakeFeetPatch
     }
 
     [HarmonyPrefix]
+    [HarmonyPatch(typeof(ExplosionEffect), "OnApplyOnGameObject")]
+    public static void OnApplyOnGameObject(ExplosionEffect __instance, GameObject target, out float __state)
+    {
+        __state = __instance.Damage;
+        if (!target.HasAnyTags(Tag.Human)) return;
+        var count = Physics2D.LinecastNonAlloc(
+            start: __instance.Trigger.Detection.Origin.position,
+            end: target.transform.position,
+            results: DetectionHelper.DistanceCheck,
+            layerMask: LayerMask.GetMask("Zombie Stopper"));
+        var total = 0;
+        for (var i = 0; i < count; i++)
+        {
+            var hit = DetectionHelper.DistanceCheck[i];
+            var stopper = hit.collider.GetComponentInParent<Stopper>();
+            if (stopper is null) continue;
+            var opponents = Traverse.Create(stopper).Field<bool>("blockOpponents").Value
+                ? Traverse.Create(stopper).Field<int>("MaxOpponents").Value
+                : 0;
+            total += opponents;
+        }
+
+        __instance.Damage -= total * 50.0f;
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(ExplosionEffect), "OnApplyOnGameObject")]
+    public static void OnApplyOnGameObject(ExplosionEffect __instance, float __state)
+    {
+        __instance.Damage = __state;
+    }
+
+    [HarmonyPrefix]
     [HarmonyPatch(typeof(LevelSettingsMenu), "InitGeneralSettings")]
     public static void InitGeneralSettings(LevelSettingsMenu __instance)
     {
