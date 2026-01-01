@@ -396,6 +396,7 @@
         <Compile Include="BiliBili\BiliApi.cs"/>
         <Compile Include="BiliBili\Data\AnchorInfo.cs"/>
         <Compile Include="BiliBili\Data\Danmaku.cs"/>
+        <Compile Include="BiliBili\Data\Enter.cs"/>
         <Compile Include="BiliBili\Data\GameInfo.cs"/>
         <Compile Include="BiliBili\Data\Gift.cs"/>
         <Compile Include="BiliBili\Data\Guard.cs"/>

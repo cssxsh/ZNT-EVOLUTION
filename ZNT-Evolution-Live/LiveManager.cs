@@ -1,18 +1,15 @@
 using System.Collections;
-using System.Linq;
 using BepInEx.Logging;
-using HarmonyLib;
 using ZNT.Evolution.Live.BiliBili;
-using ZNT.Evolution.Live.BiliBili.Data;
 
-// ReSharper disable once InconsistentNaming
+// ReSharper disable InconsistentNaming
 namespace ZNT.Evolution.Live;
 
 public class LiveManager : ComponentSingleton<LiveManager>, IActivable
 {
     private static readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource(nameof(LiveManager));
 
-    private BiliApi BiliApi;
+    internal BiliApi BiliApi;
 
     protected override void OnAwake()
     {
@@ -20,20 +17,21 @@ public class LiveManager : ComponentSingleton<LiveManager>, IActivable
         DontDestroyOnLoad();
         BiliApi = gameObject.AddComponent<BiliApi>();
         BiliApi.enabled = false;
-        // log
+        // ReSharper disable UnusedParameter.Local
         BiliApi.OnError += (raw, code, message) => Logger.LogWarning($"OnError {raw}");
         BiliApi.OnStart += (raw, anchor) => Logger.LogDebug($"OnStart {raw}");
         BiliApi.OnEnd += (raw, anchor) => Logger.LogDebug($"OnEnd {raw}");
         BiliApi.OnWsLink += (ws, link) => Logger.LogDebug($"OnWsLink {link}");
         BiliApi.OnWsAuth += (ws, auth) => Logger.LogDebug($"OnWsAuth {auth}");
         BiliApi.OnWsError += (ws, exception) => Logger.LogWarning($"OnWsError {exception}");
+        BiliApi.OnEnter += (raw, enter) => Logger.LogDebug($"OnEnter {raw}");
         BiliApi.OnDanmaku += (raw, dm) => Logger.LogDebug($"OnDanmaku {raw}");
-        BiliApi.OnGift += (raw, gift) => Logger.LogInfo($"OnGift {raw}");
+        BiliApi.OnGift += (raw, gift) => Logger.LogDebug($"OnGift {raw}");
         BiliApi.OnSuperChat += (raw, sc) => Logger.LogInfo($"OnSuperChat {raw}");
         BiliApi.OnSuperChatDelete += (raw, del) => Logger.LogInfo($"OnSuperChatDelete {raw}");
         BiliApi.OnGuard += (raw, guard) => Logger.LogInfo($"OnGuard {raw}");
-        // handle
-        BiliApi.OnDanmaku += (_, dm) => StartCoroutine(OnDanmaku(dm));
+        // ReSharper restore UnusedParameter.Local
+        BiliApi.OnError += (_, code, message) => StartCoroutine(OnError(code, message));
     }
 
     public bool IsActive => BiliApi.enabled;
@@ -61,27 +59,18 @@ public class LiveManager : ComponentSingleton<LiveManager>, IActivable
 
     public void ToggleActivation() => SetActive(!IsActive);
 
-    private static IEnumerator OnDanmaku(Danmaku dm)
+    // ReSharper disable Unity.PerformanceAnalysis
+    private IEnumerator OnError(int code, string _)
     {
-        foreach (var element in LevelElementIndex.Index.Values.Cast<LevelElement>())
+        yield return Wait.ForEndOfFrame;
+        switch (code)
         {
-            if (element.Title != dm.Message && element.name != dm.Message) continue;
-            switch (element.CustomAsset)
-            {
-                case HumanAsset human:
-                    yield return Wait.ForEndOfFrame;
-                    // ReSharper disable once Unity.PerformanceCriticalCodeInvocation
-                    foreach (var point in FindObjectsOfType<CharacterSpawnPoint>())
-                    {
-                        if (point.Active) continue;
-                        // ReSharper disable once Unity.PerformanceCriticalCodeInvocation
-                        human.CreateGameObject(position: point.transform.position)
-                            .GetComponent<ISpawnable>()
-                            .OnSpawn(Traverse.Create(point).Field<Parameters>("sendParams").Value);
-                    }
-
-                    break;
-            }
+            case 7001:
+            case 7002:
+            case 7003:
+                yield return new UnityEngine.WaitForSeconds(60);
+                BiliApi.SendMessage(methodName: "AppStart");
+                break;
         }
     }
 }

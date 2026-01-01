@@ -32,6 +32,7 @@ public class BiliApi : MonoBehaviour
     private static readonly ConcurrentBag<ArraySegment<byte>> BufferPooling = new();
     private ArraySegment<byte> AuthPacket => Packet(WsOperation.OP_AUTH, JObject.Parse(WebsocketInfo.AuthBody));
     private static readonly ArraySegment<byte> HeartBeatPacket = Packet(WsOperation.OP_HEARTBEAT, null);
+
     private static ArraySegment<byte> Buffer
     {
         get => BufferPooling.TryTake(out var buffer) ? buffer : WebSocket.CreateServerBuffer(0x00002000);
@@ -47,6 +48,7 @@ public class BiliApi : MonoBehaviour
     public event Action<WebsocketInfo, JObject> OnWsAuth;
     public event Action<WebsocketInfo> OnWsHeartBeat;
     public event Action<WebsocketInfo, Exception> OnWsError;
+    public event Action<JObject, Enter> OnEnter;
     public event Action<JObject, Danmaku> OnDanmaku;
     public event Action<JObject, Gift> OnGift;
     public event Action<JObject, SuperChat> OnSuperChat;
@@ -257,6 +259,9 @@ public class BiliApi : MonoBehaviour
         var command = content.Value<string>("cmd");
         switch (command)
         {
+            case "LIVE_OPEN_PLATFORM_LIVE_ROOM_ENTER":
+                OnEnter?.Invoke(content, content["data"].ToObject<Enter>());
+                break;
             case "LIVE_OPEN_PLATFORM_DM":
                 OnDanmaku?.Invoke(content, content["data"].ToObject<Danmaku>());
                 break;

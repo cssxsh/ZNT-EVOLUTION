@@ -47,7 +47,7 @@ public struct Danmaku
     public bool IsAdmin;
 
     [JsonProperty("dm_type")]
-    public string Type;
+    public bool IsEmoji;
 
     [JsonProperty("msg")]
     public string Message;
