@@ -35,34 +35,14 @@ internal class SnakeFeetPatch
     public static void OnCreate(SpawnCharacterChooser __instance)
     {
         var spawn = Traverse.Create(__instance).Field("spawn").Field<Enum>("spawnType").Value;
+        if (spawn.ToString() != "Human") return;
         var characters = Traverse.Create(__instance).Field<List<CharacterAsset>>("selectableCharacters").Value;
-        switch (spawn.ToString())
-        {
-            case "Human":
-                characters.AddRange(LevelElementIndex.Index.Values.Cast<LevelElement>()
-                    .Where(element => element.Useable)
-                    .Select(element => element.CustomAsset)
-                    .OfType<HumanAsset>()
-                    .Where(asset => !characters.Contains(asset))
-                    .Distinct());
-                break;
-            case "Zombie":
-                characters.AddRange(LevelElementIndex.Index.Values.Cast<LevelElement>()
-                    .Where(element => element.Useable)
-                    .Select(element => element.CustomAsset)
-                    .OfType<ZombieAsset>()
-                    .Where(asset => !characters.Contains(asset))
-                    .Distinct());
-                break;
-            default:
-                characters.AddRange(LevelElementIndex.Index.Values.Cast<LevelElement>()
-                    .Where(element => element.Useable)
-                    .Select(element => element.CustomAsset)
-                    .OfType<CharacterAsset>()
-                    .Where(asset => !characters.Contains(asset))
-                    .Distinct());
-                break;
-        }
+        characters.AddRange(LevelElementIndex.Index.Values.Cast<LevelElement>()
+            .Where(element => element.Useable)
+            .Select(element => element.CustomAsset)
+            .OfType<HumanAsset>()
+            .Where(asset => !characters.Contains(asset) && asset.AnimationLibrary.AnimationExists("rise"))
+            .Distinct());
     }
 
     [HarmonyPrefix]
