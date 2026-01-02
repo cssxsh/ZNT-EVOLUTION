@@ -37,10 +37,10 @@ internal static class SceneLoaderPatch
         toggle.onValueChanged.AddListener(call);
     }
 
-    private static void OnValueChanged(this InputField input, UnityAction<string> call)
+    private static void OnEndEdit(this InputField input, UnityAction<string> call)
     {
-        input.onValueChanged = new InputField.OnChangeEvent();
-        input.onValueChanged.AddListener(call);
+        input.onEndEdit = new InputField.SubmitEvent();
+        input.onEndEdit.AddListener(call);
     }
 
     [HarmonyPrefix]
@@ -151,9 +151,9 @@ internal static class SceneLoaderPatch
                         .Find("Option Panels/Video/Scroll Area/ScrollView/Content/FullScreen Entry").gameObject;
                     var item = UnityEngine.Object.Instantiate(original: fullscreen, parent: content.transform);
                     item.name = $"{info.Metadata.Name} {definition} Entry";
-                    item.GetComponentsInChildren<I2.Loc.Localize>(includeInactive: true)
-                        .ForEach(localize => localize.Term = term.Term);
                     item.SetActive(true);
+                    var localize = item.GetComponentInChildren<I2.Loc.Localize>(includeInactive: true);
+                    localize.Term = term.Term;
                     var toggle = item.GetComponentInChildren<Toggle>(includeInactive: true);
                     toggle.OnValueChanged(value => entry.BoxedValue = value);
                     toggle.SetIsOnWithoutNotify((bool)entry.BoxedValue);
@@ -164,24 +164,26 @@ internal static class SceneLoaderPatch
                         .Find("Option Panels/Video/Scroll Area/ScrollView/Content/Max FPS Entry").gameObject;
                     var item = UnityEngine.Object.Instantiate(original: fps, parent: content.transform);
                     item.name = $"{info.Metadata.Name} {definition} Entry";
-                    item.GetComponentsInChildren<I2.Loc.Localize>(includeInactive: true)
-                        .ForEach(localize => localize.Term = term.Term);
                     item.SetActive(true);
+                    var localize = item.GetComponentInChildren<I2.Loc.Localize>(includeInactive: true);
+                    localize.Term = term.Term;
+                    var canvas = item.GetComponentInChildren<CanvasGroup>(includeInactive: true);
+                    var toggle = item.GetComponentInChildren<Toggle>(includeInactive: true);
                     var input = item.GetComponentInChildren<InputField>(includeInactive: true);
-                    input.OnValueChanged(value =>
+                    canvas.interactable = true;
+                    toggle.OnValueChanged(value =>
+                    {
+                        entry.BoxedValue = (value ? 0 : int.MinValue) | ((int)entry.BoxedValue & int.MaxValue);
+                        input.interactable = value;
+                    });
+                    toggle.SetIsOnWithoutNotify((int)entry.BoxedValue >= 0);
+                    input.OnEndEdit(value =>
                     {
                         if (string.IsNullOrEmpty(value)) entry.BoxedValue = entry.DefaultValue;
                         else entry.SetSerializedValue(value);
                     });
                     input.SetTextWithoutNotify(((int)entry.BoxedValue & int.MaxValue).ToString());
-                    input.interactable = (int)entry.BoxedValue >= 0;
-                    var toggle = item.GetComponentInChildren<Toggle>(includeInactive: true);
-                    toggle.OnValueChanged(value =>
-                    {
-                        entry.BoxedValue = (value ? int.MaxValue : -1) | ((int)entry.BoxedValue & int.MaxValue);
-                        input.interactable = value;
-                    });
-                    toggle.SetIsOnWithoutNotify(input.interactable);
+                    input.interactable = toggle.isOn;
                 }
             }
         }
