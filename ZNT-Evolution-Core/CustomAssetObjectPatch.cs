@@ -7,13 +7,14 @@ using UnityEngine;
 using ZNT.Evolution.Core.Asset;
 using ZNT.Evolution.Core.Editor;
 using ZNT.Evolution.Core.Effect;
+using BepInExLogger = BepInEx.Logging.Logger;
 
 // ReSharper disable InconsistentNaming
 namespace ZNT.Evolution.Core;
 
 internal static class CustomAssetObjectPatch
 {
-    private static readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource(nameof(CustomAssetObject));
+    private static readonly ManualLogSource Logger = BepInExLogger.CreateLogSource(nameof(CustomAssetObject));
 
     private static DamageType GetDamageType(this Parameters parameters, string key = nameof(DamageType))
     {

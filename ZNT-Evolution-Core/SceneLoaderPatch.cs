@@ -12,13 +12,14 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using ZNT.Evolution.Core.Asset;
 using ZNT.LevelEditor;
+using BepInExLogger = BepInEx.Logging.Logger;
 
 // ReSharper disable InconsistentNaming
 namespace ZNT.Evolution.Core;
 
 internal static class SceneLoaderPatch
 {
-    private static readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource(nameof(SceneLoader));
+    private static readonly ManualLogSource Logger = BepInExLogger.CreateLogSource(nameof(SceneLoader));
 
     private static void ToggleActivation(this RectTransform transform)
     {
@@ -114,9 +115,9 @@ internal static class SceneLoaderPatch
         {
             var item = UnityEngine.Object.Instantiate(original: impl, parent: content.transform);
             item.name = $"{element.Title} Entry";
-            item.GetComponentsInChildren<I2.Loc.Localize>(includeInactive: true)
-                .ForEach(localize => localize.Term = element.GetTermData().Term);
             item.SetActive(true);
+            var localize = item.GetComponentInChildren<I2.Loc.Localize>(includeInactive: true);
+            localize.Term = element.GetTermData().Term;
             var toggle = item.GetComponentInChildren<Toggle>(includeInactive: true);
             var enable = Traverse.Create(element).Field<bool>("useable");
             toggle.OnValueChanged(value => enable.Value = value);

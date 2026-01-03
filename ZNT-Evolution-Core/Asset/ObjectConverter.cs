@@ -5,12 +5,13 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using UnityEngine;
+using BepInExLogger = BepInEx.Logging.Logger;
 
 namespace ZNT.Evolution.Core.Asset;
 
-internal class UnityEngineObjectConverter : CustomCreationConverter<UnityEngine.Object>
+internal class ObjectConverter : CustomCreationConverter<UnityEngine.Object>
 {
-    private static readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource("ObjectConverter");
+    private static readonly ManualLogSource Logger = BepInExLogger.CreateLogSource(nameof(ObjectConverter));
 
     public override bool CanWrite => true;
 

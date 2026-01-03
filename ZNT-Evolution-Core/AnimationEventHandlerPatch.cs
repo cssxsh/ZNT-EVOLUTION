@@ -6,13 +6,14 @@ using BepInEx.Logging;
 using HarmonyLib;
 using JetBrains.Annotations;
 using ZNT.Evolution.Core.Editor;
+using BepInExLogger = BepInEx.Logging.Logger;
 
 // ReSharper disable InconsistentNaming
 namespace ZNT.Evolution.Core;
 
 internal static class AnimationEventHandlerPatch
 {
-    private static readonly ManualLogSource LogSource = Logger.CreateLogSource(nameof(AnimationEventHandler));
+    private static readonly ManualLogSource Logger = BepInExLogger.CreateLogSource(nameof(AnimationEventHandler));
 
     private static readonly C5.HashedArrayList<MethodInfo> EventHandles = new();
 
@@ -50,7 +51,6 @@ internal static class AnimationEventHandlerPatch
                 switch (description.Description.Substring(0, index))
                 {
                     case nameof(AnimationEventHandler.RegisterTriggerEvent):
-                        LogSource.LogDebug($"RegisterTriggerEvent(name=\"{name}\") for {method.FullDescription()}");
                         __instance.EventHandler.RegisterTriggerEvent(name, frame => method.Invoke(null, new object[]
                         {
                             __instance,
@@ -58,7 +58,6 @@ internal static class AnimationEventHandlerPatch
                         }));
                         break;
                     case nameof(AnimationEventHandler.RegisterEndEvent):
-                        LogSource.LogDebug($"RegisterEndEvent(name=\"{name}\") for {method.FullDescription()}");
                         __instance.EventHandler.RegisterEndEvent(name, () => method.Invoke(null, new object[]
                         {
                             __instance,
@@ -95,7 +94,7 @@ internal static class AnimationEventHandlerPatch
                         when infos[1].ParameterType.IsAssignableFrom(typeof(tk2dSpriteAnimationFrame)):
                     case nameof(AnimationEventHandler.RegisterEndEvent)
                         when infos[1].ParameterType.IsAssignableFrom(typeof(tk2dSpriteAnimationClip)):
-                        if (EventHandles.Add(method)) LogSource.LogInfo($"Cached {method.FullDescription()}");
+                        if (EventHandles.Add(method)) Logger.LogInfo($"Cached {method.FullDescription()}");
                         break;
                 }
             }

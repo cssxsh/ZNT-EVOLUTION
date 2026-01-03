@@ -3,6 +3,7 @@ using BepInEx.Logging;
 using HarmonyLib;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
+using BepInExLogger = BepInEx.Logging.Logger;
 
 // ReSharper disable MemberCanBePrivate.Global
 namespace ZNT.Evolution.Core.Asset;
@@ -11,7 +12,7 @@ namespace ZNT.Evolution.Core.Asset;
 [UsedImplicitly]
 internal class LevelElementAddition : EvolutionAddition<LevelElement>
 {
-    private static readonly ManualLogSource LogSource = Logger.CreateLogSource(nameof(LevelElementAddition));
+    private static readonly ManualLogSource Logger = BepInExLogger.CreateLogSource(nameof(LevelElementAddition));
 
     [JsonProperty("Assets")]
     public readonly CustomAsset[] Assets;
@@ -19,7 +20,7 @@ internal class LevelElementAddition : EvolutionAddition<LevelElement>
     [JsonConstructor]
     public LevelElementAddition(LevelElement[] targets, CustomAsset[] assets) : base(targets)
     {
-        if (targets.Length != assets.Length) LogSource.LogWarning("Targets.Length != Assets.Length");
+        if (targets.Length != assets.Length) Logger.LogWarning("Targets.Length != Assets.Length");
         Assets = assets;
     }
 

@@ -6,9 +6,9 @@ using UnityEngine;
 
 namespace ZNT.Evolution.Core.Asset;
 
-internal class UnityEngineObjectContractResolver : DefaultContractResolver
+internal class ObjectContractResolver : DefaultContractResolver
 {
-    public UnityEngineObjectContractResolver() : base(shareCache: true)
+    public ObjectContractResolver() : base(shareCache: true)
     {
         // ...
     }

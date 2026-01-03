@@ -20,12 +20,12 @@ public static class CustomAssetUtility
     {
         ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
         TypeNameHandling = TypeNameHandling.Auto,
-        ContractResolver = new UnityEngineObjectContractResolver(),
+        ContractResolver = new ObjectContractResolver(),
         Converters =
         {
             new FrameworkInputsConverter(),
             new GenericDictionaryConverter(),
-            new UnityEngineObjectConverter(),
+            new ObjectConverter(),
             new ExplodeSurfaceConverter(),
             new DamageFlagsConverter(),
             new StringEnumConverter(),

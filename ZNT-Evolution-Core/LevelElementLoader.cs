@@ -8,12 +8,13 @@ using HarmonyLib;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
 using ZNT.Evolution.Core.Asset;
+using BepInExLogger = BepInEx.Logging.Logger;
 
 namespace ZNT.Evolution.Core;
 
 public static class LevelElementLoader
 {
-    private static readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource(nameof(LevelElementLoader));
+    private static readonly ManualLogSource Logger = BepInExLogger.CreateLogSource(nameof(LevelElementLoader));
 
     public static IEnumerator LoadFromFolder(string path, LevelElement.Type type)
     {

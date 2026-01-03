@@ -3,6 +3,7 @@ using HarmonyLib;
 using UnityEngine;
 using UnityEngine.Events;
 using ZNT.Evolution.Core.Editor;
+using BepInExLogger = BepInEx.Logging.Logger;
 
 namespace ZNT.Evolution.Core.Effect;
 
@@ -10,7 +11,7 @@ namespace ZNT.Evolution.Core.Effect;
 [DisallowMultipleComponent]
 public class SphereBuffEffect : TriggerEffect
 {
-    private static readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource(nameof(SphereBuffEffect));
+    private static readonly ManualLogSource Logger = BepInExLogger.CreateLogSource(nameof(SphereBuffEffect));
 
     [SerializeInEditor(name: "Detection Radius")]
     public float DetectionRadius
@@ -26,54 +27,45 @@ public class SphereBuffEffect : TriggerEffect
         set => Trigger.Frequency = value;
     }
 
-    // ReSharper disable once InconsistentNaming
+    // ReSharper disable InconsistentNaming
+
     [SerializeInEditor(name: "Detection Type")]
     public CharacterType DetectionType = CharacterType.ArmedCivilian;
 
-    // ReSharper disable once InconsistentNaming
     [SerializeInEditor(name: "Max Hp Buff")]
     public bool MaxHp;
 
-    // ReSharper disable once InconsistentNaming
     [SerializeInEditor(name: "Max Hp Duration")]
     public float MaxHpDuration = 60.0f;
 
-    // ReSharper disable once InconsistentNaming
     [SerializeInEditor(name: "Max Hp Diff")]
     public float MaxHpDiff = 100.0f;
 
-    // ReSharper disable once InconsistentNaming
     private readonly Parameters MaxHpParameters = new(id: nameof(Health.MaxHp));
 
-    // ReSharper disable once InconsistentNaming
     [SerializeInEditor(name: "Hp Buff")]
     public bool Hp;
 
-    // ReSharper disable once InconsistentNaming
     [SerializeInEditor(name: "Hp Duration")]
     public float HpDuration = 600.0f;
 
-    // ReSharper disable once InconsistentNaming
     [SerializeInEditor(name: "Hp Diff")]
     public float HpDiff = 10.0f;
 
-    // ReSharper disable once InconsistentNaming
     private readonly Parameters HpParameters = new(id: nameof(Health.Hp));
 
-    // ReSharper disable once InconsistentNaming
     [SerializeInEditor(name: "Damage Buff")]
     public bool Damage;
 
-    // ReSharper disable once InconsistentNaming
     [SerializeInEditor(name: "Damage Duration")]
     public float DamageDuration = 60.0f;
 
-    // ReSharper disable once InconsistentNaming
     [SerializeInEditor(name: "Damage Diff")]
     public float DamageDiff = 100.0f;
 
-    // ReSharper disable once InconsistentNaming
     private readonly Parameters DamageParameters = new(id: nameof(Attacker.Damage));
+
+    // ReSharper restore InconsistentNaming
 
     public override bool CheckConditions(GameObject target)
     {

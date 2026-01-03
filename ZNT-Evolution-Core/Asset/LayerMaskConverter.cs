@@ -7,12 +7,13 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
+using BepInExLogger = BepInEx.Logging.Logger;
 
 namespace ZNT.Evolution.Core.Asset;
 
 public class LayerMaskConverter : CustomCreationConverter<LayerMask>
 {
-    private static readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource(nameof(LayerMaskConverter));
+    private static readonly ManualLogSource Logger = BepInExLogger.CreateLogSource(nameof(LayerMaskConverter));
 
     public override bool CanWrite => true;
 

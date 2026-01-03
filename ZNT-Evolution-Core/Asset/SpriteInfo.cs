@@ -4,6 +4,7 @@ using BepInEx.Logging;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using UnityEngine;
+using BepInExLogger = BepInEx.Logging.Logger;
 
 // ReSharper disable MemberCanBePrivate.Global
 namespace ZNT.Evolution.Core.Asset;
@@ -12,7 +13,7 @@ namespace ZNT.Evolution.Core.Asset;
 [UsedImplicitly]
 internal class SpriteInfo : EvolutionInfo<tk2dSpriteCollectionData>
 {
-    private static readonly ManualLogSource LogSource = BepInEx.Logging.Logger.CreateLogSource(nameof(SpriteInfo));
+    private static readonly ManualLogSource Logger = BepInExLogger.CreateLogSource(nameof(SpriteInfo));
 
     [JsonProperty("OrthoSize")]
     public readonly float OrthoSize;
@@ -53,8 +54,8 @@ internal class SpriteInfo : EvolutionInfo<tk2dSpriteCollectionData>
         Anchors = anchors ?? Regions.Select(_ => anchor ?? Vector2.zero).ToArray();
         AttachPoints = points ?? new Dictionary<int, tk2dSpriteDefinition.AttachPoint[]>();
         Material = material;
-        if (Names.Length != Regions.Length) LogSource.LogWarning("Names.Length != Regions.Length");
-        if (Names.Length != Anchors.Length) LogSource.LogWarning("Names.Length != Anchors.Length");
+        if (Names.Length != Regions.Length) Logger.LogWarning("Names.Length != Regions.Length");
+        if (Names.Length != Anchors.Length) Logger.LogWarning("Names.Length != Anchors.Length");
     }
 
     public override tk2dSpriteCollectionData Create()

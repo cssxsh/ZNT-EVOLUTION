@@ -1,7 +1,7 @@
 using System.Linq;
 using UnityEngine;
 
-// ReSharper disable once InconsistentNaming
+// ReSharper disable InconsistentNaming
 namespace ZNT.Evolution.Core.Editor;
 
 [SerializeInEditor(name: "Explosion")]

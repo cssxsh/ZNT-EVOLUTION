@@ -8,13 +8,14 @@ using UnityEngine;
 using ZNT.Evolution.Core.Asset;
 using ZNT.Evolution.Core.Editor;
 using ZNT.Evolution.Core.Effect;
+using BepInExLogger = BepInEx.Logging.Logger;
 
 // ReSharper disable InconsistentNaming
 namespace ZNT.Evolution.Core;
 
 internal static class StartManagerPatch
 {
-    private static readonly ManualLogSource Logger = BepInEx.Logging.Logger.CreateLogSource(nameof(StartManager));
+    private static readonly ManualLogSource Logger = BepInExLogger.CreateLogSource(nameof(StartManager));
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(StartManager), "Start")]
