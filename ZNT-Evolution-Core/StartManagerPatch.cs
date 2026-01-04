@@ -43,8 +43,8 @@ internal static class StartManagerPatch
                     Logger.LogInfo($"Fix CharacterType for {human}");
                     break;
                 case PhysicObjectAsset { DamageCharacterOnTrigger: true, DamageRadius: 0 } physic:
-                    physic.DamageRadius = physic.ColliderRadius;
-                    Logger.LogInfo($"Fix DamageRadius for {physic}");
+                    physic.DamageCharacterOnTrigger = false;
+                    Logger.LogInfo($"Fix DamageCharacterOnTrigger for {physic}");
                     break;
                 case LevelElement { name: "drone_exterminator" } drone:
                     drone.Title = "Drone Exterminator";
