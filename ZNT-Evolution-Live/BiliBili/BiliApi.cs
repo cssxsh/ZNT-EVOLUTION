@@ -7,6 +7,7 @@ using System.Net.WebSockets;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
+using HarmonyLib;
 using JetBrains.Annotations;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
@@ -138,7 +139,6 @@ public class BiliApi : MonoBehaviour
     [UsedImplicitly]
     protected IEnumerator WsLink()
     {
-        WebSocketImpl.Options.KeepAliveInterval = TimeSpan.FromSeconds(10);
         foreach (var link in WebsocketInfo.WssLink)
         {
             var connect = WebSocketImpl.ConnectAsync(new Uri(link), CancellationToken.None);
@@ -209,19 +209,15 @@ public class BiliApi : MonoBehaviour
         request.SetRequestHeader("x-bili-signature-nonce", Guid.NewGuid().ToString());
         request.SetRequestHeader("x-bili-signature-version", "1.0");
         request.SetRequestHeader("x-bili-timestamp", DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString());
-        var headers = new StringBuilder()
-            .Append("x-bili-accesskeyid:").Append(request.GetRequestHeader("x-bili-accesskeyid"))
-            .Append("\n")
-            .Append("x-bili-content-md5:").Append(request.GetRequestHeader("x-bili-content-md5"))
-            .Append("\n")
-            .Append("x-bili-signature-method:").Append(request.GetRequestHeader("x-bili-signature-method"))
-            .Append("\n")
-            .Append("x-bili-signature-nonce:").Append(request.GetRequestHeader("x-bili-signature-nonce"))
-            .Append("\n")
-            .Append("x-bili-signature-version:").Append(request.GetRequestHeader("x-bili-signature-version"))
-            .Append("\n")
-            .Append("x-bili-timestamp:").Append(request.GetRequestHeader("x-bili-timestamp"))
-            .ToString();
+        var headers = new[]
+        {
+            "x-bili-accesskeyid",
+            "x-bili-content-md5",
+            "x-bili-signature-method",
+            "x-bili-signature-nonce",
+            "x-bili-signature-version",
+            "x-bili-timestamp",
+        }.Join(converter: n => $"{n}:{request.GetRequestHeader(n)}", delimiter: "\n");
         request.SetRequestHeader("Authorization", Sha256(headers, AccessKeySecret));
         request.SetRequestHeader("Accept", "application/json");
         request.SetRequestHeader("Content-Type", "application/json");
