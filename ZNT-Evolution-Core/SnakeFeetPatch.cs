@@ -155,6 +155,16 @@ internal class SnakeFeetPatch
                     .GetField(nameof(HumanBehaviour.Attitude))] = human.Attitude;
             }
                 break;
+            case TrapEffect trap:
+            {
+                __result.Fields.Clear();
+                __result.Fields[typeof(TrapEffect).GetField(nameof(TrapEffect.Mode))] = trap.Mode;
+                __result.Fields[typeof(TrapEffect).GetField(nameof(TrapEffect.KillDelay))] = trap.KillDelay;
+                __result.Fields[typeof(TrapEffect).GetField(nameof(TrapEffect.Damage))] = trap.Damage;
+                __result.Fields[typeof(TrapEffect).GetField(nameof(TrapEffect.DamageRate))] = trap.DamageRate;
+                __result.Fields[typeof(TrapEffect).GetField(nameof(TrapEffect.DamageType))] = trap.DamageType;
+            }
+                break;
         }
     }
 }
