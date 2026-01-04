@@ -389,10 +389,11 @@
         </Reference>
     </ItemGroup>
     <ItemGroup>
+        <Compile Include="Properties\AssemblyInfo.cs"/>
+        <Compile Include="CharacterSpawnPointPatch.cs"/>
+        <Compile Include="EvolutionLivePlugin.cs"/>
         <Compile Include="LiveManager.cs"/>
         <Compile Include="MainMenuPatch.cs"/>
-        <Compile Include="Properties\AssemblyInfo.cs"/>
-        <Compile Include="EvolutionLivePlugin.cs"/>
         <Compile Include="BiliBili\BiliApi.cs"/>
         <Compile Include="BiliBili\Data\AnchorInfo.cs"/>
         <Compile Include="BiliBili\Data\Danmaku.cs"/>

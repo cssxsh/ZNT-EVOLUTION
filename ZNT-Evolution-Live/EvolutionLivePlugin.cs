@@ -21,6 +21,7 @@ public class EvolutionLivePlugin : BaseUnityPlugin
     {
         Instance = this;
         Harmony.CreateAndPatchAll(typeof(MainMenuPatch));
+        Harmony.CreateAndPatchAll(typeof(CharacterSpawnPointPatch));
     }
 
     public void Start()
