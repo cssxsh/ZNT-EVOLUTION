@@ -213,6 +213,8 @@ internal static class CustomAssetObjectPatch
     public static void LoadFromAsset(PhysicObjectAsset __instance, GameObject gameObject)
     {
         var behaviour = gameObject.GetComponent<PhysicObjectBehaviour>();
+        if (behaviour.Physic.StartDirection.IsZero()) Logger.LogWarning($"{__instance} StartDirection is zero");
+        else behaviour.Physic.StartDirection = behaviour.Physic.StartDirection.normalized;
         behaviour.DamageTriger.enabled = behaviour.DamageCharacterOnTrigger
                                          || behaviour.ExplodeOn.HasFlag(ExplodeSurfaceConverter.Zombie)
                                          || behaviour.ExplodeOn.HasFlag(ExplodeSurfaceConverter.Climber)
