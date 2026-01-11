@@ -21,7 +21,7 @@ internal static class CustomAssetObjectPatch
         return parameters.ContainsKey(key) ? parameters.GetValue<DamageType>(key) : DamageType.None;
     }
 
-    private static Transform CreatePrefab(this ExplosionAsset explosion, Transform parent = null)
+    private static Transform CreateComponent(this ExplosionAsset explosion, Transform parent)
     {
         var prefab = ComponentSingleton<GamePoolManager>.Instance.Spawn(explosion.Prefab, parent);
         var explode = Traverse.Create(explosion).Field<bool>("autoExplode");
@@ -30,13 +30,12 @@ internal static class CustomAssetObjectPatch
         {
             explode.Value = false;
             explosion.LoadFromAsset(prefab.gameObject);
+            return prefab;
         }
         finally
         {
             explode.Value = auto;
         }
-
-        return prefab;
     }
 
     private static void Despawn(this AnimationDespawner despawn, AnimationSettings animation)
@@ -61,17 +60,26 @@ internal static class CustomAssetObjectPatch
     {
         if (Traverse.Create(__instance).Field<bool>("autoExplode").Value) return;
         gameObject.GetComponentSafe<ExplosionEditor>();
-        gameObject.GetComponentSafe<SignalReceiverLinker>();
+        if (gameObject.transform.parent is null)
+        {
+            gameObject.GetComponentSafe<SignalReceiverLinker>();
+        }
+        else
+        {
+            UnityEngine.Object.Destroy(gameObject.GetComponent<SignalLinkerGui>());
+            UnityEngine.Object.Destroy(gameObject.GetComponent<SignalReceiverLinker>());
+        }
     }
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(MineBehaviour), "OnCreate")]
     public static void OnCreate(MineBehaviour __instance)
     {
-        var prefab = Traverse.Create(__instance).Field<Transform>("explosionPrefab");
-        if (prefab.Value.IsChildOf(__instance.transform)) return;
+        var prefab = Traverse.Create(__instance).Field<Transform>("explosionPrefab").Value;
+        if (prefab is not null && prefab.IsChildOf(__instance.transform)) return;
         var explosion = Traverse.Create(__instance).Field<ExplosionAsset>("explosion").Value;
-        prefab.Value = explosion.CreatePrefab(parent: __instance.transform);
+        var explode = explosion.CreateComponent(parent: __instance.transform);
+        Traverse.Create(__instance).Field<Transform>("explosionPrefab").Value = explode;
     }
 
     [HarmonyPrefix]
@@ -336,11 +344,11 @@ internal static class CustomAssetObjectPatch
         }
 
         if (value is null) return;
-        var prefab = value.CreatePrefab(parent: __instance.transform);
-        prefab.name = "Repulse";
-        prefab.GetComponent<ExplosionEditor>().EditorVisibility.CustomName = nameof(Rage.Repulsion);
-        prefab.GetComponent<ExplosionEffect>().DespawnOnEnd = false;
-        Traverse.Create(__instance).Field<GameObject>("repulse").Value = prefab.gameObject;
+        var explode = value.CreateComponent(parent: __instance.transform);
+        explode.name = "Repulse";
+        explode.GetComponent<ExplosionEditor>().EditorVisibility.CustomName = nameof(Rage.Repulsion);
+        explode.GetComponent<ExplosionEffect>().DespawnOnEnd = false;
+        Traverse.Create(__instance).Field<GameObject>("repulse").Value = explode.gameObject;
     }
 
     [HarmonyPrefix]
