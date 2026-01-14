@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -42,7 +43,7 @@ internal static class CustomAssetObjectPatch
     {
         if (animation == null) return;
         Traverse.Create(despawn).Field<AnimationEventHandler>("eventHandler").Value
-            .RegisterEndEvent(animation, () => despawn.SendMessage(methodName: "Despawn"));
+            .RegisterEndEvent(animation, (Action)Delegate.CreateDelegate(typeof(Action), despawn, "Despawn"));
     }
 
     [HarmonyPrefix]
@@ -221,8 +222,8 @@ internal static class CustomAssetObjectPatch
     public static void LoadFromAsset(PhysicObjectAsset __instance, GameObject gameObject)
     {
         var behaviour = gameObject.GetComponent<PhysicObjectBehaviour>();
-        if (behaviour.Physic.StartDirection.IsZero()) Logger.LogWarning($"{__instance} StartDirection is zero");
-        else behaviour.Physic.StartDirection = behaviour.Physic.StartDirection.normalized;
+        if (behaviour.Physic.StartDirection.IsZero()
+            && behaviour.Physic.StartForce != 0) Logger.LogWarning($"{__instance} StartDirection is zero");
         behaviour.DamageTriger.enabled = behaviour.DamageCharacterOnTrigger
                                          || behaviour.ExplodeOn.HasFlag(ExplodeSurfaceConverter.Zombie)
                                          || behaviour.ExplodeOn.HasFlag(ExplodeSurfaceConverter.Climber)
@@ -423,23 +424,6 @@ internal static class CustomAssetObjectPatch
     #endregion
 
     #region VisualEffect
-
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(EffectManager), "OnAwake")]
-    public static void OnAwake(EffectManager __instance)
-    {
-        foreach (var effect in VisualEffectIndex.Index.Values.OfType<CustomVisualEffect>())
-        {
-            Logger.LogDebug($"Rebuild {effect}");
-            Traverse.Create(effect).Field<Transform>("prefab").Value = Object.Instantiate(effect.Prefab);
-            Object.DontDestroyOnLoad(effect.Prefab);
-            effect.Prefab.gameObject.SetActive(false);
-            var animator = effect.Prefab.GetComponent<SpriteAnimator>();
-            if (animator) animator.Animator.playAutomatically &= !(effect.animation?.PlayAnimation ?? false);
-            effect.Prefab.gameObject.SetActive(true);
-            effect.Prefab.name = effect.name;
-        }
-    }
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(EffectManager), "GetEffect")]

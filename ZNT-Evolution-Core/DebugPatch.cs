@@ -36,7 +36,7 @@ internal static class DebugPatch
     [HarmonyPatch(typeof(AchievementManager), "OnCreate")]
     public static void OnCreate(AchievementManager __instance)
     {
-        __instance.enabled = Steamworks.SteamFriends.GetPersonaName() != "Goldberg";
+        __instance.enabled = SteamManager.Initialized && SteamManager.Instance.GetUserName() != "Goldberg";
     }
 
     [HarmonyPrefix]
@@ -212,7 +212,7 @@ internal static class DebugPatch
     }
 
     [HarmonyPrefix]
-    [HarmonyPatch(typeof(WeatherRain), "CreateEffect")]
+    [HarmonyPatch(typeof(WeatherRain), "OnDestroy")]
     public static void OnDestroy(WeatherRain __instance)
     {
         var rain = Traverse.Create(__instance).Field<RainEffect>("rainEffect").Value;

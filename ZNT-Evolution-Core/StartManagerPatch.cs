@@ -185,6 +185,22 @@ internal static class StartManagerPatch
             yield return LevelElementLoader.ApplyFromFolder(path: target);
         }
 
+        foreach (var effect in VisualEffectIndex.Index.Values.OfType<CustomVisualEffect>())
+        {
+            Logger.LogInfo($"Rebuild {effect}");
+            Traverse.Create(effect).Field<Transform>("prefab").Value = Object.Instantiate(effect.Prefab);
+            Object.DontDestroyOnLoad(effect.Prefab.gameObject);
+            effect.Prefab.name = effect.name;
+            effect.Prefab.gameObject.SetActive(false);
+            // ReSharper disable once Unity.PerformanceCriticalCodeInvocation
+            var pool = effect.Prefab.GetComponent<PoolRetriever>();
+            if (pool) Object.Destroy(pool);
+            // ReSharper disable once Unity.PerformanceCriticalCodeInvocation
+            var animator = effect.Prefab.GetComponent<SpriteAnimator>();
+            if (animator) animator.Animator.playAutomatically &= !(effect.animation?.PlayAnimation ?? false);
+            effect.Prefab.gameObject.SetActive(true);
+        }
+
         foreach (var element in LevelElementIndex.Index.Values.Cast<LevelElement>())
         {
             switch (element.CustomAsset)
