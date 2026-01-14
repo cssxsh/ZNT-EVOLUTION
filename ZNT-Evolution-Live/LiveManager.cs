@@ -56,7 +56,7 @@ public class LiveManager : ComponentSingleton<LiveManager>, IActivable, I2.Loc.I
         BiliApi = gameObject.AddComponent<BiliApi>();
         BiliApi.enabled = false;
         // ReSharper disable UnusedParameter.Local
-        BiliApi.OnError += (raw, code, message) => Logger.LogWarning($"OnError {raw}");
+        BiliApi.OnError += (raw, request) => Logger.LogWarning($"OnError {raw}");
         BiliApi.OnStart += (raw, anchor) => Logger.LogDebug($"OnStart {raw}");
         BiliApi.OnEnd += (raw, anchor) => Logger.LogDebug($"OnEnd {raw}");
         BiliApi.OnWsLink += (ws, link) => Logger.LogDebug($"OnWsLink {link}");
@@ -69,12 +69,12 @@ public class LiveManager : ComponentSingleton<LiveManager>, IActivable, I2.Loc.I
         BiliApi.OnSuperChatDelete += (raw, del) => Logger.LogInfo($"OnSuperChatDelete {raw}");
         BiliApi.OnGuard += (raw, guard) => Logger.LogInfo($"OnGuard {raw}");
         // ReSharper restore UnusedParameter.Local
-        BiliApi.OnError += (_, code, message) => StartCoroutine(OnError(code, message));
-        BiliApi.OnStart += (_, anchor) => StartCoroutine(OnStart(anchor));
-        BiliApi.OnEnd += (_, anchor) => StartCoroutine(OnEnd(anchor));
-        BiliApi.OnEnter += (_, enter) => StartCoroutine(OnEnter(enter));
-        BiliApi.OnDanmaku += (_, dm) => StartCoroutine(OnDanmaku(dm));
-        BiliApi.OnGift += (_, gift) => StartCoroutine(OnGift(gift));
+        BiliApi.OnError += (_, request) => StartCoroutine(nameof(OnError), request);
+        BiliApi.OnStart += (_, anchor) => StartCoroutine(nameof(OnStart), anchor);
+        BiliApi.OnEnd += (_, anchor) => StartCoroutine(nameof(OnEnd), anchor);
+        BiliApi.OnEnter += (_, enter) => StartCoroutine(nameof(OnEnter), enter);
+        BiliApi.OnDanmaku += (_, dm) => StartCoroutine(nameof(OnDanmaku), dm);
+        BiliApi.OnGift += (_, gift) => StartCoroutine(nameof(OnGift), gift);
         foreach (var element in LevelElementIndex.Index.Values.Cast<LevelElement>())
         {
             if (element.CustomAsset is not { Prefab.name: "Human" }) continue;
@@ -144,18 +144,18 @@ public class LiveManager : ComponentSingleton<LiveManager>, IActivable, I2.Loc.I
     }
 
     // ReSharper disable Unity.PerformanceAnalysis
-    private IEnumerator OnError(int code, string message)
+    private IEnumerator OnError(RequestInfo request)
     {
-        LiveState.SetTranslation(0, $"Error {message}");
-        LiveState.SetTranslation(9, $"错误  {message}");
+        LiveState.SetTranslation(0, $"Error {request.Message}");
+        LiveState.SetTranslation(9, $"错误  {request.Message}");
         yield return Wait.ForEndOfFrame;
-        switch (code)
+        switch (request.Code)
         {
             case 7001:
             case 7002:
             case 7003:
                 yield return new UnityEngine.WaitForSeconds(60);
-                BiliApi.SendMessage(methodName: "AppStart");
+                BiliApi.StartCoroutine(methodName: "AppStart");
                 break;
         }
     }

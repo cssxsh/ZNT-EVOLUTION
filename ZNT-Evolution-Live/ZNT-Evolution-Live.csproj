@@ -401,6 +401,7 @@
         <Compile Include="BiliBili\Data\GameInfo.cs"/>
         <Compile Include="BiliBili\Data\Gift.cs"/>
         <Compile Include="BiliBili\Data\Guard.cs"/>
+        <Compile Include="BiliBili\Data\RequestInfo.cs"/>
         <Compile Include="BiliBili\Data\SuperChat.cs"/>
         <Compile Include="BiliBili\Data\SuperChatDelete.cs"/>
         <Compile Include="BiliBili\Data\WebsocketInfo.cs"/>

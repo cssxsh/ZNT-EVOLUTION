@@ -41,7 +41,7 @@ public class BiliApi : MonoBehaviour
     }
 
     // ReSharper disable InconsistentNaming
-    public event Action<JObject, int, string> OnError;
+    public event Action<JObject, RequestInfo> OnError;
     public event Action<JObject, AnchorInfo> OnStart;
     public event Action<JObject, AnchorInfo> OnEnd;
     public event Action<JObject, AnchorInfo, long> OnHeartBeat;
@@ -57,11 +57,11 @@ public class BiliApi : MonoBehaviour
     public event Action<JObject, Guard> OnGuard;
     // ReSharper restore InconsistentNaming
 
-    private void OnEnable() => StartCoroutine(AppStart());
+    private void OnEnable() => StartCoroutine(nameof(AppStart));
 
-    private void OnDisable() => StartCoroutine(AppEnd());
+    private void OnDisable() => StartCoroutine(nameof(AppEnd));
 
-    private void FixedUpdate() => StartCoroutine(AppHeartBeat());
+    private void FixedUpdate() => StartCoroutine(nameof(AppHeartBeat));
 
     [UsedImplicitly]
     protected IEnumerator AppStart()
@@ -76,14 +76,14 @@ public class BiliApi : MonoBehaviour
         var result = JObject.Parse(post.webRequest.downloadHandler.text);
         if (result.Value<int>("code") != 0)
         {
-            OnError?.Invoke(result, result.Value<int>("code"), result.Value<string>("message"));
+            OnError?.Invoke(result, result.ToObject<RequestInfo>());
         }
         else
         {
             GameInfo = result["data"]["game_info"].ToObject<GameInfo>();
             WebsocketInfo = result["data"]["websocket_info"].ToObject<WebsocketInfo>();
             AnchorInfo = result["data"]["anchor_info"].ToObject<AnchorInfo>();
-            StartCoroutine(WsLink());
+            StartCoroutine(nameof(WsLink));
             OnStart?.Invoke(result, AnchorInfo);
         }
     }
@@ -101,7 +101,7 @@ public class BiliApi : MonoBehaviour
         var result = JObject.Parse(post.webRequest.downloadHandler.text);
         if (result.Value<int>("code") != 0)
         {
-            OnError?.Invoke(result, result.Value<int>("code"), result.Value<string>("message"));
+            OnError?.Invoke(result, result.ToObject<RequestInfo>());
         }
         else
         {
@@ -126,7 +126,7 @@ public class BiliApi : MonoBehaviour
         var result = JObject.Parse(post.webRequest.downloadHandler.text);
         if (result.Value<int>("code") != 0)
         {
-            OnError?.Invoke(result, result.Value<int>("code"), result.Value<string>("message"));
+            OnError?.Invoke(result, result.ToObject<RequestInfo>());
         }
         else
         {
@@ -144,9 +144,9 @@ public class BiliApi : MonoBehaviour
             var connect = WebSocketImpl.ConnectAsync(new Uri(link), CancellationToken.None);
             yield return new WaitUntil(() => connect.IsCompleted);
             if (connect.IsFaulted) continue;
-            StartCoroutine(WsHandle());
+            StartCoroutine(nameof(WsHandle));
             yield return Wait.ForEndOfFrame;
-            StartCoroutine(WsAuth());
+            StartCoroutine(nameof(WsAuth));
             yield return Wait.ForEndOfFrame;
             OnWsLink?.Invoke(WebsocketInfo, link);
             break;
