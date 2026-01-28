@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props"
             Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')"/>
@@ -433,6 +433,7 @@
         <Compile Include="Editor\MineTrapEditor.cs"/>
         <Compile Include="Editor\OneWayEditor.cs"/>
         <Compile Include="Editor\StairEditor.cs"/>
+        <Compile Include="Editor\TutorialBreakingNews.cs"/>
         <Compile Include="Effect\CharacterAllocationEffect.cs"/>
         <Compile Include="Effect\CharacterBuff.cs"/>
         <Compile Include="Effect\SphereBuffEffect.cs"/>

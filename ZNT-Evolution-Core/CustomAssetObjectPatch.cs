@@ -453,6 +453,10 @@ internal static class CustomAssetObjectPatch
                 _ = prefab.GetComponentSafe<LayerEditor>();
                 _ = prefab.GetComponentSafe<MineTrapEditor>();
                 break;
+            case TutorialLoader:
+                _ = prefab.GetComponentSafe<TutorialBreakingNews>();
+                _ = prefab.GetComponentSafe<LayerEditor>();
+                break;
             case PropBehaviour:
                 _ = prefab.GetComponentSafe<LayerEditor>();
                 break;
@@ -483,6 +487,32 @@ internal static class CustomAssetObjectPatch
     private static void OnAwake(StairBehaviour __instance)
     {
         _ = __instance.gameObject.GetComponentSafe<StairEditor>();
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(TutorialScreen), "SetNews")]
+    private static void SetNews(TutorialScreen __instance, out List<string> __state)
+    {
+        __state = Traverse.Create(__instance).Field<List<string>>("breakingNews").Value;
+        var settings = Traverse.Create(__instance).Field<TutorialSettings>("tutorialSettings").Value;
+        if (!settings.ShowBreakingNews) return;
+        var news = settings.GetComponent<TutorialBreakingNews>();
+        if (news is null) return;
+        var lines = new List<string>(news);
+        if (lines.Count == 0) return;
+        Traverse.Create(__instance).Field<List<string>>("breakingNews").Value = lines;
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(TutorialScreen), "SetNews")]
+    private static void SetNews(TutorialScreen __instance, List<string> __state)
+    {
+        Traverse.Create(__instance).Field<List<string>>("breakingNews").Value = __state;
+        foreach (var (key, gui) in Traverse.Create(__instance)
+                     .Field<Dictionary<string, TMPro.TextMeshProUGUI>>("currentNews").Value)
+        {
+            gui.text = gui.text.StartsWith("Headlines/") ? key : gui.text;
+        }
     }
 
     #endregion
