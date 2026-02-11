@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using BepInEx.Logging;
+using DG.Tweening;
 using HarmonyLib;
 using UnityEngine;
 using ZNT.Evolution.Core.Asset;
@@ -446,19 +447,22 @@ internal static class CustomAssetObjectPatch
     {
         if (__instance.DefaultOrientation.GetVariation(0) is not GameObject prefab) return;
         if (prefab.GetComponentInChildren<Health>() is { } health) health.EditorVisibility = true;
-        if (prefab.TryGetComponent(out OneWayCollider _)) prefab.AddComponent<OneWayEditor>().FixResizeHandles();
+        if (prefab.TryGetComponent(out OneWayCollider _)) prefab.GetComponentSafe<OneWayEditor>().FixResizeHandles();
+        if (prefab.TryGetComponent(out PropMoveable _)) prefab.GetComponentSafe<PropMoveableEditor>();
         switch (prefab.GetComponent<BaseBehaviour>())
         {
-            case MineBehaviour:
+            case PropBehaviour prop:
                 _ = prefab.GetComponentSafe<LayerEditor>();
-                _ = prefab.GetComponentSafe<MineTrapEditor>();
-                break;
-            case TutorialLoader:
-                _ = prefab.GetComponentSafe<TutorialBreakingNews>();
-                _ = prefab.GetComponentSafe<LayerEditor>();
-                break;
-            case PropBehaviour:
-                _ = prefab.GetComponentSafe<LayerEditor>();
+                switch (prop)
+                {
+                    case MineBehaviour:
+                        _ = prefab.GetComponentSafe<MineTrapEditor>();
+                        break;
+                    case TutorialLoader:
+                        _ = prefab.GetComponentSafe<TutorialBreakingNews>();
+                        break;
+                }
+
                 break;
             case HumanBehaviour:
                 _ = prefab.GetComponentSafe<HumanEditor>();
@@ -513,6 +517,34 @@ internal static class CustomAssetObjectPatch
         {
             gui.text = gui.text.StartsWith("Headlines/") ? key : gui.text;
         }
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(PropMoveable), "Move", new Type[] { })]
+    private static void Move(PropMoveable __instance)
+    {
+        if (__instance.StopAtNextStep) return;
+        var editor = __instance.GetComponent<PropMoveableEditor>();
+        if (editor is null) return;
+        var speed = Traverse.Create(__instance).Field<float>("currentSpeed");
+        speed.Value = 0;
+        if (editor.Tweener != null) editor.enabled = false;
+        editor.Tweener = DOTween.To(() => speed.Value, value => speed.Value = value, __instance.Speed, editor.Duration)
+            .SetEase(editor.SpeedEase);
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(PropMoveable), "Stop")]
+    private static void Stop(PropMoveable __instance)
+    {
+        if (__instance.StopAtNextStep) return;
+        var editor = __instance.GetComponent<PropMoveableEditor>();
+        if (editor is null) return;
+        var speed = Traverse.Create(__instance).Field<float>("currentSpeed");
+        speed.Value = __instance.Speed;
+        if (editor.Tweener != null) editor.enabled = false;
+        editor.Tweener = DOTween.To(() => speed.Value, value => speed.Value = value, 0, editor.Duration)
+            .SetEase(editor.SpeedEase);
     }
 
     #endregion
