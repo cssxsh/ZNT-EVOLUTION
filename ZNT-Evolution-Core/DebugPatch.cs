@@ -217,6 +217,7 @@ internal static class DebugPatch
     {
         var rain = Traverse.Create(__instance).Field<RainEffect>("rainEffect").Value;
         rain?.gameObject.SetActive(false);
+        Traverse.Create(__instance).Field<RainEffect>("rainEffect").Value = null;
     }
 
     [HarmonyPostfix]
