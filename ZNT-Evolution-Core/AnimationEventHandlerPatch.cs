@@ -108,7 +108,7 @@ internal static class AnimationEventHandlerPatch
         var parameters = Traverse.Create(controller).Field<CorpseParameter>("parameters").Value;
         if (parameters.Character.Behaviour is not HumanBehaviour human) return;
         var definition = frame.spriteCollection.spriteDefinitions[frame.spriteId];
-        var point = definition.attachPoints.FirstOrDefault(point => point.name == "throw")
+        var point = definition.attachPoints.FirstOrDefault(point => point.name is "throw")
                     ?? new tk2dSpriteDefinition.AttachPoint();
         human.PhysicObjectThrower.Throw(
             Traverse.Create(controller).Field<UnityEngine.BoxCollider2D>("boxCollider").Value,

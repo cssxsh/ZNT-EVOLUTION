@@ -359,7 +359,7 @@ public static class LevelElementLoader
                 Logger.LogInfo($"LevelElement {id} - {brush} Loaded");
             }
 
-            if (element.DecorType == LevelElement.DecorStyle.Animated)
+            if (element.DecorType is LevelElement.DecorStyle.Animated)
             {
                 var id = element.Bind();
                 Logger.LogInfo($"LevelElement {id} - {element} Loaded");

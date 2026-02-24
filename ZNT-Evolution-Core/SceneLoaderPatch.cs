@@ -60,7 +60,11 @@ internal static class SceneLoaderPatch
     public static void UpdateSources()
     {
         if (_localization != null) return;
-        var localization = new I2.Loc.LanguageSourceData();
+        var localization = new I2.Loc.LanguageSourceData
+        {
+            GoogleUpdateFrequency = I2.Loc.LanguageSourceData.eGoogleUpdateFrequency.Never,
+            GoogleInEditorCheckFrequency = I2.Loc.LanguageSourceData.eGoogleUpdateFrequency.Never
+        };
         try
         {
             using var fs = Assembly.GetExecutingAssembly()
@@ -142,8 +146,7 @@ internal static class SceneLoaderPatch
             if (!info.Metadata.GUID.Contains("znt")) continue;
             foreach (var (definition, entry) in info.Instance.Config)
             {
-                var term = _localization.GetTermData($"{info.Metadata.Name}/{definition}")
-                           ?? _localization.AddTerm($"{info.Metadata.Name}/{definition}");
+                var term = _localization.AddTerm($"{info.Metadata.Name}/{definition}");
                 term.SetTranslation(0, $"[{info.Metadata.Name}] {definition.Key}");
                 term.SetTranslation(9, $"[{info.Metadata.Name}] {entry.Description.Description}");
                 if (entry.SettingType == typeof(bool))
@@ -272,7 +275,7 @@ internal static class SceneLoaderPatch
         copy.name = "Copy Button";
         copy.OnValueChanged(value => target.Value.ObjectSettings.Activate(value, ObjectSettings.Control.Copy));
         var icon = copy.transform.Find("Icon").GetComponent<Image>();
-        icon.sprite = Resources.FindObjectsOfTypeAll<Sprite>().FirstOrDefault(sprite => sprite.name == "icon_plus");
+        icon.sprite = Resources.FindObjectsOfTypeAll<Sprite>().FirstOrDefault(sprite => sprite.name is "icon_plus");
     }
 
     private static void AddEmpty(this SelectionMenu menu)

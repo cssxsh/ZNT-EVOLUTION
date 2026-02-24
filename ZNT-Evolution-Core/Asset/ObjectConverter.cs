@@ -17,7 +17,7 @@ internal class ObjectConverter : CustomCreationConverter<UnityEngine.Object>
 
     public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
     {
-        if (writer.WriteState == WriteState.Start)
+        if (writer.WriteState is WriteState.Start)
         {
             if (value is ISerializationCallbackReceiver receiver) receiver.OnBeforeSerialize();
             Traverse.Create(serializer)
