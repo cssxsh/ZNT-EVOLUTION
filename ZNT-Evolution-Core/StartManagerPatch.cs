@@ -145,6 +145,7 @@ internal static class StartManagerPatch
         });
         InvisibleShield.PoolPrefab();
         SphereBuffEffect.PoolPrefab();
+        SphereLaoAerEffect.PoolPrefab();
         Logger.LogInfo("Loading Bank");
         yield return LevelElementLoader.LoadBanks(folder: Application.streamingAssetsPath, loadSamples: true);
         Logger.LogInfo("Loading LevelElement");
