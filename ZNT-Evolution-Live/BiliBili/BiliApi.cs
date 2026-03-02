@@ -2,13 +2,17 @@ using System;
 using System.Buffers.Binary;
 using System.Collections;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.WebSockets;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using HarmonyLib;
 using JetBrains.Annotations;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -197,6 +201,24 @@ public class BiliApi : MonoBehaviour
                 OnWsError?.Invoke(WebsocketInfo, e);
             }
         }
+    }
+
+    [UsedImplicitly]
+    public static Dictionary<string, string> YellowFace()
+    {
+        using var fs = Assembly.GetExecutingAssembly()
+            .GetManifestResourceStream("ZNT.Evolution.Live.Resources.322.json");
+        using var reader = new StreamReader(fs ?? throw new FileNotFoundException("322.json"));
+        var json = JObject.Load(new JsonTextReader(reader));
+        var emote = new Dictionary<string, string>();
+        foreach (var element in json["emote"])
+        {
+            var text = element["text"].ToString();
+            var url = element["url"].ToString();
+            emote[text] = url;
+        }
+
+        return emote;
     }
 
     private UnityWebRequest Post(string url, JObject body)
