@@ -46,6 +46,18 @@ internal static class StartManagerPatch
                     physic.DamageCharacterOnTrigger = false;
                     Logger.LogInfo($"Fix DamageCharacterOnTrigger for {physic}");
                     break;
+                case LevelElement
+                {
+                    name: "elevator_1_spawn" or "elevator_2_spawn" or "lawn_mower_spawn" or "moving_container_spawn",
+                    Brush: Rotorz.Tile.OrientedBrush brush,
+                } element:
+                {
+                    if (brush.DefaultOrientation.GetVariation(0) is not GameObject prefab) break;
+                    if (!prefab.TryGetComponent(out SpawnPoint spawn) || spawn is CharacterSpawnPoint) break;
+                    Traverse.Create(spawn).Field("levelEditorOptions").Field<bool>("ShowDamages").Value = true;
+                    Logger.LogInfo($"Fix SpawnPoint for {element}");
+                }
+                    break;
                 case LevelElement { name: "drone_exterminator" } drone:
                     drone.Title = "Drone Exterminator";
                     Logger.LogInfo($"Fix Title for {drone}");
