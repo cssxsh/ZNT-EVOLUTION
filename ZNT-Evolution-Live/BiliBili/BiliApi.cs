@@ -75,9 +75,9 @@ public class BiliApi : MonoBehaviour
         {
             ["app_id"] = AppId,
             ["code"] = Code
-        }).SendWebRequest();
-        yield return post;
-        var result = JObject.Parse(post.webRequest.downloadHandler.text);
+        });
+        yield return post.SendWebRequest();
+        var result = JObject.Parse(post.downloadHandler.text);
         if (result.Value<int>("code") != 0)
         {
             OnError?.Invoke(result, result.ToObject<RequestInfo>());
@@ -100,9 +100,9 @@ public class BiliApi : MonoBehaviour
         {
             ["app_id"] = AppId,
             ["game_id"] = GameInfo.GameId
-        }).SendWebRequest();
-        yield return post;
-        var result = JObject.Parse(post.webRequest.downloadHandler.text);
+        });
+        yield return post.SendWebRequest();
+        var result = JObject.Parse(post.downloadHandler.text);
         if (result.Value<int>("code") != 0)
         {
             OnError?.Invoke(result, result.ToObject<RequestInfo>());
@@ -125,9 +125,9 @@ public class BiliApi : MonoBehaviour
         var post = Post("https://live-open.biliapi.com/v2/app/heartbeat", new JObject
         {
             ["game_id"] = GameInfo.GameId
-        }).SendWebRequest();
-        yield return post;
-        var result = JObject.Parse(post.webRequest.downloadHandler.text);
+        });
+        yield return post.SendWebRequest();
+        var result = JObject.Parse(post.downloadHandler.text);
         if (result.Value<int>("code") != 0)
         {
             OnError?.Invoke(result, result.ToObject<RequestInfo>());
@@ -135,7 +135,7 @@ public class BiliApi : MonoBehaviour
         else
         {
             yield return WsHeartBeat();
-            LastHeartBeat = long.Parse(post.webRequest.GetRequestHeader("x-bili-timestamp"));
+            LastHeartBeat = long.Parse(post.GetRequestHeader("x-bili-timestamp"));
             OnHeartBeat?.Invoke(result, AnchorInfo, LastHeartBeat);
         }
     }
@@ -184,7 +184,7 @@ public class BiliApi : MonoBehaviour
     [UsedImplicitly]
     protected IEnumerator WsHandle()
     {
-        while (WebSocketImpl.State == WebSocketState.Open)
+        while (WebSocketImpl.State is WebSocketState.Open)
         {
             var buffer = Buffer;
             var receive = WebSocketImpl.ReceiveAsync(buffer, CancellationToken.None);
