@@ -132,6 +132,66 @@ internal static class StartManagerPatch
                     Logger.LogInfo($"Fix blood_explosion for {animation}");
                 }
                     break;
+                case { name: "anim_astrogoliath" or "anim_clown" or "anim_machine_gunner" }:
+                {
+                    var transform = animation.GetClipByName("talk");
+                    animation.clips = animation.clips.AddToArray(new tk2dSpriteAnimationClip(transform)
+                    {
+                        name = "rise"
+                    });
+                    Traverse.Create(animation)
+                        .Field<Dictionary<string, tk2dSpriteAnimationClip>>("clipNameCache").Value = null;
+                    Traverse.Create(animation)
+                        .Field<Dictionary<string, int>>("idNameCache").Value = null;
+                    animation.InitializeClipCache();
+                    Logger.LogInfo($"Feat rise for {animation}");
+                }
+                    break;
+                case { name: "anim_boss_1" }:
+                {
+                    var transform = animation.GetClipByName("stand_phone_talk");
+                    animation.clips = animation.clips.AddToArray(new tk2dSpriteAnimationClip(transform)
+                    {
+                        name = "rise"
+                    });
+                    Traverse.Create(animation)
+                        .Field<Dictionary<string, tk2dSpriteAnimationClip>>("clipNameCache").Value = null;
+                    Traverse.Create(animation)
+                        .Field<Dictionary<string, int>>("idNameCache").Value = null;
+                    animation.InitializeClipCache();
+                    Logger.LogInfo($"Feat rise for {animation}");
+                }
+                    break;
+                case { name: "anim_boss_chemist" }:
+                {
+                    var transform = animation.GetClipByName("transform");
+                    animation.clips = animation.clips.AddToArray(new tk2dSpriteAnimationClip(transform)
+                    {
+                        name = "rise"
+                    });
+                    Traverse.Create(animation)
+                        .Field<Dictionary<string, tk2dSpriteAnimationClip>>("clipNameCache").Value = null;
+                    Traverse.Create(animation)
+                        .Field<Dictionary<string, int>>("idNameCache").Value = null;
+                    animation.InitializeClipCache();
+                    Logger.LogInfo($"Feat rise for {animation}");
+                }
+                    break;
+                case { name: "anim_daft_punk_1" or "anim_daft_punk_2" }:
+                {
+                    var transform = animation.GetClipByName("teleport_in");
+                    animation.clips = animation.clips.AddToArray(new tk2dSpriteAnimationClip(transform)
+                    {
+                        name = "rise"
+                    });
+                    Traverse.Create(animation)
+                        .Field<Dictionary<string, tk2dSpriteAnimationClip>>("clipNameCache").Value = null;
+                    Traverse.Create(animation)
+                        .Field<Dictionary<string, int>>("idNameCache").Value = null;
+                    animation.InitializeClipCache();
+                    Logger.LogInfo($"Feat rise for {animation}");
+                }
+                    break;
                 case { name: "anim_traps" }:
                 {
                     var missile = animation.GetClipByName("sentry_moon_canon_missile");
