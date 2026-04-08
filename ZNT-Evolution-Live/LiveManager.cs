@@ -80,26 +80,31 @@ public class LiveManager : ComponentSingleton<LiveManager>, IActivable, I2.Loc.I
         StartCoroutine(nameof(LoadYellowFace));
         foreach (var element in LevelElementIndex.Index.Values.Cast<LevelElement>())
         {
-            if (element.CustomAsset is not { Prefab.name: "Human" }) continue;
-            switch (element.CustomAsset)
+            if (element is not { Useable: true, DevOnly: false }) continue;
+            if (element.CustomAsset is not HumanAsset { Prefab.name: "Human", Invincible: false } human) continue;
+            if (!human.AnimationLibrary.AnimationExists("rise")) continue;
+            switch (human)
             {
-                case HumanAsset { CharacterType: CharacterType.Cultist }:
-                    break;
-                case HumanAsset { CharacterType: CharacterType.Boss } boss:
-                    if (boss.name is "BossChemistInvincible" or "BossGertrudeCinematic") continue;
-                    Assets.Add(boss);
-                    break;
-                case HumanAsset { Animations.name: "DroneAnimations" } drone:
-                    if (drone.name is not "Drone") continue;
-                    Assets.Add(drone);
-                    break;
-                case HumanAsset { name: "SurvivorGunner" } rick:
-                    Assets.Add(rick);
-                    break;
-                case HumanAsset { Attitude: HumanAttitude.Combative } human:
-                    if (!human.AnimationLibrary.AnimationExists("rise")) continue;
-                    if (human.Invincible) continue;
+                case { Animations.name: "ArmedAnimations" }:
+                    // if (human.name is "BossChemist" or "BossDrugLord" or "Astrogoliath" or "Clown") continue;
                     Assets.Add(human);
+                    break;
+                case { Animations.name: "BulkyMeleeAnimations" }:
+                    // if (human.name is "MachineGunner") continue;
+                    Assets.Add(human);
+                    break;
+                case { Animations.name: "DroneAnimations" }:
+                    if (human.name is "DroneInvincible" or "DroneInvisible") continue;
+                    Assets.Add(human);
+                    break;
+                case { Animations.name: "MeleeAnimations" }:
+                    // if (human.name is "Priest" or "Virgin") continue;
+                    // if (human.name is "Lumberjack") continue;
+                    Assets.Add(human);
+                    break;
+                case { Animations.name: "UnarmedAnimations" }:
+                    // if (human.name is "DaftPunk1" or "DaftPunk2") continue;
+                    // Assets.Add(human);
                     break;
             }
         }
@@ -237,7 +242,9 @@ public class LiveManager : ComponentSingleton<LiveManager>, IActivable, I2.Loc.I
                 {
                     new tk2dSpriteAnimationFrame
                     {
-                        spriteCollection = sprite
+                        spriteCollection = sprite,
+                        triggerEvent = false,
+                        eventInfo = "hide_icon"
                     }
                 }
             };
