@@ -437,6 +437,7 @@
         <Compile Include="Editor\TutorialBreakingNews.cs"/>
         <Compile Include="Effect\CharacterAllocationEffect.cs"/>
         <Compile Include="Effect\CharacterBuff.cs"/>
+        <Compile Include="Effect\FogOfWar.cs"/>
         <Compile Include="Effect\SphereBuffEffect.cs"/>
         <Compile Include="Effect\SphereLaoAerEffect.cs"/>
     </ItemGroup>

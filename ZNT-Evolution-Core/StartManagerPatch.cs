@@ -216,6 +216,7 @@ internal static class StartManagerPatch
             }
         });
         InvisibleShield.PoolPrefab();
+        FogOfWar.PoolPrefab();
         SphereBuffEffect.PoolPrefab();
         SphereLaoAerEffect.PoolPrefab();
         Logger.LogInfo("Loading Bank");
