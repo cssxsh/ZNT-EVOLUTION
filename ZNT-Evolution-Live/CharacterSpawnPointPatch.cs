@@ -26,6 +26,14 @@ public static class CharacterSpawnPointPatch
     }
 
     // ReSharper disable Unity.PerformanceAnalysis
+    internal static void ShowIcon(this Character character, string name)
+    {
+        if (character.AnimationController is not HumanAnimationController controller) return;
+        if (!controller.IconAnimator.Library.AnimationExists(name)) return;
+        controller.PlayIcon(name);
+    }
+
+    // ReSharper disable Unity.PerformanceAnalysis
     internal static void SpawnCopy(this Character character, string id)
     {
         var asset = character.Components.Asset.Asset;
@@ -57,5 +65,18 @@ public static class CharacterSpawnPointPatch
     public static void OnDie(Character __instance)
     {
         LiveManager.Users.Remove(__instance.name);
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(PatrolDialogue), "OnStart")]
+    public static bool OnStart(PatrolDialogue __instance)
+    {
+        if (__instance.Patroller.Animator is not HumanAnimationController controller) return true;
+        // if (!__instance.Text.Content.StartsWith("[") || !__instance.Text.Content.EndsWith("[")) return true;
+        if (!controller.IconAnimator.Library.AnimationExists(__instance.Text.Content)) return true;
+        controller.PlayIcon(__instance.Text.Content);
+        Timer.DelayedCall(__instance.DialogueDuration, () => controller.IconAnimator.Renderer.enabled = false);
+        // TODO: __instance.Offset;
+        return false;
     }
 }
