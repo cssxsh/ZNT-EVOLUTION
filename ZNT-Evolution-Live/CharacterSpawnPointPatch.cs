@@ -1,10 +1,16 @@
+using System;
+using BepInEx.Logging;
 using HarmonyLib;
+using UnityEngine;
+using BepInExLogger = BepInEx.Logging.Logger;
 
 // ReSharper disable InconsistentNaming
 namespace ZNT.Evolution.Live;
 
 public static class CharacterSpawnPointPatch
 {
+    private static readonly ManualLogSource Logger = BepInExLogger.CreateLogSource(nameof(CharacterSpawnPoint));
+
     // ReSharper disable Unity.PerformanceAnalysis
     internal static Character Spawn(this SpawnPoint __instance, CharacterAsset asset)
     {
@@ -15,10 +21,18 @@ public static class CharacterSpawnPointPatch
     }
 
     // ReSharper disable Unity.PerformanceAnalysis
-    internal static void ShowDialogue(this Character character, string text, float duration)
+    internal static void ShowMessage(this Character character, string text, float duration)
     {
         var patroller = character.Components.Patroller;
         if (patroller is null) return;
+        if (patroller.Animator is HumanAnimationController controller &&
+            controller.IconAnimator.Library.AnimationExists(text))
+        {
+            controller.PlayIcon(text);
+            Timer.DelayedCall(duration, () => controller.IconAnimator.Renderer.enabled = false);
+            return;
+        }
+
         var dialogue = ComponentSingleton<GamePoolManager>.Instance
             .Spawn(nameof(Dialogue)).GetComponent<Dialogue>();
         dialogue.SetText(new LocalizableString { Localize = false, Content = text }, duration);
@@ -48,16 +62,58 @@ public static class CharacterSpawnPointPatch
     public static void Start(CharacterSpawnPoint __instance)
     {
         if (__instance.Active) return;
-        var type = Traverse.Create(__instance).Field<System.Enum>("spawnType").Value;
-        if (type.ToString() != "Human") return;
-        LiveManager.SpawnPoints.Add(__instance);
+        if (Traverse.Create(__instance).Field<Enum>("spawnType").Value.ToString() is not "Human") return;
+        if (GameManager.Instance is null) return;
+        var system = GameManager.Instance.DecorSystems[DecorSystemLayer.LayerType.Foreground];
+        foreach (var (_, decor) in system.Decors)
+        {
+            if (__instance.transform.position - decor.Position != new Vector3(0.5f, -2.5f, 0.0f)) continue;
+            switch (decor.Sprite.name)
+            {
+                case "Downtown Number 1":
+                    LiveManager.SpawnPoints["1"] = __instance;
+                    return;
+                case "Downtown Number 2":
+                    LiveManager.SpawnPoints["2"] = __instance;
+                    return;
+                case "Downtown Number 3":
+                    LiveManager.SpawnPoints["3"] = __instance;
+                    return;
+                case "Downtown Number 4":
+                    LiveManager.SpawnPoints["4"] = __instance;
+                    return;
+                case "Downtown Number 5":
+                    LiveManager.SpawnPoints["5"] = __instance;
+                    return;
+                case "Downtown Number 6":
+                    LiveManager.SpawnPoints["6"] = __instance;
+                    return;
+                case "Downtown Number 7":
+                    LiveManager.SpawnPoints["7"] = __instance;
+                    return;
+                case "Downtown Number 8":
+                    LiveManager.SpawnPoints["8"] = __instance;
+                    return;
+                case "Downtown Number 9":
+                    LiveManager.SpawnPoints["9"] = __instance;
+                    return;
+                case "Downtown Number 10":
+                    LiveManager.SpawnPoints["10"] = __instance;
+                    return;
+            }
+        }
     }
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(SpawnPoint), "StopSpawn")]
     public static void StopSpawn(SpawnPoint __instance)
     {
-        LiveManager.SpawnPoints.Remove(__instance);
+        foreach (var (key, value) in LiveManager.SpawnPoints)
+        {
+            if (value != __instance) continue;
+            LiveManager.SpawnPoints.Remove(key);
+            return;
+        }
     }
 
     [HarmonyPostfix]
@@ -72,7 +128,6 @@ public static class CharacterSpawnPointPatch
     public static bool OnStart(PatrolDialogue __instance)
     {
         if (__instance.Patroller.Animator is not HumanAnimationController controller) return true;
-        // if (!__instance.Text.Content.StartsWith("[") || !__instance.Text.Content.EndsWith("[")) return true;
         if (!controller.IconAnimator.Library.AnimationExists(__instance.Text.Content)) return true;
         controller.PlayIcon(__instance.Text.Content);
         Timer.DelayedCall(__instance.DialogueDuration, () => controller.IconAnimator.Renderer.enabled = false);

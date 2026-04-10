@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using BepInEx.Logging;
 using HarmonyLib;
 using JetBrains.Annotations;
@@ -31,7 +32,7 @@ public class LiveManager : ComponentSingleton<LiveManager>, IActivable, I2.Loc.I
     internal static readonly Dictionary<string, Character> Users = new();
 
     [UsedImplicitly]
-    internal static readonly C5.HashedArrayList<SpawnPoint> SpawnPoints = new();
+    internal static readonly Dictionary<string, SpawnPoint> SpawnPoints = new();
 
     [UsedImplicitly]
     internal static readonly C5.HashedArrayList<CharacterAsset> Assets = new();
@@ -87,6 +88,7 @@ public class LiveManager : ComponentSingleton<LiveManager>, IActivable, I2.Loc.I
             {
                 case { Animations.name: "ArmedAnimations" }:
                     // if (human.name is "BossChemist" or "BossDrugLord" or "Astrogoliath" or "Clown") continue;
+                    if (human.name is "BossChemist" or "BossGertrudeCinematic") continue;
                     Assets.Add(human);
                     break;
                 case { Animations.name: "BulkyMeleeAnimations" }:
@@ -98,7 +100,7 @@ public class LiveManager : ComponentSingleton<LiveManager>, IActivable, I2.Loc.I
                     Assets.Add(human);
                     break;
                 case { Animations.name: "MeleeAnimations" }:
-                    // if (human.name is "Priest" or "Virgin") continue;
+                    if (human.name is "Priest" or "Virgin") continue;
                     // if (human.name is "Lumberjack") continue;
                     Assets.Add(human);
                     break;
@@ -180,30 +182,17 @@ public class LiveManager : ComponentSingleton<LiveManager>, IActivable, I2.Loc.I
     {
         UserIds[dm.OpenId] = dm.UserName;
         yield return Wait.ForEndOfFrame;
-        Users.TryGetValue(dm.OpenId, out var character);
-        if (character is null) yield break;
-        if (dm.IsEmoji)
+        if (Users.TryGetValue(dm.OpenId, out var character))
         {
-            switch (dm.Message)
-            {
-                case "禁止套娃":
-                    character.SpawnCopy(id: dm.OpenId);
-                    break;
-            }
-        }
-        else
-        {
-            character.ShowDialogue($"{dm.UserName}: {dm.Message}", 10);
+            character.ShowMessage(dm.Message, 10);
             yield return Wait.ForEndOfFrame;
-            switch (dm.Message)
-            {
-                case "[出窍]":
-                    character.OnDie();
-                    break;
-                case "[加油]":
-                    character.OnMagazineEmpty();
-                    break;
-            }
+        }
+        else if (Regex.IsMatch(dm.Message, @"^(\d+)$"))
+        {
+            var point = SpawnPoints[dm.Message];
+            var asset = Assets[UnityEngine.Random.Range(0, Assets.Count)];
+            Users[dm.OpenId] = point.Spawn(asset);
+            Users[dm.OpenId].name = dm.OpenId;
         }
     }
 
@@ -254,21 +243,6 @@ public class LiveManager : ComponentSingleton<LiveManager>, IActivable, I2.Loc.I
             Traverse.Create(icons)
                 .Field<Dictionary<string, int>>("idNameCache").Value = null;
             icons.InitializeClipCache();
-        }
-    }
-
-    private void FixedUpdate()
-    {
-        if (Execution.SceneMode.HasFlag(Execution.Mode.Edition)) return;
-        if (SpawnPoints.IsEmpty || Assets.IsEmpty) return;
-        UnityEngine.Random.InitState((int)System.DateTimeOffset.UtcNow.Ticks);
-        foreach (var (id, _) in UserIds)
-        {
-            if (Users.ContainsKey(id)) continue;
-            var asset = Assets[UnityEngine.Random.Range(0, Assets.Count)];
-            var character = SpawnPoints[UnityEngine.Random.Range(0, SpawnPoints.Count)].Spawn(asset);
-            character.name = id;
-            Users[id] = character;
         }
     }
 }

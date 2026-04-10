@@ -207,13 +207,13 @@ public class BiliApi : MonoBehaviour
     public static Dictionary<string, string> YellowFace()
     {
         using var fs = Assembly.GetExecutingAssembly()
-            .GetManifestResourceStream("ZNT.Evolution.Live.Resources.322.json");
-        using var reader = new StreamReader(fs ?? throw new FileNotFoundException("322.json"));
+            .GetManifestResourceStream("ZNT.Evolution.Live.Resources.100.json");
+        using var reader = new StreamReader(fs ?? throw new FileNotFoundException("100.json"));
         var json = JObject.Load(new JsonTextReader(reader));
         var emote = new Dictionary<string, string>();
-        foreach (var element in json["emote"])
+        foreach (var element in json["emoticons"])
         {
-            var text = element["text"].ToString();
+            var text = element["emoji"].ToString();
             var url = element["url"].ToString();
             emote[text] = url;
         }
