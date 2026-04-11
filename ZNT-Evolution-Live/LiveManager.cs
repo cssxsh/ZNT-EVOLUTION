@@ -37,6 +37,9 @@ public class LiveManager : ComponentSingleton<LiveManager>, IActivable, I2.Loc.I
     [UsedImplicitly]
     internal static readonly C5.HashedArrayList<CharacterAsset> Assets = new();
 
+    [UsedImplicitly]
+    internal static tk2dSpriteAnimation Icons = new();
+
     public I2.Loc.LanguageSourceData SourceData { get; set; }
 
     protected override void OnAwake()
@@ -78,6 +81,8 @@ public class LiveManager : ComponentSingleton<LiveManager>, IActivable, I2.Loc.I
         BiliApi.OnEnter += (_, enter) => StartCoroutine(nameof(OnEnter), enter);
         BiliApi.OnDanmaku += (_, dm) => StartCoroutine(nameof(OnDanmaku), dm);
         BiliApi.OnGift += (_, gift) => StartCoroutine(nameof(OnGift), gift);
+        Icons = UnityEngine.Resources.FindObjectsOfTypeAll<tk2dSpriteAnimation>()
+            .First(animation => animation.name == "anim_human_icons");
         StartCoroutine(nameof(LoadYellowFace));
         foreach (var element in LevelElementIndex.Index.Values.Cast<LevelElement>())
         {
@@ -184,8 +189,10 @@ public class LiveManager : ComponentSingleton<LiveManager>, IActivable, I2.Loc.I
         yield return Wait.ForEndOfFrame;
         if (Users.TryGetValue(dm.OpenId, out var character))
         {
-            character.ShowMessage(dm.Message, 10);
-            yield return Wait.ForEndOfFrame;
+            if (dm.IsEmoji) yield return LoadIcon(dm.Message, dm.EmojiImageUrl);
+            character.ShowMessage(
+                text: Icons.AnimationExists(dm.Message) ? dm.Message : $"{dm.UserName}: {dm.Message}",
+                duration: 10);
         }
         else if (Regex.IsMatch(dm.Message, @"^(\d+)$"))
         {
@@ -203,46 +210,44 @@ public class LiveManager : ComponentSingleton<LiveManager>, IActivable, I2.Loc.I
         yield return Wait.ForEndOfFrame;
     }
 
-    // ReSharper disable once MemberCanBeMadeStatic.Local
     private IEnumerator LoadYellowFace()
     {
-        var icons = UnityEngine.Resources.FindObjectsOfTypeAll<tk2dSpriteAnimation>()
-            .First(animation => animation.name == "anim_human_icons");
-        foreach (var (text, url) in BiliApi.YellowFace())
+        foreach (var (text, url) in BiliApi.YellowFace()) yield return LoadIcon(text, url);
+    }
+
+    private static IEnumerator LoadIcon(string text, string url)
+    {
+        if (Icons.AnimationExists(text)) yield break;
+        var request = UnityWebRequestTexture.GetTexture(url);
+        yield return request.SendWebRequest();
+        var texture = DownloadHandlerTexture.GetContent(request);
+        var sprite = tk2dSpriteCollectionData.CreateFromTexture(
+            texture: texture,
+            size: tk2dSpriteCollectionSize.Explicit(0.5f, texture.height),
+            names: new[] { url },
+            regions: new[] { new UnityEngine.Rect(0, 0, texture.width, texture.height) },
+            anchors: new[] { new UnityEngine.Vector2(texture.width, texture.height) / 2 }
+        );
+        UnityEngine.Object.DontDestroyOnLoad(sprite);
+        var clip = new tk2dSpriteAnimationClip
         {
-            var id = icons.GetClipIdByName(text);
-            if (id != -1) Logger.LogWarning($"{icons.name} already exists clip {text} at {id}");
-            var request = UnityWebRequestTexture.GetTexture(url);
-            yield return request.SendWebRequest();
-            var texture = DownloadHandlerTexture.GetContent(request);
-            var sprite = tk2dSpriteCollectionData.CreateFromTexture(
-                texture: texture,
-                size: tk2dSpriteCollectionSize.Explicit(0.5f, texture.height),
-                names: new[] { url },
-                regions: new[] { new UnityEngine.Rect(0, 0, texture.width, texture.height) },
-                anchors: new[] { new UnityEngine.Vector2(texture.width, texture.height) / 2 }
-            );
-            UnityEngine.Object.DontDestroyOnLoad(sprite);
-            var clip = new tk2dSpriteAnimationClip
+            name = text,
+            wrapMode = tk2dSpriteAnimationClip.WrapMode.Once,
+            frames = new[]
             {
-                name = text,
-                wrapMode = tk2dSpriteAnimationClip.WrapMode.Once,
-                frames = new[]
+                new tk2dSpriteAnimationFrame
                 {
-                    new tk2dSpriteAnimationFrame
-                    {
-                        spriteCollection = sprite,
-                        triggerEvent = false,
-                        eventInfo = "hide_icon"
-                    }
+                    spriteCollection = sprite,
+                    triggerEvent = false,
+                    eventInfo = "hide_icon"
                 }
-            };
-            icons.clips = icons.clips.AddToArray(clip);
-            Traverse.Create(icons)
-                .Field<Dictionary<string, tk2dSpriteAnimationClip>>("clipNameCache").Value = null;
-            Traverse.Create(icons)
-                .Field<Dictionary<string, int>>("idNameCache").Value = null;
-            icons.InitializeClipCache();
-        }
+            }
+        };
+        Icons.clips = Icons.clips.AddToArray(clip);
+        Traverse.Create(Icons)
+            .Field<Dictionary<string, tk2dSpriteAnimationClip>>("clipNameCache").Value = null;
+        Traverse.Create(Icons)
+            .Field<Dictionary<string, int>>("idNameCache").Value = null;
+        Icons.InitializeClipCache();
     }
 }
