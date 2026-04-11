@@ -137,7 +137,9 @@ internal static class StartManagerPatch
                     var transform = animation.GetClipByName("talk");
                     animation.clips = animation.clips.AddToArray(new tk2dSpriteAnimationClip(transform)
                     {
-                        name = "rise"
+                        name = "rise",
+                        useableInLevelEditor = false,
+                        wrapMode = tk2dSpriteAnimationClip.WrapMode.Once
                     });
                     Traverse.Create(animation)
                         .Field<Dictionary<string, tk2dSpriteAnimationClip>>("clipNameCache").Value = null;
@@ -152,7 +154,9 @@ internal static class StartManagerPatch
                     var transform = animation.GetClipByName("stand_phone_talk");
                     animation.clips = animation.clips.AddToArray(new tk2dSpriteAnimationClip(transform)
                     {
-                        name = "rise"
+                        name = "rise",
+                        useableInLevelEditor = false,
+                        wrapMode = tk2dSpriteAnimationClip.WrapMode.Once
                     });
                     Traverse.Create(animation)
                         .Field<Dictionary<string, tk2dSpriteAnimationClip>>("clipNameCache").Value = null;
@@ -167,7 +171,9 @@ internal static class StartManagerPatch
                     var transform = animation.GetClipByName("transform");
                     animation.clips = animation.clips.AddToArray(new tk2dSpriteAnimationClip(transform)
                     {
-                        name = "rise"
+                        name = "rise",
+                        useableInLevelEditor = false,
+                        wrapMode = tk2dSpriteAnimationClip.WrapMode.Once
                     });
                     Traverse.Create(animation)
                         .Field<Dictionary<string, tk2dSpriteAnimationClip>>("clipNameCache").Value = null;
@@ -182,7 +188,9 @@ internal static class StartManagerPatch
                     var transform = animation.GetClipByName("teleport_in");
                     animation.clips = animation.clips.AddToArray(new tk2dSpriteAnimationClip(transform)
                     {
-                        name = "rise"
+                        name = "rise",
+                        useableInLevelEditor = false,
+                        wrapMode = tk2dSpriteAnimationClip.WrapMode.Once
                     });
                     Traverse.Create(animation)
                         .Field<Dictionary<string, tk2dSpriteAnimationClip>>("clipNameCache").Value = null;
