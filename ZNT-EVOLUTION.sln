@@ -6,6 +6,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZNT-Evolution-Live", "ZNT-E
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZNT-Evolution-Tool", "ZNT-Evolution-Tool\ZNT-Evolution-Tool.csproj", "{41433190-8728-4B42-86B3-2889E0ECD1BA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZNT-Evolution-Host", "ZNT-Evolution-Host\ZNT-Evolution-Host.csproj", "{560F0615-8DD0-468C-8A9A-1BBEE78DCC99}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{41433190-8728-4B42-86B3-2889E0ECD1BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{41433190-8728-4B42-86B3-2889E0ECD1BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{41433190-8728-4B42-86B3-2889E0ECD1BA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{560F0615-8DD0-468C-8A9A-1BBEE78DCC99}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{560F0615-8DD0-468C-8A9A-1BBEE78DCC99}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{560F0615-8DD0-468C-8A9A-1BBEE78DCC99}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{560F0615-8DD0-468C-8A9A-1BBEE78DCC99}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
