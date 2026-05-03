@@ -73,7 +73,13 @@ internal class ObjectConverter : CustomCreationConverter<UnityEngine.Object>
         var key = serializer.Deserialize<string>(reader);
         if (key == null) return null;
         if (type == typeof(Shader)) return Shader.Find(key);
-        if (type == typeof(FMODAsset)) return FmodAssetIndex.PathIndex[key];
+
+        if (type == typeof(FMODAsset))
+        {
+            if (FmodAssetIndex.PathIndex.TryGetValue(key, out var fmod)) return fmod;
+            Logger.LogError($"NotFound {type.FullName} {{ path: \"{key}\" }}");
+            return null;
+        }
 
         if (CustomAssetUtility.Cache.TryGetValue(key, out var value)) return value;
         var name = key.Split(':')[0].Trim();
