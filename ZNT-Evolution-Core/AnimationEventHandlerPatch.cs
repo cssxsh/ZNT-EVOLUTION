@@ -5,6 +5,8 @@ using System.Reflection;
 using BepInEx.Logging;
 using HarmonyLib;
 using JetBrains.Annotations;
+using Newtonsoft.Json.Linq;
+using ZNT.Evolution.Core.Asset;
 using ZNT.Evolution.Core.Editor;
 using BepInExLogger = BepInEx.Logging.Logger;
 
@@ -118,6 +120,36 @@ internal static class AnimationEventHandlerPatch
             parameters.Direction,
             frame.eventInt
         );
+    }
+
+    [UsedImplicitly]
+    [Description("RegisterTriggerEvent:throw")]
+    public static void Throw(MovingObjectAnimationController controller, tk2dSpriteAnimationFrame frame)
+    {
+        var physic = CustomAssetUtility.DeserializeObject<PhysicObjectAsset>(JValue.CreateString(frame.soundParamName));
+        if (physic is null) return;
+        // var behaviour = Traverse.Create(controller).Field<MovingObjectBehaviour>("Behaviour").Value;
+        var definition = frame.spriteCollection.spriteDefinitions[frame.spriteId];
+        var point = definition.attachPoints.FirstOrDefault(point => point.name is "throw")
+                    ?? new tk2dSpriteDefinition.AttachPoint();
+        var position = controller.transform.position + point.position;
+        var orientation = controller.transform.forward;
+        {
+            var component = physic.CreateGameObject(position: position).GetComponent<PhysicObjectBehaviour>();
+            component.transform.localScale = orientation == UnityEngine.Vector3.back
+                ? new UnityEngine.Vector3(-1f, 1f, 1f)
+                : new UnityEngine.Vector3(1f, 1f, 1f);
+            // if (component.CarryParent)
+            //     component.SetParent(parent, health);
+            component.ExplosionParent = physic.AttachToParent ? controller.transform : null;
+            component.IgnoreCollisions(controller.GetComponent<UnityEngine.Collider2D>(), true);
+            var sign = UnityEngine.Mathf.Sign(orientation.z);
+            var direction = component.Physic.StartDirection;
+            direction.x *= sign;
+            component.Physic.StartDirection = direction;
+            component.Physic.Body.angularVelocity = -physic.StartAngularVelocity * sign;
+            component.Physic.Throw();
+        }
     }
 
     [UsedImplicitly]

@@ -50,13 +50,12 @@ public static class CustomAssetUtility
         serializer.Serialize(json, data);
     }
 
-    public static void SerializeObjectToTextAsset(out TextAsset asset, object data)
+    public static void SerializeObject(out JToken token, object data)
     {
         var serializer = JsonSerializer.Create(SerializerSettings);
-        using var writer = new StringWriter();
-        using var json = new JsonTextWriter(writer);
+        using var json = new JTokenWriter();
         serializer.Serialize(json, data);
-        asset = new TextAsset(writer.ToString());
+        token = json.Token;
     }
 
     public static T DeserializeObjectFromPath<T>(string source)
@@ -67,11 +66,10 @@ public static class CustomAssetUtility
         return serializer.Deserialize<T>(json);
     }
 
-    public static T DeserializeObjectFromTextAsset<T>(TextAsset asset)
+    public static T DeserializeObject<T>(JToken token)
     {
         var serializer = JsonSerializer.Create(SerializerSettings);
-        using var reader = new StringReader(asset.text);
-        using var json = new JsonTextReader(reader);
+        using var json = new JTokenReader(token);
         return serializer.Deserialize<T>(json);
     }
 
