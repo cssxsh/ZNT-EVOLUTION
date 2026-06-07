@@ -276,7 +276,15 @@ internal static class CustomAssetObjectPatch
     [HarmonyPatch(typeof(HumanBehaviour), "Initialize")]
     public static void Initialize(HumanBehaviour __instance)
     {
-        if (__instance.SharedAsset.CharacterType == CharacterType.Cultist
+        if (__instance.SharedAsset.OverrideOnAim == __instance.Vision.Detection.EditorVisibility)
+        {
+            __instance.Vision.Detection.EditorVisibility = new Visibility(!__instance.SharedAsset.OverrideOnAim)
+            {
+                CustomName = "Vision"
+            };
+        }
+
+        if (__instance.SharedAsset.CharacterType is CharacterType.Cultist
             && !CultistBuff.ContainsKey(__instance.Character))
         {
             var effect = CultistBuff[__instance.Character] = ComponentSingleton<GamePoolManager>.Instance
@@ -331,6 +339,13 @@ internal static class CustomAssetObjectPatch
                     break;
             }
         }
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(HumanBehaviour), "ResetVision")]
+    public static bool ResetVision(HumanBehaviour __instance)
+    {
+        return __instance.VisionFollowTarget || __instance.SharedAsset.OverrideOnAim;
     }
 
     [HarmonyPrefix]
