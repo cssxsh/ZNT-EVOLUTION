@@ -75,3 +75,46 @@
 | **0x1D**  |  Y   |      |      |  Y   |  Y   |      |  Y   |  Y   |      |      |      |      |  Y   |      |  Y   |  Y   |      |      |      |      |  Y   |  Y   |      |      |      |  Y   |  Y   |      |  Y   |      |      |      |
 | **0x1E**  |  Y   |      |      |  Y   |      |      |  Y   |  Y   |  Y   |      |      |      |      |  Y   |  Y   |  Y   |      |      |      |      |  Y   |  Y   |      |      |      |      |      |      |      |      |      |      |
 | **0x1F**  |      |      |      |  Y   |      |      |  Y   |  Y   |      |      |      |      |      |      |      |      |      |      |      |      |      |      |      |      |      |      |  Y   |      |      |      |      |      |
+
+# Sorting Layer
+
+| ID           | Name                  | Value |
+|:-------------|:----------------------|:-----:|
+| `0x08D7B4B9` | `SkyDecor`            | `-12` |
+| `0xC22B02A3` | `BackgroundDecor`     | `-11` |
+| `0x88F263AD` | `MiddlegroundDecor`   | `-10` |
+| `0x220BEC37` | `ExteriorDecor`       | `-9`  |
+| `0xA3EA8441` | `ExteriorTile`        | `-8`  |
+| `0x09EEEB53` | `ExteriorDetailsTile` | `-7`  |
+| `0x03B836D7` | `WallBackDecor`       | `-6`  |
+| `0xFDB611FD` | `Rain`                | `-5`  |
+| `0x387DDD9F` | `WallTile`            | `-4`  |
+| `0xC81B7ABF` | `WallFrontDecor`      | `-3`  |
+| `0xE5855F21` | `WallFrontTile`       | `-2`  |
+| `0x9B92996F` | `GameplayDecor`       | `-1`  |
+| `0x00000000` | `Default`             |  `0`  |
+| `0x0F73C973` | `Elevator`            |  `1`  |
+| `0xC82E234F` | `Door`                |  `2`  |
+| `0x5374895F` | `Prop`                |  `3`  |
+| `0x270E1B19` | `Blood`               |  `4`  |
+| `0x4F949767` | `Corpse`              |  `5`  |
+| `0x2322C27B` | `Static Zombie`       |  `6`  |
+| `0x6813A8E1` | `Human`               |  `7`  |
+| `0x45A8730B` | `Bonus`               |  `8`  |
+| `0x11A0103F` | `Zombie`              |  `9`  |
+| `0xEE2FF0B5` | `Zombie Overlord`     | `10`  |
+| `0xFCC6DE09` | `Trap`                | `11`  |
+| `0x160BBE75` | `StairsTile`          | `12`  |
+| `0xBE07F37F` | `Water`               | `13`  |
+| `0x311FDB2F` | `GameplayTile`        | `14`  |
+| `0x2095F59D` | `BloodUpTile`         | `15`  |
+| `0x9D109DA9` | `BloodDownTile`       | `16`  |
+| `0x8EA23237` | `BloodLeftLeftTile`   | `17`  |
+| `0x8297AB09` | `BloodDownRightTile`  | `18`  |
+| `0x3604A1DD` | `ForegroundDecor`     | `19`  |
+| `0x624661BB` | `GameplayFrontTile`   | `20`  |
+| `0x94841565` | `Foreground Parallax` | `21`  |
+| `0xBFD74D83` | `FrontEffect`         | `22`  |
+| `0xF16F8A89` | `Mask`                | `23`  |
+| `0x94DD6639` | `LevelEditor`         | `24`  |
+| `0x4629EB59` | `UI`                  | `25`  |

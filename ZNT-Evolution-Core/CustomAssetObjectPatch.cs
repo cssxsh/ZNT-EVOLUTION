@@ -127,6 +127,7 @@ internal static class CustomAssetObjectPatch
     {
         var controller = __instance.GetComponent<MovingObjectAnimationController>();
         if (controller is null) return;
+        controller.Animator.Sprite.SortingOrder = (int)value;
         if (!controller.Asset.StandAnimation.Contains('{')) return;
         var clip = string.Format(controller.Asset.StandAnimation, value.ToString().ToLower());
         controller.Animator.Sprite.SetSprite(clip);
