@@ -203,6 +203,13 @@ public static class LevelElementLoader
             Logger.LogDebug($"{filename} -> {human} from {human.AnimationLibrary}");
         }
 
+        foreach (var file in Directory.EnumerateFiles(path, "*.moving.json"))
+        {
+            var filename = Path.GetFileName(file);
+            var moving = DeserializeObject<MovingObjectAsset>(folder: path, file: file);
+            Logger.LogDebug($"{filename} -> {moving}");
+        }
+
         var asset = DeserializeObject<JObject>(folder: path, file: "element.json").Value<string>("CustomAsset");
         switch (asset)
         {
