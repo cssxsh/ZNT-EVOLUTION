@@ -175,4 +175,43 @@ internal class SnakeFeetPatch
             //     break;
         }
     }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(SignalReceiverLinker), "Start")]
+    public static void Start(SignalReceiverLinker __instance)
+    {
+        // ReSharper disable once InvertIf
+        if (__instance.TryGetComponent(out MovingObjectBehaviour moving))
+        {
+            var hit = new ReceiverLink
+            {
+                GameObject = __instance.gameObject,
+                Component = moving,
+                Name = nameof(MovingObjectBehaviour.OnHitCharacter),
+                Title = "Hit"
+            };
+            Traverse.Create(__instance).Method("AddReceiver", moving, hit).GetValue();
+        }
+
+        // ReSharper disable once InvertIf
+        if (__instance.TryGetComponent(out SentryGunBehaviour sentry))
+        {
+            var hit = new ReceiverLink
+            {
+                GameObject = __instance.gameObject,
+                Component = sentry,
+                Name = nameof(SentryGunBehaviour.OnDamage),
+                Title = "Hit"
+            };
+            Traverse.Create(__instance).Method("AddReceiver", sentry, hit).GetValue();
+            var die = new ReceiverLink
+            {
+                GameObject = __instance.gameObject,
+                Component = sentry,
+                Name = nameof(SentryGunBehaviour.OnDie),
+                Title = "Break"
+            };
+            Traverse.Create(__instance).Method("AddReceiver", sentry, die).GetValue();
+        }
+    }
 }

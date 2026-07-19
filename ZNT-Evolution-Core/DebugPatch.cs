@@ -314,6 +314,39 @@ internal static class DebugPatch
     }
 
     [HarmonyPrefix]
+    [HarmonyPatch(typeof(Framework.Events.SignalReceiver), "Initialize")]
+    public static void Initialize(Framework.Events.SignalReceiver __instance)
+    {
+        if (string.IsNullOrEmpty(__instance.ComponentName) || string.IsNullOrEmpty(__instance.MethodName)) return;
+        var type = Traverse.Create(__instance).Method("GetType", __instance.ComponentName).GetValue<Type>();
+        var name = __instance.MethodName.ReplaceLast(" (param)", string.Empty);
+        const BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic |
+                                   BindingFlags.FlattenHierarchy;
+        try
+        {
+            var with_param = type.GetMethod(name, flags, null, [typeof(Parameters)], null);
+            if (with_param is not null && with_param.IsDefined(typeof(SignalReceiverAttribute)))
+            {
+                Traverse.Create(__instance).Field<bool>("methodHasParam").Value = true;
+                return;
+            }
+
+            var no_param = type.GetMethod(name, flags, null, [], null);
+            if (no_param is not null && no_param.IsDefined(typeof(SignalReceiverAttribute)))
+            {
+                Traverse.Create(__instance).Field<bool>("methodHasParam").Value = false;
+                return;
+            }
+
+            Traverse.Create(__instance).Field<bool>("methodHasParam").Value = with_param is not null;
+        }
+        catch (Exception)
+        {
+            // ignored
+        }
+    }
+
+    [HarmonyPrefix]
     [HarmonyPatch(typeof(SignalReceiverLinker), "OnAwake")]
     public static void OnAwake(SignalReceiverLinker __instance)
     {
