@@ -128,7 +128,7 @@ internal static class StartManagerPatch
                 {
                     var explosion = animation.GetClipByName("blood_explosion");
                     var sprites = animation.FirstValidClip.frames[0].spriteCollection;
-                    foreach (var frame in explosion.frames) frame.spriteCollection = sprites;
+                    foreach (var frame in explosion.frames) frame.spriteCollection ??= sprites;
                     Logger.LogInfo($"Fix blood_explosion for {animation}");
                 }
                     break;
@@ -206,7 +206,7 @@ internal static class StartManagerPatch
                     animation.clips = animation.clips.AddToArray(new tk2dSpriteAnimationClip
                     {
                         name = "empty",
-                        frames = new[] { missile.frames[1] },
+                        frames = [missile.frames[1]],
                         fps = 1.0f,
                         loopStart = 0,
                         useableInLevelEditor = false,

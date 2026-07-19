@@ -652,9 +652,9 @@ public static class LevelElementLoader
         var impl = tk2dSpriteCollectionData.CreateFromTexture(
             texture: material.mainTexture,
             size: tk2dSpriteCollectionSize.Explicit(0.5f, 12.0f),
-            names: new[] { "single" },
-            regions: new[] { new Rect(0, 0, material.mainTexture.width, material.mainTexture.height) },
-            anchors: new[] { Vector2.zero }
+            names: ["single"],
+            regions: [new Rect(0, 0, material.mainTexture.width, material.mainTexture.height)],
+            anchors: [Vector2.zero]
         );
 
         impl.name = material.name.Replace("_mat", "");

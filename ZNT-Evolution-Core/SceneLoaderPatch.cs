@@ -296,7 +296,7 @@ internal static class SceneLoaderPatch
         Traverse.Create(binder).Field<UIBehaviour[]>("uiComponents").Value = fields;
     }
 
-    private static readonly HashSet<string> Activated = new();
+    private static readonly HashSet<string> Activated = [];
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(SelectionMenu), "UpdateComponentMenu")]

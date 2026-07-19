@@ -13,14 +13,11 @@ public class InvisibleShield : Editor, IActivable, IDeserializable
     [SerializeInEditor(name: "Is Active")]
     public bool IsActive { get; private set; } = true;
 
-    [SerializeField]
-    private WallType type = WallType.Explosion;
-
     [SerializeInEditor(name: "Type")]
     public WallType Type
     {
-        get => type;
-        set => gameObject.layer = (type = value) switch
+        get;
+        set => gameObject.layer = (field = value) switch
         {
             WallType.Both => LayerMask.NameToLayer("Gameplay"),
             WallType.Human => LayerMask.NameToLayer("Block Humans"),
@@ -28,7 +25,7 @@ public class InvisibleShield : Editor, IActivable, IDeserializable
             WallType.Explosion => LayerMask.NameToLayer("Block Explosion"),
             _ => throw new ArgumentOutOfRangeException(nameof(WallType), value, null)
         };
-    }
+    } = WallType.Explosion;
 
     [SerializeInEditor(name: "Offset")]
     public Vector2 Offset

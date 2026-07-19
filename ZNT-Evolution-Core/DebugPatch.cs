@@ -224,7 +224,7 @@ internal static class DebugPatch
     [HarmonyPatch(typeof(PathologicalGames.PrefabPool), "nameInstance")]
     public static void AddPoolRetriever(Transform instance)
     {
-        instance.gameObject.GetComponentSafe<PoolRetriever>();
+        _ = instance.gameObject.GetComponentSafe<PoolRetriever>();
     }
 
     [HarmonyPostfix]
@@ -319,7 +319,7 @@ internal static class DebugPatch
     {
         __instance.ExcludedComponents ??= __instance.GetComponentsInChildren<BaseComponent>(includeInactive: true)
             .Where(component => !component.EditorVisibility).ToList();
-        __instance.ExcludedGameObjects ??= new List<GameObject>();
+        __instance.ExcludedGameObjects ??= [];
     }
 
     [HarmonyPrefix]
@@ -328,6 +328,6 @@ internal static class DebugPatch
     {
         __instance.ExcludedComponents ??= __instance.GetComponentsInChildren<BaseComponent>(includeInactive: true)
             .Where(component => !component.EditorVisibility).ToList();
-        __instance.ExcludedGameObjects ??= new List<GameObject>();
+        __instance.ExcludedGameObjects ??= [];
     }
 }

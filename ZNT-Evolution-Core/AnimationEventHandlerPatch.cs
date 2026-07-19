@@ -53,18 +53,16 @@ internal static class AnimationEventHandlerPatch
                 switch (description.Description.Substring(0, index))
                 {
                     case nameof(AnimationEventHandler.RegisterTriggerEvent):
-                        __instance.EventHandler.RegisterTriggerEvent(name, frame => method.Invoke(null, new object[]
-                        {
+                        __instance.EventHandler.RegisterTriggerEvent(name, frame => method.Invoke(null, [
                             __instance,
                             frame
-                        }));
+                        ]));
                         break;
                     case nameof(AnimationEventHandler.RegisterEndEvent):
-                        __instance.EventHandler.RegisterEndEvent(name, () => method.Invoke(null, new object[]
-                        {
+                        __instance.EventHandler.RegisterEndEvent(name, () => method.Invoke(null, [
                             __instance,
                             __instance.Animator.CurrentClip
-                        }));
+                        ]));
                         break;
                 }
             }

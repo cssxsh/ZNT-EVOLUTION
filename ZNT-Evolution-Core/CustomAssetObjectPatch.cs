@@ -61,10 +61,10 @@ internal static class CustomAssetObjectPatch
     public static void LoadFromAsset(ExplosionAsset __instance, GameObject gameObject)
     {
         if (Traverse.Create(__instance).Field<bool>("autoExplode").Value) return;
-        gameObject.GetComponentSafe<ExplosionEditor>();
+        _ = gameObject.GetComponentSafe<ExplosionEditor>();
         if (gameObject.transform.parent is null)
         {
-            gameObject.GetComponentSafe<SignalReceiverLinker>();
+            _ = gameObject.GetComponentSafe<SignalReceiverLinker>();
         }
         else
         {
@@ -536,7 +536,7 @@ internal static class CustomAssetObjectPatch
     }
 
     [HarmonyPostfix]
-    [HarmonyPatch(typeof(PropMoveable), "Move", new Type[] { })]
+    [HarmonyPatch(typeof(PropMoveable), "Move", [])]
     [HarmonyPatch(typeof(PropMoveable), "MoveOpposite")]
     private static void Move(PropMoveable __instance)
     {

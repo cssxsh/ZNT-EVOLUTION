@@ -10,7 +10,7 @@ internal class DamageFlagsConverter : CustomCreationConverter<DamageType>
 {
     public static DamageType[] GetDamageFlags(DamageType damage)
     {
-        if (!damage.HasFlag((DamageType)int.MinValue)) return new[] { damage };
+        if (!damage.HasFlag((DamageType)int.MinValue)) return [damage];
         return Enum.GetValues(typeof(DamageType)).Cast<DamageType>()
             .Where(type => damage.HasFlag((DamageType)(0x01 << (int)type)))
             .ToArray();

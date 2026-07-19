@@ -22,14 +22,13 @@ internal class ObjectConverter : CustomCreationConverter<UnityEngine.Object>
             if (value is ISerializationCallbackReceiver receiver) receiver.OnBeforeSerialize();
             Traverse.Create(serializer)
                 .Field("_serializerWriter")
-                .Method("SerializeObject", new[]
-                {
+                .Method("SerializeObject", [
                     typeof(JsonWriter),
                     typeof(object),
                     typeof(JsonObjectContract),
                     typeof(JsonProperty),
                     typeof(JsonContract)
-                })
+                ])
                 .GetValue(writer, value, serializer.ContractResolver.ResolveContract(value.GetType()), null, null);
             return;
         }
