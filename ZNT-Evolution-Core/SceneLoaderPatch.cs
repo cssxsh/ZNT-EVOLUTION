@@ -296,6 +296,12 @@ internal static class SceneLoaderPatch
         Traverse.Create(binder).Field<UIBehaviour[]>("uiComponents").Value = fields;
     }
 
+    private static void BindDirection(this SelectionMenu menu, EditorComponent component, MemberInfo member)
+    {
+        var prefabs = Traverse.Create(menu).Field<SupportedTypePrefabs>("customDrawerPrefabs").Value;
+        menu.InstantiateCustomBinder(prefabs[EditorComponent.SupportedType.Vector3]).BindDirection(component, member);
+    }
+
     private static readonly HashSet<string> Activated = [];
 
     [HarmonyPrefix]
@@ -361,6 +367,20 @@ internal static class SceneLoaderPatch
             var delete = Traverse.Create(__instance).Field<Button>("deleteButton").Value;
             delete.onClick.Invoke();
         }
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(SelectionMenu), "SetDefaultUi")]
+    public static bool SetDefaultUi(SelectionMenu __instance, EditorComponent component, MemberInfo member)
+    {
+        // ReSharper disable once InvertIf
+        if (member == typeof(MovingObjectBehaviour).GetProperty(nameof(MovingObjectBehaviour.Orientation)))
+        {
+            __instance.BindDirection(component, member);
+            return false;
+        }
+
+        return true;
     }
 
     #endregion

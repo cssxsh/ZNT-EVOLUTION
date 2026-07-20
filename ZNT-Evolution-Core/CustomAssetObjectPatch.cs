@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using BepInEx.Logging;
-using DG.Tweening;
 using HarmonyLib;
 using UnityEngine;
 using ZNT.Evolution.Core.Asset;
@@ -112,107 +111,49 @@ internal static class CustomAssetObjectPatch
     [HarmonyPatch(typeof(MovingObjectAsset), "LoadFromAsset")]
     public static void LoadFromAsset(MovingObjectAsset __instance, GameObject gameObject)
     {
-        var controller = gameObject.GetComponent<MovingObjectAnimationController>();
-        if (controller is null) return;
-        var orientation = gameObject.GetComponent<ObjectOrientation>().CurrentOrientation;
-        var clip = string.Format(__instance.StandAnimation, orientation.ToString().ToLower());
-        if (!controller.Animator.AnimationExists(clip)) return;
-        var frame = controller.Animator.GetAnimationClip(clip).frames[0];
+        var behaviour = gameObject.GetComponent<MovingObjectBehaviour>();
+        var controller = (MovingObjectAnimationController)behaviour.AnimationController;
+        if (__instance.StandAnimation.Contains('{') ||
+            __instance.DisableAnimation.Contains('{') ||
+            __instance.MoveAnimation.Contains('{') ||
+            __instance.StopAnimation.Contains('{') ||
+            __instance.HitAnimation.Contains('{') ||
+            __instance.DestroyAnimation.Contains('{'))
+        {
+            controller.Asset = UnityEngine.Object.Instantiate(__instance);
+            behaviour.Orientation = behaviour.Orientation;
+        }
+
+        var frame = controller.Animator.GetAnimationClip(controller.Asset.StandAnimation).frames[0];
         controller.Animator.Sprite.SetSprite(frame.spriteCollection, frame.spriteId);
     }
 
     [HarmonyPostfix]
-    [HarmonyPatch(typeof(ObjectOrientation), "orientation", MethodType.Setter)]
-    public static void SetOrientation(ObjectOrientation __instance, ObjectOrientation.Orientation value)
+    [HarmonyPatch(typeof(MovingObjectBehaviour), "Orientation", MethodType.Setter)]
+    public static void SetOrientation(MovingObjectBehaviour __instance, Vector3 value)
     {
-        var controller = __instance.GetComponent<MovingObjectAnimationController>();
-        if (controller is null) return;
-        controller.Animator.Sprite.SortingOrder = (int)value;
-        if (!controller.Asset.StandAnimation.Contains('{')) return;
-        var clip = string.Format(controller.Asset.StandAnimation, value.ToString().ToLower());
-        controller.Animator.Sprite.SetSprite(clip);
+        var controller = (MovingObjectAnimationController)__instance.AnimationController;
+        controller.Animator.Sprite.SortingOrder = value == Vector3.forward ? 0 : -1;
+        if (!controller.Asset.name.EndsWith("(Clone)")) return;
+        var asset = (MovingObjectAsset)__instance.GetComponent<AssetComponent>().Asset;
+        var direction = value == Vector3.forward ? "right" : "left";
+        controller.Asset.StandAnimation = string.Format(asset.StandAnimation, direction);
+        controller.Asset.DisableAnimation = string.Format(asset.DisableAnimation, direction);
+        controller.Asset.MoveAnimation = string.Format(asset.MoveAnimation, direction);
+        controller.Asset.StopAnimation = string.Format(asset.StopAnimation, direction);
+        controller.Asset.HitAnimation = string.Format(asset.HitAnimation, direction);
+        controller.Asset.DestroyAnimation = string.Format(asset.DestroyAnimation, direction);
+        if (controller.Animator.IsPlaying()) return;
+        var frame = controller.Animator.GetAnimationClip(controller.Asset.StandAnimation).frames[0];
+        controller.Animator.Sprite.SetSprite(frame.spriteCollection, frame.spriteId);
     }
 
-    [HarmonyPrefix]
-    [HarmonyPatch(typeof(MovingObjectAnimationController), "OnStart")]
-    public static bool OnStart(MovingObjectAnimationController __instance)
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(MovingObjectBehaviour), "OnDespawned")]
+    public static void OnDespawned(MovingObjectBehaviour __instance)
     {
-        if (!__instance.Asset.StandAnimation.Contains('{')) return true;
-        var orientation = __instance.GetComponent<ObjectOrientation>().CurrentOrientation;
-        var clip = string.Format(__instance.Asset.StandAnimation, orientation.ToString().ToLower());
-        if (!string.IsNullOrEmpty(clip)) __instance.ForcePlay(clip);
-        Traverse.Create(__instance).Field<SoundEventPlayer>("soundEventPlayer").Value
-            .PlaySound(__instance.Asset.StandSound);
-        return false;
-    }
-
-    [HarmonyPrefix]
-    [HarmonyPatch(typeof(MovingObjectAnimationController), "OnDeactivate")]
-    public static bool OnDeactivate(MovingObjectAnimationController __instance)
-    {
-        if (!__instance.Asset.DisableAnimation.Contains('{')) return true;
-        var orientation = __instance.GetComponent<ObjectOrientation>().CurrentOrientation;
-        var clip = string.Format(__instance.Asset.DisableAnimation, orientation.ToString().ToLower());
-        if (!string.IsNullOrEmpty(clip)) __instance.ForcePlay(clip);
-        Traverse.Create(__instance).Field<SoundEventPlayer>("soundEventPlayer").Value
-            .PlaySound(__instance.Asset.DisableSound);
-        return false;
-    }
-
-    [HarmonyPrefix]
-    [HarmonyPatch(typeof(MovingObjectAnimationController), "OnMove")]
-    public static bool OnMove(MovingObjectAnimationController __instance)
-    {
-        var behaviour = __instance.GetComponent<MovingObjectBehaviour>();
-        if (behaviour is null || !behaviour.IsActive) return true;
-        if (!__instance.Asset.MoveAnimation.Contains('{')) return true;
-        var orientation = __instance.GetComponent<ObjectOrientation>().CurrentOrientation;
-        var clip = string.Format(__instance.Asset.MoveAnimation, orientation.ToString().ToLower());
-        if (!string.IsNullOrEmpty(clip)) __instance.ForcePlay(clip);
-        Traverse.Create(__instance).Field<SoundEventPlayer>("soundEventPlayer").Value
-            .PlaySound(__instance.Asset.MoveSound);
-        return false;
-    }
-
-    [HarmonyPrefix]
-    [HarmonyPatch(typeof(MovingObjectAnimationController), "OnStop")]
-    public static bool OnStop(MovingObjectAnimationController __instance)
-    {
-        var behaviour = __instance.GetComponent<MovingObjectBehaviour>();
-        if (behaviour is null || !behaviour.IsActive) return true;
-        if (!__instance.Asset.StopAnimation.Contains('{')) return true;
-        var orientation = __instance.GetComponent<ObjectOrientation>().CurrentOrientation;
-        var clip = string.Format(__instance.Asset.StopAnimation, orientation.ToString().ToLower());
-        if (!string.IsNullOrEmpty(clip)) __instance.ForcePlay(clip);
-        Traverse.Create(__instance).Field<SoundEventPlayer>("soundEventPlayer").Value.Stop();
-        Traverse.Create(__instance).Field<SoundPlayer>("soundPlayer").Value.Sound = __instance.Asset.StopSound;
-        Traverse.Create(__instance).Field<SoundPlayer>("soundPlayer").Value.Play();
-        return false;
-    }
-
-    [HarmonyPrefix]
-    [HarmonyPatch(typeof(MovingObjectAnimationController), "HitCharacter")]
-    public static bool HitCharacter(MovingObjectAnimationController __instance)
-    {
-        if (!__instance.Asset.HitAnimation.Contains('{')) return true;
-        var orientation = __instance.GetComponent<ObjectOrientation>().CurrentOrientation;
-        var name = string.Format(__instance.Asset.HitAnimation, orientation.ToString().ToLower());
-        if (!string.IsNullOrEmpty(name)) __instance.ForcePlay(name);
-        Traverse.Create(__instance).Field<SoundPlayer>("soundPlayer").Value.Sound = __instance.Asset.HitSound;
-        Traverse.Create(__instance).Field<SoundPlayer>("soundPlayer").Value.Play();
-        return false;
-    }
-
-    [HarmonyPrefix]
-    [HarmonyPatch(typeof(MovingObjectAnimationController), "OnDestroyed")]
-    public static bool OnDestroyed(MovingObjectAnimationController __instance)
-    {
-        if (!Application.isPlaying) return true;
-        if (!__instance.Asset.DestroyAnimation.Contains('{')) return true;
-        var orientation = __instance.GetComponent<ObjectOrientation>().CurrentOrientation;
-        var name = string.Format(__instance.Asset.DestroyAnimation, orientation.ToString().ToLower());
-        if (!string.IsNullOrEmpty(name)) __instance.ForcePlay(name);
-        return false;
+        var controller = (MovingObjectAnimationController)__instance.AnimationController;
+        if (controller.Asset.name.EndsWith("(Clone)")) UnityEngine.Object.Destroy(controller.Asset);
     }
 
     #endregion
@@ -542,12 +483,7 @@ internal static class CustomAssetObjectPatch
     {
         if (__instance.StopAtNextStep) return;
         var editor = __instance.GetComponent<PropMoveableEditor>();
-        if (editor is null) return;
-        var speed = Traverse.Create(__instance).Field<float>("currentSpeed");
-        speed.Value = 0;
-        editor.Tweener?.Kill();
-        editor.Tweener = DOTween.To(() => speed.Value, value => speed.Value = value, __instance.Speed, editor.Duration)
-            .SetEase(editor.SpeedEase);
+        editor?.SpeedTween(__instance, 0, __instance.Speed);
     }
 
     [HarmonyPostfix]
@@ -556,12 +492,7 @@ internal static class CustomAssetObjectPatch
     {
         if (__instance.StopAtNextStep) return;
         var editor = __instance.GetComponent<PropMoveableEditor>();
-        if (editor is null) return;
-        var speed = Traverse.Create(__instance).Field<float>("currentSpeed");
-        speed.Value = __instance.Speed;
-        editor.Tweener?.Kill();
-        editor.Tweener = DOTween.To(() => speed.Value, value => speed.Value = value, 0, editor.Duration)
-            .SetEase(editor.SpeedEase);
+        editor?.SpeedTween(__instance, __instance.Speed, 0);
     }
 
     [HarmonyPrefix]
