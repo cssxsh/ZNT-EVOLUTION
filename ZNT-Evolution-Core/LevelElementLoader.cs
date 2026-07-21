@@ -321,11 +321,7 @@ public static class LevelElementLoader
             UnityEngine.Object.DontDestroyOnLoad(texture);
             element.Preview = Sprite.Create(
                 texture: texture,
-                rect: new Rect(
-                    x: (texture.width - 128) / 2.0f,
-                    y: (texture.height - 128) / 2.0f,
-                    width: texture.width,
-                    height: texture.height),
+                rect: new Rect(x: 0, y: 0, width: texture.width, height: texture.height),
                 pivot: Vector2.one / 2.0f);
             UnityEngine.Object.DontDestroyOnLoad(element.Preview);
             texture.name = element.Preview.name = $"preview_{element.name}";
@@ -366,8 +362,28 @@ public static class LevelElementLoader
                 Logger.LogInfo($"LevelElement {id} - {brush} Loaded");
             }
 
-            if (element.DecorType is LevelElement.DecorStyle.Animated)
+            // ReSharper disable once ConvertIfStatementToSwitchStatement
+            if (element is { DecorType: LevelElement.DecorStyle.Animated })
             {
+                var id = element.Bind();
+                Logger.LogInfo($"LevelElement {id} - {element} Loaded");
+                return;
+            }
+
+            // ReSharper disable once ConvertIfStatementToSwitchStatement
+            if (element is { DecorType: LevelElement.DecorStyle.Custom, DecorPrefab.name: "ScrollingDecor" })
+            {
+                if (material.shader.name is not
+                    "ZNT/Common/Animated Flat Textured Cutout" and "ZNT/Common/Animated Flat Textured Transparent")
+                {
+                    Logger.LogWarning($"Shader Of {material} Is {material.shader.name}");
+                }
+
+                if (material.mainTexture.wrapMode is not TextureWrapMode.Repeat)
+                {
+                    Logger.LogWarning($"WrapMode Of {material.mainTexture} Is {material.mainTexture.wrapMode}");
+                }
+
                 var id = element.Bind();
                 Logger.LogInfo($"LevelElement {id} - {element} Loaded");
                 return;
@@ -512,9 +528,9 @@ public static class LevelElementLoader
             Logger.LogDebug($"{filename} -> {animations}");
         }
 
-        var animation = DeserializeObject<AnimationAddition>(folder: path, file: "animation.addition.json");
-        animation.Apply();
-        Logger.LogInfo($"{animation.Targets.Length} animations apply");
+        var addition = DeserializeObject<AnimationAddition>(folder: path, file: "animation.addition.json");
+        addition.Apply();
+        Logger.LogInfo($"{addition.Targets.Length} animation clips added");
     }
 
     private static void ApplyElementFromFolder(this AssetBundle _, string path)
@@ -629,7 +645,7 @@ public static class LevelElementLoader
             var filename = Path.GetFileName(file);
             var visual = DeserializeObject<CustomVisualEffect>(folder: path, file: file);
             Logger.LogDebug($"{filename} -> {visual}");
-            visual.Bind();
+            _ = visual.Bind();
         }
 
         foreach (var file in Directory.EnumerateFiles(path, "*.explosion.json"))

@@ -1,7 +1,9 @@
+using BepInEx.Logging;
 using HarmonyLib;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using UnityEngine;
+using BepInExLogger = BepInEx.Logging.Logger;
 
 // ReSharper disable MemberCanBePrivate.Global
 namespace ZNT.Evolution.Core.Asset;
@@ -10,6 +12,8 @@ namespace ZNT.Evolution.Core.Asset;
 [UsedImplicitly]
 internal class BrushInfo : EvolutionInfo<Rotorz.Tile.OrientedBrush>
 {
+    private static readonly ManualLogSource Logger = BepInExLogger.CreateLogSource(nameof(BrushInfo));
+
     [JsonProperty("ForceLegacySideways")]
     public readonly bool ForceLegacySideways;
 
@@ -25,8 +29,8 @@ internal class BrushInfo : EvolutionInfo<Rotorz.Tile.OrientedBrush>
     [JsonProperty("Coalesce")]
     public readonly Rotorz.Tile.Coalesce Coalesce;
 
-    [JsonProperty("Variation")]
-    public readonly Object Variation;
+    [JsonProperty("Prefab")]
+    public readonly GameObject Prefab;
 
     [JsonConstructor]
     public BrushInfo(
@@ -36,14 +40,16 @@ internal class BrushInfo : EvolutionInfo<Rotorz.Tile.OrientedBrush>
         int userFlags,
         bool forceOverrideFlags,
         Rotorz.Tile.Coalesce coalesce,
-        Object variation) : base(name)
+        GameObject prefab = null, GameObject variation = null) : base(name)
     {
         ForceLegacySideways = forceLegacySideways;
         ApplyPrefabTransform = applyPrefabTransform;
         UserFlags = userFlags;
         ForceOverrideFlags = forceOverrideFlags;
         Coalesce = coalesce;
-        Variation = variation;
+        Prefab = prefab ?? variation;
+        if (string.IsNullOrEmpty(Name)) Logger.LogWarning("Name is null");
+        if (Prefab is null) Logger.LogWarning("Prefab is null");
     }
 
     public override Rotorz.Tile.OrientedBrush Create()
@@ -58,7 +64,7 @@ internal class BrushInfo : EvolutionInfo<Rotorz.Tile.OrientedBrush>
         Traverse.Create(impl).Field<int>("_userFlags").Value = UserFlags;
         impl.forceOverrideFlags = ForceOverrideFlags;
         impl.Coalesce = Coalesce;
-        impl.AddOrientation(mask: 0).AddVariation(variation: Variation, weight: 50);
+        impl.AddOrientation(mask: 0).AddVariation(variation: Prefab, weight: 50);
 
         Object.DontDestroyOnLoad(impl);
         return impl;

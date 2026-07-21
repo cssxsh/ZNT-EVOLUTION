@@ -1,7 +1,9 @@
 using System.Collections.Generic;
+using BepInEx.Logging;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using UnityEngine;
+using BepInExLogger = BepInEx.Logging.Logger;
 
 // ReSharper disable MemberCanBePrivate.Global
 namespace ZNT.Evolution.Core.Asset;
@@ -10,6 +12,8 @@ namespace ZNT.Evolution.Core.Asset;
 [UsedImplicitly]
 internal class SpriteMerge : EvolutionMerge<tk2dSpriteCollectionData>
 {
+    private static readonly ManualLogSource Logger = BepInExLogger.CreateLogSource(nameof(SpriteMerge));
+
     [JsonProperty("AttachPoints")]
     public readonly Dictionary<int, tk2dSpriteDefinition.AttachPoint[]> AttachPoints;
 
@@ -25,6 +29,8 @@ internal class SpriteMerge : EvolutionMerge<tk2dSpriteCollectionData>
     {
         AttachPoints = points ?? new Dictionary<int, tk2dSpriteDefinition.AttachPoint[]>();
         Material = material;
+        if (Material is null) Logger.LogWarning("Material is null");
+        if (Source is null) Logger.LogWarning("Source is null");
     }
 
     public override tk2dSpriteCollectionData Create()

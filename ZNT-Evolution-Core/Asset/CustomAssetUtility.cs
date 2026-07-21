@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using HarmonyLib;
+using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
@@ -16,7 +18,7 @@ public static class CustomAssetUtility
 {
     internal static readonly Dictionary<string, Object> Cache = new();
 
-    private static JsonSerializerSettings SerializerSettings => new()
+    private static readonly JsonSerializer Serializer = JsonSerializer.Create(new JsonSerializerSettings
     {
         ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
         TypeNameHandling = TypeNameHandling.Auto,
@@ -37,50 +39,80 @@ public static class CustomAssetUtility
             new Matrix4x4Converter(),
             new RectConverter()
         }
-    };
+    });
 
     public static string NameAndType(this Object o) => $"{o.name} : {o.GetType()}";
 
+    [UsedImplicitly]
     public static void SerializeObjectToPath(string target, object data)
     {
-        var serializer = JsonSerializer.Create(SerializerSettings);
-        using var writer = new StreamWriter(target);
-        using var json = new JsonTextWriter(writer);
-        json.Formatting = Formatting.Indented;
-        serializer.Serialize(json, data);
+        using var stream = File.OpenWrite(target);
+        if (target.EndsWith(".bson")) SerializeObjectToBson(stream, data);
+        else SerializeObjectToJson(stream, data);
     }
 
+    [UsedImplicitly]
+    public static void SerializeObjectToBson(Stream target, object data)
+    {
+        using var bson = new BsonDataWriter(target);
+        Serializer.Serialize(bson, data);
+    }
+
+    [UsedImplicitly]
+    public static void SerializeObjectToJson(Stream target, object data)
+    {
+        using var writer = new StreamWriter(target, Encoding.UTF8, 1024, true);
+        using var json = new JsonTextWriter(writer);
+        json.Formatting = Formatting.Indented;
+        Serializer.Serialize(json, data);
+    }
+
+    [UsedImplicitly]
     public static void SerializeObject(out JToken token, object data)
     {
-        var serializer = JsonSerializer.Create(SerializerSettings);
         using var json = new JTokenWriter();
-        serializer.Serialize(json, data);
+        Serializer.Serialize(json, data);
         token = json.Token;
     }
 
+    [UsedImplicitly]
     public static T DeserializeObjectFromPath<T>(string source)
     {
-        var serializer = JsonSerializer.Create(SerializerSettings);
-        using var reader = new StreamReader(source);
-        using var json = new JsonTextReader(reader);
-        return serializer.Deserialize<T>(json);
+        using var stream = File.OpenRead(source);
+        return source.EndsWith(".bson")
+            ? DeserializeObjectFromBson<T>(stream)
+            : DeserializeObjectFromJson<T>(stream);
     }
 
+    [UsedImplicitly]
+    public static T DeserializeObjectFromBson<T>(Stream source)
+    {
+        using var bson = new BsonDataReader(source);
+        return Serializer.Deserialize<T>(bson);
+    }
+
+    [UsedImplicitly]
+    public static T DeserializeObjectFromJson<T>(Stream source)
+    {
+        using var reader = new StreamReader(source, Encoding.UTF8, true, 1024, true);
+        using var json = new JsonTextReader(reader);
+        return Serializer.Deserialize<T>(json);
+    }
+
+    [UsedImplicitly]
     public static T DeserializeObject<T>(JToken token)
     {
-        var serializer = JsonSerializer.Create(SerializerSettings);
         using var json = new JTokenReader(token);
-        return serializer.Deserialize<T>(json);
+        return Serializer.Deserialize<T>(json);
     }
 
     internal static void Merge(Object o, IDictionary<string, JToken> fields)
     {
-        var serializer = JsonSerializer.Create(SerializerSettings);
         foreach (var (path, token) in fields)
         {
             var field = path.Split('.').Aggregate(Traverse.Create(o), (t, name) => t.Field(name));
             using var json = new JTokenReader(token);
-            var value = serializer.Deserialize(json, field.GetValueType());
+            var value = Serializer.Deserialize(json, field.GetValueType());
             field.SetValue(value);
         }
     }

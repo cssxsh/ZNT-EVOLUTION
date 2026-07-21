@@ -54,6 +54,7 @@ internal class SpriteInfo : EvolutionInfo<tk2dSpriteCollectionData>
         Anchors = anchors ?? Regions.Select(_ => anchor ?? Vector2.zero).ToArray();
         AttachPoints = points ?? new Dictionary<int, tk2dSpriteDefinition.AttachPoint[]>();
         Material = material;
+        if (Material is null) Logger.LogWarning("Material is null");
         if (Names.Length != Regions.Length) Logger.LogWarning("Names.Length != Regions.Length");
         if (Names.Length != Anchors.Length) Logger.LogWarning("Names.Length != Anchors.Length");
     }

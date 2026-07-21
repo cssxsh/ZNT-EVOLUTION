@@ -387,6 +387,9 @@
             <HintPath>$(ZNTGamePath)\znt_Data\Managed\Vectrosity.dll</HintPath>
             <Private>False</Private>
         </Reference>
+        <Reference Include="ZipStorer, Version=4.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+            <HintPath>..\packages\ZipStorer.4.2.0\lib\net48\ZipStorer.dll</HintPath>
+        </Reference>
     </ItemGroup>
     <ItemGroup>
         <Compile Include="Properties\AssemblyInfo.cs"/>
@@ -402,6 +405,9 @@
         <Compile Include="Asset\AnimationAddition.cs"/>
         <Compile Include="Asset\AssetElementBinder.cs"/>
         <Compile Include="Asset\BrushInfo.cs"/>
+        <Compile Include="Asset\BrushMerge.cs"/>
+        <Compile Include="Asset\BsonDataReader.cs"/>
+        <Compile Include="Asset\BsonDataWriter.cs"/>
         <Compile Include="Asset\CustomAssetUtility.cs"/>
         <Compile Include="Asset\CustomVisualEffect.cs"/>
         <Compile Include="Asset\DamageDictionary.cs"/>
@@ -417,6 +423,7 @@
         <Compile Include="Asset\LayerMaskConverter.cs"/>
         <Compile Include="Asset\LazyRef.cs"/>
         <Compile Include="Asset\LevelElementAddition.cs"/>
+        <Compile Include="Asset\MaterialMerge.cs"/>
         <Compile Include="Asset\ObjectContractResolver.cs"/>
         <Compile Include="Asset\ObjectConverter.cs"/>
         <Compile Include="Asset\ObjectMerge.cs"/>
@@ -440,19 +447,26 @@
         <Compile Include="Effect\FogOfWar.cs"/>
         <Compile Include="Effect\SphereBuffEffect.cs"/>
         <Compile Include="Effect\SphereLaoAerEffect.cs"/>
+        <Compile Include="Mod\ModContext.cs"/>
+        <Compile Include="Mod\ModMetadata.cs"/>
+        <Compile Include="Mod\ModManager.cs"/>
     </ItemGroup>
     <ItemGroup>
         <EmbeddedResource Include="Resources\**"/>
     </ItemGroup>
+    <ItemGroup>
+        <None Include="packages.config"/>
+    </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets"/>
     <Target Name="AfterBuild">
         <ItemGroup>
-            <Plugin Include="$(ZNTGamePath)\BepInEx\plugins\$(MSBuildProjectName)\*.dll"/>
-            <Plugin Include="$(ZNTGamePath)\BepInEx\plugins\$(MSBuildProjectName)\*.pdb"/>
+            <Plugin Include="$(ZNTGamePath)\BepInEx\plugins\$(MSBuildProjectName)\$(AssemblyName).*.dll"/>
+            <Plugin Include="$(ZNTGamePath)\BepInEx\plugins\$(MSBuildProjectName)\$(AssemblyName).*.pdb"/>
         </ItemGroup>
         <Delete Files="@(Plugin)"/>
         <Copy SourceFiles="$(OutputPath)\$(AssemblyName).dll" DestinationFiles="$(ZNTGamePath)\BepInEx\plugins\$(MSBuildProjectName)\$(AssemblyName).$(Version).dll"/>
         <Copy SourceFiles="$(OutputPath)\$(AssemblyName).pdb" DestinationFiles="$(ZNTGamePath)\BepInEx\plugins\$(MSBuildProjectName)\$(AssemblyName).$(Version).pdb"/>
+        <Copy SourceFiles="$(OutputPath)\ZipStorer.dll" DestinationFiles="$(ZNTGamePath)\BepInEx\plugins\$(MSBuildProjectName)\ZipStorer.dll"/>
     </Target>
     <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
          Other similar extension points exist, see Microsoft.Common.targets.

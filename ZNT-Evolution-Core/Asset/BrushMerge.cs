@@ -1,8 +1,6 @@
-using System.Collections.Generic;
 using BepInEx.Logging;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using UnityEngine;
 using BepInExLogger = BepInEx.Logging.Logger;
 
@@ -11,30 +9,31 @@ namespace ZNT.Evolution.Core.Asset;
 
 [JsonObject]
 [UsedImplicitly]
-internal class ObjectMerge : EvolutionMerge<Object>
+internal class BrushMerge : EvolutionMerge<Rotorz.Tile.OrientedBrush>
 {
-    private static readonly ManualLogSource Logger = BepInExLogger.CreateLogSource(nameof(SpriteMerge));
+    private static readonly ManualLogSource Logger = BepInExLogger.CreateLogSource(nameof(BrushMerge));
 
-    [JsonProperty("Fields")]
-    public readonly Dictionary<string, JToken> Fields;
+    [JsonProperty("Prefab")]
+    public readonly GameObject Prefab;
 
     [JsonConstructor]
-    public ObjectMerge(
-        Object source,
+    public BrushMerge(
+        Rotorz.Tile.OrientedBrush source,
         string name,
-        Dictionary<string, JToken> fields) : base(name, source)
+        GameObject prefab) : base(name, source)
     {
-        Fields = fields;
+        Prefab = prefab;
         if (string.IsNullOrEmpty(Name)) Logger.LogWarning("Name is null");
         if (Source is null) Logger.LogWarning("Source is null");
+        if (Prefab is null) Logger.LogWarning("Prefab is null");
     }
 
-    public override Object Create()
+    public override Rotorz.Tile.OrientedBrush Create()
     {
         var clone = Object.Instantiate(Source);
 
         clone.name = Name;
-        CustomAssetUtility.Merge(clone, Fields);
+        clone.DefaultOrientation.SetVariation(0, Prefab);
 
         Object.DontDestroyOnLoad(clone);
         return clone;
