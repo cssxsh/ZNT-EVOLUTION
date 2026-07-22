@@ -5,6 +5,7 @@ namespace ZNT.Evolution.Core.Mod;
 internal record ModResource<T> : IComparable<ModResource<T>>
 {
     public T File;
+    public string Path;
     public string Name;
     public string Type;
     public string Format;

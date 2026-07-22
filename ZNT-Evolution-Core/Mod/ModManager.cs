@@ -58,6 +58,7 @@ public static class ModManager
                  select new ModResource<ZipFileEntry>
                  {
                      File = entry,
+                     Path = entry.FilenameInZip,
                      Name = match.Groups[1].Value,
                      Type = match.Groups[2].Value,
                      Format = match.Groups[3].Value
@@ -69,161 +70,7 @@ public static class ModManager
             buffer.SetLength(0);
             yield return package.ExtractFileAsync(resource.File, buffer).ToCoroutine();
             buffer.Position = 0;
-            switch (resource)
-            {
-                // ModMetadata
-                case { Name: "metadata", Format: "json" or "bson" }:
-                    continue;
-                // UnityEngine.Texture2D
-                case { Format: "tga" or "png" or "exr" }:
-                {
-                    var texture = context.ReadTexture2D(resource.Name, buffer.ToArray());
-                    Logger.LogDebug($"{resource.File.FilenameInZip} -> {texture}");
-                    // ReSharper disable once InvertIf
-                    if (texture.name.StartsWith("preview_"))
-                    {
-                        var rect = new Rect(x: 0, y: 0, width: texture.width, height: texture.height);
-                        var preview = context.MakePreview(texture, rect);
-                        Logger.LogDebug($"{resource.File.FilenameInZip} -> {preview}");
-                    }
-                }
-                    break;
-                // UnityEngine.Material
-                case { Type: "material.merge", Format: "json" or "bson" }:
-                {
-                    var material = context.ReadMaterial(buffer, resource.Format);
-                    var texture = material.mainTexture;
-                    Logger.LogDebug($"{resource.File.FilenameInZip} -> {material} with {texture}, {material.shader}");
-                }
-                    break;
-                // tk2dSpriteCollectionData
-                case { Type: "sprite.info", Format: "json" or "bson" }:
-                {
-                    var sprites = context.ReadSpriteInfo(buffer, resource.Format);
-                    Logger.LogDebug($"{resource.File.FilenameInZip} -> {sprites} from {sprites.material}");
-                }
-                    break;
-                // tk2dSpriteCollectionData
-                case { Type: "sprite.merge", Format: "json" or "bson" }:
-                {
-                    var sprites = context.ReadSpriteMerge(buffer, resource.Format);
-                    Logger.LogDebug($"{resource.File.FilenameInZip} -> {sprites} from {sprites.material}");
-                }
-                    break;
-                // tk2dSpriteAnimation
-                case { Type: "animation", Format: "json" or "bson" }:
-                {
-                    var animation = context.ReadAnimation(buffer, resource.Format);
-                    Logger.LogDebug($"{resource.File.FilenameInZip} -> {animation}");
-                }
-                    break;
-                // ZNT.Evolution.Core.Asset.AnimationAddition
-                case { Type: "animation.addition", Format: "json" or "bson" }:
-                {
-                    var addition = context.ReadAnimationAddition(buffer, resource.Format);
-                    Logger.LogDebug($"{resource.File.FilenameInZip} -> {addition.Clips.Length} clips");
-                }
-                    break;
-                // ZNT.Evolution.Core.Asset.CustomVisualEffect
-                case { Type: "visual", Format: "json" or "bson" }:
-                {
-                    var visual = context.ReadVisualEffect(buffer, resource.Format);
-                    Logger.LogDebug($"{resource.File.FilenameInZip} -> {visual} from {visual.animation?.Library}");
-                }
-                    break;
-                // ExplosionAsset
-                case { Type: "explosion", Format: "json" or "bson" }:
-                {
-                    var explosion = context.ReadExplosionAsset(buffer, resource.Format);
-                    Logger.LogDebug($"{resource.File.FilenameInZip} -> {explosion} from {explosion.EffectToSpawn}");
-                }
-                    break;
-                // DecorAsset
-                case { Type: "decor", Format: "json" or "bson" }:
-                {
-                    var decor = context.ReadDecorAsset(buffer, resource.Format);
-                    Logger.LogDebug($"{resource.File.FilenameInZip} -> {decor} from {decor.Animation}");
-                }
-                    break;
-                // BreakablePropAsset
-                case { Type: "breakable", Format: "json" or "bson" }:
-                {
-                    var breakable = context.ReadBreakablePropAsset(buffer, resource.Format);
-                    Logger.LogDebug($"{resource.File.FilenameInZip} -> {breakable} from {breakable.Animation}");
-                }
-                    break;
-                // TriggerAsset
-                case { Type: "trigger", Format: "json" or "bson" }:
-                {
-                    var trigger = context.ReadTriggerAsset(buffer, resource.Format);
-                    Logger.LogDebug($"{resource.File.FilenameInZip} -> {trigger} from {trigger.Animation}");
-                }
-                    break;
-                // MovingObjectAsset
-                case { Type: "moving", Format: "json" or "bson" }:
-                {
-                    var moving = context.ReadMovingObjectAsset(buffer, resource.Format);
-                    var animation = Traverse.Create(moving).Field<tk2dSpriteAnimation>("library").Value;
-                    Logger.LogDebug($"{resource.File.FilenameInZip} -> {moving} from {animation}");
-                }
-                    break;
-                // SentryGunAsset
-                case { Type: "sentry", Format: "json" or "bson" }:
-                {
-                    var sentry = context.ReadSentryGunAsset(buffer, resource.Format);
-                    Logger.LogDebug($"{resource.File.FilenameInZip} -> {sentry} from {sentry.Animation}");
-                }
-                    break;
-                // PhysicObjectAsset
-                case { Type: "physic", Format: "json" or "bson" }:
-                {
-                    var physic = context.ReadPhysicObjectAsset(buffer, resource.Format);
-                    var animation = Traverse.Create(physic).Field<tk2dSpriteAnimation>("library").Value;
-                    Logger.LogDebug($"{resource.File.FilenameInZip} -> {physic} from {animation}");
-                }
-                    break;
-                // HumanAsset
-                case { Type: "human", Format: "json" or "bson" }:
-                {
-                    var human = context.ReadHumanAsset(buffer, resource.Format);
-                    Logger.LogDebug($"{resource.File.FilenameInZip} -> {human} from {human.AnimationLibrary}");
-                }
-                    break;
-                // ZNT.Evolution.Core.Asset..SpawnPointAsset
-                case { Type: "spawn", Format: "json" or "bson" }:
-                {
-                    var spawn = context.ReadSpawnPointAsset(buffer, resource.Format);
-                    Logger.LogDebug($"{resource.File.FilenameInZip} -> {spawn}");
-                }
-                    break;
-                // Rotorz.Tile.OrientedBrush
-                case { Type: "brush.info", Format: "json" or "bson" }:
-                {
-                    var brush = context.ReadBrushInfo(buffer, resource.Format);
-                    var prefab = brush.DefaultOrientation.GetVariation(0);
-                    Logger.LogDebug($"{resource.File.FilenameInZip} -> {brush} from {prefab}");
-                }
-                    break;
-                // Rotorz.Tile.OrientedBrush
-                case { Type: "brush.merge", Format: "json" or "bson" }:
-                {
-                    var brush = context.ReadBrushMerge(buffer, resource.Format);
-                    var prefab = brush.DefaultOrientation.GetVariation(0);
-                    Logger.LogDebug($"{resource.File.FilenameInZip} -> {brush} from {prefab}");
-                }
-                    break;
-                // LevelElement
-                case { Type: "element", Format: "json" or "bson" }:
-                {
-                    var element = context.ReadLevelElement(buffer, resource.Format);
-                    Logger.LogDebug($"{resource.File.FilenameInZip} -> {element}");
-                    Logger.LogInfo($"LevelElement {element.AssetId} - {element.Title} Loaded");
-                }
-                    break;
-                default:
-                    Logger.LogWarning($"{resource.File.FilenameInZip} is not supported");
-                    break;
-            }
+            context.LoadResource(resource, buffer);
         }
     }
 
@@ -253,6 +100,7 @@ public static class ModManager
                  select new ModResource<FileInfo>
                  {
                      File = file,
+                     Path = file.FullName.Substring(folder.FullName.Length + 1).Replace('\\', '/'),
                      Name = match.Groups[1].Value,
                      Type = match.Groups[2].Value,
                      Format = match.Groups[3].Value
@@ -265,164 +113,166 @@ public static class ModManager
             using var temp = resource.File.OpenRead();
             yield return temp.CopyToAsync(buffer).ToCoroutine();
             buffer.Position = 0;
-            var fullname = resource.File.FullName
-                .Substring(folder.FullName.Length + 1)
-                .Replace('\\', '/');
-            switch (resource)
+            context.LoadResource(resource, buffer);
+        }
+    }
+
+    private static void LoadResource<T>(this ModContext context, ModResource<T> resource, MemoryStream buffer)
+    {
+        switch (resource)
+        {
+            // ModMetadata
+            case { Name: "metadata", Format: "json" or "bson" }:
+                return;
+            // UnityEngine.Texture2D
+            case { Format: "tga" or "png" or "exr" }:
             {
-                // ModMetadata
-                case { Name: "metadata", Format: "json" or "bson" }:
-                    continue;
-                // UnityEngine.Texture2D
-                case { Format: "tga" or "png" or "exr" }:
+                var texture = context.ReadTexture2D(resource.Name, buffer.ToArray());
+                Logger.LogDebug($"{resource.Path} -> {texture}");
+                // ReSharper disable once InvertIf
+                if (texture.name.StartsWith("preview_"))
                 {
-                    var texture = context.ReadTexture2D(resource.Name, buffer.ToArray());
-                    Logger.LogDebug($"{fullname} -> {texture}");
-                    // ReSharper disable once InvertIf
-                    if (texture.name.StartsWith("preview_"))
-                    {
-                        var rect = new Rect(x: 0, y: 0, width: texture.width, height: texture.height);
-                        var preview = context.MakePreview(texture, rect);
-                        Logger.LogDebug($"{fullname} -> {preview}");
-                    }
+                    var rect = new Rect(x: 0, y: 0, width: texture.width, height: texture.height);
+                    var preview = context.MakePreview(texture, rect);
+                    Logger.LogDebug($"{resource.Path} -> {preview}");
                 }
-                    break;
-                // UnityEngine.Material
-                case { Type: "material.merge", Format: "json" or "bson" }:
-                {
-                    var material = context.ReadMaterial(buffer, resource.Format);
-                    var texture = material.mainTexture;
-                    Logger.LogDebug($"{fullname} -> {material} with {texture}, {material.shader}");
-                }
-                    break;
-                // tk2dSpriteCollectionData
-                case { Type: "sprite.info", Format: "json" or "bson" }:
-                {
-                    var sprites = context.ReadSpriteInfo(buffer, resource.Format);
-                    Logger.LogDebug($"{fullname} -> {sprites} from {sprites.material}");
-                }
-                    break;
-                // tk2dSpriteCollectionData
-                case { Type: "sprite.merge", Format: "json" or "bson" }:
-                {
-                    var sprites = context.ReadSpriteMerge(buffer, resource.Format);
-                    Logger.LogDebug($"{fullname} -> {sprites} from {sprites.material}");
-                }
-                    break;
-                // tk2dSpriteAnimation
-                case { Type: "animation", Format: "json" or "bson" }:
-                {
-                    var animation = context.ReadAnimation(buffer, resource.Format);
-                    Logger.LogDebug($"{fullname} -> {animation}");
-                }
-                    break;
-                // ZNT.Evolution.Core.Asset.AnimationAddition
-                case { Type: "animation.addition", Format: "json" or "bson" }:
-                {
-                    var addition = context.ReadAnimationAddition(buffer, resource.Format);
-                    Logger.LogDebug($"{fullname} -> {addition.Clips.Length} clips");
-                }
-                    break;
-                // ZNT.Evolution.Core.Asset.CustomVisualEffect
-                case { Type: "visual", Format: "json" or "bson" }:
-                {
-                    var visual = context.ReadVisualEffect(buffer, resource.Format);
-                    Logger.LogDebug($"{fullname} -> {visual} from {visual.animation?.Library}");
-                }
-                    break;
-                // ExplosionAsset
-                case { Type: "explosion", Format: "json" or "bson" }:
-                {
-                    var explosion = context.ReadExplosionAsset(buffer, resource.Format);
-                    Logger.LogDebug($"{fullname} -> {explosion} from {explosion.EffectToSpawn}");
-                }
-                    break;
-                // DecorAsset
-                case { Type: "decor", Format: "json" or "bson" }:
-                {
-                    var decor = context.ReadDecorAsset(buffer, resource.Format);
-                    Logger.LogDebug($"{fullname} -> {decor} from {decor.Animation}");
-                }
-                    break;
-                // BreakablePropAsset
-                case { Type: "breakable", Format: "json" or "bson" }:
-                {
-                    var breakable = context.ReadBreakablePropAsset(buffer, resource.Format);
-                    Logger.LogDebug($"{fullname} -> {breakable} from {breakable.Animation}");
-                }
-                    break;
-                // TriggerAsset
-                case { Type: "trigger", Format: "json" or "bson" }:
-                {
-                    var trigger = context.ReadTriggerAsset(buffer, resource.Format);
-                    Logger.LogDebug($"{fullname} -> {trigger} from {trigger.Animation}");
-                }
-                    break;
-                // MovingObjectAsset
-                case { Type: "moving", Format: "json" or "bson" }:
-                {
-                    var moving = context.ReadMovingObjectAsset(buffer, resource.Format);
-                    var animation = Traverse.Create(moving).Field<tk2dSpriteAnimation>("library").Value;
-                    Logger.LogDebug($"{fullname} -> {moving} from {animation}");
-                }
-                    break;
-                // SentryGunAsset
-                case { Type: "sentry", Format: "json" or "bson" }:
-                {
-                    var sentry = context.ReadSentryGunAsset(buffer, resource.Format);
-                    Logger.LogDebug($"{fullname} -> {sentry} from {sentry.Animation}");
-                }
-                    break;
-                // PhysicObjectAsset
-                case { Type: "physic", Format: "json" or "bson" }:
-                {
-                    var physic = context.ReadPhysicObjectAsset(buffer, resource.Format);
-                    var animation = Traverse.Create(physic).Field<tk2dSpriteAnimation>("library").Value;
-                    Logger.LogDebug($"{fullname} -> {physic} from {animation}");
-                }
-                    break;
-                // HumanAsset
-                case { Type: "human", Format: "json" or "bson" }:
-                {
-                    var human = context.ReadHumanAsset(buffer, resource.Format);
-                    Logger.LogDebug($"{fullname} -> {human} from {human.AnimationLibrary}");
-                }
-                    break;
-                // ZNT.Evolution.Core.Asset..SpawnPointAsset
-                case { Type: "spawn", Format: "json" or "bson" }:
-                {
-                    var spawn = context.ReadSpawnPointAsset(buffer, resource.Format);
-                    Logger.LogDebug($"{fullname} -> {spawn}");
-                }
-                    break;
-                // Rotorz.Tile.OrientedBrush
-                case { Type: "brush.info", Format: "json" or "bson" }:
-                {
-                    var brush = context.ReadBrushInfo(buffer, resource.Format);
-                    var prefab = brush.DefaultOrientation.GetVariation(0);
-                    Logger.LogDebug($"{fullname} -> {brush} from {prefab}");
-                }
-                    break;
-                // Rotorz.Tile.OrientedBrush
-                case { Type: "brush.merge", Format: "json" or "bson" }:
-                {
-                    var brush = context.ReadBrushMerge(buffer, resource.Format);
-                    var prefab = brush.DefaultOrientation.GetVariation(0);
-                    Logger.LogDebug($"{fullname} -> {brush} from {prefab}");
-                }
-                    break;
-                // LevelElement
-                case { Type: "element", Format: "json" or "bson" }:
-                {
-                    var element = context.ReadLevelElement(buffer, resource.Format);
-                    Logger.LogDebug($"{fullname} -> {element}");
-                    Logger.LogInfo($"LevelElement {element.AssetId} - {element.Title} Loaded");
-                }
-                    break;
-                default:
-                    Logger.LogWarning($"{fullname} is not supported");
-                    break;
             }
+                break;
+            // UnityEngine.Material
+            case { Type: "material.merge", Format: "json" or "bson" }:
+            {
+                var material = context.ReadMaterial(buffer, resource.Format);
+                var texture = material.mainTexture;
+                Logger.LogDebug($"{resource.Path} -> {material} with {texture}, {material.shader}");
+            }
+                break;
+            // tk2dSpriteCollectionData
+            case { Type: "sprite.info", Format: "json" or "bson" }:
+            {
+                var sprites = context.ReadSpriteInfo(buffer, resource.Format);
+                Logger.LogDebug($"{resource.Path} -> {sprites} from {sprites.material}");
+            }
+                break;
+            // tk2dSpriteCollectionData
+            case { Type: "sprite.merge", Format: "json" or "bson" }:
+            {
+                var sprites = context.ReadSpriteMerge(buffer, resource.Format);
+                Logger.LogDebug($"{resource.Path} -> {sprites} from {sprites.material}");
+            }
+                break;
+            // tk2dSpriteAnimation
+            case { Type: "animation", Format: "json" or "bson" }:
+            {
+                var animation = context.ReadAnimation(buffer, resource.Format);
+                Logger.LogDebug($"{resource.Path} -> {animation}");
+            }
+                break;
+            // ZNT.Evolution.Core.Asset.AnimationAddition
+            case { Type: "animation.addition", Format: "json" or "bson" }:
+            {
+                var addition = context.ReadAnimationAddition(buffer, resource.Format);
+                Logger.LogDebug($"{resource.Path} -> {addition.Clips.Length} clips");
+            }
+                break;
+            // ZNT.Evolution.Core.Asset.CustomVisualEffect
+            case { Type: "visual", Format: "json" or "bson" }:
+            {
+                var visual = context.ReadVisualEffect(buffer, resource.Format);
+                Logger.LogDebug($"{resource.Path} -> {visual} from {visual.animation?.Library}");
+            }
+                break;
+            // ExplosionAsset
+            case { Type: "explosion", Format: "json" or "bson" }:
+            {
+                var explosion = context.ReadExplosionAsset(buffer, resource.Format);
+                Logger.LogDebug($"{resource.Path} -> {explosion} from {explosion.EffectToSpawn}");
+            }
+                break;
+            // DecorAsset
+            case { Type: "decor", Format: "json" or "bson" }:
+            {
+                var decor = context.ReadDecorAsset(buffer, resource.Format);
+                Logger.LogDebug($"{resource.Path} -> {decor} from {decor.Animation}");
+            }
+                break;
+            // BreakablePropAsset
+            case { Type: "breakable", Format: "json" or "bson" }:
+            {
+                var breakable = context.ReadBreakablePropAsset(buffer, resource.Format);
+                Logger.LogDebug($"{resource.Path} -> {breakable} from {breakable.Animation}");
+            }
+                break;
+            // TriggerAsset
+            case { Type: "trigger", Format: "json" or "bson" }:
+            {
+                var trigger = context.ReadTriggerAsset(buffer, resource.Format);
+                Logger.LogDebug($"{resource.Path} -> {trigger} from {trigger.Animation}");
+            }
+                break;
+            // MovingObjectAsset
+            case { Type: "moving", Format: "json" or "bson" }:
+            {
+                var moving = context.ReadMovingObjectAsset(buffer, resource.Format);
+                var animation = Traverse.Create(moving).Field<tk2dSpriteAnimation>("library").Value;
+                Logger.LogDebug($"{resource.Path} -> {moving} from {animation}");
+            }
+                break;
+            // SentryGunAsset
+            case { Type: "sentry", Format: "json" or "bson" }:
+            {
+                var sentry = context.ReadSentryGunAsset(buffer, resource.Format);
+                Logger.LogDebug($"{resource.Path} -> {sentry} from {sentry.Animation}");
+            }
+                break;
+            // PhysicObjectAsset
+            case { Type: "physic", Format: "json" or "bson" }:
+            {
+                var physic = context.ReadPhysicObjectAsset(buffer, resource.Format);
+                var animation = Traverse.Create(physic).Field<tk2dSpriteAnimation>("library").Value;
+                Logger.LogDebug($"{resource.Path} -> {physic} from {animation}");
+            }
+                break;
+            // HumanAsset
+            case { Type: "human", Format: "json" or "bson" }:
+            {
+                var human = context.ReadHumanAsset(buffer, resource.Format);
+                Logger.LogDebug($"{resource.Path} -> {human} from {human.AnimationLibrary}");
+            }
+                break;
+            // ZNT.Evolution.Core.Asset..SpawnPointAsset
+            case { Type: "spawn", Format: "json" or "bson" }:
+            {
+                var spawn = context.ReadSpawnPointAsset(buffer, resource.Format);
+                Logger.LogDebug($"{resource.Path} -> {spawn}");
+            }
+                break;
+            // Rotorz.Tile.OrientedBrush
+            case { Type: "brush.info", Format: "json" or "bson" }:
+            {
+                var brush = context.ReadBrushInfo(buffer, resource.Format);
+                var prefab = brush.DefaultOrientation.GetVariation(0);
+                Logger.LogDebug($"{resource.Path} -> {brush} from {prefab}");
+            }
+                break;
+            // Rotorz.Tile.OrientedBrush
+            case { Type: "brush.merge", Format: "json" or "bson" }:
+            {
+                var brush = context.ReadBrushMerge(buffer, resource.Format);
+                var prefab = brush.DefaultOrientation.GetVariation(0);
+                Logger.LogDebug($"{resource.Path} -> {brush} from {prefab}");
+            }
+                break;
+            // LevelElement
+            case { Type: "element", Format: "json" or "bson" }:
+            {
+                var element = context.ReadLevelElement(buffer, resource.Format);
+                Logger.LogDebug($"{resource.Path} -> {element}");
+                Logger.LogInfo($"LevelElement {element.AssetId} - {element.Title} Loaded");
+            }
+                break;
+            default:
+                Logger.LogWarning($"{resource.Path} is not supported");
+                break;
         }
     }
 }
