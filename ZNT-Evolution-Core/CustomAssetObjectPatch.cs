@@ -46,6 +46,35 @@ internal static class CustomAssetObjectPatch
             .RegisterEndEvent(animation, (Action)Delegate.CreateDelegate(typeof(Action), despawn, "Despawn"));
     }
 
+    private static ICollection<GameObject> Prefabs(this Rotorz.Tile.OrientedBrush brush)
+    {
+        var prefabs = new HashSet<GameObject>();
+        foreach (var orientation in brush.Orientations)
+        {
+            for (var index = 0; index < orientation.VariationCount; index++)
+            {
+                switch (orientation.GetVariation(index))
+                {
+                    case GameObject prefab:
+                        prefabs.Add(prefab);
+                        break;
+                    case Rotorz.Tile.TilesetBrush { attachPrefab: { } attach }:
+                        prefabs.Add(attach);
+                    {
+                        if (!attach.TryGetComponent(out SimpleSpawner spawner)) break;
+                        foreach (var transform in Traverse.Create(spawner).Field<Transform[]>("prefabs").Value)
+                        {
+                            prefabs.Add(transform.gameObject);
+                        }
+                    }
+                        break;
+                }
+            }
+        }
+
+        return prefabs;
+    }
+
     [HarmonyPrefix]
     [HarmonyPatch(typeof(CustomAssetObject), "LoadFromAsset")]
     public static void LoadFromAsset(CustomAssetObject __instance, GameObject gameObject)
@@ -402,37 +431,57 @@ internal static class CustomAssetObjectPatch
     [HarmonyPatch(typeof(Rotorz.Tile.OrientedBrush), "Awake")]
     public static void Awake(Rotorz.Tile.OrientedBrush __instance)
     {
-        if (__instance.DefaultOrientation.GetVariation(0) is not GameObject prefab) return;
-        if (prefab.GetComponentInChildren<Health>() is { } health) health.EditorVisibility = true;
-        if (prefab.TryGetComponent(out OneWayCollider _)) prefab.GetComponentSafe<OneWayEditor>().FixResizeHandles();
-        if (prefab.TryGetComponent(out PropMoveable _)) prefab.GetComponentSafe<PropMoveableEditor>();
-        switch (prefab.GetComponent<BaseBehaviour>())
+        foreach (var prefab in __instance.Prefabs())
         {
-            case PropBehaviour prop:
-                _ = prefab.GetComponentSafe<LayerEditor>();
-                switch (prop)
+            if (prefab.GetComponentInChildren<Health>() is { } health)
+            {
+                health.EditorVisibility = new Visibility(true)
                 {
-                    case MineBehaviour:
-                        _ = prefab.GetComponentSafe<MineTrapEditor>();
-                        break;
-                    case TutorialLoader:
-                        _ = prefab.GetComponentSafe<TutorialBreakingNews>();
-                        break;
+                    CustomName = health.EditorVisibility.CustomName
+                };
+            }
+
+            if (prefab.TryGetComponent(out OneWayCollider collider))
+            {
+                _ = collider.gameObject.GetComponentSafe<OneWayEditor>();
+                if (collider.TryGetComponent(out ResizeHandles resize))
+                {
+                    resize.MinBounds = new Bounds(center: Vector2.zero, size: Vector2.one * 0.6f);
+                    resize.RoundToNearest = 1f / 4f;
+                    resize.Bounds = new Bounds(center: Vector2.zero, size: Vector2.one);
                 }
+            }
 
-                break;
-            case HumanBehaviour:
-                _ = prefab.GetComponentSafe<HumanEditor>();
-                break;
+            switch (prefab.GetComponentInChildren<BaseBehaviour>())
+            {
+                case BarricadeBehaviour:
+                case BonusBarrelBehaviour:
+                case BreakableProp:
+                case DoorBehaviour:
+                    _ = prefab.GetComponentSafe<LayerEditor>();
+                    break;
+                case MineBehaviour:
+                    _ = prefab.GetComponentSafe<MineTrapEditor>();
+                    _ = prefab.GetComponentSafe<LayerEditor>();
+                    break;
+                case StairBehaviour:
+                    _ = prefab.GetComponentSafe<StairEditor>();
+                    break;
+                case TutorialLoader:
+                    _ = prefab.GetComponentSafe<TutorialBreakingNews>();
+                    break;
+                case MovingObjectBehaviour:
+                    _ = prefab.GetComponentSafe<PropMoveableEditor>();
+                    _ = prefab.GetComponentSafe<LayerEditor>();
+                    break;
+                case SentryGunBehaviour:
+                    _ = prefab.GetComponentSafe<LayerEditor>();
+                    break;
+                case HumanBehaviour:
+                    _ = prefab.GetComponentSafe<HumanEditor>();
+                    break;
+            }
         }
-    }
-
-    private static void FixResizeHandles(this OneWayEditor prefab)
-    {
-        var resize = prefab.GetComponent<ResizeHandles>();
-        resize.MinBounds = new Bounds(center: Vector2.zero, size: Vector2.one * 0.6f);
-        resize.RoundToNearest = 1f / 4f;
-        resize.Bounds = new Bounds(center: Vector2.zero, size: Vector2.one);
     }
 
     [HarmonyPostfix]
@@ -441,13 +490,6 @@ internal static class CustomAssetObjectPatch
     {
         if (__instance.TryGetComponent(out OneWayEditor _)) yield break;
         yield return __result;
-    }
-
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(StairBehaviour), "OnAwake")]
-    private static void OnAwake(StairBehaviour __instance)
-    {
-        _ = __instance.gameObject.GetComponentSafe<StairEditor>();
     }
 
     [HarmonyPrefix]
