@@ -150,11 +150,9 @@ internal static class CustomAssetObjectPatch
             __instance.DestroyAnimation.Contains('{'))
         {
             controller.Asset = UnityEngine.Object.Instantiate(__instance);
-            behaviour.Orientation = behaviour.Orientation;
         }
 
-        var frame = controller.Animator.GetAnimationClip(controller.Asset.StandAnimation).frames[0];
-        controller.Animator.Sprite.SetSprite(frame.spriteCollection, frame.spriteId);
+        behaviour.Orientation = behaviour.Orientation;
     }
 
     [HarmonyPostfix]
