@@ -450,6 +450,7 @@
         <Compile Include="Mod\ModContext.cs"/>
         <Compile Include="Mod\ModMetadata.cs"/>
         <Compile Include="Mod\ModManager.cs"/>
+        <Compile Include="Mod\ModResource.cs"/>
     </ItemGroup>
     <ItemGroup>
         <EmbeddedResource Include="Resources\**"/>

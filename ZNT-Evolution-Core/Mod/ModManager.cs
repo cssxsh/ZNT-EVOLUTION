@@ -1,9 +1,9 @@
 using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using BepInEx.Logging;
 using HarmonyLib;
@@ -25,8 +25,6 @@ public static class ModManager
         public override Encoding GetEncoding(int codepage) => codepage is 437 ? fallback : null;
     }
 
-    private static readonly Dictionary<string, ModContext> Allocated = new();
-
     private static IEnumerator ToCoroutine(this Task task)
     {
         while (!task.IsCompleted) yield return null;
@@ -45,287 +43,189 @@ public static class ModManager
         yield return zip.ExtractFileAsync(meta, buffer).ToCoroutine();
         buffer.Position = 0;
         var metadata = CustomAssetUtility.DeserializeObject<ModMetadata>(buffer, meta.IsBson());
-        Logger.LogInfo($"load [{metadata.Name} {metadata.Version}] from package '{path}'.");
-        var context = AllocateContext(metadata, path);
-        if (context is null) yield break;
+        var context = ModContext.Allocate(metadata, path);
+        if (context.Path != path)
+        {
+            Logger.LogWarning($"[{metadata.Name} {metadata.Version}] has been loaded from '{context.Path}'");
+            yield break;
+        }
 
-        var sprite = entries.Where(entry => entry.FilenameInZip.StartsWith("Sprite/")).ToList();
-        // UnityEngine.Texture2D
-        foreach (var entry in sprite.Where(entry => entry.FilenameInZip.EndsWith(".png")))
+        Logger.LogInfo($"load [{metadata.Name} {metadata.Version}] from package '{path}'");
+
+        var regex = new Regex("""^(?:.+\/)?(\w+)(?:\.(.*))?\.(\w+)$""");
+        foreach (var resource in
+                 from entry in entries
+                 let match = regex.Match(entry.FilenameInZip)
+                 where match.Success
+                 select new ModResource<ZipFileEntry>
+                 {
+                     File = entry,
+                     Name = match.Groups[1].Value,
+                     Type = match.Groups[2].Value,
+                     Format = match.Groups[3].Value
+                 }
+                 into resource
+                 orderby resource.Order
+                 select resource)
         {
             buffer.SetLength(0);
-            yield return zip.ExtractFileAsync(entry, buffer).ToCoroutine();
-            var texture = new Texture2D(0, 0, TextureFormat.RGBA32, false, true);
-            texture.LoadImage(buffer.ToArray());
-            texture.name = Path.GetFileNameWithoutExtension(entry.FilenameInZip);
-            texture.filterMode = FilterMode.Point;
-            texture.wrapMode = TextureWrapMode.Clamp;
-            // texture.Apply(true, true);
-            Logger.LogDebug($"{entry.FilenameInZip} -> {texture}");
-            CustomAssetUtility.Cache[texture.NameAndType()] = texture;
-            // LevelElement.Preview
-            // ReSharper disable once InvertIf
-            if (texture.name.StartsWith("preview_"))
+            yield return zip.ExtractFileAsync(resource.File, buffer).ToCoroutine();
+            buffer.Position = 0;
+            switch (resource)
             {
-                var preview = Sprite.Create(
-                    texture: texture,
-                    rect: new Rect(x: 0, y: 0, width: texture.width, height: texture.height),
-                    pivot: Vector2.one / 2.0f);
-                preview.name = texture.name;
-                Object.DontDestroyOnLoad(preview);
-                Logger.LogDebug($"{entry.FilenameInZip} -> {preview}");
-                CustomAssetUtility.Cache[preview.NameAndType()] = preview;
+                // ModMetadata
+                case { Name: "metadata", Format: "json" or "bson" }:
+                    continue;
+                // UnityEngine.Texture2D
+                case { Format: "tga" or "png" or "exr" }:
+                {
+                    var texture = context.ReadTexture2D(resource.Name, buffer.ToArray());
+                    Logger.LogDebug($"{resource.File.FilenameInZip} -> {texture}");
+                    // ReSharper disable once InvertIf
+                    if (texture.name.StartsWith("preview_"))
+                    {
+                        var rect = new Rect(x: 0, y: 0, width: texture.width, height: texture.height);
+                        var preview = context.MakePreview(texture, rect);
+                        Logger.LogDebug($"{resource.File.FilenameInZip} -> {preview}");
+                    }
+                }
+                    break;
+                // UnityEngine.Material
+                case { Type: "material.merge", Format: "json" or "bson" }:
+                {
+                    var material = context.ReadMaterial(buffer, resource.Format);
+                    var texture = material.mainTexture;
+                    Logger.LogDebug($"{resource.File.FilenameInZip} -> {material} with {texture}, {material.shader}");
+                }
+                    break;
+                // tk2dSpriteCollectionData
+                case { Type: "sprite.info", Format: "json" or "bson" }:
+                {
+                    var sprites = context.ReadSpriteInfo(buffer, resource.Format);
+                    Logger.LogDebug($"{resource.File.FilenameInZip} -> {sprites} from {sprites.material}");
+                }
+                    break;
+                // tk2dSpriteCollectionData
+                case { Type: "sprite.merge", Format: "json" or "bson" }:
+                {
+                    var sprites = context.ReadSpriteMerge(buffer, resource.Format);
+                    Logger.LogDebug($"{resource.File.FilenameInZip} -> {sprites} from {sprites.material}");
+                }
+                    break;
+                // tk2dSpriteAnimation
+                case { Type: "animation", Format: "json" or "bson" }:
+                {
+                    var animation = context.ReadAnimation(buffer, resource.Format);
+                    Logger.LogDebug($"{resource.File.FilenameInZip} -> {animation}");
+                }
+                    break;
+                // ZNT.Evolution.Core.Asset.AnimationAddition
+                case { Type: "animation.addition", Format: "json" or "bson" }:
+                {
+                    var addition = context.ReadAnimationAddition(buffer, resource.Format);
+                    Logger.LogDebug($"{resource.File.FilenameInZip} -> {addition.Clips.Length} clips");
+                }
+                    break;
+                // ZNT.Evolution.Core.Asset.CustomVisualEffect
+                case { Type: "visual", Format: "json" or "bson" }:
+                {
+                    var visual = context.ReadVisualEffect(buffer, resource.Format);
+                    Logger.LogDebug($"{resource.File.FilenameInZip} -> {visual} from {visual.animation?.Library}");
+                }
+                    break;
+                // ExplosionAsset
+                case { Type: "explosion", Format: "json" or "bson" }:
+                {
+                    var explosion = context.ReadExplosionAsset(buffer, resource.Format);
+                    Logger.LogDebug($"{resource.File.FilenameInZip} -> {explosion} from {explosion.EffectToSpawn}");
+                }
+                    break;
+                // DecorAsset
+                case { Type: "decor", Format: "json" or "bson" }:
+                {
+                    var decor = context.ReadDecorAsset(buffer, resource.Format);
+                    Logger.LogDebug($"{resource.File.FilenameInZip} -> {decor} from {decor.Animation}");
+                }
+                    break;
+                // BreakablePropAsset
+                case { Type: "breakable", Format: "json" or "bson" }:
+                {
+                    var breakable = context.ReadBreakablePropAsset(buffer, resource.Format);
+                    Logger.LogDebug($"{resource.File.FilenameInZip} -> {breakable} from {breakable.Animation}");
+                }
+                    break;
+                // TriggerAsset
+                case { Type: "trigger", Format: "json" or "bson" }:
+                {
+                    var trigger = context.ReadTriggerAsset(buffer, resource.Format);
+                    Logger.LogDebug($"{resource.File.FilenameInZip} -> {trigger} from {trigger.Animation}");
+                }
+                    break;
+                // MovingObjectAsset
+                case { Type: "moving", Format: "json" or "bson" }:
+                {
+                    var moving = context.ReadMovingObjectAsset(buffer, resource.Format);
+                    var animation = Traverse.Create(moving).Field<tk2dSpriteAnimation>("library").Value;
+                    Logger.LogDebug($"{resource.File.FilenameInZip} -> {moving} from {animation}");
+                }
+                    break;
+                // SentryGunAsset
+                case { Type: "sentry", Format: "json" or "bson" }:
+                {
+                    var sentry = context.ReadSentryGunAsset(buffer, resource.Format);
+                    Logger.LogDebug($"{resource.File.FilenameInZip} -> {sentry} from {sentry.Animation}");
+                }
+                    break;
+                // PhysicObjectAsset
+                case { Type: "physic", Format: "json" or "bson" }:
+                {
+                    var physic = context.ReadPhysicObjectAsset(buffer, resource.Format);
+                    var animation = Traverse.Create(physic).Field<tk2dSpriteAnimation>("library").Value;
+                    Logger.LogDebug($"{resource.File.FilenameInZip} -> {physic} from {animation}");
+                }
+                    break;
+                // HumanAsset
+                case { Type: "human", Format: "json" or "bson" }:
+                {
+                    var human = context.ReadHumanAsset(buffer, resource.Format);
+                    Logger.LogDebug($"{resource.File.FilenameInZip} -> {human} from {human.AnimationLibrary}");
+                }
+                    break;
+                // ZNT.Evolution.Core.Asset..SpawnPointAsset
+                case { Type: "spawn", Format: "json" or "bson" }:
+                {
+                    var spawn = context.ReadSpawnPointAsset(buffer, resource.Format);
+                    Logger.LogDebug($"{resource.File.FilenameInZip} -> {spawn}");
+                }
+                    break;
+                // Rotorz.Tile.OrientedBrush
+                case { Type: "brush.info", Format: "json" or "bson" }:
+                {
+                    var brush = context.ReadBrushInfo(buffer, resource.Format);
+                    var prefab = brush.DefaultOrientation.GetVariation(0);
+                    Logger.LogDebug($"{resource.File.FilenameInZip} -> {brush} from {prefab}");
+                }
+                    break;
+                // Rotorz.Tile.OrientedBrush
+                case { Type: "brush.merge", Format: "json" or "bson" }:
+                {
+                    var brush = context.ReadBrushMerge(buffer, resource.Format);
+                    var prefab = brush.DefaultOrientation.GetVariation(0);
+                    Logger.LogDebug($"{resource.File.FilenameInZip} -> {brush} from {prefab}");
+                }
+                    break;
+                // LevelElement
+                case { Type: "element", Format: "json" or "bson" }:
+                {
+                    var element = context.ReadLevelElement(buffer, resource.Format);
+                    Logger.LogDebug($"{resource.File.FilenameInZip} -> {element}");
+                    Logger.LogInfo($"LevelElement {element.AssetId} - {element.Title} Loaded");
+                }
+                    break;
+                default:
+                    Logger.LogWarning($"{resource.File.FilenameInZip} is not supported");
+                    break;
             }
-        }
-
-        // UnityEngine.Material
-        foreach (var entry in entries.Where(entry =>
-                     entry.FilenameInZip.EndsWith(".material.merge.json") ||
-                     entry.FilenameInZip.EndsWith(".material.merge.bson")))
-        {
-            buffer.SetLength(0);
-            yield return zip.ExtractFileAsync(entry, buffer).ToCoroutine();
-            buffer.Position = 0;
-            var merge = CustomAssetUtility.DeserializeObject<MaterialMerge>(buffer, entry.IsBson());
-            var material = merge.Create();
-            var texture = (Texture2D)material.mainTexture;
-            texture.filterMode = material.shader.name switch
-            {
-                "ZNT/Effects/Wind" => FilterMode.Bilinear,
-                "ZNT/Effects/Radioactivity" => FilterMode.Bilinear,
-                "ZNT/Effects/Haze" => FilterMode.Bilinear,
-                "ZNT/Effects/Water Lit" => FilterMode.Bilinear,
-                "ZNT/Effects/Steam" => FilterMode.Bilinear,
-                _ => FilterMode.Point
-            };
-            texture.wrapMode = material.shader.name switch
-            {
-                "ZNT/Common/Animated Flat Textured Cutout" => TextureWrapMode.Repeat,
-                "ZNT/Common/Animated Flat Textured Transparent" => TextureWrapMode.Repeat,
-                _ => TextureWrapMode.Clamp
-            };
-            Logger.LogDebug($"{entry.FilenameInZip} -> {material} from {texture}");
-            CustomAssetUtility.Cache[material.NameAndType()] = material;
-        }
-
-        // tk2dSpriteCollectionData
-        foreach (var entry in entries.Where(entry =>
-                     entry.FilenameInZip.EndsWith(".sprite.info.json") ||
-                     entry.FilenameInZip.EndsWith(".sprite.info.bson") ||
-                     entry.FilenameInZip.EndsWith(".sprite.merge.json") ||
-                     entry.FilenameInZip.EndsWith(".sprite.merge.bson")))
-        {
-            buffer.SetLength(0);
-            yield return zip.ExtractFileAsync(entry, buffer).ToCoroutine();
-            buffer.Position = 0;
-            EvolutionInfo<tk2dSpriteCollectionData> info = entry.FilenameInZip.Contains(".info.")
-                ? CustomAssetUtility.DeserializeObject<SpriteInfo>(buffer, entry.IsBson())
-                : CustomAssetUtility.DeserializeObject<SpriteMerge>(buffer, entry.IsBson());
-            var sprites = info.Create();
-            Logger.LogDebug($"{entry.FilenameInZip} -> {sprites} from {sprites.material}");
-            CustomAssetUtility.Cache[sprites.NameAndType()] = sprites;
-        }
-
-        // tk2dSpriteAnimation
-        foreach (var entry in entries.Where(entry =>
-                     entry.FilenameInZip.EndsWith(".animation.json") ||
-                     entry.FilenameInZip.EndsWith(".animation.bson")))
-        {
-            buffer.SetLength(0);
-            yield return zip.ExtractFileAsync(entry, buffer).ToCoroutine();
-            buffer.Position = 0;
-            var animation = CustomAssetUtility.DeserializeObject<tk2dSpriteAnimation>(buffer, entry.IsBson());
-            Logger.LogDebug($"{entry.FilenameInZip} -> {animation}");
-            CustomAssetUtility.Cache[animation.NameAndType()] = animation;
-        }
-
-        // ZNT.Evolution.Core.Asset.AnimationAddition
-        foreach (var entry in entries.Where(entry =>
-                     entry.FilenameInZip.EndsWith(".animation.addition.json") ||
-                     entry.FilenameInZip.EndsWith(".animation.addition.bson")))
-        {
-            buffer.SetLength(0);
-            yield return zip.ExtractFileAsync(entry, buffer).ToCoroutine();
-            buffer.Position = 0;
-            var addition = CustomAssetUtility.DeserializeObject<AnimationAddition>(buffer, entry.IsBson());
-            addition.Apply();
-            Logger.LogDebug($"{entry.FilenameInZip} -> {addition}");
-        }
-
-        // ZNT.Evolution.Core.Asset.CustomVisualEffect
-        foreach (var entry in entries.Where(entry =>
-                     entry.FilenameInZip.EndsWith(".visual.json") ||
-                     entry.FilenameInZip.EndsWith(".visual.bson")))
-        {
-            buffer.SetLength(0);
-            yield return zip.ExtractFileAsync(entry, buffer).ToCoroutine();
-            buffer.Position = 0;
-            var visual = CustomAssetUtility.DeserializeObject<CustomVisualEffect>(buffer, entry.IsBson());
-            Logger.LogDebug($"{entry.FilenameInZip} -> {visual} from {visual.animation?.Library}");
-            CustomAssetUtility.Cache[visual.NameAndType()] = visual;
-            _ = visual.Bind();
-        }
-
-        var asset = entries.Where(entry => entry.FilenameInZip.StartsWith("Asset/")).ToList();
-        // ExplosionAsset
-        foreach (var entry in asset.Where(entry =>
-                     entry.FilenameInZip.EndsWith(".explosion.json") ||
-                     entry.FilenameInZip.EndsWith(".explosion.bson")))
-        {
-            buffer.SetLength(0);
-            yield return zip.ExtractFileAsync(entry, buffer).ToCoroutine();
-            buffer.Position = 0;
-            var explosion = CustomAssetUtility.DeserializeObject<ExplosionAsset>(buffer, entry.IsBson());
-            Logger.LogDebug($"{entry.FilenameInZip} -> {explosion} from {explosion.EffectToSpawn}");
-            CustomAssetUtility.Cache[explosion.NameAndType()] = explosion;
-        }
-
-        // PhysicObjectAsset
-        foreach (var entry in asset.Where(entry =>
-                     entry.FilenameInZip.EndsWith(".physic.json") ||
-                     entry.FilenameInZip.EndsWith(".physic.bson")))
-        {
-            buffer.SetLength(0);
-            yield return zip.ExtractFileAsync(entry, buffer).ToCoroutine();
-            buffer.Position = 0;
-            var physic = CustomAssetUtility.DeserializeObject<PhysicObjectAsset>(buffer, entry.IsBson());
-            var animation = Traverse.Create(physic).Field<tk2dSpriteAnimation>("library").Value;
-            Logger.LogDebug($"{entry.FilenameInZip} -> {physic} from {animation}");
-            CustomAssetUtility.Cache[physic.NameAndType()] = physic;
-        }
-
-        // HumanAsset
-        foreach (var entry in asset.Where(entry =>
-                     entry.FilenameInZip.EndsWith(".human.json") ||
-                     entry.FilenameInZip.EndsWith(".human.bson")))
-        {
-            buffer.SetLength(0);
-            yield return zip.ExtractFileAsync(entry, buffer).ToCoroutine();
-            buffer.Position = 0;
-            var human = CustomAssetUtility.DeserializeObject<HumanAsset>(buffer, entry.IsBson());
-            Logger.LogDebug($"{entry.FilenameInZip} -> {human} from {human.AnimationLibrary}");
-            CustomAssetUtility.Cache[human.NameAndType()] = human;
-        }
-
-        // DecorAsset
-        foreach (var entry in asset.Where(entry =>
-                     entry.FilenameInZip.EndsWith(".decor.json") ||
-                     entry.FilenameInZip.EndsWith(".decor.bson")))
-        {
-            buffer.SetLength(0);
-            yield return zip.ExtractFileAsync(entry, buffer).ToCoroutine();
-            buffer.Position = 0;
-            var decor = CustomAssetUtility.DeserializeObject<DecorAsset>(buffer, entry.IsBson());
-            Logger.LogDebug($"{entry.FilenameInZip} -> {decor} from {decor.Animation}");
-            CustomAssetUtility.Cache[decor.NameAndType()] = decor;
-        }
-
-        // BreakablePropAsset
-        foreach (var entry in asset.Where(entry =>
-                     entry.FilenameInZip.EndsWith(".breakable.json") ||
-                     entry.FilenameInZip.EndsWith(".breakable.bson")))
-        {
-            buffer.SetLength(0);
-            yield return zip.ExtractFileAsync(entry, buffer).ToCoroutine();
-            buffer.Position = 0;
-            var breakable = CustomAssetUtility.DeserializeObject<BreakablePropAsset>(buffer, entry.IsBson());
-            Logger.LogDebug($"{entry.FilenameInZip} -> {breakable} from {breakable.Animation}");
-            CustomAssetUtility.Cache[breakable.NameAndType()] = breakable;
-        }
-
-        // SentryGunAsset
-        foreach (var entry in asset.Where(entry =>
-                     entry.FilenameInZip.EndsWith(".sentry.json") ||
-                     entry.FilenameInZip.EndsWith(".sentry.bson")))
-        {
-            buffer.SetLength(0);
-            yield return zip.ExtractFileAsync(entry, buffer).ToCoroutine();
-            buffer.Position = 0;
-            var sentry = CustomAssetUtility.DeserializeObject<SentryGunAsset>(buffer, entry.IsBson());
-            Logger.LogDebug($"{entry.FilenameInZip} -> {sentry} from {sentry.Animation}");
-            CustomAssetUtility.Cache[sentry.NameAndType()] = sentry;
-        }
-
-        // MovingObjectAsset
-        foreach (var entry in asset.Where(entry =>
-                     entry.FilenameInZip.EndsWith(".moving.json") ||
-                     entry.FilenameInZip.EndsWith(".moving.bson")))
-        {
-            buffer.SetLength(0);
-            yield return zip.ExtractFileAsync(entry, buffer).ToCoroutine();
-            buffer.Position = 0;
-            var moving = CustomAssetUtility.DeserializeObject<MovingObjectAsset>(buffer, entry.IsBson());
-            var animation = Traverse.Create(moving).Field<tk2dSpriteAnimation>("library").Value;
-            Logger.LogDebug($"{entry.FilenameInZip} -> {moving} from {animation}");
-            CustomAssetUtility.Cache[moving.NameAndType()] = moving;
-        }
-
-        // TriggerAsset
-        foreach (var entry in asset.Where(entry =>
-                     entry.FilenameInZip.EndsWith(".trigger.json") ||
-                     entry.FilenameInZip.EndsWith(".trigger.bson")))
-        {
-            buffer.SetLength(0);
-            yield return zip.ExtractFileAsync(entry, buffer).ToCoroutine();
-            buffer.Position = 0;
-            var trigger = CustomAssetUtility.DeserializeObject<TriggerAsset>(buffer, entry.IsBson());
-            Logger.LogDebug($"{entry.FilenameInZip} -> {trigger} from {trigger.Animation}");
-            CustomAssetUtility.Cache[trigger.NameAndType()] = trigger;
-        }
-
-        // ZNT.Evolution.Core.Asset.SpawnPointAsset
-        foreach (var entry in asset.Where(entry =>
-                     entry.FilenameInZip.EndsWith(".spawn.json") ||
-                     entry.FilenameInZip.EndsWith(".spawn.bson")))
-        {
-            buffer.SetLength(0);
-            yield return zip.ExtractFileAsync(entry, buffer).ToCoroutine();
-            buffer.Position = 0;
-            var spawn = CustomAssetUtility.DeserializeObject<SpawnPointAsset>(buffer, entry.IsBson());
-            Logger.LogDebug($"{entry.FilenameInZip} -> {spawn}");
-            CustomAssetUtility.Cache[spawn.NameAndType()] = spawn;
-        }
-
-        // Rotorz.Tile.OrientedBrush
-        foreach (var entry in asset.Where(entry =>
-                     entry.FilenameInZip.EndsWith(".brush.info.json") ||
-                     entry.FilenameInZip.EndsWith(".brush.info.bson") ||
-                     entry.FilenameInZip.EndsWith(".brush.merge.json") ||
-                     entry.FilenameInZip.EndsWith(".brush.merge.bson")))
-        {
-            buffer.SetLength(0);
-            yield return zip.ExtractFileAsync(entry, buffer).ToCoroutine();
-            buffer.Position = 0;
-            EvolutionInfo<Rotorz.Tile.OrientedBrush> info = entry.FilenameInZip.Contains(".info.")
-                ? CustomAssetUtility.DeserializeObject<BrushInfo>(buffer, entry.IsBson())
-                : CustomAssetUtility.DeserializeObject<BrushMerge>(buffer, entry.IsBson());
-            var brush = info.Create();
-            Logger.LogDebug($"{entry.FilenameInZip} -> {brush} from {brush.DefaultOrientation.GetVariation(0)}");
-            CustomAssetUtility.Cache[brush.NameAndType()] = brush;
-        }
-
-        // LevelElement
-        foreach (var entry in asset.Where(entry => entry.FilenameInZip.EndsWith(".element.json")))
-        {
-            buffer.SetLength(0);
-            yield return zip.ExtractFileAsync(entry, buffer).ToCoroutine();
-            buffer.Position = 0;
-            var element = CustomAssetUtility.DeserializeObject<LevelElement>(buffer);
-            Logger.LogDebug($"{entry.FilenameInZip} -> {element}");
-            CustomAssetUtility.Cache[element.NameAndType()] = element;
-            _ = element.Bind();
-            Logger.LogInfo($"LevelElement {element.name} - {element.Title} Loaded");
-        }
-    }
-
-    private static ModContext AllocateContext(ModMetadata metadata, string path)
-    {
-        lock (Allocated)
-        {
-            if (!Allocated.TryGetValue(metadata.Id, out var prev))
-                return Allocated[metadata.Id] = new ModContext(path, metadata);
-            Logger.LogWarning($"{metadata.Id} has been loaded from {prev.Path}");
-            return null;
         }
     }
 }
