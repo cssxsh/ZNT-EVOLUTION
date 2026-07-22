@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace ZNT.Evolution.Core.Editor;
@@ -6,14 +7,15 @@ namespace ZNT.Evolution.Core.Editor;
 [DisallowMultipleComponent]
 public class StairEditor : Editor, IActivable
 {
-    private StairBehaviour Behaviour => GetComponentInParent<StairBehaviour>();
+    [NonSerialized]
+    protected StairBehaviour Behaviour;
 
-    public bool IsActive => Behaviour.UseStairs;
+    public bool IsActive => (Behaviour ??= GetComponent<StairBehaviour>()).UseStairs;
 
     public void SetActive(bool state)
     {
-        if (Behaviour.UseStairs == state) return;
-        ToggleActivation();
+        if (IsActive == state) return;
+        (Behaviour ??= GetComponent<StairBehaviour>()).SendMessage(methodName: "OnMouseUpAsButton");
     }
 
     [SignalReceiver(name: "Set Stair Active")]
@@ -23,5 +25,5 @@ public class StairEditor : Editor, IActivable
     public void SetInactive() => SetActive(false);
 
     [SignalReceiver(name: "Toggle Stair Activation")]
-    public void ToggleActivation() => Behaviour.SendMessage(methodName: "OnMouseUpAsButton");
+    public void ToggleActivation() => SetActive(!IsActive);
 }

@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace ZNT.Evolution.Core.Editor;
 
-[SerializeInEditor(name: "InvisibleOneWayWall")]
+[SerializeInEditor(name: "Invisible One Way Wall")]
 [DisallowMultipleComponent]
 public class OneWayEditor : Editor, IActivable, IDeserializable
 {

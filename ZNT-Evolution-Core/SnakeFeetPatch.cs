@@ -34,8 +34,8 @@ internal class SnakeFeetPatch
     [HarmonyPatch(typeof(SpawnCharacterChooser), "OnCreate")]
     public static void OnCreate(SpawnCharacterChooser __instance)
     {
-        var spawn = Traverse.Create(__instance).Field("spawn").Field<Enum>("spawnType").Value;
-        if (spawn.ToString() != "Human") return;
+        var spawn = Traverse.Create(__instance).Field<CharacterSpawnPoint>("spawn").Value;
+        if (Traverse.Create(spawn).Field<Enum>("spawnType").Value.ToString() is not "Human") return;
         var characters = Traverse.Create(__instance).Field<List<CharacterAsset>>("selectableCharacters").Value;
         characters.AddRange(LevelElementIndex.Index.Values.Cast<LevelElement>()
             .Where(element => element.Useable)

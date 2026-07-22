@@ -7,7 +7,12 @@ public abstract class Editor : BaseComponent
 {
     protected Editor()
     {
-        EditorVisibility = GetType().GetCustomAttribute<SerializeInEditorAttribute>()?.VisibleInEditor ?? true;
+        var attribute = GetType().GetCustomAttribute<SerializeInEditorAttribute>();
+        if (attribute == null) return;
+        EditorVisibility = new Visibility(attribute.VisibleInEditor)
+        {
+            CustomName = attribute.Name
+        };
     }
 
     protected static SupportedTypeBinder CustomBinder(SelectionMenu menu)

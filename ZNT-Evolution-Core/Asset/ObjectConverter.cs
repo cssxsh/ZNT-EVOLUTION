@@ -102,7 +102,7 @@ internal class ObjectConverter : CustomCreationConverter<UnityEngine.Object>
             return lazy;
         }
 
-        Logger.LogError($"NotFound {type.FullName} {{ name: \"{name}\" }}");
+        Logger.LogError($"NotFound {t.FullName} {{ name: \"{name}\" }}");
         return null;
     }
 }
