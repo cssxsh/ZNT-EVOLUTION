@@ -46,6 +46,13 @@ internal static class DebugPatch
         __instance.Detection ??= __instance.GetComponent<TriggerDetection>();
     }
 
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(SpawnPoint), "Start")]
+    public static void Start(SpawnPoint __instance)
+    {
+        Traverse.Create(__instance).Field<int>("randomSeed").Value = __instance.GetInstanceID();
+    }
+
     [HarmonyPrefix]
     [HarmonyPatch(typeof(Character), "OnVisionLost")]
     public static bool OnVisionLost(GameObject target) => target is not null;
