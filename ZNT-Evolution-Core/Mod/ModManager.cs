@@ -33,16 +33,18 @@ public static class ModManager
         if (task.Exception != null) throw task.Exception;
     }
 
+    private static bool IsBson(this ZipFileEntry entry) => entry.FilenameInZip.EndsWith(".bson");
+
     public static IEnumerator LoadFromPackage(string path)
     {
         using var zip = ZipStorer.Open(path, FileAccess.Read);
         var entries = zip.ReadCentralDir();
-        var meta = zip.GetEntry("metadata.json");
-        if (meta is null) throw new FileNotFoundException($"metadata.json in {path}");
+        var meta = zip.GetEntry("metadata.json") ?? zip.GetEntry("metadata.bson");
+        if (meta is null) throw new FileNotFoundException($"metadata in {path}");
         using var buffer = new MemoryStream();
         yield return zip.ExtractFileAsync(meta, buffer).ToCoroutine();
         buffer.Position = 0;
-        var metadata = CustomAssetUtility.DeserializeObjectFromJson<ModMetadata>(buffer);
+        var metadata = CustomAssetUtility.DeserializeObject<ModMetadata>(buffer, meta.IsBson());
         Logger.LogInfo($"load [{metadata.Name} {metadata.Version}] from package '{path}'.");
         var context = AllocateContext(metadata, path);
         if (context is null) yield break;
@@ -77,12 +79,14 @@ public static class ModManager
         }
 
         // UnityEngine.Material
-        foreach (var entry in entries.Where(entry => entry.FilenameInZip.EndsWith(".material.merge.json")))
+        foreach (var entry in entries.Where(entry =>
+                     entry.FilenameInZip.EndsWith(".material.merge.json") ||
+                     entry.FilenameInZip.EndsWith(".material.merge.bson")))
         {
             buffer.SetLength(0);
             yield return zip.ExtractFileAsync(entry, buffer).ToCoroutine();
             buffer.Position = 0;
-            var merge = CustomAssetUtility.DeserializeObjectFromJson<MaterialMerge>(buffer);
+            var merge = CustomAssetUtility.DeserializeObject<MaterialMerge>(buffer, entry.IsBson());
             var material = merge.Create();
             var texture = (Texture2D)material.mainTexture;
             texture.filterMode = material.shader.name switch
@@ -105,58 +109,58 @@ public static class ModManager
         }
 
         // tk2dSpriteCollectionData
-        foreach (var entry in entries.Where(entry => entry.FilenameInZip.EndsWith(".sprite.info.json")))
+        foreach (var entry in entries.Where(entry =>
+                     entry.FilenameInZip.EndsWith(".sprite.info.json") ||
+                     entry.FilenameInZip.EndsWith(".sprite.info.bson") ||
+                     entry.FilenameInZip.EndsWith(".sprite.merge.json") ||
+                     entry.FilenameInZip.EndsWith(".sprite.merge.bson")))
         {
             buffer.SetLength(0);
             yield return zip.ExtractFileAsync(entry, buffer).ToCoroutine();
             buffer.Position = 0;
-            var info = CustomAssetUtility.DeserializeObjectFromJson<SpriteInfo>(buffer);
+            EvolutionInfo<tk2dSpriteCollectionData> info = entry.FilenameInZip.Contains(".info.")
+                ? CustomAssetUtility.DeserializeObject<SpriteInfo>(buffer, entry.IsBson())
+                : CustomAssetUtility.DeserializeObject<SpriteMerge>(buffer, entry.IsBson());
             var sprites = info.Create();
             Logger.LogDebug($"{entry.FilenameInZip} -> {sprites} from {sprites.material}");
             CustomAssetUtility.Cache[sprites.NameAndType()] = sprites;
         }
 
-        // tk2dSpriteCollectionData
-        foreach (var entry in entries.Where(entry => entry.FilenameInZip.EndsWith(".sprite.merge.json")))
-        {
-            buffer.SetLength(0);
-            yield return zip.ExtractFileAsync(entry, buffer).ToCoroutine();
-            buffer.Position = 0;
-            var merge = CustomAssetUtility.DeserializeObjectFromJson<SpriteMerge>(buffer);
-            var sprites = merge.Create();
-            Logger.LogDebug($"{entry.FilenameInZip} -> {sprites} from {sprites.material}");
-            CustomAssetUtility.Cache[sprites.NameAndType()] = sprites;
-        }
-
         // tk2dSpriteAnimation
-        foreach (var entry in entries.Where(entry => entry.FilenameInZip.EndsWith(".animation.json")))
+        foreach (var entry in entries.Where(entry =>
+                     entry.FilenameInZip.EndsWith(".animation.json") ||
+                     entry.FilenameInZip.EndsWith(".animation.bson")))
         {
             buffer.SetLength(0);
             yield return zip.ExtractFileAsync(entry, buffer).ToCoroutine();
             buffer.Position = 0;
-            var animation = CustomAssetUtility.DeserializeObjectFromJson<tk2dSpriteAnimation>(buffer);
+            var animation = CustomAssetUtility.DeserializeObject<tk2dSpriteAnimation>(buffer, entry.IsBson());
             Logger.LogDebug($"{entry.FilenameInZip} -> {animation}");
             CustomAssetUtility.Cache[animation.NameAndType()] = animation;
         }
 
         // ZNT.Evolution.Core.Asset.AnimationAddition
-        foreach (var entry in entries.Where(entry => entry.FilenameInZip.EndsWith(".animation.addition.json")))
+        foreach (var entry in entries.Where(entry =>
+                     entry.FilenameInZip.EndsWith(".animation.addition.json") ||
+                     entry.FilenameInZip.EndsWith(".animation.addition.bson")))
         {
             buffer.SetLength(0);
             yield return zip.ExtractFileAsync(entry, buffer).ToCoroutine();
             buffer.Position = 0;
-            var addition = CustomAssetUtility.DeserializeObjectFromJson<AnimationAddition>(buffer);
+            var addition = CustomAssetUtility.DeserializeObject<AnimationAddition>(buffer, entry.IsBson());
             addition.Apply();
             Logger.LogDebug($"{entry.FilenameInZip} -> {addition}");
         }
 
         // ZNT.Evolution.Core.Asset.CustomVisualEffect
-        foreach (var entry in entries.Where(entry => entry.FilenameInZip.EndsWith(".visual.json")))
+        foreach (var entry in entries.Where(entry =>
+                     entry.FilenameInZip.EndsWith(".visual.json") ||
+                     entry.FilenameInZip.EndsWith(".visual.bson")))
         {
             buffer.SetLength(0);
             yield return zip.ExtractFileAsync(entry, buffer).ToCoroutine();
             buffer.Position = 0;
-            var visual = CustomAssetUtility.DeserializeObjectFromJson<CustomVisualEffect>(buffer);
+            var visual = CustomAssetUtility.DeserializeObject<CustomVisualEffect>(buffer, entry.IsBson());
             Logger.LogDebug($"{entry.FilenameInZip} -> {visual} from {visual.animation?.Library}");
             CustomAssetUtility.Cache[visual.NameAndType()] = visual;
             _ = visual.Bind();
@@ -164,126 +168,138 @@ public static class ModManager
 
         var asset = entries.Where(entry => entry.FilenameInZip.StartsWith("Asset/")).ToList();
         // ExplosionAsset
-        foreach (var entry in asset.Where(entry => entry.FilenameInZip.EndsWith(".explosion.json")))
+        foreach (var entry in asset.Where(entry =>
+                     entry.FilenameInZip.EndsWith(".explosion.json") ||
+                     entry.FilenameInZip.EndsWith(".explosion.bson")))
         {
             buffer.SetLength(0);
             yield return zip.ExtractFileAsync(entry, buffer).ToCoroutine();
             buffer.Position = 0;
-            var explosion = CustomAssetUtility.DeserializeObjectFromJson<ExplosionAsset>(buffer);
+            var explosion = CustomAssetUtility.DeserializeObject<ExplosionAsset>(buffer, entry.IsBson());
             Logger.LogDebug($"{entry.FilenameInZip} -> {explosion} from {explosion.EffectToSpawn}");
             CustomAssetUtility.Cache[explosion.NameAndType()] = explosion;
         }
 
         // PhysicObjectAsset
-        foreach (var entry in asset.Where(entry => entry.FilenameInZip.EndsWith(".physic.json")))
+        foreach (var entry in asset.Where(entry =>
+                     entry.FilenameInZip.EndsWith(".physic.json") ||
+                     entry.FilenameInZip.EndsWith(".physic.bson")))
         {
             buffer.SetLength(0);
             yield return zip.ExtractFileAsync(entry, buffer).ToCoroutine();
             buffer.Position = 0;
-            var physic = CustomAssetUtility.DeserializeObjectFromJson<PhysicObjectAsset>(buffer);
+            var physic = CustomAssetUtility.DeserializeObject<PhysicObjectAsset>(buffer, entry.IsBson());
             var animation = Traverse.Create(physic).Field<tk2dSpriteAnimation>("library").Value;
             Logger.LogDebug($"{entry.FilenameInZip} -> {physic} from {animation}");
             CustomAssetUtility.Cache[physic.NameAndType()] = physic;
         }
 
         // HumanAsset
-        foreach (var entry in asset.Where(entry => entry.FilenameInZip.EndsWith(".human.json")))
+        foreach (var entry in asset.Where(entry =>
+                     entry.FilenameInZip.EndsWith(".human.json") ||
+                     entry.FilenameInZip.EndsWith(".human.bson")))
         {
             buffer.SetLength(0);
             yield return zip.ExtractFileAsync(entry, buffer).ToCoroutine();
             buffer.Position = 0;
-            var human = CustomAssetUtility.DeserializeObjectFromJson<HumanAsset>(buffer);
+            var human = CustomAssetUtility.DeserializeObject<HumanAsset>(buffer, entry.IsBson());
             Logger.LogDebug($"{entry.FilenameInZip} -> {human} from {human.AnimationLibrary}");
             CustomAssetUtility.Cache[human.NameAndType()] = human;
         }
 
         // DecorAsset
-        foreach (var entry in asset.Where(entry => entry.FilenameInZip.EndsWith(".decor.json")))
+        foreach (var entry in asset.Where(entry =>
+                     entry.FilenameInZip.EndsWith(".decor.json") ||
+                     entry.FilenameInZip.EndsWith(".decor.bson")))
         {
             buffer.SetLength(0);
             yield return zip.ExtractFileAsync(entry, buffer).ToCoroutine();
             buffer.Position = 0;
-            var decor = CustomAssetUtility.DeserializeObjectFromJson<DecorAsset>(buffer);
+            var decor = CustomAssetUtility.DeserializeObject<DecorAsset>(buffer, entry.IsBson());
             Logger.LogDebug($"{entry.FilenameInZip} -> {decor} from {decor.Animation}");
             CustomAssetUtility.Cache[decor.NameAndType()] = decor;
         }
 
         // BreakablePropAsset
-        foreach (var entry in asset.Where(entry => entry.FilenameInZip.EndsWith(".breakable.json")))
+        foreach (var entry in asset.Where(entry =>
+                     entry.FilenameInZip.EndsWith(".breakable.json") ||
+                     entry.FilenameInZip.EndsWith(".breakable.bson")))
         {
             buffer.SetLength(0);
             yield return zip.ExtractFileAsync(entry, buffer).ToCoroutine();
             buffer.Position = 0;
-            var breakable = CustomAssetUtility.DeserializeObjectFromJson<BreakablePropAsset>(buffer);
+            var breakable = CustomAssetUtility.DeserializeObject<BreakablePropAsset>(buffer, entry.IsBson());
             Logger.LogDebug($"{entry.FilenameInZip} -> {breakable} from {breakable.Animation}");
             CustomAssetUtility.Cache[breakable.NameAndType()] = breakable;
         }
 
         // SentryGunAsset
-        foreach (var entry in asset.Where(entry => entry.FilenameInZip.EndsWith(".sentry.json")))
+        foreach (var entry in asset.Where(entry =>
+                     entry.FilenameInZip.EndsWith(".sentry.json") ||
+                     entry.FilenameInZip.EndsWith(".sentry.bson")))
         {
             buffer.SetLength(0);
             yield return zip.ExtractFileAsync(entry, buffer).ToCoroutine();
             buffer.Position = 0;
-            var sentry = CustomAssetUtility.DeserializeObjectFromJson<SentryGunAsset>(buffer);
+            var sentry = CustomAssetUtility.DeserializeObject<SentryGunAsset>(buffer, entry.IsBson());
             Logger.LogDebug($"{entry.FilenameInZip} -> {sentry} from {sentry.Animation}");
             CustomAssetUtility.Cache[sentry.NameAndType()] = sentry;
         }
 
         // MovingObjectAsset
-        foreach (var entry in asset.Where(entry => entry.FilenameInZip.EndsWith(".moving.json")))
+        foreach (var entry in asset.Where(entry =>
+                     entry.FilenameInZip.EndsWith(".moving.json") ||
+                     entry.FilenameInZip.EndsWith(".moving.bson")))
         {
             buffer.SetLength(0);
             yield return zip.ExtractFileAsync(entry, buffer).ToCoroutine();
             buffer.Position = 0;
-            var moving = CustomAssetUtility.DeserializeObjectFromJson<MovingObjectAsset>(buffer);
+            var moving = CustomAssetUtility.DeserializeObject<MovingObjectAsset>(buffer, entry.IsBson());
             var animation = Traverse.Create(moving).Field<tk2dSpriteAnimation>("library").Value;
             Logger.LogDebug($"{entry.FilenameInZip} -> {moving} from {animation}");
             CustomAssetUtility.Cache[moving.NameAndType()] = moving;
         }
 
         // TriggerAsset
-        foreach (var entry in asset.Where(entry => entry.FilenameInZip.EndsWith(".trigger.json")))
+        foreach (var entry in asset.Where(entry =>
+                     entry.FilenameInZip.EndsWith(".trigger.json") ||
+                     entry.FilenameInZip.EndsWith(".trigger.bson")))
         {
             buffer.SetLength(0);
             yield return zip.ExtractFileAsync(entry, buffer).ToCoroutine();
             buffer.Position = 0;
-            var trigger = CustomAssetUtility.DeserializeObjectFromJson<TriggerAsset>(buffer);
+            var trigger = CustomAssetUtility.DeserializeObject<TriggerAsset>(buffer, entry.IsBson());
             Logger.LogDebug($"{entry.FilenameInZip} -> {trigger} from {trigger.Animation}");
             CustomAssetUtility.Cache[trigger.NameAndType()] = trigger;
         }
 
         // ZNT.Evolution.Core.Asset.SpawnPointAsset
-        foreach (var entry in asset.Where(entry => entry.FilenameInZip.EndsWith(".spawn.json")))
+        foreach (var entry in asset.Where(entry =>
+                     entry.FilenameInZip.EndsWith(".spawn.json") ||
+                     entry.FilenameInZip.EndsWith(".spawn.bson")))
         {
             buffer.SetLength(0);
             yield return zip.ExtractFileAsync(entry, buffer).ToCoroutine();
             buffer.Position = 0;
-            var spawn = CustomAssetUtility.DeserializeObjectFromJson<SpawnPointAsset>(buffer);
+            var spawn = CustomAssetUtility.DeserializeObject<SpawnPointAsset>(buffer, entry.IsBson());
             Logger.LogDebug($"{entry.FilenameInZip} -> {spawn}");
             CustomAssetUtility.Cache[spawn.NameAndType()] = spawn;
         }
 
         // Rotorz.Tile.OrientedBrush
-        foreach (var entry in asset.Where(entry => entry.FilenameInZip.EndsWith(".brush.info.json")))
+        foreach (var entry in asset.Where(entry =>
+                     entry.FilenameInZip.EndsWith(".brush.info.json") ||
+                     entry.FilenameInZip.EndsWith(".brush.info.bson") ||
+                     entry.FilenameInZip.EndsWith(".brush.merge.json") ||
+                     entry.FilenameInZip.EndsWith(".brush.merge.bson")))
         {
             buffer.SetLength(0);
             yield return zip.ExtractFileAsync(entry, buffer).ToCoroutine();
             buffer.Position = 0;
-            var info = CustomAssetUtility.DeserializeObjectFromJson<BrushMerge>(buffer);
+            EvolutionInfo<Rotorz.Tile.OrientedBrush> info = entry.FilenameInZip.Contains(".info.")
+                ? CustomAssetUtility.DeserializeObject<BrushInfo>(buffer, entry.IsBson())
+                : CustomAssetUtility.DeserializeObject<BrushMerge>(buffer, entry.IsBson());
             var brush = info.Create();
-            Logger.LogDebug($"{entry.FilenameInZip} -> {brush} from {brush.DefaultOrientation.GetVariation(0)}");
-            CustomAssetUtility.Cache[brush.NameAndType()] = brush;
-        }
-
-        // Rotorz.Tile.OrientedBrush
-        foreach (var entry in asset.Where(entry => entry.FilenameInZip.EndsWith(".brush.merge.json")))
-        {
-            buffer.SetLength(0);
-            yield return zip.ExtractFileAsync(entry, buffer).ToCoroutine();
-            buffer.Position = 0;
-            var merge = CustomAssetUtility.DeserializeObjectFromJson<BrushMerge>(buffer);
-            var brush = merge.Create();
             Logger.LogDebug($"{entry.FilenameInZip} -> {brush} from {brush.DefaultOrientation.GetVariation(0)}");
             CustomAssetUtility.Cache[brush.NameAndType()] = brush;
         }
@@ -294,7 +310,7 @@ public static class ModManager
             buffer.SetLength(0);
             yield return zip.ExtractFileAsync(entry, buffer).ToCoroutine();
             buffer.Position = 0;
-            var element = CustomAssetUtility.DeserializeObjectFromJson<LevelElement>(buffer);
+            var element = CustomAssetUtility.DeserializeObject<LevelElement>(buffer);
             Logger.LogDebug($"{entry.FilenameInZip} -> {element}");
             CustomAssetUtility.Cache[element.NameAndType()] = element;
             _ = element.Bind();

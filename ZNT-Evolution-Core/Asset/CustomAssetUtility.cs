@@ -47,24 +47,17 @@ public static class CustomAssetUtility
     public static void SerializeObjectToPath(string target, object data)
     {
         using var stream = File.OpenWrite(target);
-        if (target.EndsWith(".bson")) SerializeObjectToBson(stream, data);
-        else SerializeObjectToJson(stream, data);
+        SerializeObject(stream, data, target.EndsWith(".bson"));
     }
 
     [UsedImplicitly]
-    public static void SerializeObjectToBson(Stream target, object data)
+    public static void SerializeObject(Stream target, object data, bool bson = false)
     {
-        using var bson = new BsonDataWriter(target);
-        Serializer.Serialize(bson, data);
-    }
-
-    [UsedImplicitly]
-    public static void SerializeObjectToJson(Stream target, object data)
-    {
-        using var writer = new StreamWriter(target, Encoding.UTF8, 1024, true);
-        using var json = new JsonTextWriter(writer);
-        json.Formatting = Formatting.Indented;
-        Serializer.Serialize(json, data);
+        using JsonWriter writer = bson
+            ? new BsonDataWriter(target)
+            : new JsonTextWriter(new StreamWriter(target, Encoding.UTF8, 1024, true));
+        writer.Formatting = Formatting.Indented;
+        Serializer.Serialize(writer, data);
     }
 
     [UsedImplicitly]
@@ -79,24 +72,16 @@ public static class CustomAssetUtility
     public static T DeserializeObjectFromPath<T>(string source)
     {
         using var stream = File.OpenRead(source);
-        return source.EndsWith(".bson")
-            ? DeserializeObjectFromBson<T>(stream)
-            : DeserializeObjectFromJson<T>(stream);
+        return DeserializeObject<T>(stream, source.EndsWith(".bson"));
     }
 
     [UsedImplicitly]
-    public static T DeserializeObjectFromBson<T>(Stream source)
+    public static T DeserializeObject<T>(Stream source, bool bson = false)
     {
-        using var bson = new BsonDataReader(source);
-        return Serializer.Deserialize<T>(bson);
-    }
-
-    [UsedImplicitly]
-    public static T DeserializeObjectFromJson<T>(Stream source)
-    {
-        using var reader = new StreamReader(source, Encoding.UTF8, true, 1024, true);
-        using var json = new JsonTextReader(reader);
-        return Serializer.Deserialize<T>(json);
+        using JsonReader reader = bson
+            ? new BsonDataReader(source)
+            : new JsonTextReader(new StreamReader(source, Encoding.UTF8, true, 1024, true));
+        return Serializer.Deserialize<T>(reader);
     }
 
     [UsedImplicitly]
