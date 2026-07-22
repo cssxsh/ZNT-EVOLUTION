@@ -56,7 +56,6 @@ internal class BrushInfo : EvolutionInfo<Rotorz.Tile.OrientedBrush>
     {
         var impl = ScriptableObject.CreateInstance<Rotorz.Tile.OrientedBrush>();
 
-        impl.hideFlags = HideFlags.HideAndDontSave;
         impl.name = Name;
         impl.group = 1;
         impl.forceLegacySideways = ForceLegacySideways;

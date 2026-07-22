@@ -29,7 +29,6 @@ internal class SpriteMerge : EvolutionMerge<tk2dSpriteCollectionData>
     {
         AttachPoints = points ?? new Dictionary<int, tk2dSpriteDefinition.AttachPoint[]>();
         Material = material;
-        if (Material is null) Logger.LogWarning("Material is null");
         if (Source is null) Logger.LogWarning("Source is null");
     }
 
@@ -38,7 +37,6 @@ internal class SpriteMerge : EvolutionMerge<tk2dSpriteCollectionData>
         var clone = Object.Instantiate(Source);
 
         clone.name = Name ?? Material.name.Replace("_mat", "");
-        clone.gameObject.hideFlags = HideFlags.HideAndDontSave;
         clone.material = Material;
         clone.materials[0] = Material;
         clone.textures[0] = Material.mainTexture;

@@ -36,6 +36,9 @@ internal class SpriteInfo : EvolutionInfo<tk2dSpriteCollectionData>
     [JsonProperty("Material")]
     public readonly Material Material;
 
+    [JsonProperty("Transformed")]
+    public readonly bool Transformed;
+
     [JsonConstructor]
     public SpriteInfo(
         float orthoSize,
@@ -45,32 +48,45 @@ internal class SpriteInfo : EvolutionInfo<tk2dSpriteCollectionData>
         Vector2[] anchors = null, Vector2? anchor = null,
         Dictionary<int, tk2dSpriteDefinition.AttachPoint[]> points = null,
         string name = null,
-        Material material = null) : base(name)
+        Material material = null,
+        bool transformed = false) : base(name)
     {
         OrthoSize = orthoSize;
         TargetHeight = targetHeight;
         Names = names;
         Regions = regions;
-        Anchors = anchors ?? Regions.Select(_ => anchor ?? Vector2.zero).ToArray();
+        Anchors = anchors ?? Regions.Select(region => anchor ?? (region.size / 2)).ToArray();
         AttachPoints = points ?? new Dictionary<int, tk2dSpriteDefinition.AttachPoint[]>();
         Material = material;
-        if (Material is null) Logger.LogWarning("Material is null");
+        Transformed = transformed;
         if (Names.Length != Regions.Length) Logger.LogWarning("Names.Length != Regions.Length");
         if (Names.Length != Anchors.Length) Logger.LogWarning("Names.Length != Anchors.Length");
     }
 
     public override tk2dSpriteCollectionData Create()
     {
+        var names = new string[Regions.Length];
+        var regions = new Rect[Regions.Length];
+        var anchors = new Vector2[Regions.Length];
+        for (var i = 0; i < Regions.Length; i++)
+        {
+            names[i] = Names.IsIndexValid(i) ? Names[i] : $"region_{i}";
+            regions[i] = Regions[i];
+            anchors[i] = Anchors.IsIndexValid(i) ? Anchors[i] : Regions[i].size / 2;
+            if (!Transformed) continue;
+            anchors[i].y = regions[i].height - anchors[i].y;
+            regions[i].y = Material.mainTexture.height - regions[i].height - regions[i].y;
+        }
+
         var impl = tk2dSpriteCollectionData.CreateFromTexture(
             texture: Material.mainTexture,
             size: tk2dSpriteCollectionSize.Explicit(orthoSize: OrthoSize, targetHeight: TargetHeight),
-            names: Names,
-            regions: Regions,
-            anchors: Anchors
+            names: names,
+            regions: regions,
+            anchors: anchors
         );
 
         impl.name = Name ?? Material.name.Replace("_mat", "");
-        impl.gameObject.hideFlags = HideFlags.HideAndDontSave;
         impl.material = Material;
         impl.materials[0] = Material;
         foreach (var definition in impl.spriteDefinitions) definition.material = Material;
@@ -91,7 +107,8 @@ internal class SpriteInfo : EvolutionInfo<tk2dSpriteCollectionData>
             anchors: Anchors,
             points: AttachPoints,
             name: Name,
-            material: material
+            material: material,
+            transformed: Transformed
         );
     }
 }

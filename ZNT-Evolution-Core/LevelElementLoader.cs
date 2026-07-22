@@ -395,7 +395,6 @@ public static class LevelElementLoader
                 impl.SpriteIndex = index;
                 impl.name = string.Format(element.name, index + 1, sprites.name);
                 impl.Title = string.Format(element.Title, index + 1, sprites.spriteDefinitions[index].name);
-                impl.hideFlags = HideFlags.HideAndDontSave;
 
                 var id = impl.Bind();
                 Logger.LogInfo($"LevelElement {id} - {impl.Title} Loaded");
@@ -674,7 +673,6 @@ public static class LevelElementLoader
         );
 
         impl.name = material.name.Replace("_mat", "");
-        impl.gameObject.hideFlags = HideFlags.HideAndDontSave;
         impl.material = material;
         impl.materials[0] = material;
         impl.spriteDefinitions[0].material = material;
@@ -688,7 +686,6 @@ public static class LevelElementLoader
     {
         var impl = UnityEngine.Object.Instantiate(origin);
         impl.name = origin.name + "_tiles";
-        impl.hideFlags = HideFlags.HideAndDontSave;
         impl.ElementType = LevelElement.Type.Brush;
 
         impl.CustomAsset = HookAsset.Invoke(body =>
