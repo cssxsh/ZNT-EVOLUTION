@@ -46,10 +46,14 @@ internal static class StartManagerPatch
                     physic.DamageCharacterOnTrigger = false;
                     Logger.LogInfo($"Fix DamageCharacterOnTrigger for {physic}");
                     break;
+                case MovingObjectAsset { Speed: 50.0f } moving:
+                    moving.Speed = 15.0f;
+                    Logger.LogInfo($"Fix Speed for {moving}");
+                    break;
                 case LevelElement
                 {
                     name: "elevator_1_spawn" or "elevator_2_spawn" or "lawn_mower_spawn" or "moving_container_spawn",
-                    Brush: Rotorz.Tile.OrientedBrush brush,
+                    Brush: Rotorz.Tile.OrientedBrush brush
                 } element:
                 {
                     if (brush.DefaultOrientation.GetVariation(0) is not GameObject prefab) break;
@@ -92,6 +96,8 @@ internal static class StartManagerPatch
                     break;
                 case LevelElement { CustomAsset: HumanAsset human } element:
                 {
+                    if (human.HierarchyName is "Rick") break;
+                    if (human.HierarchyName is "Zombinator") break;
                     if (element.Title.Replace("Human ", "") == human.HierarchyName) break;
                     element.CustomAsset.HierarchyName = element.Title.Replace("Human ", "");
                     Logger.LogInfo($"Fix HierarchyName for {element.CustomAsset}");
