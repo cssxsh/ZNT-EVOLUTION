@@ -19,8 +19,7 @@ internal class ModContext
             // ReSharper disable once InvertIf
             if (Allocated.TryGetValue(metadata.Id, out var allocated))
             {
-                var meta = allocated.Metadata;
-                throw new AssetException($"[{meta.Name} {meta.Version}] has been loaded from '{allocated.Path}'");
+                throw new AssetException($"'{metadata.Id}' of '{path}' is allocated by '{allocated.Path}'");
             }
 
             return Allocated[metadata.Id] = new ModContext(path, metadata);

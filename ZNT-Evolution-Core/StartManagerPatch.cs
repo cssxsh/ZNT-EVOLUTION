@@ -17,6 +17,15 @@ internal static class StartManagerPatch
 {
     private static readonly ManualLogSource Logger = BepInExLogger.CreateLogSource(nameof(StartManager));
 
+    private static IEnumerator ToCoroutine(this Task task, YieldInstruction instruction = null)
+    {
+        while (!task.IsCompleted) yield return instruction;
+        if (task.Exception == null) yield break;
+        Logger.LogError(task.Exception.InnerExceptions.Count == 1
+            ? task.Exception.GetBaseException()
+            : task.Exception);
+    }
+
     [HarmonyPostfix]
     [HarmonyPatch(typeof(StartManager), "Start")]
     public static IEnumerator Start(IEnumerator __result, StartManager __instance)
@@ -28,28 +37,21 @@ internal static class StartManagerPatch
     private static IEnumerator Evolution(this StartManager starter)
     {
         Traverse.Create(starter).Field<bool>("isLoading").Value = true;
-        Logger.LogInfo("Initializing");
         yield return Initialize();
-        Logger.LogInfo("Loading Patch");
         yield return LoadPatch();
-        Logger.LogInfo("Loading Bank");
         yield return LoadBank();
-        Logger.LogInfo("Loading Asset Folder");
         yield return LoadAssetFolder();
-        Logger.LogInfo("Loading Brush Folder");
         yield return LoadBrushFolder();
-        Logger.LogInfo("Loading Decor Folder");
         yield return LoadDecorFolder();
-        Logger.LogInfo("Loading Apply Folder");
         yield return LoadApplyFolder();
-        Logger.LogInfo("Loading Event Handle");
-        yield return LoadEventHandle();
+        yield return LoadModsFolder();
         Traverse.Create(starter).Field<bool>("isLoading").Value = false;
         starter.LoadNextScene();
     }
 
     private static IEnumerator Initialize()
     {
+        Logger.LogInfo("Initializing");
         yield return CustomAssetUtility.LoadBuildIn<CustomAsset>(asset =>
         {
             CustomAssetUtility.Cache[asset.NameAndType()] = asset;
@@ -243,6 +245,7 @@ internal static class StartManagerPatch
 
     private static IEnumerator LoadPatch()
     {
+        Logger.LogInfo("Loading Patch");
         foreach (var file in Directory.EnumerateFiles(Application.streamingAssetsPath, "*.patch"))
         {
             var request = AssetBundle.LoadFromFileAsync(file);
@@ -253,24 +256,34 @@ internal static class StartManagerPatch
             if (wqy) TMPro.TMP_Settings.defaultFontAsset.fallbackFontAssets.Insert(0, wqy);
             Logger.LogInfo($"Loaded Patch '{file}'");
         }
+
+        Logger.LogDebug("Loading Event Handle");
+        foreach (var (_, info) in BepInEx.Bootstrap.Chainloader.PluginInfos)
+        {
+            if (!info.Metadata.GUID.Contains("znt")) continue;
+            AnimationEventHandlerPatch.RegisterAnimationEvent(info.Instance.GetType().Assembly);
+        }
     }
 
     private static IEnumerator LoadBank()
     {
+        Logger.LogInfo("Loading Bank");
         yield return LevelElementLoader.LoadBanks(folder: Application.streamingAssetsPath, loadSamples: true);
     }
 
     private static IEnumerator LoadAssetFolder()
     {
+        Logger.LogInfo("Loading Asset Folder");
         var asset = Path.Combine(Application.dataPath, "Asset");
-        if (!Directory.Exists(asset)) yield break;
+        if (!Directory.Exists(asset)) Directory.CreateDirectory(asset);
         yield return LevelElementLoader.LoadAssetFromFolder(path: asset);
     }
 
     private static IEnumerator LoadBrushFolder()
     {
+        Logger.LogInfo("Loading Brush Folder");
         var brush = Path.Combine(Application.dataPath, nameof(LevelElement.Type.Brush));
-        if (!Directory.Exists(brush)) yield break;
+        if (!Directory.Exists(brush)) Directory.CreateDirectory(brush);
         foreach (var directory in Directory.EnumerateDirectories(brush))
         {
             if (directory.EndsWith(".bak")) continue;
@@ -293,6 +306,7 @@ internal static class StartManagerPatch
 
     private static IEnumerator LoadDecorFolder()
     {
+        Logger.LogInfo("Loading Decor Folder");
         var decor = Path.Combine(Application.dataPath, nameof(LevelElement.Type.Decor));
         if (!Directory.Exists(decor)) Directory.CreateDirectory(decor);
         foreach (var directory in Directory.EnumerateDirectories(decor))
@@ -307,6 +321,7 @@ internal static class StartManagerPatch
 
     private static IEnumerator LoadApplyFolder()
     {
+        Logger.LogInfo("Loading Apply Folder");
         var apply = Path.Combine(Application.dataPath, "Apply");
         if (!Directory.Exists(apply)) Directory.CreateDirectory(apply);
         foreach (var directory in Directory.EnumerateDirectories(apply))
@@ -319,13 +334,20 @@ internal static class StartManagerPatch
         }
     }
 
-    private static IEnumerator LoadEventHandle()
+    private static IEnumerator LoadModsFolder()
     {
-        yield return null;
-        foreach (var (_, info) in BepInEx.Bootstrap.Chainloader.PluginInfos)
+        Logger.LogInfo("Loading Mods Folder");
+        var mods = Path.Combine(Application.dataPath, "Mods");
+        if (!Directory.Exists(mods)) yield break;
+
+        foreach (var folder in Directory.EnumerateDirectories(mods))
         {
-            if (!info.Metadata.GUID.Contains("znt")) continue;
-            AnimationEventHandlerPatch.RegisterAnimationEvent(info.Instance.GetType().Assembly);
+            yield return Mod.ModManager.Load(folder).ToCoroutine();
+        }
+
+        foreach (var file in Directory.EnumerateFiles(mods, "*.zip"))
+        {
+            yield return Mod.ModManager.Load(file).ToCoroutine();
         }
     }
 }
