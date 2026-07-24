@@ -18,6 +18,8 @@ public static class ModManager
 {
     private static readonly ManualLogSource Logger = BepInExLogger.CreateLogSource(nameof(ModManager));
 
+    private static readonly Regex ResourceRegex = new("""^(?:.+\/)?([^.]+)(?:\.(.*))?\.(\w+)$""");
+
     static ModManager() => Encoding.RegisterProvider(new Fix437EncodingProvider(Encoding.ASCII));
 
     private class Fix437EncodingProvider(Encoding fallback) : EncodingProvider
@@ -59,7 +61,7 @@ public static class ModManager
     {
         using var package = ZipStorer.Open(path, FileAccess.Read);
         var entries = package.ReadCentralDir();
-        var meta = package.GetEntry("metadata.json") ?? package.GetEntry("metadata.bson");
+        var meta = package.GetEntry("metadata.json");
         if (meta is null) throw new FileNotFoundException($"metadata in {path}", "metadata.json");
         using var buffer = new MemoryStream();
         await package.ExtractFileAsync(meta, buffer);
@@ -68,10 +70,9 @@ public static class ModManager
         var context = ModContext.Allocate(metadata, path);
         Logger.LogInfo($"load [{context.Metadata.Name} {context.Metadata.Version}] from package '{path}'");
 
-        var regex = new Regex("""^(?:.+\/)?(\w+)(?:\.(.*))?\.(\w+)$""");
         foreach (var resource in
                  from entry in entries
-                 let match = regex.Match(entry.FilenameInZip)
+                 let match = ResourceRegex.Match(entry.FilenameInZip)
                  where match.Success
                  select new ModResource<ZipFileEntry>
                  {
@@ -103,9 +104,7 @@ public static class ModManager
 
     private static async Task<ModMetadata> LoadFromFolder(string path)
     {
-        var meta = File.Exists(Path.Combine(path, "metadata.json"))
-            ? Path.Combine(path, "metadata.json")
-            : Path.Combine(path, "metadata.bson");
+        var meta = Path.Combine(path, "metadata.json");
         if (!File.Exists(meta)) throw new FileNotFoundException($"metadata in {path}", "metadata.json");
         var metadata = CustomAssetUtility.DeserializeObjectFromPath<ModMetadata>(meta);
         var context = ModContext.Allocate(metadata, path);
@@ -113,10 +112,9 @@ public static class ModManager
 
         using var buffer = new MemoryStream();
         var folder = new DirectoryInfo(path);
-        var regex = new Regex("""^(?:.+\/)?(\w+)(?:\.(.*))?\.(\w+)$""");
         foreach (var resource in
                  from file in folder.EnumerateFiles("*", SearchOption.AllDirectories)
-                 let match = regex.Match(file.Name)
+                 let match = ResourceRegex.Match(file.Name)
                  where match.Success
                  select new ModResource<FileInfo>
                  {
@@ -152,8 +150,25 @@ public static class ModManager
         switch (resource)
         {
             // ModMetadata
-            case { Name: "metadata", Format: "json" or "bson" }:
+            case { Name: "metadata", Type: "", Format: "json" }:
                 return;
+            // FMOD.Studio.Bank
+            case { Format: "bank", Type: "strings" }:
+            {
+                if (FMODUnity.RuntimeManager.HasBankLoaded(resource.Name + ".strings")) break;
+                _ = context.ReadBank(resource.Name + ".strings", buffer.ToArray());
+                context.Logger.LogDebug($"{resource.Path} -> index of {resource.Name}");
+            }
+                break;
+            // FMOD.Studio.Bank
+            case { Format: "bank" }:
+            {
+                if (FMODUnity.RuntimeManager.HasBankLoaded(resource.Name + ".strings")) break;
+                if (FMODUnity.RuntimeManager.HasBankLoaded(resource.Name)) break;
+                var bank = context.ReadBank(resource.Name, buffer.ToArray());
+                context.Logger.LogDebug($"{resource.Path} -> bank:/{bank.name}");
+            }
+                break;
             // UnityEngine.Texture2D
             case { Format: "tga" or "png" or "exr" }:
             {

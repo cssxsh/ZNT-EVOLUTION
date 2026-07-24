@@ -8,6 +8,8 @@ namespace ZNT.Evolution.Core;
 public class EvolutionCorePlugin : BaseUnityPlugin
 {
     internal static EvolutionCorePlugin Instance;
+    
+    internal static Harmony Harmony;
 
     internal static ConfigEntry<int> CorpsesCountMax;
 
@@ -22,13 +24,15 @@ public class EvolutionCorePlugin : BaseUnityPlugin
     public void Awake()
     {
         Instance = this;
-        Harmony.CreateAndPatchAll(typeof(DebugPatch));
-        Harmony.CreateAndPatchAll(typeof(GlobalSettingsPatch));
-        Harmony.CreateAndPatchAll(typeof(StartManagerPatch));
-        Harmony.CreateAndPatchAll(typeof(CustomAssetObjectPatch));
-        Harmony.CreateAndPatchAll(typeof(AnimationEventHandlerPatch));
-        Harmony.CreateAndPatchAll(typeof(SceneLoaderPatch));
-        Harmony.CreateAndPatchAll(typeof(SnakeFeetPatch));
+        Harmony ??= new Harmony(Info.Metadata.GUID);
+        Harmony.PatchAll(typeof(DebugPatch));
+        Harmony.PatchAll(typeof(GlobalSettingsPatch));
+        Harmony.PatchAll(typeof(StartManagerPatch));
+        Harmony.PatchAll(typeof(CustomAssetObjectPatch));
+        Harmony.PatchAll(typeof(AnimationEventHandlerPatch));
+        Harmony.PatchAll(typeof(SceneLoaderPatch));
+        Harmony.PatchAll(typeof(SnakeFeetPatch));
+        Harmony.PatchAll(typeof(TextAssetPatch));
     }
 
     public void Start()

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using FMODUnity;
 using HarmonyLib;
 using UnityEngine;
 
@@ -16,47 +15,70 @@ public static class AssetElementBinder
     /// <returns> 同步的内容 </returns>
     public static Dictionary<string, FMODAsset> FetchFMODAsset(string path)
     {
-        var result = RuntimeManager.StudioSystem.getBank(path, out var bank);
-        if (!bank.isValid()) throw new BankLoadException(path, result);
+        var result = FMODUnity.RuntimeManager.StudioSystem.getBank(path, out var bank);
+        if (result != FMOD.RESULT.OK) throw new FMODUnity.BankLoadException(path, result);
         result = bank.getEventList(out var events);
-        if (events == null) throw new BankLoadException(path, result);
+        if (result != FMOD.RESULT.OK) throw new FMODUnity.BankLoadException(path, result);
         var dictionary = new Dictionary<string, FMODAsset>(events.Length);
         foreach (var description in events)
         {
             var asset = ScriptableObject.CreateInstance<FMODAsset>();
-
-            description.getID(out var guid);
+            UnityEngine.Object.DontDestroyOnLoad(asset);
+            result = description.getID(out var guid);
+            if (result != FMOD.RESULT.OK) throw new FMODUnity.BankLoadException(path, result);
             asset.id = $"{{{guid}}}";
-            description.getPath(out asset.path);
-            asset.name = asset.path.Split('/').Last();
+            result = description.getPath(out asset.path);
+            if (result != FMOD.RESULT.OK) throw new FMODUnity.BankLoadException(path, result);
+            asset.name = asset.path.Substring(asset.path.LastIndexOf('/') + 1);
             Traverse.Create(asset).Field<string>("assetId").Value = $"{path} - {asset.path}";
-            asset.Bind();
-            dictionary.TryAdd(asset.path, asset);
+            _ = asset.Bind();
+            dictionary.Add(asset.path, asset);
         }
 
         return dictionary;
     }
 
+    /// <summary>
+    /// 清理 Bank 中的 Event 从 FmodAssetIndex 中
+    /// </summary>
+    /// <param name="path"> Bank 的 path, 例如 <c>bank:/Gunner</c> </param>
+    public static void ClearFMODAsset(string path)
+    {
+        var result = FMODUnity.RuntimeManager.StudioSystem.getBank(path, out var bank);
+        if (result != FMOD.RESULT.OK) throw new FMODUnity.BankLoadException(path, result);
+        result = bank.getEventList(out var events);
+        if (result != FMOD.RESULT.OK) throw new FMODUnity.BankLoadException(path, result);
+        foreach (var description in events)
+        {
+            result = description.getPath(out var key);
+            if (result != FMOD.RESULT.OK) throw new FMODUnity.BankLoadException(path, result);
+            if (FmodAssetIndex.PathIndex.TryGetValue(key, out var asset)) asset.Unbind();
+        }
+    }
+
     public static string Bind(this AssetElement asset)
     {
         if (string.IsNullOrEmpty(asset.AssetId)) Traverse.Create(asset).Field<string>("assetId").Value = asset.name;
-        switch (asset)
+        lock (AssetElementIndex.IndexPath)
         {
-            case LevelElement element:
-                lock (LevelElementIndex.IndexName) LevelElementIndex.Index.AddAssetElement(element);
-                break;
-            case FMODAsset fmod:
-                lock (FmodAssetIndex.IndexName) FmodAssetIndex.Index.AddAssetElement(fmod);
-                FmodAssetIndex.PathIndex[fmod.path] = fmod;
-                break;
-            case VisualEffect effect:
-                lock (VisualEffectIndex.IndexName) VisualEffectIndex.Index.AddAssetElement(effect);
-                break;
-            case ShaderAnimator animator:
-                lock (ShaderAnimatorIndex.IndexName) ShaderAnimatorIndex.Index.AddAssetElement(animator);
-                break;
-            default:
-                throw new NotSupportedException($"Bind: {asset}");
+            switch (asset)
+            {
+                case LevelElement element:
+                    LevelElementIndex.Index.AddAssetElement(element);
+                    break;
+                case FMODAsset fmod:
+                    FmodAssetIndex.Index.AddAssetElement(fmod);
+                    FmodAssetIndex.PathIndex.TryAdd(fmod.path, fmod);
+                    break;
+                case VisualEffect effect:
+                    VisualEffectIndex.Index.AddAssetElement(effect);
+                    break;
+                case ShaderAnimator animator:
+                    ShaderAnimatorIndex.Index.AddAssetElement(animator);
+                    break;
+                default:
+                    throw new NotSupportedException($"Bind: {asset}");
+            }
         }
 
         return asset.AssetId;
@@ -64,23 +86,26 @@ public static class AssetElementBinder
 
     public static void Unbind(this AssetElement asset)
     {
-        switch (asset)
+        lock (AssetElementIndex.IndexPath)
         {
-            case LevelElement element:
-                lock (LevelElementIndex.IndexName) LevelElementIndex.Index.RemoveAssetElement(element);
-                break;
-            case FMODAsset fmod:
-                lock (FmodAssetIndex.IndexName) FmodAssetIndex.Index.RemoveAssetElement(fmod);
-                FmodAssetIndex.PathIndex.Remove(fmod.path);
-                break;
-            case VisualEffect effect:
-                lock (VisualEffectIndex.IndexName) VisualEffectIndex.Index.RemoveAssetElement(effect);
-                break;
-            case ShaderAnimator animator:
-                lock (ShaderAnimatorIndex.IndexName) ShaderAnimatorIndex.Index.RemoveAssetElement(animator);
-                break;
-            default:
-                throw new NotSupportedException($"Unbind: {asset}");
+            switch (asset)
+            {
+                case LevelElement element:
+                    LevelElementIndex.Index.RemoveAssetElement(element);
+                    break;
+                case FMODAsset fmod:
+                    FmodAssetIndex.Index.RemoveAssetElement(fmod);
+                    FmodAssetIndex.PathIndex.Remove(fmod.path);
+                    break;
+                case VisualEffect effect:
+                    VisualEffectIndex.Index.RemoveAssetElement(effect);
+                    break;
+                case ShaderAnimator animator:
+                    ShaderAnimatorIndex.Index.RemoveAssetElement(animator);
+                    break;
+                default:
+                    throw new NotSupportedException($"Unbind: {asset}");
+            }
         }
     }
 

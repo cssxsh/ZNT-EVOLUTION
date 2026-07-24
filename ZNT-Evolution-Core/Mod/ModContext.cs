@@ -58,6 +58,19 @@ internal class ModContext
         _cache = new Dictionary<string, Object>();
     }
 
+    #region FMOD
+
+    public TextAsset ReadBank(string name, byte[] input)
+    {
+        var bank = new TextAsset { name = name };
+        bank.SetBytes(input);
+        Acquire(bank);
+        bank.SetBytes(null);
+        return bank;
+    }
+
+    #endregion
+
     #region Sprite
 
     public Texture2D ReadTexture2D(string name, byte[] input)
@@ -251,6 +264,21 @@ internal class ModContext
 
             switch (o)
             {
+                case TextAsset bank when bank.name.EndsWith(".strings"):
+                    FMODUnity.RuntimeManager.LoadBank(bank);
+                    FMODUnity.RuntimeManager.WaitForAllLoads();
+                    break;
+                case TextAsset bank:
+                    FMODUnity.RuntimeManager.LoadBank(bank);
+                    FMODUnity.RuntimeManager.WaitForAllLoads();
+                {
+                    Logger.LogDebug($"Fetch FMODAsset from bank:/{bank.name}");
+                    foreach (var (_, asset) in AssetElementBinder.FetchFMODAsset(path: $"bank:/{bank.name}"))
+                    {
+                        Logger.LogInfo($"Bind FMODAsset {asset.path} - {bank.name}");
+                    }
+                }
+                    break;
                 case VisualEffect visual:
                     _ = visual.Bind();
                     Logger.LogInfo($"Bind VisualEffect {visual.AssetId} - {visual.name}");
@@ -278,6 +306,14 @@ internal class ModContext
 
             switch (o)
             {
+                case TextAsset bank when bank.name.EndsWith(".strings"):
+                    FMODUnity.RuntimeManager.UnloadBank(bank.name);
+                    break;
+                case TextAsset bank:
+                    Logger.LogInfo($"Clear FMODAsset from bank:/{bank.name}");
+                    AssetElementBinder.ClearFMODAsset(path: $"bank:/{bank.name}");
+                    FMODUnity.RuntimeManager.UnloadBank(bank.name);
+                    break;
                 case VisualEffect visual:
                     visual.Unbind();
                     Logger.LogInfo($"Unbind VisualEffect {visual.AssetId} - {visual.name}");
