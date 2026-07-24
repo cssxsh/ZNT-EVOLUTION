@@ -1,44 +1,57 @@
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using BepInEx.Logging;
+using HarmonyLib;
 using UnityEngine;
 using ZNT.Evolution.Core.Asset;
 using BepInExLogger = BepInEx.Logging.Logger;
 
 namespace ZNT.Evolution.Core.Mod;
 
-internal class ModContext
+public class ModContext
 {
-    public static readonly Dictionary<string, ModContext> Allocated = new();
+    private static readonly Dictionary<string, ModContext> Contexts = new();
 
-    public static ModContext Allocate(ModMetadata metadata, string path)
+    public static IReadOnlyCollection<ModContext> Allocated()
     {
-        lock (Allocated)
+        lock (Contexts)
         {
+            return Contexts.Values;
+        }
+    }
+
+    public static ModContext Allocate(string path)
+    {
+        lock (Contexts)
+        {
+            var metadata = Directory.Exists(path)
+                ? ModMetadata.FromFolder(path)
+                : ModMetadata.FromPackage(path);
             // ReSharper disable once InvertIf
-            if (Allocated.TryGetValue(metadata.Id, out var allocated))
+            if (Contexts.TryGetValue(metadata.Id, out var allocated))
             {
                 throw new AssetException($"'{metadata.Id}' of '{path}' is allocated by '{allocated.Path}'");
             }
 
-            return Allocated[metadata.Id] = new ModContext(path, metadata);
+            return Contexts[metadata.Id] = new ModContext(path, metadata);
         }
     }
 
-    public static string Release(ModMetadata metadata)
+    public static void Free(string id)
     {
-        lock (Allocated)
+        lock (Contexts)
         {
             // ReSharper disable once InvertIf
-            if (Allocated.TryGetValue(metadata.Id, out var allocated))
+            if (Contexts.TryGetValue(id, out var allocated))
             {
-                foreach (var o in allocated._cache.Values.ToArray()) allocated.Release(o);
-                Allocated.Remove(allocated.Metadata.Id);
-                return allocated.Path;
+                if (allocated.Loaded) throw new AssetException($"'{id}' of '{allocated.Path}' is loaded");
+                Contexts.Remove(allocated.Metadata.Id);
             }
-
-            return null;
         }
     }
 
@@ -48,19 +61,350 @@ internal class ModContext
 
     public readonly ManualLogSource Logger;
 
-    private readonly Dictionary<string, Object> _cache;
+    public bool Loaded { private set; get; }
 
     private ModContext(string path, ModMetadata metadata)
     {
         Path = path;
         Metadata = metadata;
         Logger = BepInExLogger.CreateLogSource(metadata.Name);
-        _cache = new Dictionary<string, Object>();
+        Loaded = false;
+    }
+
+    private static readonly Regex InfoRegex = new("""^(?:.+\/)?([^.]+)(?:\.(.*))?\.(\w+)$""");
+
+    public bool IsLoadReady()
+    {
+        if (Loaded) return false;
+        lock (Contexts)
+        {
+            foreach (var (id, version) in Metadata.Dependencies)
+            {
+                if (!Contexts.TryGetValue(id, out var allocated)) return false;
+                if (System.Version.Parse(allocated.Metadata.Version) < System.Version.Parse(version)) return false;
+                if (!allocated.Loaded) return false;
+            }
+        }
+
+        return true;
+    }
+
+    public async Task Load()
+    {
+        if (Loaded)
+        {
+            Logger.LogInfo($"[{Metadata.Name} {Metadata.Version}] is already loaded");
+            return;
+        }
+
+        lock (Contexts)
+        {
+            foreach (var (id, version) in Metadata.Dependencies)
+            {
+                if (Contexts.TryGetValue(id, out var allocated) &&
+                    System.Version.Parse(allocated.Metadata.Version) >= System.Version.Parse(version) &&
+                    allocated.Loaded) continue;
+                throw new AssetException($"[{Metadata.Name} {Metadata.Version}] dependency {id} - {version}]");
+            }
+        }
+
+        using var buffer = new MemoryStream();
+        if (Directory.Exists(Path))
+        {
+            Logger.LogInfo($"load [{Metadata.Name} {Metadata.Version}] from folder '{Path}'");
+            var folder = new DirectoryInfo(Path);
+            foreach (var resource in
+                     from file in folder.EnumerateFiles("*", SearchOption.AllDirectories)
+                     let match = InfoRegex.Match(file.Name)
+                     where match.Success
+                     select new ModResource<FileInfo>
+                     {
+                         File = file,
+                         Path = file.FullName.Substring(folder.FullName.Length + 1).Replace('\\', '/'),
+                         Name = match.Groups[1].Value,
+                         Type = match.Groups[2].Value,
+                         Format = match.Groups[3].Value
+                     }
+                     into resource
+                     orderby resource.Order
+                     select resource)
+            {
+                buffer.SetLength(0);
+                using var temp = resource.File.OpenRead();
+                await temp.CopyToAsync(buffer);
+                buffer.Position = 0;
+                try
+                {
+                    LoadResource(resource, buffer);
+                }
+                catch (System.Exception e)
+                {
+                    Logger.LogError(new AssetException(Path, e));
+                }
+            }
+        }
+        else
+        {
+            Logger.LogInfo($"load [{Metadata.Name} {Metadata.Version}] from package '{Path}'");
+            using var package = ZipStorer.Open(Path, FileAccess.Read);
+            var entries = package.ReadCentralDir();
+            foreach (var resource in
+                     from entry in entries
+                     let match = InfoRegex.Match(entry.FilenameInZip)
+                     where match.Success
+                     select new ModResource<ZipFileEntry>
+                     {
+                         File = entry,
+                         Path = entry.FilenameInZip,
+                         Name = match.Groups[1].Value,
+                         Type = match.Groups[2].Value,
+                         Format = match.Groups[3].Value
+                     }
+                     into resource
+                     orderby resource.Order
+                     select resource)
+            {
+                buffer.SetLength(0);
+                await package.ExtractFileAsync(resource.File, buffer);
+                buffer.Position = 0;
+                try
+                {
+                    LoadResource(resource, buffer);
+                }
+                catch (System.Exception e)
+                {
+                    Logger.LogError(new AssetException(Path, e));
+                }
+            }
+        }
+
+        Loaded = true;
+    }
+
+    public bool IsUnloadReady()
+    {
+        lock (Contexts)
+        {
+            foreach (var (_, context) in Contexts)
+            {
+                if (context.Metadata.Dependencies.ContainsKey(Metadata.Id) && context.Loaded) return false;
+            }
+        }
+
+        return true;
+    }
+
+    public async Task Unload()
+    {
+        lock (Contexts)
+        {
+            foreach (var (_, context) in Contexts)
+            {
+                if (!context.Metadata.Dependencies.ContainsKey(Metadata.Id) || !context.Loaded) continue;
+                var name = context.Metadata.Name;
+                var version = context.Metadata.Version;
+                throw new AssetException($"[{name} {version}] dependency {Metadata.Id} - {Metadata.Version}]");
+            }
+        }
+
+        var keys = new List<string>();
+        lock (Cache) keys.AddRange(Cache.Keys.Reverse());
+        foreach (var key in keys)
+        {
+            await Task.Delay(10);
+            try
+            {
+                Release(key);
+            }
+            catch (System.Exception e)
+            {
+                Logger.LogWarning(e);
+            }
+        }
+
+        Loaded = false;
+    }
+
+    [SuppressMessage("ReSharper", "InconsistentlySynchronizedField")]
+    private void LoadResource<T>(ModResource<T> resource, MemoryStream buffer)
+    {
+        switch (resource)
+        {
+            // ModMetadata
+            case { Name: "metadata", Type: "", Format: "json" }:
+                return;
+            // FMOD.Studio.Bank
+            case { Format: "bank", Type: "strings" }:
+            {
+                if (FMODUnity.RuntimeManager.HasBankLoaded(resource.Name + ".strings")) break;
+                _ = ReadBank(resource.Name + ".strings", buffer.ToArray());
+                Logger.LogDebug($"{resource.Path} -> index of {resource.Name}");
+            }
+                break;
+            // FMOD.Studio.Bank
+            case { Format: "bank" }:
+            {
+                if (FMODUnity.RuntimeManager.HasBankLoaded(resource.Name + ".strings")) break;
+                if (FMODUnity.RuntimeManager.HasBankLoaded(resource.Name)) break;
+                var bank = ReadBank(resource.Name, buffer.ToArray());
+                Logger.LogDebug($"{resource.Path} -> bank:/{bank.name}");
+            }
+                break;
+            // UnityEngine.Texture2D
+            case { Format: "tga" or "png" or "exr" }:
+            {
+                var texture = ReadTexture2D(resource.Name, buffer.ToArray());
+                Logger.LogDebug($"{resource.Path} -> {texture}");
+                // ReSharper disable once InvertIf
+                if (texture.name.StartsWith("preview_"))
+                {
+                    var rect = new Rect(x: 0, y: 0, width: texture.width, height: texture.height);
+                    var preview = MakePreview(texture, rect);
+                    Logger.LogDebug($"{resource.Path} -> {preview}");
+                }
+            }
+                break;
+            // UnityEngine.Material
+            case { Type: "material.merge", Format: "json" or "bson" }:
+            {
+                var material = ReadMaterial(buffer, resource.Format);
+                var texture = material.mainTexture;
+                Logger.LogDebug($"{resource.Path} -> {material} with {texture}, {material.shader}");
+            }
+                break;
+            // tk2dSpriteCollectionData
+            case { Type: "sprite.info", Format: "json" or "bson" }:
+            {
+                var sprites = ReadSpriteInfo(buffer, resource.Format);
+                Logger.LogDebug($"{resource.Path} -> {sprites} from {sprites.material}");
+            }
+                break;
+            // tk2dSpriteCollectionData
+            case { Type: "sprite.merge", Format: "json" or "bson" }:
+            {
+                var sprites = ReadSpriteMerge(buffer, resource.Format);
+                Logger.LogDebug($"{resource.Path} -> {sprites} from {sprites.material}");
+            }
+                break;
+            // tk2dSpriteAnimation
+            case { Type: "animation", Format: "json" or "bson" }:
+            {
+                var animation = ReadAnimation(buffer, resource.Format);
+                Logger.LogDebug($"{resource.Path} -> {animation}");
+            }
+                break;
+            // ZNT.Evolution.Core.Asset.AnimationAddition
+            case { Type: "animation.addition", Format: "json" or "bson" }:
+            {
+                var addition = ReadAnimationAddition(buffer, resource.Format);
+                Logger.LogDebug($"{resource.Path} -> {addition.Clips.Length} clips");
+            }
+                break;
+            // ZNT.Evolution.Core.Asset.CustomVisualEffect
+            case { Type: "visual", Format: "json" or "bson" }:
+            {
+                var visual = ReadVisualEffect(buffer, resource.Format);
+                Logger.LogDebug($"{resource.Path} -> {visual} from {visual.animation?.Library}");
+            }
+                break;
+            // ExplosionAsset
+            case { Type: "explosion", Format: "json" or "bson" }:
+            {
+                var explosion = ReadExplosionAsset(buffer, resource.Format);
+                Logger.LogDebug($"{resource.Path} -> {explosion} from {explosion.EffectToSpawn}");
+            }
+                break;
+            // DecorAsset
+            case { Type: "decor", Format: "json" or "bson" }:
+            {
+                var decor = ReadDecorAsset(buffer, resource.Format);
+                Logger.LogDebug($"{resource.Path} -> {decor} from {decor.Animation}");
+            }
+                break;
+            // BreakablePropAsset
+            case { Type: "breakable", Format: "json" or "bson" }:
+            {
+                var breakable = ReadBreakablePropAsset(buffer, resource.Format);
+                Logger.LogDebug($"{resource.Path} -> {breakable} from {breakable.Animation}");
+            }
+                break;
+            // TriggerAsset
+            case { Type: "trigger", Format: "json" or "bson" }:
+            {
+                var trigger = ReadTriggerAsset(buffer, resource.Format);
+                Logger.LogDebug($"{resource.Path} -> {trigger} from {trigger.Animation}");
+            }
+                break;
+            // MovingObjectAsset
+            case { Type: "moving", Format: "json" or "bson" }:
+            {
+                var moving = ReadMovingObjectAsset(buffer, resource.Format);
+                var animation = Traverse.Create(moving).Field<tk2dSpriteAnimation>("library").Value;
+                Logger.LogDebug($"{resource.Path} -> {moving} from {animation}");
+            }
+                break;
+            // SentryGunAsset
+            case { Type: "sentry", Format: "json" or "bson" }:
+            {
+                var sentry = ReadSentryGunAsset(buffer, resource.Format);
+                Logger.LogDebug($"{resource.Path} -> {sentry} from {sentry.Animation}");
+            }
+                break;
+            // PhysicObjectAsset
+            case { Type: "physic", Format: "json" or "bson" }:
+            {
+                var physic = ReadPhysicObjectAsset(buffer, resource.Format);
+                var animation = Traverse.Create(physic).Field<tk2dSpriteAnimation>("library").Value;
+                Logger.LogDebug($"{resource.Path} -> {physic} from {animation}");
+            }
+                break;
+            // HumanAsset
+            case { Type: "human", Format: "json" or "bson" }:
+            {
+                var human = ReadHumanAsset(buffer, resource.Format);
+                Logger.LogDebug($"{resource.Path} -> {human} from {human.AnimationLibrary}");
+            }
+                break;
+            // ZNT.Evolution.Core.Asset.SpawnPointAsset
+            case { Type: "spawn", Format: "json" or "bson" }:
+            {
+                var spawn = ReadSpawnPointAsset(buffer, resource.Format);
+                Logger.LogDebug($"{resource.Path} -> {spawn}");
+            }
+                break;
+            // Rotorz.Tile.OrientedBrush
+            case { Type: "brush.info", Format: "json" or "bson" }:
+            {
+                var brush = ReadBrushInfo(buffer, resource.Format);
+                var prefab = brush.DefaultOrientation.GetVariation(0);
+                Logger.LogDebug($"{resource.Path} -> {brush} from {prefab}");
+            }
+                break;
+            // Rotorz.Tile.OrientedBrush
+            case { Type: "brush.merge", Format: "json" or "bson" }:
+            {
+                var brush = ReadBrushMerge(buffer, resource.Format);
+                var prefab = brush.DefaultOrientation.GetVariation(0);
+                Logger.LogDebug($"{resource.Path} -> {brush} from {prefab}");
+            }
+                break;
+            // LevelElement
+            case { Type: "element", Format: "json" or "bson" }:
+            {
+                var element = ReadLevelElement(buffer, resource.Format);
+                Logger.LogDebug($"{resource.Path} -> {element}");
+            }
+                break;
+            // Unsupported
+            default:
+                Logger.LogWarning($"{resource.Path} is not supported");
+                break;
+        }
     }
 
     #region FMOD
 
-    public TextAsset ReadBank(string name, byte[] input)
+    private TextAsset ReadBank(string name, byte[] input)
     {
         var bank = new TextAsset { name = name };
         bank.SetBytes(input);
@@ -73,7 +417,7 @@ internal class ModContext
 
     #region Sprite
 
-    public Texture2D ReadTexture2D(string name, byte[] input)
+    private Texture2D ReadTexture2D(string name, byte[] input)
     {
         var texture = new Texture2D(0, 0, TextureFormat.RGBA32, false, true);
         texture.LoadImage(input);
@@ -85,7 +429,7 @@ internal class ModContext
         return texture;
     }
 
-    public Sprite MakePreview(Texture2D texture, Rect rect)
+    private Sprite MakePreview(Texture2D texture, Rect rect)
     {
         // LevelElement.Preview
         var preview = Sprite.Create(texture: texture, rect: rect, pivot: Vector2.one / 2.0f);
@@ -94,7 +438,7 @@ internal class ModContext
         return preview;
     }
 
-    public Material ReadMaterial(Stream input, string format)
+    private Material ReadMaterial(Stream input, string format)
     {
         var merge = CustomAssetUtility.DeserializeObject<MaterialMerge>(input, format is "bson");
         var material = merge.Create();
@@ -118,7 +462,7 @@ internal class ModContext
         return material;
     }
 
-    public tk2dSpriteCollectionData ReadSpriteInfo(Stream input, string format)
+    private tk2dSpriteCollectionData ReadSpriteInfo(Stream input, string format)
     {
         var info = CustomAssetUtility.DeserializeObject<SpriteInfo>(input, format is "bson");
         var sprites = info.Create();
@@ -126,7 +470,7 @@ internal class ModContext
         return sprites;
     }
 
-    public tk2dSpriteCollectionData ReadSpriteMerge(Stream input, string format)
+    private tk2dSpriteCollectionData ReadSpriteMerge(Stream input, string format)
     {
         var merge = CustomAssetUtility.DeserializeObject<SpriteMerge>(input, format is "bson");
         var sprites = merge.Create();
@@ -134,14 +478,14 @@ internal class ModContext
         return sprites;
     }
 
-    public tk2dSpriteAnimation ReadAnimation(Stream input, string format)
+    private tk2dSpriteAnimation ReadAnimation(Stream input, string format)
     {
         var animation = CustomAssetUtility.DeserializeObject<tk2dSpriteAnimation>(input, format is "bson");
         Acquire(animation);
         return animation;
     }
 
-    public AnimationAddition ReadAnimationAddition(Stream input, string format)
+    private AnimationAddition ReadAnimationAddition(Stream input, string format)
     {
         var addition = CustomAssetUtility.DeserializeObject<AnimationAddition>(input, format is "bson");
         addition.Apply();
@@ -149,7 +493,7 @@ internal class ModContext
         return addition;
     }
 
-    public CustomVisualEffect ReadVisualEffect(Stream input, string format)
+    private CustomVisualEffect ReadVisualEffect(Stream input, string format)
     {
         var visual = CustomAssetUtility.DeserializeObject<CustomVisualEffect>(input, format is "bson");
         Acquire(visual);
@@ -160,63 +504,63 @@ internal class ModContext
 
     #region Asset
 
-    public ExplosionAsset ReadExplosionAsset(Stream input, string format)
+    private ExplosionAsset ReadExplosionAsset(Stream input, string format)
     {
         var explosion = CustomAssetUtility.DeserializeObject<ExplosionAsset>(input, format is "bson");
         Acquire(explosion);
         return explosion;
     }
 
-    public DecorAsset ReadDecorAsset(Stream input, string format)
+    private DecorAsset ReadDecorAsset(Stream input, string format)
     {
         var decor = CustomAssetUtility.DeserializeObject<DecorAsset>(input, format is "bson");
         Acquire(decor);
         return decor;
     }
 
-    public BreakablePropAsset ReadBreakablePropAsset(Stream input, string format)
+    private BreakablePropAsset ReadBreakablePropAsset(Stream input, string format)
     {
         var breakable = CustomAssetUtility.DeserializeObject<BreakablePropAsset>(input, format is "bson");
         Acquire(breakable);
         return breakable;
     }
 
-    public TriggerAsset ReadTriggerAsset(Stream input, string format)
+    private TriggerAsset ReadTriggerAsset(Stream input, string format)
     {
         var trigger = CustomAssetUtility.DeserializeObject<TriggerAsset>(input, format is "bson");
         Acquire(trigger);
         return trigger;
     }
 
-    public MovingObjectAsset ReadMovingObjectAsset(Stream input, string format)
+    private MovingObjectAsset ReadMovingObjectAsset(Stream input, string format)
     {
         var moving = CustomAssetUtility.DeserializeObject<MovingObjectAsset>(input, format is "bson");
         Acquire(moving);
         return moving;
     }
 
-    public PhysicObjectAsset ReadPhysicObjectAsset(Stream input, string format)
+    private PhysicObjectAsset ReadPhysicObjectAsset(Stream input, string format)
     {
         var physic = CustomAssetUtility.DeserializeObject<PhysicObjectAsset>(input, format is "bson");
         Acquire(physic);
         return physic;
     }
 
-    public SentryGunAsset ReadSentryGunAsset(Stream input, string format)
+    private SentryGunAsset ReadSentryGunAsset(Stream input, string format)
     {
         var sentry = CustomAssetUtility.DeserializeObject<SentryGunAsset>(input, format is "bson");
         Acquire(sentry);
         return sentry;
     }
 
-    public HumanAsset ReadHumanAsset(Stream input, string format)
+    private HumanAsset ReadHumanAsset(Stream input, string format)
     {
         var human = CustomAssetUtility.DeserializeObject<HumanAsset>(input, format is "bson");
         Acquire(human);
         return human;
     }
 
-    public SpawnPointAsset ReadSpawnPointAsset(Stream input, string format)
+    private SpawnPointAsset ReadSpawnPointAsset(Stream input, string format)
     {
         var spawn = CustomAssetUtility.DeserializeObject<SpawnPointAsset>(input, format is "bson");
         Acquire(spawn);
@@ -227,7 +571,7 @@ internal class ModContext
 
     #region LevelElement
 
-    public Rotorz.Tile.OrientedBrush ReadBrushInfo(Stream input, string format)
+    private Rotorz.Tile.OrientedBrush ReadBrushInfo(Stream input, string format)
     {
         var info = CustomAssetUtility.DeserializeObject<BrushInfo>(input, format is "bson");
         var brush = info.Create();
@@ -235,7 +579,7 @@ internal class ModContext
         return brush;
     }
 
-    public Rotorz.Tile.OrientedBrush ReadBrushMerge(Stream input, string format)
+    private Rotorz.Tile.OrientedBrush ReadBrushMerge(Stream input, string format)
     {
         var merge = CustomAssetUtility.DeserializeObject<BrushMerge>(input, format is "bson");
         var brush = merge.Create();
@@ -243,7 +587,7 @@ internal class ModContext
         return brush;
     }
 
-    public LevelElement ReadLevelElement(Stream input, string format)
+    private LevelElement ReadLevelElement(Stream input, string format)
     {
         var element = CustomAssetUtility.DeserializeObject<LevelElement>(input, format is "bson");
         Acquire(element);
@@ -252,13 +596,15 @@ internal class ModContext
 
     #endregion
 
+    private static readonly Dictionary<string, Object> Cache = new();
+
     private void Acquire(Object o)
     {
-        lock (_cache)
+        lock (Cache)
         {
-            if (!_cache.TryAdd(o.NameAndType(), o))
+            if (!Cache.TryAdd(o.NameAndType(), o))
             {
-                Logger.LogWarning($"{o.NameAndType()} is already cached");
+                Logger.LogWarning($"{o.NameAndType()} is already acquired");
                 return;
             }
 
@@ -294,13 +640,13 @@ internal class ModContext
         }
     }
 
-    private void Release(Object o)
+    private void Release(string key)
     {
-        lock (_cache)
+        lock (Cache)
         {
-            if (!_cache.Remove(o.NameAndType()))
+            if (!Cache.Remove(key, out var o))
             {
-                Logger.LogWarning($"{o.NameAndType()} is already released");
+                Logger.LogWarning($"{key} is already released");
                 return;
             }
 
@@ -324,7 +670,7 @@ internal class ModContext
                     break;
             }
 
-            CustomAssetUtility.Cache.Remove(o.NameAndType());
+            CustomAssetUtility.Cache.Remove(key);
             Object.Destroy(o);
         }
     }

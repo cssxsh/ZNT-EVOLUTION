@@ -8,6 +8,7 @@ using UnityEngine;
 using ZNT.Evolution.Core.Asset;
 using ZNT.Evolution.Core.Editor;
 using ZNT.Evolution.Core.Effect;
+using ZNT.Evolution.Core.Mod;
 using BepInExLogger = BepInEx.Logging.Logger;
 
 // ReSharper disable InconsistentNaming
@@ -337,17 +338,6 @@ internal static class StartManagerPatch
     private static IEnumerator LoadModsFolder()
     {
         Logger.LogInfo("Loading Mods Folder");
-        var mods = Path.Combine(Application.dataPath, "Mods");
-        if (!Directory.Exists(mods)) yield break;
-
-        foreach (var folder in Directory.EnumerateDirectories(mods))
-        {
-            yield return Mod.ModManager.Load(folder).ToCoroutine();
-        }
-
-        foreach (var file in Directory.EnumerateFiles(mods, "*.zip"))
-        {
-            yield return Mod.ModManager.Load(file).ToCoroutine();
-        }
+        yield return ModManager.LoadAll().ToCoroutine();
     }
 }

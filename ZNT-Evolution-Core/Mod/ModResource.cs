@@ -23,7 +23,7 @@ internal record ModResource<T> : IComparable<ModResource<T>>
         { Type: "visual", Format: "json" or "bson" } => 0x0002_0005,
         { Type: "explosion", Format: "json" or "bson" } => 0x0003_0001,
         { Type: "decor", Format: "json" or "bson" } => 0x0003_0002,
-        { Type: "breakable", Format: "json" or "bson"} => 0x0003_0003,
+        { Type: "breakable", Format: "json" or "bson" } => 0x0003_0003,
         { Type: "trigger", Format: "json" or "bson" } => 0x0003_0004,
         { Type: "moving", Format: "json" or "bson" } => 0x0003_0005,
         { Type: "physic", Format: "json" or "bson" } => 0x0003_0006,
