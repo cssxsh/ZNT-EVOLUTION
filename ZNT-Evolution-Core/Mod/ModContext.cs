@@ -161,7 +161,7 @@ public class ModContext
                     }
                     catch (System.Exception e)
                     {
-                        Logger.LogError(new AssetException(Path, e));
+                        throw new AssetException($"[{Metadata.Name} {Metadata.Version}]", e);
                     }
                 }
             }
@@ -194,7 +194,7 @@ public class ModContext
                     }
                     catch (System.Exception e)
                     {
-                        Logger.LogError(new AssetException(Path, e));
+                        throw new AssetException($"[{Metadata.Name} {Metadata.Version}]", e);
                     }
                 }
             }
@@ -238,8 +238,7 @@ public class ModContext
                 throw new AssetException($"[{name} {version}] dependency {Metadata.Id} - {Metadata.Version}]");
             }
 
-            var keys = new List<string>();
-            keys.AddRange(Cache.Keys.Reverse());
+            var keys = new List<string>(_cache.Keys.Reverse());
             foreach (var key in keys)
             {
                 await Task.CompletedTask;
@@ -249,7 +248,7 @@ public class ModContext
                 }
                 catch (System.Exception e)
                 {
-                    Logger.LogWarning(e);
+                    throw new AssetException($"[{Metadata.Name} {Metadata.Version}]", e);
                 }
             }
 
@@ -631,12 +630,12 @@ public class ModContext
 
     #endregion
 
-    private static readonly Dictionary<string, Object> Cache = new();
+    private readonly Dictionary<string, Object> _cache = new();
 
     private void Acquire(Object obj)
     {
         var key = obj.NameAndType();
-        if (!Cache.TryAdd(key, obj))
+        if (!_cache.TryAdd(key, obj))
         {
             Logger.LogWarning($"{key} is already acquired");
             return;
@@ -652,10 +651,10 @@ public class ModContext
                 FMODUnity.RuntimeManager.LoadBank(bank);
                 FMODUnity.RuntimeManager.WaitForAllLoads();
             {
-                Logger.LogDebug($"Fetch FMODAsset from bank:/{bank.name}");
+                Logger.LogInfo($"Fetch FMODAsset from bank:/{bank.name}");
                 foreach (var (_, asset) in AssetElementBinder.FetchFMODAsset(path: $"bank:/{bank.name}"))
                 {
-                    Logger.LogInfo($"Bind FMODAsset {asset.path} - {bank.name}");
+                    Logger.LogDebug($"Bind FMODAsset {asset.path} - {bank.name}");
                 }
             }
                 break;
@@ -675,7 +674,7 @@ public class ModContext
 
     private void Release(string key)
     {
-        if (!Cache.Remove(key, out var o))
+        if (!_cache.Remove(key, out var o))
         {
             Logger.LogWarning($"{key} is already released");
             return;

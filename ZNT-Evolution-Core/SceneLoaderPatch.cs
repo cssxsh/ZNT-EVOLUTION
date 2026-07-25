@@ -1,8 +1,8 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using BepInEx.Logging;
 using HarmonyLib;
 using UIWidgets;
@@ -10,7 +10,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using ZNT.Evolution.Core.Asset;
+using ZNT.Evolution.Core.Mod;
 using ZNT.LevelEditor;
 using BepInExLogger = BepInEx.Logging.Logger;
 
@@ -81,17 +81,12 @@ internal static class SceneLoaderPatch
         Logger.LogInfo("Evolution LanguageSource Loaded.");
     }
 
-    private static I2.Loc.TermData GetTermData(this LevelElement element)
+    private static I2.Loc.TermData GetTermData(this ModMetadata metadata)
     {
-        var term = _localization.GetTermData($"Evolution/{element.name}");
+        var term = _localization.GetTermData($"Evolution/{metadata.Id}");
         if (term != null) return term;
-        term = _localization.AddTerm($"Evolution/{element.name}");
-        term.SetTranslation(0, element.ElementType switch
-        {
-            LevelElement.Type.Brush => $"{element.Title} [{element.AllowedTileSystems}]",
-            LevelElement.Type.Decor => $"{element.Title} [{element.AllowedDecorSystems}]",
-            _ => throw new ArgumentOutOfRangeException(element.name)
-        });
+        term = _localization.AddTerm($"Evolution/{metadata.Id}");
+        term.SetTranslation(0, $"{metadata.Name} {metadata.Version}");
         return term;
     }
 
@@ -115,24 +110,52 @@ internal static class SceneLoaderPatch
             .Find("Option Panels/Video/Scroll Area/ScrollView/Content/FullScreen Entry").gameObject;
         var content = panel.GetComponentInChildren<VerticalLayoutGroup>();
 
-        foreach (var element in AssetElementBinder.BoundLevelElements())
+        var push = (ModContext context) =>
         {
-            var item = UnityEngine.Object.Instantiate(original: impl, parent: content.transform);
-            item.name = $"{element.Title} Entry";
-            item.SetActive(true);
+            var item = Object.Instantiate(original: impl, parent: content.transform);
+            item.name = $"{context.Metadata.Name} Entry";
+            item.SetActive(false);
             var localize = item.GetComponentInChildren<I2.Loc.Localize>(includeInactive: true);
-            localize.Term = element.GetTermData().Term;
+            localize.Term = context.Metadata.GetTermData().Term;
             var toggle = item.GetComponentInChildren<Toggle>(includeInactive: true);
-            var enable = Traverse.Create(element).Field<bool>("useable");
-            toggle.OnValueChanged(value => enable.Value = value);
-            toggle.SetIsOnWithoutNotify(enable.Value);
-        }
+            toggle.SetIsOnWithoutNotify(context.Loaded);
+            toggle.OnValueChanged(value =>
+            {
+                switch (value)
+                {
+                    case true when context.IsLoadReady():
+                        context.Load().ContinueWith(task =>
+                        {
+                            if (task.Exception != null) Logger.LogError(task.Exception);
+                            toggle.SetIsOnWithoutNotify(context.Loaded);
+                        }, TaskScheduler.FromCurrentSynchronizationContext());
+                        break;
+                    case false when context.IsUnloadReady():
+                        context.Unload().ContinueWith(task =>
+                        {
+                            if (task.Exception != null) Logger.LogError(task.Exception);
+                            toggle.SetIsOnWithoutNotify(context.Loaded);
+                        }, TaskScheduler.FromCurrentSynchronizationContext());
+                        break;
+                    default:
+                        toggle.SetIsOnWithoutNotify(context.Loaded);
+                        break;
+                }
+            });
+            item.SetActive(true);
+        };
+        foreach (var context in ModContext.Allocated()) push.Invoke(context);
 
         var reload = panel.transform.Find("Reset Entry").GetComponentInChildren<Button>();
         reload.OnClick(() =>
         {
-            Logger.LogInfo("Reload MOD ...");
-            // reload.interactable = false;
+            Logger.LogInfo("Reloading Mods Folder");
+            content.transform.DestroyChildren();
+            ModManager.ReloadAll().ContinueWith(task =>
+            {
+                if (task.Exception != null) Logger.LogError(task.Exception);
+                foreach (var context in ModContext.Allocated()) push.Invoke(context);
+            }, TaskScheduler.FromCurrentSynchronizationContext());
         });
     }
 
@@ -153,22 +176,23 @@ internal static class SceneLoaderPatch
                 {
                     var fullscreen = menu.transform
                         .Find("Option Panels/Video/Scroll Area/ScrollView/Content/FullScreen Entry").gameObject;
-                    var item = UnityEngine.Object.Instantiate(original: fullscreen, parent: content.transform);
+                    var item = Object.Instantiate(original: fullscreen, parent: content.transform);
                     item.name = $"{info.Metadata.Name} {definition} Entry";
-                    item.SetActive(true);
+                    item.SetActive(false);
                     var localize = item.GetComponentInChildren<I2.Loc.Localize>(includeInactive: true);
                     localize.Term = term.Term;
                     var toggle = item.GetComponentInChildren<Toggle>(includeInactive: true);
                     toggle.OnValueChanged(value => entry.BoxedValue = value);
                     toggle.SetIsOnWithoutNotify((bool)entry.BoxedValue);
+                    item.SetActive(true);
                 }
                 else if (entry.SettingType == typeof(int))
                 {
                     var fps = menu.transform
                         .Find("Option Panels/Video/Scroll Area/ScrollView/Content/Max FPS Entry").gameObject;
-                    var item = UnityEngine.Object.Instantiate(original: fps, parent: content.transform);
+                    var item = Object.Instantiate(original: fps, parent: content.transform);
                     item.name = $"{info.Metadata.Name} {definition} Entry";
-                    item.SetActive(true);
+                    item.SetActive(false);
                     var localize = item.GetComponentInChildren<I2.Loc.Localize>(includeInactive: true);
                     localize.Term = term.Term;
                     var canvas = item.GetComponentInChildren<CanvasGroup>(includeInactive: true);
@@ -188,6 +212,7 @@ internal static class SceneLoaderPatch
                     });
                     input.SetTextWithoutNotify(((int)entry.BoxedValue & int.MaxValue).ToString());
                     input.interactable = toggle.isOn;
+                    item.SetActive(true);
                 }
             }
         }
@@ -227,7 +252,7 @@ internal static class SceneLoaderPatch
         var panels = menu.transform.Find("Option Panels");
         var tabs = menu.transform.Find("Option Menu/Tabs");
 
-        var panel = UnityEngine.Object.Instantiate(original: panels.GetChild(0).gameObject, parent: panels);
+        var panel = Object.Instantiate(original: panels.GetChild(0).gameObject, parent: panels);
         panel.name = name;
         var content = panel.GetComponentInChildren<VerticalLayoutGroup>();
         content.transform.DestroyChildren();
@@ -237,7 +262,7 @@ internal static class SceneLoaderPatch
         var index = container.Value.Length;
         container.Value = container.Value.AddToArray(panel);
 
-        var tab = UnityEngine.Object.Instantiate(original: tabs.GetChild(0).gameObject, parent: tabs);
+        var tab = Object.Instantiate(original: tabs.GetChild(0).gameObject, parent: tabs);
         tab.name = name;
         tab.GetComponentsInChildren<I2.Loc.Localize>(includeInactive: true)
             .ForEach(localize => localize.Term = $"Evolution/{name}_Tab");
@@ -271,7 +296,7 @@ internal static class SceneLoaderPatch
     {
         var move = Traverse.Create(menu).Field<Toggle>("moveButton").Value;
         var target = Traverse.Create(menu).Field<EditorGameObject>("serializeGameObject");
-        var copy = UnityEngine.Object.Instantiate(original: move, parent: move.transform.parent);
+        var copy = Object.Instantiate(original: move, parent: move.transform.parent);
         copy.name = "Copy Button";
         copy.OnValueChanged(value => target.Value.ObjectSettings.Activate(value, ObjectSettings.Control.Copy));
         var icon = copy.transform.Find("Icon").GetComponent<Image>();
@@ -282,7 +307,7 @@ internal static class SceneLoaderPatch
     {
         if (menu.transform.Find("Empty")) return;
         var container = Traverse.Create(menu).Field<RectTransform>("mainContainer").Value;
-        var empty = UnityEngine.Object.Instantiate(original: container, parent: menu.transform);
+        var empty = Object.Instantiate(original: container, parent: menu.transform);
         empty.name = "Empty";
         empty.gameObject.SetActive(false);
     }
@@ -317,7 +342,7 @@ internal static class SceneLoaderPatch
         foreach (var transform in container.Cast<Transform>())
         {
             _ = transform.gameObject.activeSelf ? Activated.Add(transform.name) : Activated.Remove(transform.name);
-            UnityEngine.Object.Destroy(transform.gameObject);
+            Object.Destroy(transform.gameObject);
         }
 
         container.anchoredPosition = Vector2.zero;
@@ -331,7 +356,7 @@ internal static class SceneLoaderPatch
 
             var header = __instance.SetComponentHeader(component).gameObject;
             header.name = $"{component.Name} Header";
-            var panel = UnityEngine.Object.Instantiate(original: empty, parent: container);
+            var panel = Object.Instantiate(original: empty, parent: container);
             panel.name = $"{component.Name} Panel";
             Traverse.Create(__instance).Field<RectTransform>("mainContainer").Value = panel;
             foreach (var (member, _) in component.Fields)

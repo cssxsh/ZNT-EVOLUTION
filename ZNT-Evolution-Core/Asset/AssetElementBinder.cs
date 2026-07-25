@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using HarmonyLib;
 using UnityEngine;
 
@@ -107,12 +106,5 @@ public static class AssetElementBinder
                     throw new NotSupportedException($"Unbind: {asset}");
             }
         }
-    }
-
-    public static IEnumerable<LevelElement> BoundLevelElements()
-    {
-        return LevelElementIndex.Index.Values
-            .Cast<LevelElement>()
-            .Where(element => string.IsNullOrEmpty(element.AssetId) || element.AssetId.Length != 0x20);
     }
 }
