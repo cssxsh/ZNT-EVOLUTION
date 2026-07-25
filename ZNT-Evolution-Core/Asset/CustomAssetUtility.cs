@@ -46,7 +46,7 @@ public static class CustomAssetUtility
     [UsedImplicitly]
     public static void SerializeObjectToPath(string target, object data)
     {
-        using var stream = File.OpenWrite(target);
+        using var stream = File.Open(target, FileMode.Create, FileAccess.Write);
         SerializeObject(stream, data, target.EndsWith(".bson"));
     }
 
