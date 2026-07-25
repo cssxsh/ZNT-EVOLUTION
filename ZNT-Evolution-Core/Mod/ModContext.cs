@@ -1,9 +1,9 @@
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using BepInEx.Logging;
 using HarmonyLib;
@@ -17,17 +17,25 @@ public class ModContext
 {
     private static readonly Dictionary<string, ModContext> Contexts = new();
 
+    private static readonly ReaderWriterLockSlim Lock = new();
+
     public static IReadOnlyCollection<ModContext> Allocated()
     {
-        lock (Contexts)
+        Lock.EnterReadLock();
+        try
         {
             return Contexts.Values;
+        }
+        finally
+        {
+            Lock.ExitReadLock();
         }
     }
 
     public static ModContext Allocate(string path)
     {
-        lock (Contexts)
+        Lock.EnterWriteLock();
+        try
         {
             var metadata = Directory.Exists(path)
                 ? ModMetadata.FromFolder(path)
@@ -40,11 +48,16 @@ public class ModContext
 
             return Contexts[metadata.Id] = new ModContext(path, metadata);
         }
+        finally
+        {
+            Lock.ExitWriteLock();
+        }
     }
 
     public static void Free(string id)
     {
-        lock (Contexts)
+        Lock.EnterWriteLock();
+        try
         {
             // ReSharper disable once InvertIf
             if (Contexts.TryGetValue(id, out var allocated))
@@ -52,6 +65,10 @@ public class ModContext
                 if (allocated.Loaded) throw new AssetException($"'{id}' of '{allocated.Path}' is loaded");
                 Contexts.Remove(allocated.Metadata.Id);
             }
+        }
+        finally
+        {
+            Lock.ExitWriteLock();
         }
     }
 
@@ -75,30 +92,36 @@ public class ModContext
 
     public bool IsLoadReady()
     {
-        if (Loaded) return false;
-        lock (Contexts)
+        Lock.EnterReadLock();
+        try
         {
+            if (Loaded) return false;
             foreach (var (id, version) in Metadata.Dependencies)
             {
                 if (!Contexts.TryGetValue(id, out var allocated)) return false;
                 if (System.Version.Parse(allocated.Metadata.Version) < System.Version.Parse(version)) return false;
                 if (!allocated.Loaded) return false;
             }
-        }
 
-        return true;
+            return true;
+        }
+        finally
+        {
+            Lock.ExitReadLock();
+        }
     }
 
     public async Task Load()
     {
-        if (Loaded)
+        Lock.EnterWriteLock();
+        try
         {
-            Logger.LogInfo($"[{Metadata.Name} {Metadata.Version}] is already loaded");
-            return;
-        }
+            if (Loaded)
+            {
+                Logger.LogInfo($"[{Metadata.Name} {Metadata.Version}] is already loaded");
+                return;
+            }
 
-        lock (Contexts)
-        {
             foreach (var (id, version) in Metadata.Dependencies)
             {
                 if (Contexts.TryGetValue(id, out var allocated) &&
@@ -106,97 +129,106 @@ public class ModContext
                     allocated.Loaded) continue;
                 throw new AssetException($"[{Metadata.Name} {Metadata.Version}] dependency {id} - {version}]");
             }
-        }
 
-        using var buffer = new MemoryStream();
-        if (Directory.Exists(Path))
-        {
-            Logger.LogInfo($"load [{Metadata.Name} {Metadata.Version}] from folder '{Path}'");
-            var folder = new DirectoryInfo(Path);
-            foreach (var resource in
-                     from file in folder.EnumerateFiles("*", SearchOption.AllDirectories)
-                     let match = InfoRegex.Match(file.Name)
-                     where match.Success
-                     select new ModResource<FileInfo>
-                     {
-                         File = file,
-                         Path = file.FullName.Substring(folder.FullName.Length + 1).Replace('\\', '/'),
-                         Name = match.Groups[1].Value,
-                         Type = match.Groups[2].Value,
-                         Format = match.Groups[3].Value
-                     }
-                     into resource
-                     orderby resource.Order
-                     select resource)
+            using var buffer = new MemoryStream();
+            if (Directory.Exists(Path))
             {
-                buffer.SetLength(0);
-                using var temp = resource.File.OpenRead();
-                await temp.CopyToAsync(buffer);
-                buffer.Position = 0;
-                try
+                Logger.LogInfo($"load [{Metadata.Name} {Metadata.Version}] from folder '{Path}'");
+                var folder = new DirectoryInfo(Path);
+                foreach (var resource in
+                         from file in folder.EnumerateFiles("*", SearchOption.AllDirectories)
+                         let match = InfoRegex.Match(file.Name)
+                         where match.Success
+                         select new ModResource<FileInfo>
+                         {
+                             File = file,
+                             Path = file.FullName.Substring(folder.FullName.Length + 1).Replace('\\', '/'),
+                             Name = match.Groups[1].Value,
+                             Type = match.Groups[2].Value,
+                             Format = match.Groups[3].Value
+                         }
+                         into resource
+                         orderby resource.Order
+                         select resource)
                 {
-                    LoadResource(resource, buffer);
-                }
-                catch (System.Exception e)
-                {
-                    Logger.LogError(new AssetException(Path, e));
+                    buffer.SetLength(0);
+                    using var temp = resource.File.OpenRead();
+                    await temp.CopyToAsync(buffer);
+                    buffer.Position = 0;
+                    try
+                    {
+                        LoadResource(resource, buffer);
+                    }
+                    catch (System.Exception e)
+                    {
+                        Logger.LogError(new AssetException(Path, e));
+                    }
                 }
             }
-        }
-        else
-        {
-            Logger.LogInfo($"load [{Metadata.Name} {Metadata.Version}] from package '{Path}'");
-            using var package = ZipStorer.Open(Path, FileAccess.Read);
-            var entries = package.ReadCentralDir();
-            foreach (var resource in
-                     from entry in entries
-                     let match = InfoRegex.Match(entry.FilenameInZip)
-                     where match.Success
-                     select new ModResource<ZipFileEntry>
-                     {
-                         File = entry,
-                         Path = entry.FilenameInZip,
-                         Name = match.Groups[1].Value,
-                         Type = match.Groups[2].Value,
-                         Format = match.Groups[3].Value
-                     }
-                     into resource
-                     orderby resource.Order
-                     select resource)
+            else
             {
-                buffer.SetLength(0);
-                await package.ExtractFileAsync(resource.File, buffer);
-                buffer.Position = 0;
-                try
+                Logger.LogInfo($"load [{Metadata.Name} {Metadata.Version}] from package '{Path}'");
+                using var package = ZipStorer.Open(Path, FileAccess.Read);
+                foreach (var resource in
+                         from entry in package.ReadCentralDir()
+                         let match = InfoRegex.Match(entry.FilenameInZip)
+                         where match.Success
+                         select new ModResource<ZipFileEntry>
+                         {
+                             File = entry,
+                             Path = entry.FilenameInZip,
+                             Name = match.Groups[1].Value,
+                             Type = match.Groups[2].Value,
+                             Format = match.Groups[3].Value
+                         }
+                         into resource
+                         orderby resource.Order
+                         select resource)
                 {
-                    LoadResource(resource, buffer);
-                }
-                catch (System.Exception e)
-                {
-                    Logger.LogError(new AssetException(Path, e));
+                    buffer.SetLength(0);
+                    await package.ExtractFileAsync(resource.File, buffer);
+                    buffer.Position = 0;
+                    try
+                    {
+                        LoadResource(resource, buffer);
+                    }
+                    catch (System.Exception e)
+                    {
+                        Logger.LogError(new AssetException(Path, e));
+                    }
                 }
             }
-        }
 
-        Loaded = true;
+            Loaded = true;
+        }
+        finally
+        {
+            Lock.ExitWriteLock();
+        }
     }
 
     public bool IsUnloadReady()
     {
-        lock (Contexts)
+        Lock.EnterReadLock();
+        try
         {
             foreach (var (_, context) in Contexts)
             {
                 if (context.Metadata.Dependencies.ContainsKey(Metadata.Id) && context.Loaded) return false;
             }
-        }
 
-        return true;
+            return true;
+        }
+        finally
+        {
+            Lock.ExitReadLock();
+        }
     }
 
     public async Task Unload()
     {
-        lock (Contexts)
+        Lock.EnterWriteLock();
+        try
         {
             foreach (var (_, context) in Contexts)
             {
@@ -205,27 +237,30 @@ public class ModContext
                 var version = context.Metadata.Version;
                 throw new AssetException($"[{name} {version}] dependency {Metadata.Id} - {Metadata.Version}]");
             }
-        }
 
-        var keys = new List<string>();
-        lock (Cache) keys.AddRange(Cache.Keys.Reverse());
-        foreach (var key in keys)
+            var keys = new List<string>();
+            keys.AddRange(Cache.Keys.Reverse());
+            foreach (var key in keys)
+            {
+                await Task.CompletedTask;
+                try
+                {
+                    Release(key);
+                }
+                catch (System.Exception e)
+                {
+                    Logger.LogWarning(e);
+                }
+            }
+
+            Loaded = false;
+        }
+        finally
         {
-            await Task.Delay(10);
-            try
-            {
-                Release(key);
-            }
-            catch (System.Exception e)
-            {
-                Logger.LogWarning(e);
-            }
+            Lock.ExitWriteLock();
         }
-
-        Loaded = false;
     }
 
-    [SuppressMessage("ReSharper", "InconsistentlySynchronizedField")]
     private void LoadResource<T>(ModResource<T> resource, MemoryStream buffer)
     {
         switch (resource)
@@ -598,80 +633,75 @@ public class ModContext
 
     private static readonly Dictionary<string, Object> Cache = new();
 
-    private void Acquire(Object o)
+    private void Acquire(Object obj)
     {
-        lock (Cache)
+        var key = obj.NameAndType();
+        if (!Cache.TryAdd(key, obj))
         {
-            if (!Cache.TryAdd(o.NameAndType(), o))
-            {
-                Logger.LogWarning($"{o.NameAndType()} is already acquired");
-                return;
-            }
-
-            switch (o)
-            {
-                case TextAsset bank when bank.name.EndsWith(".strings"):
-                    FMODUnity.RuntimeManager.LoadBank(bank);
-                    FMODUnity.RuntimeManager.WaitForAllLoads();
-                    break;
-                case TextAsset bank:
-                    FMODUnity.RuntimeManager.LoadBank(bank);
-                    FMODUnity.RuntimeManager.WaitForAllLoads();
-                {
-                    Logger.LogDebug($"Fetch FMODAsset from bank:/{bank.name}");
-                    foreach (var (_, asset) in AssetElementBinder.FetchFMODAsset(path: $"bank:/{bank.name}"))
-                    {
-                        Logger.LogInfo($"Bind FMODAsset {asset.path} - {bank.name}");
-                    }
-                }
-                    break;
-                case VisualEffect visual:
-                    _ = visual.Bind();
-                    Logger.LogInfo($"Bind VisualEffect {visual.AssetId} - {visual.name}");
-                    break;
-                case LevelElement element:
-                    _ = element.Bind();
-                    Logger.LogInfo($"Bind LevelElement {element.AssetId} - {element.Title}");
-                    break;
-            }
-
-            CustomAssetUtility.Cache[o.NameAndType()] = o;
-            Object.DontDestroyOnLoad(o);
+            Logger.LogWarning($"{key} is already acquired");
+            return;
         }
+
+        switch (obj)
+        {
+            case TextAsset bank when bank.name.EndsWith(".strings"):
+                FMODUnity.RuntimeManager.LoadBank(bank);
+                FMODUnity.RuntimeManager.WaitForAllLoads();
+                break;
+            case TextAsset bank:
+                FMODUnity.RuntimeManager.LoadBank(bank);
+                FMODUnity.RuntimeManager.WaitForAllLoads();
+            {
+                Logger.LogDebug($"Fetch FMODAsset from bank:/{bank.name}");
+                foreach (var (_, asset) in AssetElementBinder.FetchFMODAsset(path: $"bank:/{bank.name}"))
+                {
+                    Logger.LogInfo($"Bind FMODAsset {asset.path} - {bank.name}");
+                }
+            }
+                break;
+            case VisualEffect visual:
+                _ = visual.Bind();
+                Logger.LogInfo($"Bind VisualEffect {visual.AssetId} - {visual.name}");
+                break;
+            case LevelElement element:
+                _ = element.Bind();
+                Logger.LogInfo($"Bind LevelElement {element.AssetId} - {element.Title}");
+                break;
+        }
+
+        CustomAssetUtility.Cache[key] = obj;
+        Object.DontDestroyOnLoad(obj);
     }
 
     private void Release(string key)
     {
-        lock (Cache)
+        if (!Cache.Remove(key, out var o))
         {
-            if (!Cache.Remove(key, out var o))
-            {
-                Logger.LogWarning($"{key} is already released");
-                return;
-            }
-
-            switch (o)
-            {
-                case TextAsset bank when bank.name.EndsWith(".strings"):
-                    FMODUnity.RuntimeManager.UnloadBank(bank.name);
-                    break;
-                case TextAsset bank:
-                    Logger.LogInfo($"Clear FMODAsset from bank:/{bank.name}");
-                    AssetElementBinder.ClearFMODAsset(path: $"bank:/{bank.name}");
-                    FMODUnity.RuntimeManager.UnloadBank(bank.name);
-                    break;
-                case VisualEffect visual:
-                    visual.Unbind();
-                    Logger.LogInfo($"Unbind VisualEffect {visual.AssetId} - {visual.name}");
-                    break;
-                case LevelElement element:
-                    element.Unbind();
-                    Logger.LogInfo($"Unbind LevelElement {element.AssetId} - {element.Title}");
-                    break;
-            }
-
-            CustomAssetUtility.Cache.Remove(key);
-            Object.Destroy(o);
+            Logger.LogWarning($"{key} is already released");
+            return;
         }
+
+        switch (o)
+        {
+            case TextAsset bank when bank.name.EndsWith(".strings"):
+                FMODUnity.RuntimeManager.UnloadBank(bank.name);
+                break;
+            case TextAsset bank:
+                Logger.LogInfo($"Clear FMODAsset from bank:/{bank.name}");
+                AssetElementBinder.ClearFMODAsset(path: $"bank:/{bank.name}");
+                FMODUnity.RuntimeManager.UnloadBank(bank.name);
+                break;
+            case VisualEffect visual:
+                visual.Unbind();
+                Logger.LogInfo($"Unbind VisualEffect {visual.AssetId} - {visual.name}");
+                break;
+            case LevelElement element:
+                element.Unbind();
+                Logger.LogInfo($"Unbind LevelElement {element.AssetId} - {element.Title}");
+                break;
+        }
+
+        CustomAssetUtility.Cache.Remove(key);
+        Object.Destroy(o);
     }
 }
