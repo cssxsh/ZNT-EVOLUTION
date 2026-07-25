@@ -7,6 +7,8 @@ namespace ZNT.Evolution.Core.Asset;
 
 public class LayerConverter : CustomCreationConverter<int>
 {
+    public static readonly LayerConverter Instance = new();
+
     public override bool CanWrite => true;
 
     public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)

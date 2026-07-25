@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -6,13 +7,8 @@ using UnityEngine;
 
 namespace ZNT.Evolution.Core.Asset;
 
-internal class ObjectContractResolver : DefaultContractResolver
+internal class ObjectContractResolver() : DefaultContractResolver(shareCache: true)
 {
-    public ObjectContractResolver() : base(shareCache: true)
-    {
-        // ...
-    }
-
     protected override JsonObjectContract CreateObjectContract(Type type)
     {
         DefaultMembersSearchFlags = BindingFlags.Instance | BindingFlags.Public;
@@ -32,21 +28,23 @@ internal class ObjectContractResolver : DefaultContractResolver
                 when !member.IsDefined(typeof(SerializeField)):
             case { Name: nameof(LevelElement.SpriteDefinition) }
                 when typeof(LevelElement).IsAssignableFrom(member.DeclaringType):
+                property.Ignored = true;
+                break;
             case { Name: nameof(LevelElement.AttachPoints) }
                 when typeof(LevelElement).IsAssignableFrom(member.DeclaringType):
-                property.Ignored = true;
+                property.DefaultValue ??= new List<AttachPoint>();
+                property.ShouldSerialize = points => points is List<AttachPoint> { Count: > 0 };
+                property.DefaultValueHandling = DefaultValueHandling.Populate;
                 break;
             case not null
                 when member.IsDefined(typeof(LayerAttribute)):
                 property.PropertyType = typeof(int);
-                property.Converter = property.MemberConverter = new LayerConverter();
+                property.Converter = property.MemberConverter = LayerConverter.Instance;
                 property.ValueProvider = new LayerProvider(origin: property.ValueProvider);
                 break;
             case { Name: nameof(UnityEngine.Object.name) }:
             case { Name: nameof(UnityEngine.Object.hideFlags) }:
                 break;
-            case not null
-                when member.IsDefined(typeof(ReadOnlyAttribute)):
             case PropertyInfo:
                 property.Readable = false;
                 break;
@@ -57,20 +55,15 @@ internal class ObjectContractResolver : DefaultContractResolver
 
     private static bool IsSerializable(Type type)
     {
-        return type.IsDefined(typeof(SerializableAttribute))
-               || typeof(UnityEngine.Object).IsAssignableFrom(type);
+        return type.IsDefined(typeof(SerializableAttribute)) || typeof(UnityEngine.Object).IsAssignableFrom(type);
     }
 
-    private class LayerProvider : IValueProvider
+    private class LayerProvider(IValueProvider origin) : IValueProvider
     {
-        private readonly IValueProvider _origin;
-
-        public LayerProvider(IValueProvider origin) => _origin = origin;
-
         public void SetValue(object target, object value)
         {
             var layer = (int)value;
-            _origin.SetValue(target, _origin.GetValue(target) switch
+            origin.SetValue(target, origin.GetValue(target) switch
             {
                 LayerMask => (LayerMask)layer,
                 int => layer,
@@ -80,7 +73,7 @@ internal class ObjectContractResolver : DefaultContractResolver
 
         public object GetValue(object target)
         {
-            return _origin.GetValue(target) switch
+            return origin.GetValue(target) switch
             {
                 LayerMask mask => mask.value,
                 int index => index,
