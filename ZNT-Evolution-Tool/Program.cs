@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
+using AssetsTools.NET;
 using AssetsTools.NET.Extra;
 
 namespace ZNT.Evolution.Tool;
@@ -32,42 +34,49 @@ internal static class Program
 
         foreach (var assets in LoadAssetsFiles())
         {
-            // foreach (var shader in assets.file.GetAssetsOfType(AssetClassID.Shader))
+            // foreach (var asset in assets.LoadTexture2D())
             // {
-            //     var fields = Manager.GetBaseField(assets, shader);
-            //     Console.WriteLine($"| `{assets.name}` | `{shader.PathId}` | `{fields["m_ParsedForm"]["m_Name"].AsString}` |");
+            //     var fields = Manager.GetBaseField(assets, asset);
+            //     var name = fields["m_Name"].AsString;
+            //     Console.WriteLine($"| `{assets.name}` | `{asset.PathId}` | `{name} : UnityEngine.Texture2D` |");
             // }
-
-            // foreach (var asset in assets.file.GetAssetsOfType(AssetClassID.MonoBehaviour))
+            //
+            // foreach (var asset in assets.LoadShader())
+            // {
+            //     var fields = Manager.GetBaseField(assets, asset);
+            //     var name = fields["m_ParsedForm"]["m_Name"].AsString;
+            //     Console.WriteLine($"| `{assets.name}` | `{asset.PathId}` | `{name}` |");
+            // }
+            //
+            // foreach (var asset in assets.LoadMaterial())
+            // {
+            //     var fields = Manager.GetBaseField(assets, asset);
+            //     var name = fields["m_Name"].AsString;
+            //     Console.WriteLine($"| `{assets.name}` | `{asset.PathId}` | `{name}` |");
+            // }
+            //
+            // foreach (var asset in assets.LoadSprites())
+            // {
+            //     var fields = Manager.GetBaseField(assets, asset);
+            //     var name = Manager.GetExtAsset(assets, fields["m_GameObject"]).baseField["m_Name"].AsString;
+            //     Console.WriteLine($"| `{assets.name}` | `{asset.PathId}` | `{name} : tk2dSpriteCollectionData` |");
+            // }
+            //
+            // foreach (var asset in assets.LoadAnimation())
+            // {
+            //     var fields = Manager.GetBaseField(assets, asset);
+            //     var name = Manager.GetExtAsset(assets, fields["m_GameObject"]).baseField["m_Name"].AsString;
+            //     Console.WriteLine($"| `{assets.name}` | `{asset.PathId}` | `{name} : tk2dSpriteAnimation` |");
+            // }
+            //
+            // foreach (var asset in assets.LoadAssetElement())
             // {
             //     var fields = Manager.GetBaseField(assets, asset);
             //     var script = Manager.GetExtAsset(assets, fields["m_Script"]);
-            //     var fullname = string.IsNullOrEmpty(script.baseField["m_Namespace"].AsString) 
-            //         ? script.baseField["m_ClassName"].AsString
-            //         : $"{script.baseField["m_Namespace"].AsString}.{script.baseField["m_ClassName"].AsString}";
-            //     if (fullname != "Rotorz.Tile.OrientedBrush") continue;
-            //     if (Manager.GetExtAsset(assets, fields["_orientations"][0][0]["_variations"][0][0]) is { info.TypeId: 1 } prefab)
-            //     {
-            //         Console.WriteLine($"| `{assets.name}` | `{asset.PathId}` | `{fields["m_Name"].AsString}` | `{prefab.baseField["m_Name"].AsString}` |");
-            //     }
-            //     else
-            //     {
-            //         Console.WriteLine($"| `{assets.name}` | `{asset.PathId}` | `{fields["m_Name"].AsString}` | |");
-            //     }
-            // }
-
-            // foreach (var asset in assets.file.GetAssetsOfType(AssetClassID.MonoBehaviour))
-            // {
-            //     var fields = Manager.GetBaseField(assets, asset);
-            //     var script = Manager.GetExtAsset(assets, fields["m_Script"]);
-            //     var fullname = string.IsNullOrEmpty(script.baseField["m_Namespace"].AsString) 
-            //         ? script.baseField["m_ClassName"].AsString
-            //         : $"{script.baseField["m_Namespace"].AsString}.{script.baseField["m_ClassName"].AsString}";
-            //     if (fullname != "tk2dSpriteCollectionData") continue;
-            //     var body = Manager.GetExtAsset(assets, fields["m_GameObject"]);
-            //     var material = Manager.GetExtAsset(assets, fields["materials"][0][0]);
-            //     var shader = Manager.GetExtAsset(assets, material.baseField["m_Shader"]);
-            //     Console.WriteLine($"| `{assets.name}` | `{asset.PathId}` | `{body.baseField["m_Name"].AsString}` | `{shader.baseField["m_ParsedForm"]["m_Name"].AsString}` |");
+            //     var name = fields["m_Name"].AsString;
+            //     var type = script.baseField["m_ClassName"].AsString;
+            //     // if (script.baseField["m_Namespace"].AsString != "") throw new Exception(type);
+            //     Console.WriteLine($"| `{assets.name}` | `{asset.PathId}` | `{name} : {type}` |");
             // }
         }
 
@@ -84,5 +93,105 @@ internal static class Program
         {
             yield return Manager.LoadAssetsFileFromBundle(GameData, index, true);
         }
+    }
+    
+    // ReSharper disable once UnusedMember.Local
+    private static IEnumerable<AssetFileInfo> LoadTexture2D(this AssetsFileInstance assets)
+    {
+        return from asset in assets.file.GetAssetsOfType(AssetClassID.Texture2D)
+            let fields = Manager.GetBaseField(assets, asset)
+            let name = fields["m_Name"].AsString
+            where name.EndsWith("_atlas")
+            select asset;
+    }
+
+    // ReSharper disable once UnusedMember.Local
+    private static IEnumerable<AssetFileInfo> LoadShader(this AssetsFileInstance assets)
+    {
+        return from asset in assets.file.GetAssetsOfType(AssetClassID.Shader)
+            let fields = Manager.GetBaseField(assets, asset)
+            // where fields["m_ParsedForm"]["m_Name"].AsString.StartsWith("ZNT/")
+            select asset;
+    }
+
+    // ReSharper disable once UnusedMember.Local
+    private static IEnumerable<AssetFileInfo> LoadMaterial(this AssetsFileInstance assets)
+    {
+        return from asset in assets.file.GetAssetsOfType(AssetClassID.Material)
+            let fields = Manager.GetBaseField(assets, asset)
+            let name = fields["m_Name"].AsString
+            where name.EndsWith("_mat")
+            select asset;
+    }
+
+    // ReSharper disable once UnusedMember.Local
+    private static IEnumerable<AssetFileInfo> LoadSprites(this AssetsFileInstance assets)
+    {
+        return from asset in assets.file.GetAssetsOfType(AssetClassID.MonoBehaviour)
+            let fields = Manager.GetBaseField(assets, asset)
+            let script = Manager.GetExtAsset(assets, fields["m_Script"])
+            where script.baseField["m_ClassName"].AsString == "tk2dSpriteCollectionData"
+            select asset;
+    }
+
+    // ReSharper disable once UnusedMember.Local
+    private static IEnumerable<AssetFileInfo> LoadAnimation(this AssetsFileInstance assets)
+    {
+        return from asset in assets.file.GetAssetsOfType(AssetClassID.MonoBehaviour)
+            let fields = Manager.GetBaseField(assets, asset)
+            let script = Manager.GetExtAsset(assets, fields["m_Script"])
+            where script.baseField["m_ClassName"].AsString == "tk2dSpriteAnimation"
+            select asset;
+    }
+
+    // ReSharper disable once UnusedMember.Local
+    private static IEnumerable<AssetFileInfo> LoadAssetElement(this AssetsFileInstance assets)
+    {
+        return from asset in assets.file.GetAssetsOfType(AssetClassID.MonoBehaviour)
+            let fields = Manager.GetBaseField(assets, asset)
+            let script = Manager.GetExtAsset(assets, fields["m_Script"])
+            where script.baseField["m_ClassName"].AsString is
+                "AssetElement" or
+                "FMODAsset" or
+                "AssetElementIndex" or
+                "CustomAssetObject" or
+                "GameConfAsset" or
+                "PoolSettingsAsset" or
+                "InputAsset" or
+                "FmodAssetIndex" or
+                "CharacterAnimationAsset" or
+                "CharacterAsset" or
+                "CharacterSoundAsset" or
+                "HumanAsset" or
+                "SentryGunAsset" or
+                "WorldEnemyAsset" or
+                "ZombieAsset" or
+                "DetectionAsset" or
+                "ScreamAsset" or
+                "BreakablePropAsset" or
+                "DecorAsset" or
+                "ExplosionAsset" or
+                "MovingObjectAsset" or
+                "MutationsConfigAsset" or
+                "PhysicObjectAsset" or
+                "TriggerAsset" or
+                "ShaderAnimator" or
+                "ShaderAnimatorIndex" or
+                "VisualEffect" or
+                "VisualEffectIndex" or
+                "LevelElement" or
+                "LevelElementIndex" or
+                "BlockerMutation" or
+                "BoomerMutation" or
+                "CharacterMutation" or
+                "ClimberMutation" or
+                "ContaminationMutation" or
+                "JumpMutation" or
+                "RunnerMutation" or
+                "SacrificeMutation" or
+                "ScreamerMutation" or
+                "SpitMutation" or
+                "TankMutation"
+            select asset;
     }
 }
