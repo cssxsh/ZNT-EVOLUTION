@@ -295,12 +295,14 @@ internal static class SceneLoaderPatch
     private static void AddCopy(this SelectionMenu menu)
     {
         var move = Traverse.Create(menu).Field<Toggle>("moveButton").Value;
-        var target = Traverse.Create(menu).Field<EditorGameObject>("serializeGameObject");
+        var plus = Traverse.Create(menu).Field<Button>("decorPlusButton").Value;
+        var icon = plus.transform.Find("Icon").GetComponent<Image>().sprite;
         var copy = Object.Instantiate(original: move, parent: move.transform.parent);
         copy.name = "Copy Button";
-        copy.OnValueChanged(value => target.Value.ObjectSettings.Activate(value, ObjectSettings.Control.Copy));
-        var icon = copy.transform.Find("Icon").GetComponent<Image>();
-        icon.sprite = Resources.FindObjectsOfTypeAll<Sprite>().FirstOrDefault(sprite => sprite.name is "icon_plus");
+        copy.transform.SetSiblingIndex(3);
+        copy.transform.Find("Icon").GetComponent<Image>().sprite = icon;
+        // copy.transform.Find("Selected").GetComponent<Image>().sprite = icon;
+        copy.OnValueChanged(menu.CopyObject);
     }
 
     private static void AddEmpty(this SelectionMenu menu)
@@ -321,10 +323,19 @@ internal static class SceneLoaderPatch
         Traverse.Create(binder).Field<UIBehaviour[]>("uiComponents").Value = fields;
     }
 
-    private static void BindDirection(this SelectionMenu menu, EditorComponent component, MemberInfo member)
+    private static void CopyObject(this SelectionMenu menu, bool active)
     {
-        var prefabs = Traverse.Create(menu).Field<SupportedTypePrefabs>("customDrawerPrefabs").Value;
-        menu.InstantiateCustomBinder(prefabs[EditorComponent.SupportedType.Vector3]).BindDirection(component, member);
+        var target = Traverse.Create(menu).Field<EditorGameObject>("serializeGameObject").Value;
+        target.ObjectSettings.Activate(active, active ? ObjectSettings.Control.Copy : ObjectSettings.Control.None); 
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(SelectionMenu), "UpdateCommonMenu")]
+    public static void UpdateCommonMenu(SelectionMenu __instance)
+    {
+        var move = Traverse.Create(__instance).Field<Toggle>("moveButton").Value;
+        var copy = move.transform.parent.Find("Copy Button")?.GetComponent<Toggle>();
+        copy?.isOn = false;
     }
 
     private static readonly HashSet<string> Activated = [];
@@ -406,6 +417,12 @@ internal static class SceneLoaderPatch
         }
 
         return true;
+    }
+
+    private static void BindDirection(this SelectionMenu menu, EditorComponent component, MemberInfo member)
+    {
+        var prefabs = Traverse.Create(menu).Field<SupportedTypePrefabs>("customDrawerPrefabs").Value;
+        menu.InstantiateCustomBinder(prefabs[EditorComponent.SupportedType.Vector3]).BindDirection(component, member);
     }
 
     #endregion

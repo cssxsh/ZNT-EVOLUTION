@@ -273,7 +273,8 @@ internal static class DebugPatch
     [HarmonyPatch(typeof(ObjectSettings), "CopyObject")]
     public static bool CopyObject(ObjectSettings __instance, Rotorz.Tile.TileIndex ti)
     {
-        if (__instance.Type != ObjectSettings.ElementType.Brush) return true;
+        var position = __instance.transform.position;
+        if (__instance.Type is not ObjectSettings.ElementType.Brush) return true;
         var element = Traverse.Create(__instance).Field<LevelElement>("element").Value;
         var level = Traverse.Create(__instance).Field<LevelLoaderManager>("levelManager").Value;
         var system = Traverse.Create(__instance).Field<Rotorz.Tile.TileSystem>("tileSystem").Value;
@@ -289,10 +290,10 @@ internal static class DebugPatch
         var tile = system.GetTileOrNull(ti);
         if (tile == null) return false;
         __instance.gameObject.CopyTo(tile.gameObject);
-        __instance.OnCopy?.Invoke(tile.gameObject, true);
+        __instance.OnCopy?.Invoke(tile.gameObject, __instance.Type is ObjectSettings.ElementType.Brush);
         tile.gameObject.BroadcastMessage(
-            methodName: "ObjectCopiedInEditor",
-            parameter: true,
+            methodName: "ObjectMovedInEditor",
+            parameter: position,
             options: SendMessageOptions.DontRequireReceiver);
         return false;
     }
