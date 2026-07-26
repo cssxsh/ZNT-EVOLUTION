@@ -8,16 +8,11 @@ namespace ZNT.Evolution.Core.Editor;
 [DisallowMultipleComponent]
 public abstract class CharacterEditor : Editor
 {
-    [NonSerialized]
-    protected Character Character;
+    [field: NonSerialized]
+    protected Character Character => field ??= GetComponentInChildren<Character>();
 
     [NonSerialized]
     protected readonly Dictionary<string, CharacterBuff> Buffs = new();
-
-    protected override void OnCreate()
-    {
-        Character ??= GetComponentInChildren<Character>();
-    }
 
     public void ApplyBuff(Parameters parameters)
     {

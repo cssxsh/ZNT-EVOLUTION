@@ -8,7 +8,8 @@ namespace ZNT.Evolution.Core.Editor;
 [DisallowMultipleComponent]
 public class InvisibleShield : Editor, IActivable, IDeserializable
 {
-    private BoxCollider2D _collider;
+    [field: NonSerialized]
+    private BoxCollider2D Collider => field ??= GetComponent<BoxCollider2D>();
 
     [SerializeInEditor(name: "Is Active")]
     public bool IsActive { get; private set; } = true;
@@ -30,8 +31,8 @@ public class InvisibleShield : Editor, IActivable, IDeserializable
     [SerializeInEditor(name: "Offset")]
     public Vector2 Offset
     {
-        get => (_collider ??= GetComponent<BoxCollider2D>()).offset;
-        set => (_collider ??= GetComponent<BoxCollider2D>()).offset = value;
+        get => Collider.offset;
+        set => Collider.offset = value;
     }
 
     public void OnDeserialized()
@@ -46,7 +47,7 @@ public class InvisibleShield : Editor, IActivable, IDeserializable
 
     public void SetActive(bool state)
     {
-        (_collider ??= GetComponent<BoxCollider2D>()).enabled = IsActive = state;
+        Collider.enabled = IsActive = state;
     }
 
     public void SetActive() => SetActive(true);
@@ -55,16 +56,10 @@ public class InvisibleShield : Editor, IActivable, IDeserializable
 
     public void ToggleActivation() => SetActive(!IsActive);
 
-    private void OnSpawned()
-    {
-        _collider ??= GetComponent<BoxCollider2D>();
-    }
-
     private void OnDespawned()
     {
-        _collider ??= GetComponent<BoxCollider2D>();
-        _collider.size = new Vector2(0.3f, 1.95f);
-        _collider.offset = new Vector2(0.65f, 0.975f);
+        Collider.size = new Vector2(0.3f, 1.95f);
+        Collider.offset = new Vector2(0.65f, 0.975f);
         Type = WallType.Explosion;
     }
 

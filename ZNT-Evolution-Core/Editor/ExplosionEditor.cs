@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using UnityEngine;
 
@@ -8,11 +9,14 @@ namespace ZNT.Evolution.Core.Editor;
 [DisallowMultipleComponent]
 public class ExplosionEditor : Editor
 {
-    private ExplosionEffect Effect => GetComponent<ExplosionEffect>();
+    [field: NonSerialized]
+    private ExplosionEffect Effect => field ??= GetComponent<ExplosionEffect>();
 
-    private SphereDetection Detection => GetComponent<SphereDetection>();
+    [field: NonSerialized]
+    private SphereDetection Detection => field ??= GetComponent<SphereDetection>();
 
-    private ExplosionAsset Asset => GetComponent<AssetComponent>().Asset as ExplosionAsset;
+    [field: NonSerialized]
+    private ExplosionAsset Asset => field ??= GetComponent<AssetComponent>().Asset as ExplosionAsset;
 
     [SerializeInEditor(name: "Damage")]
     public float Damage

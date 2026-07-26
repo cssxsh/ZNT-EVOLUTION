@@ -12,54 +12,55 @@ public class OneWayEditor : Editor, IActivable, IDeserializable
 {
     private static readonly Dictionary<Collider2D, OneWayCollider> Cache = new();
 
-    private OneWayCollider _wall;
+    [field: NonSerialized]
+    private OneWayCollider Wall => field ??= GetComponent<OneWayCollider>();
 
-    private BoxCollider2D _collider;
+    [field: NonSerialized]
+    private BoxCollider2D Collider => field ??= Traverse.Create(Wall).Field<BoxCollider2D>("collider").Value;
 
-    private PlatformEffector2D _effector;
+    [field: NonSerialized]
+    private PlatformEffector2D Effector => field ??= Traverse.Create(Wall).Field<PlatformEffector2D>("effector").Value;
 
     [SerializeInEditor(name: "Type")]
     public WallType Type
     {
-        get => Traverse.Create(_wall).Property<WallType>("Type").Value;
-        set => Traverse.Create(_wall).Property<WallType>("Type").Value = value;
+        get => Traverse.Create(Wall).Property<WallType>("Type").Value;
+        set => Traverse.Create(Wall).Property<WallType>("Type").Value = value;
     }
 
     [SerializeInEditor(name: "Block From")]
     public Orientation Orientation
     {
-        get => Traverse.Create(_wall).Field<Orientation>("orientation").Value;
+        get => Traverse.Create(Wall).Field<Orientation>("orientation").Value;
         set
         {
-            _wall ??= GetComponent<OneWayCollider>();
-            _effector ??= Traverse.Create(_wall).Field<PlatformEffector2D>("effector").Value;
             switch (value)
             {
                 case Orientation.Left:
-                    _effector.gameObject.layer = LayerMask.NameToLayer("One Way");
-                    _effector.rotationalOffset = Vector2.SignedAngle(Vector2.up, Vector2.left);
-                    Traverse.Create(_wall).Field<Vector2>("direction").Value = Vector2.left;
+                    Effector.gameObject.layer = LayerMask.NameToLayer("One Way");
+                    Effector.rotationalOffset = Vector2.SignedAngle(Vector2.up, Vector2.left);
+                    Traverse.Create(Wall).Field<Vector2>("direction").Value = Vector2.left;
                     break;
                 case Orientation.Right:
-                    _effector.gameObject.layer = LayerMask.NameToLayer("One Way");
-                    _effector.rotationalOffset = Vector2.SignedAngle(Vector2.up, Vector2.right);
-                    Traverse.Create(_wall).Field<Vector2>("direction").Value = Vector2.right;
+                    Effector.gameObject.layer = LayerMask.NameToLayer("One Way");
+                    Effector.rotationalOffset = Vector2.SignedAngle(Vector2.up, Vector2.right);
+                    Traverse.Create(Wall).Field<Vector2>("direction").Value = Vector2.right;
                     break;
                 case Orientation.Up:
-                    _effector.gameObject.layer = LayerMask.NameToLayer("Stairs Top");
-                    _effector.rotationalOffset = Vector2.SignedAngle(Vector2.up, Vector2.up);
-                    Traverse.Create(_wall).Field<Vector2>("direction").Value = Vector2.up;
+                    Effector.gameObject.layer = LayerMask.NameToLayer("Stairs Top");
+                    Effector.rotationalOffset = Vector2.SignedAngle(Vector2.up, Vector2.up);
+                    Traverse.Create(Wall).Field<Vector2>("direction").Value = Vector2.up;
                     break;
                 case Orientation.Down:
-                    _effector.gameObject.layer = LayerMask.NameToLayer("One Way");
-                    _effector.rotationalOffset = Vector2.SignedAngle(Vector2.up, Vector2.down);
-                    Traverse.Create(_wall).Field<Vector2>("direction").Value = Vector2.down;
+                    Effector.gameObject.layer = LayerMask.NameToLayer("One Way");
+                    Effector.rotationalOffset = Vector2.SignedAngle(Vector2.up, Vector2.down);
+                    Traverse.Create(Wall).Field<Vector2>("direction").Value = Vector2.down;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(Orientation), value, null);
             }
 
-            Traverse.Create(_wall).Field<Orientation>("orientation").Value = value;
+            Traverse.Create(Wall).Field<Orientation>("orientation").Value = value;
         }
     }
 
@@ -68,22 +69,17 @@ public class OneWayEditor : Editor, IActivable, IDeserializable
 
     protected override void OnCreate()
     {
-        _wall ??= GetComponent<OneWayCollider>();
-        _wall.EditorVisibility = false;
+        Wall.EditorVisibility = false;
     }
 
     private void OnEnable()
     {
-        _wall ??= GetComponent<OneWayCollider>();
-        _collider ??= Traverse.Create(_wall).Field<BoxCollider2D>("collider").Value;
-        Cache[_collider] = _wall;
+        Cache[Collider] = Wall;
     }
 
     private void OnDisable()
     {
-        _wall ??= GetComponent<OneWayCollider>();
-        _collider ??= Traverse.Create(_wall).Field<BoxCollider2D>("collider").Value;
-        Cache.Remove(_collider);
+        Cache.Remove(Collider);
     }
 
     private IEnumerator Start()
@@ -106,9 +102,7 @@ public class OneWayEditor : Editor, IActivable, IDeserializable
 
     public void SetActive(bool state)
     {
-        _wall ??= GetComponent<OneWayCollider>();
-        _collider ??= Traverse.Create(_wall).Field<BoxCollider2D>("collider").Value;
-        _collider.enabled = IsActive = state;
+        Collider.enabled = IsActive = state;
     }
 
     [SignalReceiver]

@@ -1,3 +1,4 @@
+using System;
 using HarmonyLib;
 using UnityEngine;
 
@@ -7,7 +8,8 @@ namespace ZNT.Evolution.Core.Editor;
 [DisallowMultipleComponent]
 public class HumanEditor : CharacterEditor
 {
-    private HumanBehaviour Behaviour => (HumanBehaviour)Character?.Behaviour ?? GetComponent<HumanBehaviour>();
+    [field: NonSerialized]
+    private HumanBehaviour Behaviour => field ??= GetComponent<HumanBehaviour>();
 
     private Tag Tags
     {

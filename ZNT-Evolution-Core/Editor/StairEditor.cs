@@ -7,15 +7,15 @@ namespace ZNT.Evolution.Core.Editor;
 [DisallowMultipleComponent]
 public class StairEditor : Editor, IActivable
 {
-    [NonSerialized]
-    protected StairBehaviour Behaviour;
+    [field: NonSerialized]
+    protected StairBehaviour Behaviour => field ??= GetComponent<StairBehaviour>();
 
-    public bool IsActive => (Behaviour ??= GetComponent<StairBehaviour>()).UseStairs;
+    public bool IsActive => Behaviour.UseStairs;
 
     public void SetActive(bool state)
     {
         if (IsActive == state) return;
-        (Behaviour ??= GetComponent<StairBehaviour>()).SendMessage(methodName: "OnMouseUpAsButton");
+        Behaviour.SendMessage(methodName: "OnMouseUpAsButton");
     }
 
     [SignalReceiver(name: "Set Stair Active")]
