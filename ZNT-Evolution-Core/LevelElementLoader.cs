@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using BepInEx.Logging;
@@ -69,7 +68,7 @@ public static class LevelElementLoader
                     break;
                 case TextAsset bank when name is "bank.strings" or "bank_":
                     FMODUnity.RuntimeManager.LoadBank(asset: bank, loadSamples: true);
-                    yield return new WaitUntil(() => !FMODUnity.RuntimeManager.AnyBankLoading());
+                    yield return new WaitWhile(FMODUnity.RuntimeManager.AnyBankLoading);
                     Logger.LogDebug($"[{bundle.name}] {asset.name}");
                     break;
                 default:
@@ -464,7 +463,7 @@ public static class LevelElementLoader
                     break;
                 case TextAsset bank when name is "bank.strings" or "bank_":
                     FMODUnity.RuntimeManager.LoadBank(asset: bank, loadSamples: true);
-                    yield return new WaitUntil(() => !FMODUnity.RuntimeManager.AnyBankLoading());
+                    yield return new WaitWhile(FMODUnity.RuntimeManager.AnyBankLoading);
                     Logger.LogDebug($"[{bundle.name}] {asset.name}");
                     break;
                 default:
@@ -606,7 +605,7 @@ public static class LevelElementLoader
                         break;
                     case TextAsset bank when name is "bank.strings" or "bank_":
                         FMODUnity.RuntimeManager.LoadBank(asset: bank, loadSamples: true);
-                        yield return new WaitUntil(() => !FMODUnity.RuntimeManager.AnyBankLoading());
+                        yield return new WaitWhile(FMODUnity.RuntimeManager.AnyBankLoading);
                         Logger.LogDebug($"[{bundle.name}] {asset.name}");
                         break;
                     default:
@@ -713,29 +712,24 @@ public static class LevelElementLoader
 
     public static IEnumerator LoadBanks(string folder, bool loadSamples = false)
     {
-        var main = new List<string>();
-
         foreach (var file in Directory.EnumerateFiles(path: folder, searchPattern: "*.strings.bank"))
         {
             var bank = Path.GetFileNameWithoutExtension(file);
-            var master = bank.ReplaceLast(".strings", "");
-            if (FMODUnity.Settings.Instance.MasterBanks.Contains(master)) continue;
-            main.Add(master);
+            if (FMODUnity.RuntimeManager.HasBankLoaded(bank)) continue;
             Logger.LogInfo($"load Bank {bank}");
             FMODUnity.RuntimeManager.LoadBank(bankName: bank, loadSamples: loadSamples);
-            yield return new WaitUntil(() => !FMODUnity.RuntimeManager.AnyBankLoading());
+            yield return new WaitWhile(FMODUnity.RuntimeManager.AnyBankLoading);
         }
 
         foreach (var file in Directory.EnumerateFiles(path: folder, searchPattern: "*.bank"))
         {
             var bank = Path.GetFileNameWithoutExtension(file);
             if (bank.EndsWith(".strings")) continue;
-            if (FMODUnity.Settings.Instance.MasterBanks.Contains(bank)) continue;
-            if (FMODUnity.Settings.Instance.Banks.Contains(bank)) continue;
-            if (main.Contains(bank)) continue;
+            if (FMODUnity.RuntimeManager.HasBankLoaded(bank)) continue;
+            if (FMODUnity.RuntimeManager.HasBankLoaded(bank + ".strings")) continue;
             Logger.LogInfo($"load Bank {bank}");
             FMODUnity.RuntimeManager.LoadBank(bankName: bank, loadSamples: loadSamples);
-            yield return new WaitUntil(() => !FMODUnity.RuntimeManager.AnyBankLoading());
+            yield return new WaitWhile(FMODUnity.RuntimeManager.AnyBankLoading);
             foreach (var (_, asset) in AssetElementBinder.FetchFMODAsset(path: $"bank:/{bank}"))
             {
                 Logger.LogInfo($"[{bank}] fetch {asset.path}");
