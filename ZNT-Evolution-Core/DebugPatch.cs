@@ -141,14 +141,6 @@ internal static class DebugPatch
         Traverse.Create(__instance).Field<string>("proxyId").Value ??= __instance.name;
     }
 
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(ObjectOrientation), "orientation", MethodType.Setter)]
-    public static void SetOrientation(ObjectOrientation __instance, ObjectOrientation.Orientation value)
-    {
-        var behaviour = __instance.GetComponent<MovingObjectBehaviour>();
-        behaviour?.Orientation = value == ObjectOrientation.Orientation.Right ? Vector3.forward : Vector3.back;
-    }
-
     [HarmonyPrefix]
     [HarmonyPatch(typeof(CharacterAsset), "SetHealth")]
     public static bool SetHealth(CharacterAsset __instance, Character character)
