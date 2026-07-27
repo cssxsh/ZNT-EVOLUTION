@@ -67,10 +67,21 @@ public static class ModManager
             }
         }
 
-        foreach (var context in allocated)
+        while (allocated.Find(context => context.IsUnloadReady()) is { } mod)
         {
-            Logger.LogDebug($"'{context.Path}' load fail");
-            ModContext.Free(context.Metadata.Id);
+            try
+            {
+                await mod.Unload();
+                ModContext.Free(mod.Metadata.Id);
+            }
+            catch (System.Exception e)
+            {
+                Logger.LogError(e);
+            }
+            finally
+            {
+                allocated.Remove(mod);
+            }
         }
     }
 

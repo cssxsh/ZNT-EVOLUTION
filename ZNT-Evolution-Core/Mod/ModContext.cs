@@ -130,6 +130,7 @@ public class ModContext
                 throw new AssetException($"[{Metadata.Name} {Metadata.Version}] dependency {id} - {version}]");
             }
 
+            Loaded = true;
             using var buffer = new MemoryStream();
             if (Directory.Exists(Path))
             {
@@ -198,8 +199,6 @@ public class ModContext
                     }
                 }
             }
-
-            Loaded = true;
         }
         finally
         {
