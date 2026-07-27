@@ -10,6 +10,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using ZNT.Evolution.Core.Editor;
 using ZNT.Evolution.Core.Mod;
 using ZNT.LevelEditor;
 using BepInExLogger = BepInEx.Logging.Logger;
@@ -326,7 +327,7 @@ internal static class SceneLoaderPatch
     private static void CopyObject(this SelectionMenu menu, bool active)
     {
         var target = Traverse.Create(menu).Field<EditorGameObject>("serializeGameObject").Value;
-        target.ObjectSettings.Activate(active, active ? ObjectSettings.Control.Copy : ObjectSettings.Control.None); 
+        target.ObjectSettings.Activate(active, active ? ObjectSettings.Control.Copy : ObjectSettings.Control.None);
     }
 
     [HarmonyPostfix]
@@ -370,16 +371,21 @@ internal static class SceneLoaderPatch
             var panel = Object.Instantiate(original: empty, parent: container);
             panel.name = $"{component.Name} Panel";
             Traverse.Create(__instance).Field<RectTransform>("mainContainer").Value = panel;
-            foreach (var (member, _) in component.Fields)
+            try
             {
-                if (overrider != null && overrider.OverrideMemberUi(__instance, component, member)) continue;
-                __instance.SetDefaultUi(component, member);
+                foreach (var (member, _) in component.Fields)
+                {
+                    if (overrider != null && overrider.OverrideMemberUi(__instance, component, member)) continue;
+                    __instance.SetDefaultUi(component, member);
+                }
             }
-
-            Traverse.Create(__instance).Field<RectTransform>("mainContainer").Value = container;
-            header.AddComponent<Button>().onClick.AddListener(panel.ToggleActivation);
-            header.SetActive(panel.childCount != 0);
-            panel.gameObject.SetActive(panel.childCount != 0 && Activated.Contains(panel.name));
+            finally
+            {
+                Traverse.Create(__instance).Field<RectTransform>("mainContainer").Value = container;
+                header.AddComponent<Button>().onClick.AddListener(panel.ToggleActivation);
+                header.SetActive(panel.childCount != 0);
+                panel.gameObject.SetActive(panel.childCount != 0 && Activated.Contains(panel.name));
+            }
         }
 
         scroll.Rebuild(CanvasUpdate.PostLayout);
@@ -410,19 +416,90 @@ internal static class SceneLoaderPatch
     public static bool SetDefaultUi(SelectionMenu __instance, EditorComponent component, MemberInfo member)
     {
         // ReSharper disable once InvertIf
-        if (member == typeof(MovingObjectBehaviour).GetProperty(nameof(MovingObjectBehaviour.Orientation)))
+        if (member.DeclaringType == typeof(MovingObjectBehaviour) &&
+            member.Name is nameof(MovingObjectBehaviour.Orientation))
         {
-            __instance.BindDirection(component, member);
+            // Hide for ObjectOrientation.Orientation
+            // __instance.DirectionBinder().BindDirection(component, member);
+            return false;
+        }
+
+        // ReSharper disable once InvertIf
+        if (member.DeclaringType == typeof(ObjectOrientation) &&
+            member.Name is "orientation")
+        {
+            __instance.DirectionBinder().BindDirection(component, member);
             return false;
         }
 
         return true;
     }
 
-    private static void BindDirection(this SelectionMenu menu, EditorComponent component, MemberInfo member)
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(SupportedTypeBinder), "SetName")]
+    public static bool SetName(this SupportedTypeBinder __instance, MemberInfo member)
     {
-        var prefabs = Traverse.Create(menu).Field<SupportedTypePrefabs>("customDrawerPrefabs").Value;
-        menu.InstantiateCustomBinder(prefabs[EditorComponent.SupportedType.Vector3]).BindDirection(component, member);
+        var attribute = member.GetCustomAttribute<SerializeInEditorAttribute>();
+        var name = string.IsNullOrEmpty(attribute?.Name) ? member.Name : attribute.Name;
+        var text = Traverse.Create(__instance).Field<Text>("text").Value;
+        text.text = name;
+        text.transform.parent.name = $"{name} Input";
+        return false;
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(SupportedTypeBinder), "BindVector4Field")]
+    public static void BindVector4Field(SupportedTypeBinder __instance, EditorComponent component, MemberInfo member)
+    {
+        var value = member.GetMemberValue<Vector4>(component.Data);
+        var components = Traverse.Create(__instance).Field<UIBehaviour[]>("uiComponents").Value;
+        ((InputField)components[2]).text = $"{value.z}";
+        ((InputField)components[3]).text = $"{value.w}";
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(SupportedTypeBinder), "BindVector3Field")]
+    public static void BindVector3Field(SupportedTypeBinder __instance, EditorComponent component, MemberInfo member)
+    {
+        // ReSharper disable once InvertIf
+        if (member.DeclaringType == typeof(RayConeDetection) &&
+            member.Name is nameof(RayConeDetection.GeneralDirection))
+        {
+            var input = Traverse.Create(__instance).Field<Text>("text").Value.transform.parent;
+            // Hide UnityEngine.Vector3.z
+            input.Find("Container/X Text").gameObject.SetActive(false);
+            input.Find("Container/X Input").gameObject.SetActive(false);
+        }
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(SupportedTypeBinder), "BindDirection")]
+    public static bool BindDirection(SupportedTypeBinder __instance, EditorComponent component, MemberInfo member)
+    {
+        if (member.GetMemberType() == typeof(Vector3)) return true;
+        __instance.SetName(member);
+        var components = Traverse.Create(__instance).Field<UIBehaviour[]>("uiComponents").Value;
+        var l = (Toggle)components[0];
+        var r = (Toggle)components[1];
+        l.onValueChanged.RemoveAllListeners();
+        r.onValueChanged.RemoveAllListeners();
+        var a = Vector3.left as object;
+        var b = Vector3.right as object;
+
+        if (member.GetMemberType() == typeof(Vector2))
+        {
+            a = Vector2.left;
+            b = Vector2.right;
+        }
+        else if (member.GetMemberType() == typeof(ObjectOrientation.Orientation))
+        {
+            a = ObjectOrientation.Orientation.Left;
+            b = ObjectOrientation.Orientation.Right;
+        }
+
+        l.onValueChanged.AddListener(value => member.SetMemberValue(component.Data, value ? a : b));
+        (member.GetMemberValue<object>(component.Data).Equals(a) ? l : r).isOn = true;
+        return false;
     }
 
     #endregion

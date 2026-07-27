@@ -5,8 +5,6 @@ using System.Reflection;
 using HarmonyLib;
 using MonoMod.Utils;
 using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.UI;
 using ZNT.Evolution.Core.Editor;
 using ZNT.LevelEditor;
 
@@ -288,25 +286,6 @@ internal static class DebugPatch
             parameter: position,
             options: SendMessageOptions.DontRequireReceiver);
         return false;
-    }
-
-    [HarmonyPrefix]
-    [HarmonyPatch(typeof(SupportedTypeBinder), "SetName")]
-    public static bool SetName(SupportedTypeBinder __instance, MemberInfo member)
-    {
-        if (member.IsDefined(typeof(SerializeInEditorAttribute))) return true;
-        Traverse.Create(__instance).Field<Text>("text").Value.text = member.Name;
-        return false;
-    }
-
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(SupportedTypeBinder), "BindVector4Field")]
-    public static void BindVector4Field(SupportedTypeBinder __instance, EditorComponent component, MemberInfo member)
-    {
-        var value = member.GetMemberValue<Vector4>(component.Data);
-        var components = Traverse.Create(__instance).Field<UIBehaviour[]>("uiComponents").Value;
-        ((InputField)components[2]).text = $"{value.z}";
-        ((InputField)components[3]).text = $"{value.w}";
     }
 
     [HarmonyPostfix]
