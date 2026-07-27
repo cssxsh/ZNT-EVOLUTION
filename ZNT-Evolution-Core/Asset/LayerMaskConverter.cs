@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using BepInEx.Logging;
 using HarmonyLib;
@@ -26,13 +25,10 @@ public class LayerMaskConverter : CustomCreationConverter<LayerMask>
             return;
         }
 
-        var names = new List<string>();
-        for (var layer = 0x00; layer < 0x20; layer++)
-        {
-            if (((0x01 << layer) & mask.value) == 0x00000000) continue;
-            var name = LayerMask.LayerToName(layer);
-            names.Add(string.IsNullOrEmpty(name) ? layer.ToString() : name);
-        }
+        var names =
+            from index in Enumerable.Range(0x00, 0x20)
+            let name = LayerMask.LayerToName(index)
+            select string.IsNullOrEmpty(name) ? index.ToString() : name;
 
         writer.WriteValue(names.Join());
     }

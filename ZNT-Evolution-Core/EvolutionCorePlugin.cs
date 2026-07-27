@@ -8,7 +8,7 @@ namespace ZNT.Evolution.Core;
 public class EvolutionCorePlugin : BaseUnityPlugin
 {
     internal static EvolutionCorePlugin Instance;
-    
+
     internal static Harmony Harmony;
 
     internal static ConfigEntry<int> CorpsesCountMax;

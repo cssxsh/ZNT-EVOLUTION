@@ -27,12 +27,22 @@ public class PropMoveableEditor : Editor, IEditorOverride
         if (moveable is null) return false;
         var prev = (RectTransform)container.Find($"{moveable.Name} Panel");
         Traverse.Create(menu).Field<RectTransform>("mainContainer").Value = prev;
-        menu.SetDefaultUi(component, member);
-        // ReSharper disable once ConvertIfStatementToSwitchStatement
-        if (member.Name is nameof(SpeedEase)) prev.GetChild(prev.childCount - 1).SetSiblingIndex(2);
-        if (member.Name is nameof(Duration)) prev.GetChild(prev.childCount - 1).SetSiblingIndex(3);
-        Traverse.Create(menu).Field<RectTransform>("mainContainer").Value = panel;
-        return true;
+        try
+        {
+            menu.SetDefaultUi(component, member);
+            var index = member.Name switch
+            {
+                nameof(SpeedEase) => 2,
+                nameof(Duration) => 3,
+                _ => throw new IndexOutOfRangeException(member.Name)
+            };
+            prev.GetChild(prev.childCount - 1).SetSiblingIndex(index);
+            return true;
+        }
+        finally
+        {
+            Traverse.Create(menu).Field<RectTransform>("mainContainer").Value = panel;
+        }
     }
 
     [NonSerialized]

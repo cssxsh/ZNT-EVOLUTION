@@ -69,7 +69,7 @@ public class OneWayEditor : Editor, IActivable, IDeserializable
 
     protected override void OnCreate()
     {
-        Wall.EditorVisibility = false;
+        Wall.SetVisible(false);
     }
 
     private void OnEnable()

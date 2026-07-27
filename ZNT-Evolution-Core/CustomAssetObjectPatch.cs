@@ -22,7 +22,7 @@ internal static class CustomAssetObjectPatch
         return parameters.ContainsKey(key) ? parameters.GetValue<DamageType>(key) : DamageType.None;
     }
 
-    private static Transform CreateComponent(this ExplosionAsset explosion, Transform parent)
+    private static Transform CreatePrefab(this ExplosionAsset explosion, Transform parent)
     {
         var prefab = ComponentSingleton<GamePoolManager>.Instance.Spawn(explosion.Prefab, parent);
         var explode = Traverse.Create(explosion).Field<bool>("autoExplode");
@@ -39,14 +39,14 @@ internal static class CustomAssetObjectPatch
         }
     }
 
-    private static void Despawn(this AnimationDespawner despawn, AnimationSettings animation)
+    private static void DespawnBy(this AnimationDespawner despawn, AnimationSettings animation)
     {
         if (animation == null) return;
-        Traverse.Create(despawn).Field<AnimationEventHandler>("eventHandler").Value
+        Traverse.Create(despawn).Field<AnimationEventHandler>("eventHandler").Value?
             .RegisterEndEvent(animation, (Action)Delegate.CreateDelegate(typeof(Action), despawn, "Despawn"));
     }
 
-    private static ICollection<GameObject> Prefabs(this Rotorz.Tile.OrientedBrush brush)
+    private static IReadOnlyCollection<GameObject> Prefabs(this Rotorz.Tile.OrientedBrush brush)
     {
         var prefabs = new HashSet<GameObject>();
         foreach (var orientation in brush.Orientations)
@@ -108,7 +108,7 @@ internal static class CustomAssetObjectPatch
         var prefab = Traverse.Create(__instance).Field<Transform>("explosionPrefab").Value;
         if (prefab is not null && prefab.IsChildOf(__instance.transform)) return;
         var explosion = Traverse.Create(__instance).Field<ExplosionAsset>("explosion").Value;
-        var explode = explosion.CreateComponent(parent: __instance.transform);
+        var explode = explosion.CreatePrefab(parent: __instance.transform);
         Traverse.Create(__instance).Field<Transform>("explosionPrefab").Value = explode;
     }
 
@@ -346,7 +346,7 @@ internal static class CustomAssetObjectPatch
         }
 
         if (value is null) return;
-        var explode = value.CreateComponent(parent: __instance.transform);
+        var explode = value.CreatePrefab(parent: __instance.transform);
         explode.name = "Repulse";
         explode.GetComponent<ExplosionEditor>().EditorVisibility.CustomName = nameof(Rage.Repulsion);
         explode.GetComponent<ExplosionEffect>().DespawnOnEnd = false;
@@ -432,7 +432,7 @@ internal static class CustomAssetObjectPatch
     {
         if (effect is not CustomVisualEffect custom) return;
         var despawn = __result.GetComponent<AnimationDespawner>();
-        if (despawn) despawn.Despawn(custom.animation);
+        if (despawn) despawn.DespawnBy(custom.animation);
         var animator = __result.GetComponent<SpriteAnimator>();
         if (animator) animator.ForcePlay(custom.animation);
     }
@@ -449,10 +449,7 @@ internal static class CustomAssetObjectPatch
         {
             if (prefab.GetComponentInChildren<Health>() is { } health)
             {
-                health.EditorVisibility = new Visibility(true)
-                {
-                    CustomName = health.EditorVisibility.CustomName
-                };
+                health.SetVisible(true);
             }
 
             if (prefab.GetComponentInChildren<tk2dBaseSprite>() is not null)
