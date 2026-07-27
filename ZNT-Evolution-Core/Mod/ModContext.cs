@@ -298,7 +298,7 @@ public class ModContext
                 var texture = ReadTexture2D(resource.Name, buffer.ToArray());
                 Logger.LogDebug($"{resource.Path} -> {texture}");
                 // ReSharper disable once InvertIf
-                if (texture.name.StartsWith("preview_"))
+                if (texture is { width: 128, height: 128 })
                 {
                     var rect = new Rect(x: 0, y: 0, width: texture.width, height: texture.height);
                     var preview = MakePreview(texture, rect);
@@ -428,6 +428,13 @@ public class ModContext
                 var brush = ReadBrushMerge(buffer, resource.Format);
                 var prefab = brush.DefaultOrientation.GetVariation(0);
                 Logger.LogDebug($"{resource.Path} -> {brush} from {prefab}");
+            }
+                break;
+            // UnityEngine.Sprite
+            case { Type: "preview.info", Format: "json" or "bson" }:
+            {
+                var preview = ReadPreviewInfo(buffer, resource.Format);
+                Logger.LogDebug($"{resource.Path} -> {preview} from {preview.texture}");
             }
                 break;
             // LevelElement
@@ -633,6 +640,14 @@ public class ModContext
         var brush = merge.Create();
         Acquire(brush);
         return brush;
+    }
+
+    private Sprite ReadPreviewInfo(Stream input, string format)
+    {
+        var info = CustomAssetUtility.DeserializeObject<PreviewInfo>(input, format is "bson");
+        var preview = info.Create();
+        Acquire(preview);
+        return preview;
     }
 
     private LevelElement ReadLevelElement(Stream input, string format)

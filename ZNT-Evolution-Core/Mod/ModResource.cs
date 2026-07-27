@@ -31,7 +31,8 @@ internal record ModResource<T> : IComparable<ModResource<T>>
         { Type: "human", Format: "json" or "bson" } => 0x0003_0008,
         { Type: "spawn", Format: "json" or "bson" } => 0x0003_0009,
         { Type: "brush.info" or "brush.merge", Format: "json" or "bson" } => 0x0004_0000,
-        { Type: "element", Format: "json" or "bson" } => 0x0004_0001,
+        { Type: "preview.info", Format: "json" or "bson" } => 0x0004_0001,
+        { Type: "element", Format: "json" or "bson" } => 0x0004_0002,
         _ => int.MaxValue
     };
 

@@ -428,6 +428,7 @@
         <Compile Include="Asset\ObjectContractResolver.cs"/>
         <Compile Include="Asset\ObjectConverter.cs"/>
         <Compile Include="Asset\ObjectMerge.cs"/>
+        <Compile Include="Asset\PreviewInfo.cs"/>
         <Compile Include="Asset\RectConverter.cs"/>
         <Compile Include="Asset\SpawnPointAsset.cs"/>
         <Compile Include="Asset\SpriteExtractor.cs"/>
