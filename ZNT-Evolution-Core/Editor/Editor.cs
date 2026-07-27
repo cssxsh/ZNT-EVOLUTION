@@ -14,9 +14,4 @@ public abstract class Editor : BaseComponent
             CustomName = attribute.Name
         };
     }
-
-    protected static SupportedTypeBinder CustomBinder(SelectionMenu menu)
-    {
-        return menu.InstantiateCustomBinder(menu.CustomBinders.IntStringList);
-    }
 }

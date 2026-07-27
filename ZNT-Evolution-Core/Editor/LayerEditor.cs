@@ -36,47 +36,22 @@ public class LayerEditor : Editor, IEditorOverride
         set => BottomCollider?.layer = value;
     }
 
-    private tk2dBaseSprite BaseSprite => GetComponentInChildren<tk2dBaseSprite>();
-
-    [SerializeInEditor(name: "Sprite Layer")]
-    public string Sprite
-    {
-        get => BaseSprite?.CachedRenderer.sortingLayerName ?? "";
-        set => BaseSprite?.CachedRenderer.sortingLayerName = value;
-    }
-
-    [SerializeInEditor(name: "Sprite Order")]
-    public int SpriteOrder
-    {
-        get => BaseSprite?.SortingOrder ?? 0;
-        set => BaseSprite?.SortingOrder = value;
-    }
-
-    private static string[] _names;
-
-    private static string[] _sorting;
-
     public bool OverrideMemberUi(SelectionMenu menu, EditorComponent component, MemberInfo member)
     {
-        _names ??= Enumerable.Range(0, 0x20)
-            .Select(i => string.IsNullOrEmpty(LayerMask.LayerToName(i)) ? i.ToString() : LayerMask.LayerToName(i))
-            .ToArray();
-        _sorting ??= SortingLayer.layers
-            .Select(l => l.name)
-            .ToArray();
+        var names =
+            from index in Enumerable.Range(0x00, 0x20)
+            let name = LayerMask.LayerToName(index)
+            select string.IsNullOrEmpty(name) ? index.ToString() : name;
         switch (member.Name)
         {
             case nameof(Main):
-                CustomBinder(menu).BindIndexListField(component, member, _names);
+                menu.ListBinder().BindIndexListField(component, member, names.ToArray());
                 return true;
             case nameof(Top):
-                if (TopCollider) CustomBinder(menu).BindIndexListField(component, member, _names);
+                if (TopCollider) menu.ListBinder().BindIndexListField(component, member, names.ToArray());
                 return true;
             case nameof(Bottom):
-                if (BottomCollider) CustomBinder(menu).BindIndexListField(component, member, _names);
-                return true;
-            case nameof(Sprite):
-                if (BaseSprite) CustomBinder(menu).BindStringListField(component, member, _sorting);
+                if (BottomCollider) menu.ListBinder().BindIndexListField(component, member, names.ToArray());
                 return true;
             default:
                 return false;

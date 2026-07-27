@@ -455,6 +455,11 @@ internal static class CustomAssetObjectPatch
                 };
             }
 
+            if (prefab.GetComponentInChildren<tk2dBaseSprite>() is not null)
+            {
+                _ = prefab.GetComponentSafe<SpriteEditor>();
+            }
+
             if (prefab.TryGetComponent(out OneWayCollider collider))
             {
                 _ = collider.gameObject.GetComponentSafe<OneWayEditor>();
