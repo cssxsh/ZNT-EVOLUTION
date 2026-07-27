@@ -427,6 +427,12 @@ public class ModContext
             {
                 var element = ReadLevelElement(buffer, resource.Format);
                 Logger.LogDebug($"{resource.Path} -> {element}");
+                // ReSharper disable once InvertIf
+                if (element is { ElementType: LevelElement.Type.Brush, Brush: null, LinkedElement.Element: not null})
+                {
+                    element.Brush = MakeBrush(element);
+                    Logger.LogDebug($"{resource.Path} -> {element.Brush}");
+                }
             }
                 break;
             // Unsupported
@@ -626,6 +632,17 @@ public class ModContext
         var element = CustomAssetUtility.DeserializeObject<LevelElement>(input, format is "bson");
         Acquire(element);
         return element;
+    }
+
+    private Rotorz.Tile.OrientedBrush MakeBrush(LevelElement element)
+    {
+        var merge = new BrushMerge(
+            source: element.LinkedElement.Element.Brush as Rotorz.Tile.OrientedBrush,
+            name: "brush_" + element.name,
+            prefab: element.CustomAsset.Prefab.gameObject);
+        var brush = merge.Create();
+        Acquire(brush);
+        return brush;
     }
 
     #endregion
