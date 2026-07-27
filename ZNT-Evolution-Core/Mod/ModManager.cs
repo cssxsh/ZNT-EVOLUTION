@@ -13,6 +13,8 @@ public static class ModManager
 {
     private static readonly ManualLogSource Logger = BepInExLogger.CreateLogSource(nameof(ModManager));
 
+    public static string ModsPath = System.Environment.GetEnvironmentVariable("ZNTModsPath");
+
     static ModManager() => Encoding.RegisterProvider(new Fix437EncodingProvider(Encoding.ASCII));
 
     private class Fix437EncodingProvider(Encoding fallback) : EncodingProvider
@@ -24,29 +26,26 @@ public static class ModManager
     [UsedImplicitly]
     public static async Task LoadAll()
     {
-        var mods = Path.Combine(UnityEngine.Application.dataPath, "Mods");
-        if (!Directory.Exists(mods)) Directory.CreateDirectory(mods);
         var allocated = new List<ModContext>();
 
-        foreach (var folder in Directory.EnumerateDirectories(mods))
+        foreach (var path in Directory.EnumerateFileSystemEntries(ModsPath))
         {
-            Logger.LogDebug($"allocate context from folder '{folder}'");
-            try
+            if (path.EndsWith(".zip") || path.EndsWith(".mod"))
             {
-                allocated.Add(ModContext.Allocate(folder));
+                Logger.LogDebug($"allocate context from package '{path}'");
             }
-            catch (System.Exception e)
+            else if (Directory.Exists(path) && File.Exists($"{path}/metadata.json"))
             {
-                Logger.LogError(e);
+                Logger.LogDebug($"allocate context from folder '{path}'");
             }
-        }
+            else
+            {
+                continue;
+            }
 
-        foreach (var package in Directory.EnumerateFiles(mods, "*.zip"))
-        {
-            Logger.LogDebug($"allocate context from package '{package}'");
             try
             {
-                allocated.Add(ModContext.Allocate(package));
+                allocated.Add(ModContext.Allocate(path));
             }
             catch (System.Exception e)
             {
@@ -66,29 +65,13 @@ public static class ModManager
                 Logger.LogError(e);
             }
         }
-
-        while (allocated.Find(context => context.IsUnloadReady()) is { } mod)
-        {
-            try
-            {
-                await mod.Unload();
-                ModContext.Free(mod.Metadata.Id);
-            }
-            catch (System.Exception e)
-            {
-                Logger.LogError(e);
-            }
-            finally
-            {
-                allocated.Remove(mod);
-            }
-        }
     }
 
     [UsedImplicitly]
     public static async Task UnloadAll()
     {
         var allocated = ModContext.Allocated().ToList();
+
         while (allocated.Find(context => context.IsUnloadReady()) is { } mod)
         {
             try

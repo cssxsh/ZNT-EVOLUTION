@@ -40,12 +40,12 @@ internal static class StartManagerPatch
         Traverse.Create(starter).Field<bool>("isLoading").Value = true;
         yield return Initialize();
         yield return LoadPatch();
+        yield return LoadModsFolder();
         yield return LoadBank();
         yield return LoadAssetFolder();
         yield return LoadBrushFolder();
         yield return LoadDecorFolder();
         yield return LoadApplyFolder();
-        yield return LoadModsFolder();
         Traverse.Create(starter).Field<bool>("isLoading").Value = false;
         starter.LoadNextScene();
     }
@@ -276,7 +276,7 @@ internal static class StartManagerPatch
     {
         Logger.LogInfo("Loading Asset Folder");
         var asset = Path.Combine(Application.dataPath, "Asset");
-        if (!Directory.Exists(asset)) Directory.CreateDirectory(asset);
+        if (!Directory.Exists(asset)) yield break;
         yield return LevelElementLoader.LoadAssetFromFolder(path: asset);
     }
 
@@ -284,7 +284,7 @@ internal static class StartManagerPatch
     {
         Logger.LogInfo("Loading Brush Folder");
         var brush = Path.Combine(Application.dataPath, nameof(LevelElement.Type.Brush));
-        if (!Directory.Exists(brush)) Directory.CreateDirectory(brush);
+        if (!Directory.Exists(brush)) yield break;
         foreach (var directory in Directory.EnumerateDirectories(brush))
         {
             if (directory.EndsWith(".bak")) continue;
@@ -309,7 +309,7 @@ internal static class StartManagerPatch
     {
         Logger.LogInfo("Loading Decor Folder");
         var decor = Path.Combine(Application.dataPath, nameof(LevelElement.Type.Decor));
-        if (!Directory.Exists(decor)) Directory.CreateDirectory(decor);
+        if (!Directory.Exists(decor)) yield break;
         foreach (var directory in Directory.EnumerateDirectories(decor))
         {
             if (directory.EndsWith(".bak")) continue;
@@ -324,7 +324,7 @@ internal static class StartManagerPatch
     {
         Logger.LogInfo("Loading Apply Folder");
         var apply = Path.Combine(Application.dataPath, "Apply");
-        if (!Directory.Exists(apply)) Directory.CreateDirectory(apply);
+        if (!Directory.Exists(apply)) yield break;
         foreach (var directory in Directory.EnumerateDirectories(apply))
         {
             if (directory.EndsWith(".bak")) continue;
@@ -337,7 +337,9 @@ internal static class StartManagerPatch
 
     private static IEnumerator LoadModsFolder()
     {
-        Logger.LogInfo("Loading Mods Folder");
+        ModManager.ModsPath ??= Path.Combine(Application.dataPath, "Mods");
+        Logger.LogInfo($"Loading Mods Folder '{ModManager.ModsPath}'");
+        if (!Directory.Exists(ModManager.ModsPath)) Directory.CreateDirectory(ModManager.ModsPath);
         yield return ModManager.LoadAll().ToCoroutine();
     }
 }
