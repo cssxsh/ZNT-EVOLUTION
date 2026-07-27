@@ -80,6 +80,8 @@ public class ModContext
 
     public bool Loaded { private set; get; }
 
+    public System.Version Version => System.Version.Parse(Metadata.Version);
+
     private ModContext(string path, ModMetadata metadata)
     {
         Path = path;
@@ -98,9 +100,13 @@ public class ModContext
             if (Loaded) return false;
             foreach (var (id, version) in Metadata.Dependencies)
             {
-                if (!Contexts.TryGetValue(id, out var allocated)) return false;
-                if (System.Version.Parse(allocated.Metadata.Version) < System.Version.Parse(version)) return false;
-                if (!allocated.Loaded) return false;
+                var need = System.Version.Parse(version);
+                if (BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue(id, out var plugin) &&
+                    plugin.Metadata.Version >= need) continue;
+                if (Contexts.TryGetValue(id, out var allocated) &&
+                    allocated.Version >= need &&
+                    allocated.Loaded) continue;
+                return false;
             }
 
             return true;
@@ -124,8 +130,11 @@ public class ModContext
 
             foreach (var (id, version) in Metadata.Dependencies)
             {
+                var need = System.Version.Parse(version);
+                if (BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue(id, out var plugin) &&
+                    plugin.Metadata.Version >= need) continue;
                 if (Contexts.TryGetValue(id, out var allocated) &&
-                    System.Version.Parse(allocated.Metadata.Version) >= System.Version.Parse(version) &&
+                    System.Version.Parse(allocated.Metadata.Version) >= need &&
                     allocated.Loaded) continue;
                 throw new AssetException($"[{Metadata.Name} {Metadata.Version}] dependency {id} - {version}]");
             }
