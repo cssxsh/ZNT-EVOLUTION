@@ -228,7 +228,7 @@ internal static class CustomAssetObjectPatch
     {
         var flag = __instance.DamageCharacterOnTrigger
                    && __instance.TargetLayers.ContainsLayer(other.gameObject.layer);
-        if (flag) __instance.SendMessage(methodName: "SendTargetDamage", value: other.gameObject);
+        if (flag) Traverse.Create(__instance).Method("SendTargetDamage", other.gameObject).GetValue();
         // TODO param by setting
         if (flag && __instance.Physic.GravityScale == 0.0f)
         {

@@ -124,7 +124,7 @@ internal static class DebugPatch
             case MoveableState.JumpFalling:
             case MoveableState.Falling:
             case MoveableState.Pushed:
-                __instance.SendMessage(methodName: "HitGround", value: 0.0f);
+                Traverse.Create(__instance).Method("HitGround", 0.0f).GetValue();
                 break;
             default:
                 return;
@@ -169,7 +169,7 @@ internal static class DebugPatch
     {
         __instance.Mover.UpdateIsGrounded();
         if (moveToTarget || !__instance.CanAttack()) return true;
-        __instance.SendMessage(methodName: "SetTarget", value: target);
+        Traverse.Create(__instance).Method("SetTarget", target).GetValue();
         return false;
     }
 

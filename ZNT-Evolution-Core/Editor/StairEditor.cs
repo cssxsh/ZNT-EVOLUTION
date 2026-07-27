@@ -15,7 +15,7 @@ public class StairEditor : Editor, IActivable
     public void SetActive(bool state)
     {
         if (IsActive == state) return;
-        Behaviour.SendMessage(methodName: "OnMouseUpAsButton");
+        Behaviour.Invoke(methodName: "OnMouseUpAsButton", time: 0);
     }
 
     [SignalReceiver(name: "Set Stair Active")]
