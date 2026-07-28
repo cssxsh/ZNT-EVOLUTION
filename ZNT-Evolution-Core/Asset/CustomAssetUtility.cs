@@ -109,15 +109,37 @@ public static class CustomAssetUtility
         var create = AssetBundle.LoadFromStreamAsync(fs ?? throw new FileNotFoundException("index.bundle"));
         yield return create;
         var bundle = create.assetBundle;
-        var path = "all";
-        if (typeof(CustomAsset).IsAssignableFrom(typeof(T))) path = "asset";
-        if (typeof(tk2dSpriteCollectionData) == typeof(T)) path = "tk2d";
-        if (typeof(tk2dSpriteAnimation) == typeof(T)) path = "tk2d";
-        var request = bundle.LoadAssetAsync(path);
+        var request = typeof(CustomAsset).IsAssignableFrom(typeof(T))
+            ? bundle.LoadAssetWithSubAssetsAsync<T>("asset")
+            : bundle.LoadAllAssetsAsync<T>();
         yield return request;
-        var source = ((I2.Loc.LanguageSourceAsset)request.asset).SourceData;
-        foreach (var asset in source.Assets.OfType<T>()) action.Invoke(asset);
-        bundle.Unload(true);
+        try
+        {
+            foreach (var font in request.allAssets.OfType<T>()) action.Invoke(font);
+        }
+        finally
+        {
+            bundle.Unload(false);
+        }
+    }
+
+    internal static IEnumerator LoadPatch<T>(UnityAction<T> action)
+    {
+        using var fs = Assembly.GetExecutingAssembly()
+            .GetManifestResourceStream("ZNT.Evolution.Core.Resources.patch.bundle");
+        var create = AssetBundle.LoadFromStreamAsync(fs ?? throw new FileNotFoundException("patch.bundle"));
+        yield return create;
+        var bundle = create.assetBundle;
+        var request = bundle.LoadAllAssetsAsync<T>();
+        yield return request;
+        try
+        {
+            foreach (var font in request.allAssets.OfType<T>()) action.Invoke(font);
+        }
+        finally
+        {
+            bundle.Unload(false);
+        }
     }
 
     public static bool TryGetPrefab(string name, out Transform prefab)

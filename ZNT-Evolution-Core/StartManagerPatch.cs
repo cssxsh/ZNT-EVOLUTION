@@ -39,7 +39,6 @@ internal static class StartManagerPatch
     {
         Traverse.Create(starter).Field<bool>("isLoading").Value = true;
         yield return Initialize();
-        yield return LoadPatch();
         yield return LoadModsFolder();
         yield return LoadBank();
         yield return LoadAssetFolder();
@@ -238,27 +237,17 @@ internal static class StartManagerPatch
                     break;
             }
         });
+        yield return CustomAssetUtility.LoadPatch<TMPro.TMP_FontAsset>(font =>
+        {
+            TMPro.TMP_Settings.fallbackFontAssets.Add(font);
+            Logger.LogInfo($"Loaded Patch {font}");
+            if (font.name is not "wqy-microhei SDF") return;
+            TMPro.TMP_Settings.defaultFontAsset.fallbackFontAssets.Insert(0, font);
+        });
         InvisibleShield.PoolPrefab();
         FogOfWar.PoolPrefab();
         SphereBuffEffect.PoolPrefab();
         SphereLaoAerEffect.PoolPrefab();
-    }
-
-    private static IEnumerator LoadPatch()
-    {
-        Logger.LogInfo("Loading Patch");
-        foreach (var file in Directory.EnumerateFiles(Application.streamingAssetsPath, "*.patch"))
-        {
-            var request = AssetBundle.LoadFromFileAsync(file);
-            yield return request;
-            var fonts = request.assetBundle.LoadAllAssets<TMPro.TMP_FontAsset>();
-            TMPro.TMP_Settings.fallbackFontAssets.AddRange(fonts);
-            var wqy = request.assetBundle.LoadAsset<TMPro.TMP_FontAsset>("wqy-microhei_CN SDF.asset");
-            if (wqy) TMPro.TMP_Settings.defaultFontAsset.fallbackFontAssets.Insert(0, wqy);
-            Logger.LogInfo($"Loaded Patch '{file}'");
-        }
-
-        Logger.LogDebug("Loading Event Handle");
         foreach (var (_, info) in BepInEx.Bootstrap.Chainloader.PluginInfos)
         {
             if (!info.Metadata.GUID.Contains("znt")) continue;
