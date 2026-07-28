@@ -5,7 +5,6 @@ using System.Reflection;
 using System.Threading.Tasks;
 using BepInEx.Logging;
 using HarmonyLib;
-using UIWidgets;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
@@ -84,9 +83,7 @@ internal static class SceneLoaderPatch
 
     private static I2.Loc.TermData GetTermData(this ModMetadata metadata)
     {
-        var term = _localization.GetTermData($"Evolution/{metadata.Id}");
-        if (term != null) return term;
-        term = _localization.AddTerm($"Evolution/{metadata.Id}");
+        var term = _localization.AddTerm($"Evolution/{metadata.Id}");
         term.SetTranslation(0, $"{metadata.Name} {metadata.Version}");
         return term;
     }
@@ -100,22 +97,47 @@ internal static class SceneLoaderPatch
     public static void SettingsScene(SettingsMenu __instance)
     {
         Logger.LogInfo("Update SettingsScene");
-        __instance.AddMod();
-        __instance.AddPlugin();
+        __instance.AddModPanel();
+        __instance.AddPluginPanel();
+        foreach (var reset in
+                 from i in Enumerable.Range(1, 3)
+                 let panels = __instance.transform.Find("Option Panels")
+                 select (RectTransform)panels.GetChild(i).Find("Reset Entry"))
+        {
+            reset.sizeDelta = new Vector2(-30, 80);
+        }
     }
 
-    private static void AddMod(this SettingsMenu menu)
+    private static void AddModPanel(this SettingsMenu menu)
     {
         var panel = menu.AddPanel("Mod");
-        var impl = menu.transform
-            .Find("Option Panels/Video/Scroll Area/ScrollView/Content/FullScreen Entry").gameObject;
-        var content = panel.GetComponentInChildren<VerticalLayoutGroup>();
-
-        var push = (ModContext context) =>
+        var reset = (RectTransform)panel.Find("Reset Entry");
+        var reload = reset.GetComponentInChildren<Button>();
+        reload.OnClick(() =>
         {
-            var item = Object.Instantiate(original: impl, parent: content.transform);
+            Logger.LogInfo("Reloading Mods Folder");
+            ModManager.ReloadAll().ContinueWith(task =>
+            {
+                if (task.Exception != null) Logger.LogError(task.Exception);
+                menu.FlushModPanel();
+            }, TaskScheduler.FromCurrentSynchronizationContext());
+        });
+
+        menu.FlushModPanel();
+    }
+
+    private static void FlushModPanel(this SettingsMenu menu)
+    {
+        var fullscreen = (RectTransform)menu.transform
+            .Find("Option Panels/Video/Scroll Area/ScrollView/Content/FullScreen Entry");
+        var content = (RectTransform)menu.transform
+            .Find("Option Panels/Mod/Scroll Area/ScrollView/Content");
+        content.DestroyChildren();
+        foreach (var context in ModContext.Allocated())
+        {
+            var item = Object.Instantiate(original: fullscreen, parent: content);
             item.name = $"{context.Metadata.Name} Entry";
-            item.SetActive(false);
+            item.gameObject.SetActive(false);
             var localize = item.GetComponentInChildren<I2.Loc.Localize>(includeInactive: true);
             localize.Term = context.Metadata.GetTermData().Term;
             var toggle = item.GetComponentInChildren<Toggle>(includeInactive: true);
@@ -143,57 +165,46 @@ internal static class SceneLoaderPatch
                         break;
                 }
             });
-            item.SetActive(true);
-        };
-        foreach (var context in ModContext.Allocated()) push.Invoke(context);
-
-        var reload = panel.transform.Find("Reset Entry").GetComponentInChildren<Button>();
-        reload.OnClick(() =>
-        {
-            Logger.LogInfo("Reloading Mods Folder");
-            content.transform.DestroyChildren();
-            ModManager.ReloadAll().ContinueWith(task =>
-            {
-                if (task.Exception != null) Logger.LogError(task.Exception);
-                foreach (var context in ModContext.Allocated()) push.Invoke(context);
-            }, TaskScheduler.FromCurrentSynchronizationContext());
-        });
+            item.gameObject.SetActive(true);
+        }
     }
 
-    private static void AddPlugin(this SettingsMenu menu)
+    private static void AddPluginPanel(this SettingsMenu menu)
     {
         var panel = menu.AddPanel("Plugin");
-        var content = panel.GetComponentInChildren<VerticalLayoutGroup>();
+        var reset = (RectTransform)panel.Find("Reset Entry");
+        reset.GetComponentInChildren<Button>().OnClick(menu.ResetPluginPanel);
 
+        var content = (RectTransform)menu.transform
+            .Find("Option Panels/Plugin/Scroll Area/ScrollView/Content");
+        var fullscreen = (RectTransform)menu.transform
+            .Find("Option Panels/Video/Scroll Area/ScrollView/Content/FullScreen Entry");
+        var fps = (RectTransform)menu.transform
+            .Find("Option Panels/Video/Scroll Area/ScrollView/Content/Max FPS Entry");
         foreach (var (_, info) in BepInEx.Bootstrap.Chainloader.PluginInfos)
         {
             if (!info.Metadata.GUID.Contains("znt")) continue;
-            foreach (var (definition, entry) in info.Instance.Config)
+            foreach (var (_, entry) in info.Instance.Config)
             {
-                var term = _localization.AddTerm($"{info.Metadata.Name}/{definition}");
-                term.SetTranslation(0, $"[{info.Metadata.Name}] {definition.Key}");
-                term.SetTranslation(9, $"[{info.Metadata.Name}] {entry.Description.Description}");
+                var term = _localization.AddTerm($"{info.Metadata.Name}/{entry.Definition}");
+                term.SetTranslation(0, $"[{info.Metadata.Name}] {entry.Description.Description}");
                 if (entry.SettingType == typeof(bool))
                 {
-                    var fullscreen = menu.transform
-                        .Find("Option Panels/Video/Scroll Area/ScrollView/Content/FullScreen Entry").gameObject;
-                    var item = Object.Instantiate(original: fullscreen, parent: content.transform);
-                    item.name = $"{info.Metadata.Name} {definition} Entry";
-                    item.SetActive(false);
+                    var item = Object.Instantiate(original: fullscreen, parent: content);
+                    item.name = $"{info.Metadata.Name} {entry.Definition} Entry";
+                    item.gameObject.SetActive(false);
                     var localize = item.GetComponentInChildren<I2.Loc.Localize>(includeInactive: true);
                     localize.Term = term.Term;
                     var toggle = item.GetComponentInChildren<Toggle>(includeInactive: true);
                     toggle.OnValueChanged(value => entry.BoxedValue = value);
                     toggle.SetIsOnWithoutNotify((bool)entry.BoxedValue);
-                    item.SetActive(true);
+                    item.gameObject.SetActive(true);
                 }
                 else if (entry.SettingType == typeof(int))
                 {
-                    var fps = menu.transform
-                        .Find("Option Panels/Video/Scroll Area/ScrollView/Content/Max FPS Entry").gameObject;
-                    var item = Object.Instantiate(original: fps, parent: content.transform);
-                    item.name = $"{info.Metadata.Name} {definition} Entry";
-                    item.SetActive(false);
+                    var item = Object.Instantiate(original: fps, parent: content);
+                    item.name = $"{info.Metadata.Name} {entry.Definition} Entry";
+                    item.gameObject.SetActive(false);
                     var localize = item.GetComponentInChildren<I2.Loc.Localize>(includeInactive: true);
                     localize.Term = term.Term;
                     var canvas = item.GetComponentInChildren<CanvasGroup>(includeInactive: true);
@@ -213,67 +224,63 @@ internal static class SceneLoaderPatch
                     });
                     input.SetTextWithoutNotify(((int)entry.BoxedValue & int.MaxValue).ToString());
                     input.interactable = toggle.isOn;
-                    item.SetActive(true);
+                    item.gameObject.SetActive(true);
                 }
             }
         }
-
-        var reset = panel.transform.Find("Reset Entry").GetComponentInChildren<Button>();
-        reset.OnClick(() =>
-        {
-            foreach (var (_, info) in BepInEx.Bootstrap.Chainloader.PluginInfos)
-            {
-                if (!info.Metadata.GUID.Contains("znt")) continue;
-                foreach (var (definition, entry) in info.Instance.Config)
-                {
-                    entry.BoxedValue = entry.DefaultValue;
-                    var item = content.transform.Find($"{info.Metadata.Name} {definition} Entry");
-                    switch (entry.BoxedValue)
-                    {
-                        case bool value:
-                            item.GetComponentInChildren<Toggle>(includeInactive: true)
-                                .SetIsOnWithoutNotify(value);
-                            break;
-                        case int value:
-                            item.GetComponentInChildren<InputField>(includeInactive: true)
-                                .SetTextWithoutNotify((value & int.MaxValue).ToString());
-                            item.GetComponentInChildren<InputField>(includeInactive: true)
-                                .interactable = value >= 0;
-                            item.GetComponentInChildren<Toggle>(includeInactive: true)
-                                .SetIsOnWithoutNotify(value >= 0);
-                            break;
-                    }
-                }
-            }
-        });
     }
 
-    private static GameObject AddPanel(this SettingsMenu menu, string name)
+    private static void ResetPluginPanel(this SettingsMenu menu)
     {
-        var panels = menu.transform.Find("Option Panels");
-        var tabs = menu.transform.Find("Option Menu/Tabs");
+        var content = (RectTransform)menu.transform
+            .Find("Option Panels/Plugin/Scroll Area/ScrollView/Content");
+        foreach (var (_, info) in BepInEx.Bootstrap.Chainloader.PluginInfos)
+        {
+            if (!info.Metadata.GUID.Contains("znt")) continue;
+            foreach (var (definition, entry) in info.Instance.Config)
+            {
+                entry.BoxedValue = entry.DefaultValue;
+                var item = content.Find($"{info.Metadata.Name} {definition} Entry");
+                switch (entry.BoxedValue)
+                {
+                    case bool value:
+                        item.GetComponentInChildren<Toggle>(includeInactive: true)
+                            .SetIsOnWithoutNotify(value);
+                        break;
+                    case int value:
+                        item.GetComponentInChildren<InputField>(includeInactive: true)
+                            .SetTextWithoutNotify((value & int.MaxValue).ToString());
+                        item.GetComponentInChildren<InputField>(includeInactive: true)
+                            .interactable = value >= 0;
+                        item.GetComponentInChildren<Toggle>(includeInactive: true)
+                            .SetIsOnWithoutNotify(value >= 0);
+                        break;
+                }
+            }
+        }
+    }
 
-        var panel = Object.Instantiate(original: panels.GetChild(0).gameObject, parent: panels);
+    private static RectTransform AddPanel(this SettingsMenu menu, string name)
+    {
+        var panels = (RectTransform)menu.transform.Find("Option Panels");
+        var panel = (RectTransform)Object.Instantiate(original: panels.GetChild(0), parent: panels);
         panel.name = name;
-        var content = panel.GetComponentInChildren<VerticalLayoutGroup>();
-        content.transform.DestroyChildren();
-        panel.SetActive(false);
+        panel.gameObject.SetActive(false);
+        panel.Find("Scroll Area/ScrollView/Content").DestroyChildren();
 
         var container = Traverse.Create(menu).Field<GameObject[]>("settingsContainer");
         var index = container.Value.Length;
-        container.Value = container.Value.AddToArray(panel);
+        container.Value = container.Value.AddToArray(panel.gameObject);
 
-        var tab = Object.Instantiate(original: tabs.GetChild(0).gameObject, parent: tabs);
+        var tabs = (RectTransform)menu.transform.Find("Option Menu/Tabs");
+        var tab = (RectTransform)Object.Instantiate(original: tabs.GetChild(0), parent: tabs);
         tab.name = name;
-        tab.GetComponentsInChildren<I2.Loc.Localize>(includeInactive: true)
-            .ForEach(localize => localize.Term = $"Evolution/{name}_Tab");
-        tab.GetComponentInChildren<Toggle>()
-            .OnValueChanged(value => menu.ShowSettings(group: value ? index : -1));
+        tab.GetComponentInChildren<I2.Loc.Localize>(includeInactive: true).Term = $"Evolution/{name}_Tab";
+        tab.GetComponentInChildren<Toggle>().OnValueChanged(value => menu.ShowSettings(value ? index : -1));
 
-        var reset = panel.transform.Find("Reset Entry");
+        var reset = (RectTransform)panel.Find("Reset Entry");
         var reload = reset.GetComponentInChildren<Button>();
-        reload.GetComponentsInChildren<I2.Loc.Localize>(includeInactive: true)
-            .ForEach(localize => localize.Term = $"Evolution/{name}_Reset");
+        reload.GetComponentInChildren<I2.Loc.Localize>(includeInactive: true).Term = $"Evolution/{name}_Reset";
         reload.OnClick(() => Logger.LogWarning($"{name} reset no define"));
 
         return panel;
