@@ -97,23 +97,19 @@ internal static class SceneLoaderPatch
     public static void SettingsScene(SettingsMenu __instance)
     {
         Logger.LogInfo("Update SettingsScene");
-        __instance.AddModPanel();
-        __instance.AddPluginPanel();
         foreach (var reset in
                  from i in Enumerable.Range(1, 3)
-                 let panels = __instance.transform.Find("Option Panels")
-                 select (RectTransform)panels.GetChild(i).Find("Reset Entry"))
-        {
-            reset.sizeDelta = new Vector2(-30, 80);
-        }
+                 let panel = __instance.transform.Find("Option Panels").GetChild(i)
+                 select (RectTransform)panel.Find("Reset Entry")) reset.sizeDelta = new Vector2(-30, 80);
+        __instance.AddModPanel();
+        __instance.AddPluginPanel();
     }
 
     private static void AddModPanel(this SettingsMenu menu)
     {
         var panel = menu.AddPanel("Mod");
-        var reset = (RectTransform)panel.Find("Reset Entry");
-        var reload = reset.GetComponentInChildren<Button>();
-        reload.OnClick(() =>
+        var reset = (RectTransform)panel.Find("Reset Entry/Container/ResetButton");
+        reset.GetComponent<Button>().OnClick(() =>
         {
             Logger.LogInfo("Reloading Mods Folder");
             ModManager.ReloadAll().ContinueWith(task =>
@@ -138,9 +134,9 @@ internal static class SceneLoaderPatch
             var item = Object.Instantiate(original: fullscreen, parent: content);
             item.name = $"{context.Metadata.Name} Entry";
             item.gameObject.SetActive(false);
-            var localize = item.GetComponentInChildren<I2.Loc.Localize>(includeInactive: true);
+            var localize = item.Find("Text").GetComponent<I2.Loc.Localize>();
             localize.Term = context.Metadata.GetTermData().Term;
-            var toggle = item.GetComponentInChildren<Toggle>(includeInactive: true);
+            var toggle = item.Find("Toggle").GetComponent<Toggle>();
             toggle.SetIsOnWithoutNotify(context.Loaded);
             toggle.OnValueChanged(value =>
             {
@@ -172,8 +168,8 @@ internal static class SceneLoaderPatch
     private static void AddPluginPanel(this SettingsMenu menu)
     {
         var panel = menu.AddPanel("Plugin");
-        var reset = (RectTransform)panel.Find("Reset Entry");
-        reset.GetComponentInChildren<Button>().OnClick(menu.ResetPluginPanel);
+        var reset = (RectTransform)panel.Find("Reset Entry/Container/ResetButton");
+        reset.GetComponent<Button>().OnClick(menu.ResetPluginPanel);
 
         var content = (RectTransform)menu.transform
             .Find("Option Panels/Plugin/Scroll Area/ScrollView/Content");
@@ -193,9 +189,9 @@ internal static class SceneLoaderPatch
                     var item = Object.Instantiate(original: fullscreen, parent: content);
                     item.name = $"{info.Metadata.Name} {entry.Definition} Entry";
                     item.gameObject.SetActive(false);
-                    var localize = item.GetComponentInChildren<I2.Loc.Localize>(includeInactive: true);
+                    var localize = item.Find("Text").GetComponent<I2.Loc.Localize>();
                     localize.Term = term.Term;
-                    var toggle = item.GetComponentInChildren<Toggle>(includeInactive: true);
+                    var toggle = item.Find("Toggle").GetComponent<Toggle>();
                     toggle.OnValueChanged(value => entry.BoxedValue = value);
                     toggle.SetIsOnWithoutNotify((bool)entry.BoxedValue);
                     item.gameObject.SetActive(true);
@@ -205,11 +201,11 @@ internal static class SceneLoaderPatch
                     var item = Object.Instantiate(original: fps, parent: content);
                     item.name = $"{info.Metadata.Name} {entry.Definition} Entry";
                     item.gameObject.SetActive(false);
-                    var localize = item.GetComponentInChildren<I2.Loc.Localize>(includeInactive: true);
+                    var localize = item.Find("Text").GetComponent<I2.Loc.Localize>();
                     localize.Term = term.Term;
-                    var canvas = item.GetComponentInChildren<CanvasGroup>(includeInactive: true);
-                    var toggle = item.GetComponentInChildren<Toggle>(includeInactive: true);
-                    var input = item.GetComponentInChildren<InputField>(includeInactive: true);
+                    var canvas = item.Find("Container").GetComponent<CanvasGroup>();
+                    var toggle = item.Find("Container/Toggle").GetComponent<Toggle>();
+                    var input = item.Find("Container/InputField").GetComponent<InputField>();
                     canvas.interactable = true;
                     toggle.OnValueChanged(value =>
                     {
@@ -244,16 +240,19 @@ internal static class SceneLoaderPatch
                 switch (entry.BoxedValue)
                 {
                     case bool value:
-                        item.GetComponentInChildren<Toggle>(includeInactive: true)
-                            .SetIsOnWithoutNotify(value);
+                    {
+                        var toggle = item.Find("Toggle").GetComponent<Toggle>();
+                        toggle.SetIsOnWithoutNotify(value);
+                    }
                         break;
                     case int value:
-                        item.GetComponentInChildren<InputField>(includeInactive: true)
-                            .SetTextWithoutNotify((value & int.MaxValue).ToString());
-                        item.GetComponentInChildren<InputField>(includeInactive: true)
-                            .interactable = value >= 0;
-                        item.GetComponentInChildren<Toggle>(includeInactive: true)
-                            .SetIsOnWithoutNotify(value >= 0);
+                    {
+                        var toggle = item.Find("Container/Toggle").GetComponent<Toggle>();
+                        toggle.SetIsOnWithoutNotify(value >= 0);
+                        var input = item.Find("Container/InputField").GetComponent<InputField>();
+                        input.SetTextWithoutNotify((value & int.MaxValue).ToString());
+                        input.interactable = toggle.isOn;
+                    }
                         break;
                 }
             }
@@ -275,13 +274,14 @@ internal static class SceneLoaderPatch
         var tabs = (RectTransform)menu.transform.Find("Option Menu/Tabs");
         var tab = (RectTransform)Object.Instantiate(original: tabs.GetChild(0), parent: tabs);
         tab.name = name;
-        tab.GetComponentInChildren<I2.Loc.Localize>(includeInactive: true).Term = $"Evolution/{name}_Tab";
-        tab.GetComponentInChildren<Toggle>().OnValueChanged(value => menu.ShowSettings(value ? index : -1));
+        tab.GetComponent<Toggle>().OnValueChanged(value => menu.ShowSettings(value ? index : -1));
+        tab.Find("Label").GetComponent<I2.Loc.Localize>().Term = $"Evolution/{name}_Tab";
 
-        var reset = (RectTransform)panel.Find("Reset Entry");
-        var reload = reset.GetComponentInChildren<Button>();
-        reload.GetComponentInChildren<I2.Loc.Localize>(includeInactive: true).Term = $"Evolution/{name}_Reset";
-        reload.OnClick(() => Logger.LogWarning($"{name} reset no define"));
+        var reset = (RectTransform)panel.Find("Reset Entry/Container/ResetButton");
+        reset.GetComponent<Button>().OnClick(() => Logger.LogWarning($"{name} reset no define"));
+        reset.Find("Text Hilight").GetComponent<I2.Loc.Localize>().Term = $"Evolution/{name}_Reset";
+        reset.Find("Text Pressed").GetComponent<I2.Loc.Localize>().Term = $"Evolution/{name}_Reset";
+        reset.Find("Text Default").GetComponent<I2.Loc.Localize>().Term = $"Evolution/{name}_Reset";
 
         return panel;
     }
