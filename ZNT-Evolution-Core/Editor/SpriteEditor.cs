@@ -17,7 +17,7 @@ public class SpriteEditor : Editor, IEditorOverride, IEditorUpdate
     private tk2dSpriteAnimator Animator => field ??= GetComponentInChildren<tk2dSpriteAnimator>();
 
     [field: NonSerialized]
-    private tk2dBaseSprite Sprite => field ??= Animator.Sprite ?? GetComponentInChildren<tk2dBaseSprite>();
+    private tk2dBaseSprite Sprite => field ??= Animator?.Sprite ?? GetComponentInChildren<tk2dBaseSprite>();
 
     [SerializeInEditor(name: "Sprite Animation Clip")]
     public string SpriteAnimationClip
