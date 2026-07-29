@@ -1,5 +1,5 @@
-using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using UnityEngine;
 using ZNT.Evolution.Core.Effect;
 
@@ -8,10 +8,10 @@ namespace ZNT.Evolution.Core.Editor;
 [DisallowMultipleComponent]
 public abstract class CharacterEditor : Editor
 {
-    [field: NonSerialized]
+    [JsonIgnore]
     protected Character Character => field ??= GetComponentInChildren<Character>();
 
-    [NonSerialized]
+    [JsonIgnore]
     protected readonly Dictionary<string, CharacterBuff> Buffs = new();
 
     public void ApplyBuff(Parameters parameters)

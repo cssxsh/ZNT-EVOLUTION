@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using HarmonyLib;
+using Newtonsoft.Json;
 using UnityEngine;
 
 namespace ZNT.Evolution.Core.Editor;
@@ -12,15 +13,16 @@ public class OneWayEditor : Editor, IActivable, IDeserializable
 {
     private static readonly Dictionary<Collider2D, OneWayCollider> Cache = new();
 
-    [field: NonSerialized]
+    [JsonIgnore]
     private OneWayCollider Wall => field ??= GetComponent<OneWayCollider>();
 
-    [field: NonSerialized]
+    [JsonIgnore]
     private BoxCollider2D Collider => field ??= Traverse.Create(Wall).Field<BoxCollider2D>("collider").Value;
 
-    [field: NonSerialized]
+    [JsonIgnore]
     private PlatformEffector2D Effector => field ??= Traverse.Create(Wall).Field<PlatformEffector2D>("effector").Value;
 
+    [JsonIgnore]
     [SerializeInEditor(name: "Type")]
     public WallType Type
     {
@@ -28,6 +30,7 @@ public class OneWayEditor : Editor, IActivable, IDeserializable
         set => Traverse.Create(Wall).Property<WallType>("Type").Value = value;
     }
 
+    [JsonIgnore]
     [SerializeInEditor(name: "Block From")]
     public Orientation Orientation
     {
@@ -64,6 +67,7 @@ public class OneWayEditor : Editor, IActivable, IDeserializable
         }
     }
 
+    [JsonIgnore]
     [SerializeInEditor(name: "Is Active")]
     public bool IsActive { get; private set; } = true;
 

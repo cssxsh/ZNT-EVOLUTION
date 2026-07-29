@@ -1,5 +1,5 @@
-using System;
 using System.Linq;
+using Newtonsoft.Json;
 using UnityEngine;
 
 // ReSharper disable InconsistentNaming
@@ -9,15 +9,16 @@ namespace ZNT.Evolution.Core.Editor;
 [DisallowMultipleComponent]
 public class ExplosionEditor : Editor
 {
-    [field: NonSerialized]
+    [JsonIgnore]
     private ExplosionEffect Effect => field ??= GetComponent<ExplosionEffect>();
 
-    [field: NonSerialized]
+    [JsonIgnore]
     private SphereDetection Detection => field ??= GetComponent<SphereDetection>();
 
-    [field: NonSerialized]
+    [JsonIgnore]
     private ExplosionAsset Asset => field ??= GetComponent<AssetComponent>().Asset as ExplosionAsset;
 
+    [JsonIgnore]
     [SerializeInEditor(name: "Damage")]
     public float Damage
     {
@@ -25,6 +26,7 @@ public class ExplosionEditor : Editor
         set => Effect.Damage = value;
     }
 
+    [JsonIgnore]
     [SerializeInEditor(name: "Damage Type")]
     public DamageType DamageType
     {
@@ -32,6 +34,7 @@ public class ExplosionEditor : Editor
         set => Effect.DamageType = value;
     }
 
+    [JsonIgnore]
     [SerializeInEditor(name: "Damage Radius")]
     public float DamageRadius
     {
@@ -39,12 +42,14 @@ public class ExplosionEditor : Editor
         set => Detection.Radius = value;
     }
 
+    [JsonIgnore]
     private Tag ApplyDamageOn
     {
         get => Effect.ApplyDamageOn;
         set => Effect.ApplyDamageOn = value;
     }
 
+    [JsonIgnore]
     [SerializeInEditor(name: "Damage Breakable")]
     public bool DamageBreakable
     {
@@ -52,6 +57,7 @@ public class ExplosionEditor : Editor
         set => ApplyDamageOn = value ? ApplyDamageOn.Add(Tag.Breakable) : ApplyDamageOn.Remove(Tag.Breakable);
     }
 
+    [JsonIgnore]
     [SerializeInEditor(name: "Damage Human")]
     public bool DamageHuman
     {
@@ -59,6 +65,7 @@ public class ExplosionEditor : Editor
         set => ApplyDamageOn = value ? ApplyDamageOn.Add(Tag.Human) : ApplyDamageOn.Remove(Tag.Human);
     }
 
+    [JsonIgnore]
     [SerializeInEditor(name: "Damage Zombie")]
     public bool DamageZombie
     {
@@ -66,6 +73,7 @@ public class ExplosionEditor : Editor
         set => ApplyDamageOn = value ? ApplyDamageOn.Add(Tag.Zombie) : ApplyDamageOn.Remove(Tag.Zombie);
     }
 
+    [JsonIgnore]
     [SerializeInEditor(name: "Force")]
     public float Force
     {
@@ -73,12 +81,14 @@ public class ExplosionEditor : Editor
         set => Effect.Force = value;
     }
 
+    [JsonIgnore]
     private Tag ApplyForceOn
     {
         get => Effect.ApplyForceOn;
         set => Effect.ApplyForceOn = value;
     }
 
+    [JsonIgnore]
     [SerializeInEditor(name: "Force Human")]
     public bool ForceHuman
     {
@@ -86,6 +96,7 @@ public class ExplosionEditor : Editor
         set => ApplyForceOn = value ? ApplyForceOn.Add(Tag.Human) : ApplyForceOn.Remove(Tag.Human);
     }
 
+    [JsonIgnore]
     [SerializeInEditor(name: "Force Zombie")]
     public bool ForceZombie
     {
@@ -93,6 +104,7 @@ public class ExplosionEditor : Editor
         set => ApplyForceOn = value ? ApplyForceOn.Add(Tag.Zombie) : ApplyForceOn.Remove(Tag.Zombie);
     }
 
+    [JsonIgnore]
     [SerializeInEditor(name: "Shake Camera")]
     public bool ShakeCamera
     {

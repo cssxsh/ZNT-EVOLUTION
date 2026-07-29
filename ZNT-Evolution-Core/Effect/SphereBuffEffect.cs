@@ -1,5 +1,6 @@
 using BepInEx.Logging;
 using HarmonyLib;
+using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.Events;
 using ZNT.Evolution.Core.Editor;
@@ -13,6 +14,7 @@ public class SphereBuffEffect : TriggerEffect
 {
     private static readonly ManualLogSource Logger = BepInExLogger.CreateLogSource(nameof(SphereBuffEffect));
 
+    [JsonIgnore]
     [SerializeInEditor(name: "Detection Radius")]
     public float DetectionRadius
     {
@@ -20,6 +22,7 @@ public class SphereBuffEffect : TriggerEffect
         set => ((SphereDetection)Trigger.Detection).Radius = value;
     }
 
+    [JsonIgnore]
     [SerializeInEditor(name: "Detection Frequency", devOnly: true)]
     public float DetectionFrequency
     {
@@ -41,6 +44,7 @@ public class SphereBuffEffect : TriggerEffect
     [SerializeInEditor(name: "Max Hp Diff")]
     public float MaxHpDiff = 100.0f;
 
+    [JsonIgnore]
     private readonly Parameters MaxHpParameters = new(id: nameof(Health.MaxHp));
 
     [SerializeInEditor(name: "Hp Buff")]
@@ -52,6 +56,7 @@ public class SphereBuffEffect : TriggerEffect
     [SerializeInEditor(name: "Hp Diff")]
     public float HpDiff = 10.0f;
 
+    [JsonIgnore]
     private readonly Parameters HpParameters = new(id: nameof(Health.Hp));
 
     [SerializeInEditor(name: "Damage Buff")]
@@ -63,6 +68,7 @@ public class SphereBuffEffect : TriggerEffect
     [SerializeInEditor(name: "Damage Diff")]
     public float DamageDiff = 100.0f;
 
+    [JsonIgnore]
     private readonly Parameters DamageParameters = new(id: nameof(Attacker.Damage));
 
     // ReSharper restore InconsistentNaming

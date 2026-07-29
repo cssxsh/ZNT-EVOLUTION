@@ -2,6 +2,7 @@ using System;
 using System.Reflection;
 using DG.Tweening;
 using HarmonyLib;
+using Newtonsoft.Json;
 using UnityEngine;
 using ZNT.LevelEditor;
 
@@ -45,7 +46,7 @@ public class PropMoveableEditor : Editor, IEditorOverride
         }
     }
 
-    [NonSerialized]
+    [JsonIgnore]
     private Tweener Tween;
 
     public Tweener SpeedTween(PropMoveable moveable, float start, float end)

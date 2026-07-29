@@ -1,6 +1,6 @@
-using System;
 using System.Collections.Generic;
 using HarmonyLib;
+using Newtonsoft.Json;
 using Rotorz.Tile;
 using UnityEngine;
 
@@ -10,7 +10,7 @@ namespace ZNT.Evolution.Core.Effect;
 [DisallowMultipleComponent]
 public class FogOfWar : ResizableParticleSystem, IResizable, IActivable
 {
-    [NonSerialized]
+    [JsonIgnore]
     private Dictionary<TileData, Tileset> _tiles = new();
 
     private static LevelLoaderManager Manager => GameManager.Instance ?? FindObjectOfType<LevelLoaderManager>();

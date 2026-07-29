@@ -1,7 +1,7 @@
-using System;
 using System.Linq;
 using System.Reflection;
 using HarmonyLib;
+using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -13,12 +13,13 @@ namespace ZNT.Evolution.Core.Editor;
 [DisallowMultipleComponent]
 public class SpriteEditor : Editor, IEditorOverride, IEditorUpdate
 {
-    [field: NonSerialized]
+    [JsonIgnore]
     private tk2dSpriteAnimator Animator => field ??= GetComponentInChildren<tk2dSpriteAnimator>();
 
-    [field: NonSerialized]
+    [JsonIgnore]
     private tk2dBaseSprite Sprite => field ??= Animator?.Sprite ?? GetComponentInChildren<tk2dBaseSprite>();
 
+    [JsonIgnore]
     [SerializeInEditor(name: "Sprite Animation Clip")]
     public string SpriteAnimationClip
     {
@@ -31,6 +32,7 @@ public class SpriteEditor : Editor, IEditorOverride, IEditorUpdate
         }
     }
 
+    [JsonIgnore]
     [SerializeInEditor(name: "Sprite Definition")]
     public string SpriteDefinition
     {
@@ -38,6 +40,7 @@ public class SpriteEditor : Editor, IEditorOverride, IEditorUpdate
         set => Sprite.spriteId = Sprite.GetSpriteIdByName(value);
     }
 
+    [JsonIgnore]
     [SerializeInEditor(name: "Sprite Layer")]
     public string SpriteLayer
     {
@@ -45,6 +48,7 @@ public class SpriteEditor : Editor, IEditorOverride, IEditorUpdate
         set => Sprite.CachedRenderer.sortingLayerName = value;
     }
 
+    [JsonIgnore]
     [SerializeInEditor(name: "Sprite Order")]
     public int SpriteOrder
     {
@@ -52,6 +56,7 @@ public class SpriteEditor : Editor, IEditorOverride, IEditorUpdate
         set => Sprite.SortingOrder = value;
     }
 
+    [JsonIgnore]
     [SerializeInEditor(name: "Edit Sprite Collection")]
     [LevelEditorButton(nameof(EditSpriteCollection))]
     public bool Editing { private set; get; }
@@ -141,7 +146,7 @@ public class SpriteEditor : Editor, IEditorOverride, IEditorUpdate
         }
     }
 
-    [NonSerialized]
+    [JsonIgnore]
     private Dropdown _dropdown;
 
     private void OnAnimationChanged(tk2dSpriteAnimator animator, tk2dSpriteAnimationClip clip)

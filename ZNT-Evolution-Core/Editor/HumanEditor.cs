@@ -1,5 +1,5 @@
-using System;
 using HarmonyLib;
+using Newtonsoft.Json;
 using UnityEngine;
 
 namespace ZNT.Evolution.Core.Editor;
@@ -8,15 +8,17 @@ namespace ZNT.Evolution.Core.Editor;
 [DisallowMultipleComponent]
 public class HumanEditor : CharacterEditor
 {
-    [field: NonSerialized]
+    [JsonIgnore]
     private HumanBehaviour Behaviour => field ??= GetComponent<HumanBehaviour>();
 
+    [JsonIgnore]
     private Tag Tags
     {
         get => gameObject.GetTags();
         set => gameObject.SetTags(value);
     }
 
+    [JsonIgnore]
     [SerializeInEditor(name: "Zombie Ignore")]
     public bool CannotAttack
     {
@@ -24,6 +26,7 @@ public class HumanEditor : CharacterEditor
         set => Tags = value ? Tags.Add(Tag.CannotAttack) : Tags.Remove(Tag.CannotAttack);
     }
 
+    [JsonIgnore]
     [SerializeInEditor(name: "Weapon Magazine Size")]
     public int WeaponMagazineSize
     {
@@ -32,6 +35,7 @@ public class HumanEditor : CharacterEditor
             Behaviour.Weapon.DefaultMag = new Magazine(value);
     }
 
+    [JsonIgnore]
     [SerializeInEditor(name: "Weapon Reload Time")]
     public float WeaponReloadTime
     {
@@ -39,6 +43,7 @@ public class HumanEditor : CharacterEditor
         set => Behaviour.Weapon.ReloadTimer.Duration = value;
     }
 
+    [JsonIgnore]
     [SerializeInEditor(name: "Direct Aim")]
     public bool DirectAim
     {
@@ -46,6 +51,7 @@ public class HumanEditor : CharacterEditor
         set => Behaviour.Attacker.DirectAim = value;
     }
 
+    [JsonIgnore]
     [SerializeInEditor(name: "Aim Stop Time")]
     public float AimStopTime
     {
@@ -53,6 +59,7 @@ public class HumanEditor : CharacterEditor
         set => Behaviour.Attacker.StopAimingTime = value;
     }
 
+    [JsonIgnore]
     [SerializeInEditor(name: "Aim Range")]
     public float AimRange
     {
@@ -60,6 +67,7 @@ public class HumanEditor : CharacterEditor
         set => Behaviour.Attacker.AimRange = value;
     }
 
+    [JsonIgnore]
     [SerializeInEditor(name: "Attack Frequency")]
     public float AttackFrequency
     {
@@ -67,6 +75,7 @@ public class HumanEditor : CharacterEditor
         set => Behaviour.Attacker.AttackFrequency = value;
     }
 
+    [JsonIgnore]
     [SerializeInEditor(name: "Attack Range")]
     public float AttackRange
     {
@@ -74,6 +83,7 @@ public class HumanEditor : CharacterEditor
         set => Behaviour.Attacker.AttackRange = value;
     }
 
+    [JsonIgnore]
     [SerializeInEditor(name: "Moving Attack Range")]
     public float MovingAttackRange
     {
@@ -81,6 +91,7 @@ public class HumanEditor : CharacterEditor
         set => Behaviour.Attacker.MovingAttackRange = value;
     }
 
+    [JsonIgnore]
     [SerializeInEditor(name: "Damage")]
     public float Damage
     {
@@ -88,6 +99,7 @@ public class HumanEditor : CharacterEditor
         set => Behaviour.Attacker.Damage = value;
     }
 
+    [JsonIgnore]
     [SerializeInEditor(name: "Damage Type")]
     public DamageType DamageType
     {
@@ -95,6 +107,7 @@ public class HumanEditor : CharacterEditor
         set => Behaviour.Attacker.DamageType = value;
     }
 
+    [JsonIgnore]
     [SerializeInEditor(name: "Damage Range")]
     public float DamageRange
     {
@@ -102,6 +115,7 @@ public class HumanEditor : CharacterEditor
         set => Behaviour.Attacker.DamageRange = value;
     }
 
+    [JsonIgnore]
     [SerializeInEditor(name: "Hit Multiple Targets")]
     public bool HitMultipleTargets
     {
@@ -109,6 +123,7 @@ public class HumanEditor : CharacterEditor
         set => Behaviour.Attacker.HitMultipleTargets = value;
     }
 
+    [JsonIgnore]
     [SerializeInEditor(name: "Hit Max Targets")]
     public int MaxTargets
     {
@@ -116,6 +131,7 @@ public class HumanEditor : CharacterEditor
         set => Behaviour.Attacker.MaxTargets = value;
     }
 
+    [JsonIgnore]
     [SerializeInEditor(name: "Hit Targets Damage Multiplier")]
     public float NextTargetsDamageMultiplier
     {
@@ -123,6 +139,7 @@ public class HumanEditor : CharacterEditor
         set => Behaviour.Attacker.NextTargetsDamageMultiplier = value;
     }
 
+    [JsonIgnore]
     [SerializeInEditor(name: "Vision Cast All", devOnly: true)]
     public bool VisionCastAll
     {
@@ -130,6 +147,7 @@ public class HumanEditor : CharacterEditor
         set => ((RayConeDetection)Behaviour.Vision.Detection).CastAll = value;
     }
 
+    [JsonIgnore]
     [SerializeInEditor(name: "Vision Keep Lost Track", devOnly: true)]
     public bool VisionKeepLostTrack
     {
@@ -137,6 +155,7 @@ public class HumanEditor : CharacterEditor
         set => ((SignalEffect)Behaviour.Vision.Effects[0]).KeepLostTrack = value;
     }
 
+    [JsonIgnore]
     [SerializeInEditor(name: "Block Opponents")]
     public bool BlockOpponents
     {
@@ -144,6 +163,7 @@ public class HumanEditor : CharacterEditor
         set => Behaviour.Stopper.Initialize(value, MaxOpponentsBlock, Behaviour.OnStopperBreak);
     }
 
+    [JsonIgnore]
     [SerializeInEditor(name: "Max Opponents Block")]
     public int MaxOpponentsBlock
     {

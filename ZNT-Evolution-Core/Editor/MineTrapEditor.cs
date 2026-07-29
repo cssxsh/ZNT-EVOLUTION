@@ -1,5 +1,5 @@
-using System;
 using HarmonyLib;
+using Newtonsoft.Json;
 using UnityEngine;
 
 namespace ZNT.Evolution.Core.Editor;
@@ -8,9 +8,10 @@ namespace ZNT.Evolution.Core.Editor;
 [DisallowMultipleComponent]
 public class MineTrapEditor : Editor
 {
-    [field: NonSerialized]
+    [JsonIgnore]
     private Trigger Trigger => field ??= GetComponent<Trigger>();
 
+    [JsonIgnore]
     [SerializeInEditor(name: "Detected Human")]
     public bool DetectedHuman
     {
@@ -18,6 +19,7 @@ public class MineTrapEditor : Editor
         set => Trigger.WithTags = value ? Trigger.WithTags.Add(Tag.Human) : Trigger.WithTags.Remove(Tag.Human);
     }
 
+    [JsonIgnore]
     [SerializeInEditor(name: "Detected Zombie")]
     public bool DetectedZombie
     {
@@ -25,8 +27,10 @@ public class MineTrapEditor : Editor
         set => Trigger.WithTags = value ? Trigger.WithTags.Add(Tag.Zombie) : Trigger.WithTags.Remove(Tag.Zombie);
     }
 
-    private MineBehaviour Behaviour => GetComponent<MineBehaviour>();
+    [JsonIgnore]
+    private MineBehaviour Behaviour => field ??= GetComponent<MineBehaviour>();
 
+    [JsonIgnore]
     [SerializeInEditor(name: "Delay")]
     public float Delay
     {

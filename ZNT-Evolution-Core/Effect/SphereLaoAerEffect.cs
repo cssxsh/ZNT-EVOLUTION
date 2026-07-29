@@ -1,7 +1,7 @@
-using System;
 using System.Collections.Generic;
 using BepInEx.Logging;
 using HarmonyLib;
+using Newtonsoft.Json;
 using UnityEngine;
 using BepInExLogger = BepInEx.Logging.Logger;
 
@@ -13,6 +13,7 @@ public class SphereLaoAerEffect : TriggerEffect
 {
     private static readonly ManualLogSource Logger = BepInExLogger.CreateLogSource(nameof(SphereLaoAerEffect));
 
+    [JsonIgnore]
     [SerializeInEditor(name: "Detection Radius")]
     public float DetectionRadius
     {
@@ -20,6 +21,7 @@ public class SphereLaoAerEffect : TriggerEffect
         set => ((SphereDetection)Trigger.Detection).Radius = value;
     }
 
+    [JsonIgnore]
     [SerializeInEditor(name: "Detection Frequency", devOnly: true)]
     public float DetectionFrequency
     {
@@ -27,10 +29,10 @@ public class SphereLaoAerEffect : TriggerEffect
         set => Trigger.Frequency = value;
     }
 
-    [NonSerialized]
+    [JsonIgnore]
     private HumanBehaviour _human;
 
-    [NonSerialized]
+    [JsonIgnore]
     private CorpseBehaviour _nearest;
 
     public override void OnApplyOnGameObject(GameObject target)
