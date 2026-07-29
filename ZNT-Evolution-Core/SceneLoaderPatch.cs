@@ -509,5 +509,19 @@ internal static class SceneLoaderPatch
         return false;
     }
 
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(PaintMenu), "FilterOnFirstLoad")]
+    public static void FilterOnFirstLoad(PaintMenu __instance)
+    {
+        if (!__instance.gameObject.activeInHierarchy) return;
+        __instance.StopAllCoroutines();
+        Traverse.Create(__instance)
+            .Field<Dictionary<int, List<UIWidgets.ListViewIconsItemDescription>>>("elements").Value.Clear();
+        Traverse.Create(__instance)
+            .Method("FillAccordion").GetValue();
+        var input = __instance.GetComponentInChildren<InputField>();
+        __instance.FilterList(input.text);
+    }
+
     #endregion
 }
