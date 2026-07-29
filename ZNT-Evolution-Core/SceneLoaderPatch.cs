@@ -334,16 +334,33 @@ internal static class SceneLoaderPatch
     private static void CopyObject(this SelectionMenu menu, bool active)
     {
         var target = Traverse.Create(menu).Field<EditorGameObject>("serializeGameObject").Value;
-        target.ObjectSettings.Activate(active, active ? ObjectSettings.Control.Copy : ObjectSettings.Control.None);
+        target?.ObjectSettings.Activate(active, active ? ObjectSettings.Control.Copy : ObjectSettings.Control.None);
+    }
+
+    private static void OnObjectMoved(this SelectionMenu menu, GameObject go, bool isBrush)
+    {
+        var move = Traverse.Create(menu).Field<Toggle>("moveButton").Value;
+        var copy = move.transform.parent.Find("Copy Button").GetComponent<Toggle>();
+        copy.isOn = false;
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(SelectionMenu), "SelectObject")]
+    public static void SelectObject(SelectionMenu __instance)
+    {
+        var target = Traverse.Create(__instance).Field<EditorGameObject>("serializeGameObject").Value;
+        target?.ObjectSettings.OnCopy -= __instance.OnObjectMoved;
     }
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(SelectionMenu), "UpdateCommonMenu")]
     public static void UpdateCommonMenu(SelectionMenu __instance)
     {
+        var target = Traverse.Create(__instance).Field<EditorGameObject>("serializeGameObject").Value;
+        target?.ObjectSettings.OnCopy += __instance.OnObjectMoved;
         var move = Traverse.Create(__instance).Field<Toggle>("moveButton").Value;
-        var copy = move.transform.parent.Find("Copy Button")?.GetComponent<Toggle>();
-        copy?.isOn = false;
+        var copy = move.transform.parent.Find("Copy Button").GetComponent<Toggle>();
+        copy.isOn = false;
     }
 
     private static readonly HashSet<string> Activated = [];

@@ -269,7 +269,6 @@ internal static class DebugPatch
         var level = Traverse.Create(__instance).Field<LevelLoaderManager>("levelManager").Value;
         var system = Traverse.Create(__instance).Field<Rotorz.Tile.TileSystem>("tileSystem").Value;
         if (system.GetTileOrNull(ti)?.gameObject == __instance.gameObject) return false;
-        system.EraseTile(ti);
         level.PaintTile(
             system: system,
             element: element,
