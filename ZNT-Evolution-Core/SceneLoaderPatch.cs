@@ -90,6 +90,33 @@ internal static class SceneLoaderPatch
 
     #endregion
 
+    #region MainMenuScene
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(MainMenu), "Start")]
+    public static void Start(MainMenu __instance)
+    {
+        var stats = (RectTransform)__instance.transform.Find("Canvas/Stats Button");
+        var mod = Object.Instantiate(original: stats, parent: stats.parent);
+        mod.name = "Mod Button";
+        mod.localPosition = new Vector3(-77.0f, -208.0f, 0.0f);
+        var image = mod.GetComponent<Image>();
+        image.enabled = false;
+        var tooltip = mod.GetComponent<TooltipReceiver>();
+        Traverse.Create(tooltip).Field<string>("text").Value = "Evolution/Mod_Folder";
+        var button = mod.GetComponent<Button>();
+        button.OnClick(() => System.Diagnostics.Process.Start(ModManager.ModsPath));
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(MainMenu), "Quit")]
+    public static void Quit(MainMenu __instance)
+    {
+        // ...
+    }
+
+    #endregion
+
     #region SettingsScene
 
     [HarmonyPostfix]
