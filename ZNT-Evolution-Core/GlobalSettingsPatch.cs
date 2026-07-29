@@ -40,7 +40,7 @@ internal static class GlobalSettingsPatch
     {
         __state = force
                   || Traverse.Create(__instance).Field<bool>("needUpdate").Value
-                  || __instance.transform.forward != Traverse.Create(__instance).Field<Vector3>("previousFoward").Value;
+                  || Traverse.Create(__instance).Field<Vector3>("previousFoward").Value != __instance.transform.forward;
     }
 
     [HarmonyPostfix]
@@ -49,7 +49,6 @@ internal static class GlobalSettingsPatch
     {
         if (!__state) return;
         if (!VisionMaterialization) return;
-        var rays = Traverse.Create(__instance).Field<Vector2[]>("rays").Value;
         for (var i = __instance.Origin.childCount; i < __instance.RayCount; i++)
         {
             var laser = ComponentSingleton<GamePoolManager>.Instance
@@ -70,6 +69,7 @@ internal static class GlobalSettingsPatch
         }
 
         if (!__instance.Trigger.enabled) return;
+        var rays = Traverse.Create(__instance).Field<Vector2[]>("rays").Value;
         var inverted = Traverse.Create(__instance).Field<int>("inverted").Value;
         for (var i = 0; i < __instance.RayCount; i++)
         {
@@ -87,8 +87,10 @@ internal static class GlobalSettingsPatch
     [HarmonyPatch(typeof(RayConeDetection), "ResetDeviatonAngle")]
     public static void OnDespawned(RayConeDetection __instance)
     {
+        var mask = (LayerMask)LayerMask.GetMask("Stairs Top", "Gameplay", "Crate");
         foreach (var attachment in __instance.Origin.GetComponentsInChildren<LaserAttachment>())
         {
+            Traverse.Create(attachment).Field<LayerMask>("obstacleLayers").Value = mask;
             ComponentSingleton<GamePoolManager>.Instance.Despawn(attachment);
         }
     }
