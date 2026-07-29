@@ -456,6 +456,7 @@
         <Compile Include="Mod\ModMetadata.cs"/>
         <Compile Include="Mod\ModManager.cs"/>
         <Compile Include="Mod\ModResource.cs"/>
+        <Compile Include="Mod\ModState.cs"/>
     </ItemGroup>
     <ItemGroup>
         <EmbeddedResource Include="Resources\**"/>

@@ -11,6 +11,7 @@ using UnityEngine;
 using ZNT.Evolution.Core.Asset;
 using BepInExLogger = BepInEx.Logging.Logger;
 
+// ReSharper disable MemberCanBePrivate.Global
 namespace ZNT.Evolution.Core.Mod;
 
 public class ModContext
@@ -62,7 +63,7 @@ public class ModContext
             // ReSharper disable once InvertIf
             if (Contexts.TryGetValue(id, out var allocated))
             {
-                if (allocated.Loaded) throw new AssetException($"'{id}' of '{allocated.Path}' is loaded");
+                if (allocated.State is not ModState.Idle) throw new AssetException($"'{id}' is not Idle");
                 Contexts.Remove(allocated.Metadata.Id);
             }
         }
@@ -78,7 +79,7 @@ public class ModContext
 
     public readonly ManualLogSource Logger;
 
-    public bool Loaded { private set; get; }
+    public ModState State { private set; get; }
 
     public System.Version Version => System.Version.Parse(Metadata.Version);
 
@@ -87,7 +88,7 @@ public class ModContext
         Path = path;
         Metadata = metadata;
         Logger = BepInExLogger.CreateLogSource(metadata.Name);
-        Loaded = false;
+        State = ModState.Idle;
     }
 
     private static readonly Regex InfoRegex = new("""^(?:.+\/)?([^.]+)(?:\.(.*))?\.(\w+)$""");
@@ -97,7 +98,7 @@ public class ModContext
         Lock.EnterReadLock();
         try
         {
-            if (Loaded) return false;
+            if (State is not ModState.Idle) return false;
             foreach (var (id, version) in Metadata.Dependencies)
             {
                 var need = System.Version.Parse(version);
@@ -105,7 +106,7 @@ public class ModContext
                     plugin.Metadata.Version >= need) continue;
                 if (Contexts.TryGetValue(id, out var allocated) &&
                     allocated.Version >= need &&
-                    allocated.Loaded) continue;
+                    allocated.State is ModState.Loaded) continue;
                 return false;
             }
 
@@ -122,11 +123,12 @@ public class ModContext
         Lock.EnterWriteLock();
         try
         {
-            if (Loaded)
+            if (State is ModState.Loaded)
             {
                 Logger.LogInfo($"[{Metadata.Name} {Metadata.Version}] is already loaded");
                 return;
             }
+            State = ModState.Frozen;
 
             foreach (var (id, version) in Metadata.Dependencies)
             {
@@ -134,12 +136,11 @@ public class ModContext
                 if (BepInEx.Bootstrap.Chainloader.PluginInfos.TryGetValue(id, out var plugin) &&
                     plugin.Metadata.Version >= need) continue;
                 if (Contexts.TryGetValue(id, out var allocated) &&
-                    System.Version.Parse(allocated.Metadata.Version) >= need &&
-                    allocated.Loaded) continue;
+                    allocated.Version >= need &&
+                    allocated.State is ModState.Loaded) continue;
                 throw new AssetException($"[{Metadata.Name} {Metadata.Version}] dependency {id} - {version}]");
             }
 
-            Loaded = true;
             using var buffer = new MemoryStream();
             if (Directory.Exists(Path))
             {
@@ -208,6 +209,8 @@ public class ModContext
                     }
                 }
             }
+
+            State = ModState.Loaded;
         }
         finally
         {
@@ -222,7 +225,8 @@ public class ModContext
         {
             foreach (var (_, context) in Contexts)
             {
-                if (context.Metadata.Dependencies.ContainsKey(Metadata.Id) && context.Loaded) return false;
+                if (context.Metadata.Dependencies.ContainsKey(Metadata.Id) &&
+                    context.State is ModState.Loaded) return false;
             }
 
             return true;
@@ -240,7 +244,8 @@ public class ModContext
         {
             foreach (var (_, context) in Contexts)
             {
-                if (!context.Metadata.Dependencies.ContainsKey(Metadata.Id) || !context.Loaded) continue;
+                if (!context.Metadata.Dependencies.ContainsKey(Metadata.Id) ||
+                    context.State is not ModState.Loaded) continue;
                 var name = context.Metadata.Name;
                 var version = context.Metadata.Version;
                 throw new AssetException($"[{name} {version}] dependency {Metadata.Id} - {Metadata.Version}]");
@@ -260,7 +265,7 @@ public class ModContext
                 }
             }
 
-            Loaded = false;
+            State = ModState.Idle;
         }
         finally
         {

@@ -137,7 +137,7 @@ internal static class SceneLoaderPatch
             var localize = item.Find("Text").GetComponent<I2.Loc.Localize>();
             localize.Term = context.Metadata.GetTermData().Term;
             var toggle = item.Find("Toggle").GetComponent<Toggle>();
-            toggle.SetIsOnWithoutNotify(context.Loaded);
+            toggle.SetIsOnWithoutNotify(context.State is ModState.Loaded);
             toggle.OnValueChanged(value =>
             {
                 switch (value)
@@ -146,18 +146,18 @@ internal static class SceneLoaderPatch
                         context.Load().ContinueWith(task =>
                         {
                             if (task.Exception != null) Logger.LogError(task.Exception);
-                            toggle.SetIsOnWithoutNotify(context.Loaded);
+                            toggle.SetIsOnWithoutNotify(context.State is ModState.Loaded);
                         }, TaskScheduler.FromCurrentSynchronizationContext());
                         break;
                     case false when context.IsUnloadReady():
                         context.Unload().ContinueWith(task =>
                         {
                             if (task.Exception != null) Logger.LogError(task.Exception);
-                            toggle.SetIsOnWithoutNotify(context.Loaded);
+                            toggle.SetIsOnWithoutNotify(context.State is ModState.Loaded);
                         }, TaskScheduler.FromCurrentSynchronizationContext());
                         break;
                     default:
-                        toggle.SetIsOnWithoutNotify(context.Loaded);
+                        toggle.SetIsOnWithoutNotify(context.State is ModState.Loaded);
                         break;
                 }
             });
