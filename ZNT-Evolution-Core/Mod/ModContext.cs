@@ -448,10 +448,17 @@ public class ModContext
                 var element = ReadLevelElement(buffer, resource.Format);
                 Logger.LogDebug($"{resource.Path} -> {element}");
                 // ReSharper disable once InvertIf
-                if (element is { ElementType: LevelElement.Type.Brush, Brush: null, LinkedElement.Element: not null})
+                if (element is { ElementType: LevelElement.Type.Brush, Brush: null, LinkedElement.Element: not null })
                 {
                     element.Brush = MakeBrush(element);
                     Logger.LogDebug($"{resource.Path} -> {element.Brush}");
+                }
+
+                // ReSharper disable once InvertIf
+                if (element is { ElementType: LevelElement.Type.Brush, DecorPrefab.name: "Chopter" })
+                {
+                    element.CustomAsset = MakeHook(element);
+                    Logger.LogDebug($"{resource.Path} -> {element.CustomAsset}");
                 }
             }
                 break;
@@ -667,10 +674,24 @@ public class ModContext
         var merge = new BrushMerge(
             source: element.LinkedElement.Element.Brush as Rotorz.Tile.OrientedBrush,
             name: "brush_" + element.name,
-            prefab: element.CustomAsset.Prefab.gameObject);
+            prefab: element.CustomAsset?.Prefab.gameObject ?? element.DecorPrefab);
         var brush = merge.Create();
         Acquire(brush);
         return brush;
+    }
+
+    private HookAsset MakeHook(LevelElement element)
+    {
+        var hook = HookAsset.Invoke(body =>
+        {
+            var animator = body.GetComponentInChildren<tk2dSpriteAnimator>();
+            animator.Library = element.AnimationLibrary;
+            animator.DefaultClipId = element.AnimClipId;
+            animator.Sprite.SetSprite(element.SpriteCollection, element.SpriteIndex);
+        });
+        hook.name = element.name + "_hook";
+        Acquire(hook);
+        return hook;
     }
 
     #endregion
