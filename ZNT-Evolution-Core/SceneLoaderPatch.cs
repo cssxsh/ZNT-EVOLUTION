@@ -21,6 +21,8 @@ internal static class SceneLoaderPatch
 {
     private static readonly ManualLogSource Logger = BepInExLogger.CreateLogSource(nameof(SceneLoader));
 
+    private static bool HasModChanged;
+
     private static void ToggleActivation(this RectTransform transform)
     {
         transform.gameObject.SetActive(!transform.gameObject.activeSelf);
@@ -139,6 +141,7 @@ internal static class SceneLoaderPatch
         reset.GetComponent<Button>().OnClick(() =>
         {
             Logger.LogInfo("Reloading Mods Folder");
+            HasModChanged = true;
             ModManager.ReloadAll().ContinueWith(task =>
             {
                 if (task.Exception != null) Logger.LogError(task.Exception);
@@ -172,6 +175,7 @@ internal static class SceneLoaderPatch
                     case true when context.IsLoadReady():
                         context.Load().ContinueWith(task =>
                         {
+                            HasModChanged = true;
                             if (task.Exception != null) Logger.LogError(task.Exception);
                             toggle.SetIsOnWithoutNotify(context.State is ModState.Loaded);
                         }, TaskScheduler.FromCurrentSynchronizationContext());
@@ -179,6 +183,7 @@ internal static class SceneLoaderPatch
                     case false when context.IsUnloadReady():
                         context.Unload().ContinueWith(task =>
                         {
+                            HasModChanged = true;
                             if (task.Exception != null) Logger.LogError(task.Exception);
                             toggle.SetIsOnWithoutNotify(context.State is ModState.Loaded);
                         }, TaskScheduler.FromCurrentSynchronizationContext());
@@ -557,7 +562,7 @@ internal static class SceneLoaderPatch
     [HarmonyPatch(typeof(PaintMenu), "FilterOnFirstLoad")]
     public static void FilterOnFirstLoad(PaintMenu __instance)
     {
-        if (!__instance.gameObject.activeInHierarchy) return;
+        if (!__instance.gameObject.activeInHierarchy || !HasModChanged) return;
         __instance.StopAllCoroutines();
         Traverse.Create(__instance)
             .Field<Dictionary<int, List<UIWidgets.ListViewIconsItemDescription>>>("elements").Value.Clear();
@@ -565,6 +570,7 @@ internal static class SceneLoaderPatch
             .Method("FillAccordion").GetValue();
         var input = __instance.GetComponentInChildren<InputField>();
         __instance.FilterList(input.text);
+        HasModChanged = false;
     }
 
     #endregion
