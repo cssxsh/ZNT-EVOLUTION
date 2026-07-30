@@ -15,7 +15,7 @@ internal record ModResource<T> : IComparable<ModResource<T>>
         { Name: "metadata", Type: "", Format: "json" } => 0x0000_0000,
         { Format: "bank", Type: "strings" } => 0x0001_0000,
         { Format: "bank" } => 0x0001_0001,
-        { Format: "tga" or "png" or "exr" } => 0x0002_0000,
+        { Format: "tga" or "png" or "exr", Type: "" } => 0x0002_0000,
         { Type: "material.merge", Format: "json" or "bson" } => 0x0002_0001,
         { Type: "sprite.info" or "sprite.merge", Format: "json" or "bson" } => 0x0002_0002,
         { Type: "animation", Format: "json" or "bson" } => 0x0002_0003,
@@ -31,6 +31,7 @@ internal record ModResource<T> : IComparable<ModResource<T>>
         { Type: "human", Format: "json" or "bson" } => 0x0003_0008,
         { Type: "spawn", Format: "json" or "bson" } => 0x0003_0009,
         { Type: "brush.info" or "brush.merge", Format: "json" or "bson" } => 0x0004_0000,
+        { Type: "preview", Format: "tga" or "png" or "exr" } => 0x0004_0001,
         { Type: "preview.info", Format: "json" or "bson" } => 0x0004_0001,
         { Type: "element", Format: "json" or "bson" } => 0x0004_0002,
         _ => int.MaxValue

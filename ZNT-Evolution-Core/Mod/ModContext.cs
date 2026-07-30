@@ -298,17 +298,10 @@ public class ModContext
             }
                 break;
             // UnityEngine.Texture2D
-            case { Format: "tga" or "png" or "exr" }:
+            case { Format: "tga" or "png" or "exr", Type: "" }:
             {
                 var texture = ReadTexture2D(resource.Name, buffer.ToArray());
                 Logger.LogDebug($"{resource.Path} -> {texture}");
-                // ReSharper disable once InvertIf
-                if (texture is { width: 128, height: 128 })
-                {
-                    var rect = new Rect(x: 0, y: 0, width: texture.width, height: texture.height);
-                    var preview = MakePreview(texture, rect);
-                    Logger.LogDebug($"{resource.Path} -> {preview}");
-                }
             }
                 break;
             // UnityEngine.Material
@@ -436,6 +429,13 @@ public class ModContext
             }
                 break;
             // UnityEngine.Sprite
+            case { Type: "preview", Format: "tga" or "png" or "exr" }:
+            {
+                var preview = ReadPreview(resource.Name, buffer.ToArray());
+                Logger.LogDebug($"{resource.Path} -> {preview}");
+            }
+                break;
+            // UnityEngine.Sprite
             case { Type: "preview.info", Format: "json" or "bson" }:
             {
                 var preview = ReadPreviewInfo(buffer, resource.Format);
@@ -491,18 +491,8 @@ public class ModContext
         texture.name = name;
         texture.filterMode = FilterMode.Point;
         texture.wrapMode = TextureWrapMode.Clamp;
-        // texture.Apply(true, true);
         Acquire(texture);
         return texture;
-    }
-
-    private Sprite MakePreview(Texture2D texture, Rect rect)
-    {
-        // LevelElement.Preview
-        var preview = Sprite.Create(texture: texture, rect: rect, pivot: Vector2.one / 2.0f);
-        preview.name = texture.name;
-        Acquire(preview);
-        return preview;
     }
 
     private Material ReadMaterial(Stream input, string format)
@@ -652,6 +642,20 @@ public class ModContext
         var brush = merge.Create();
         Acquire(brush);
         return brush;
+    }
+
+    private Sprite ReadPreview(string name, byte[] input)
+    {
+        var texture = new Texture2D(0, 0, TextureFormat.RGBA32, false, true);
+        texture.LoadImage(input, true);
+        texture.name = name;
+        var preview = Sprite.Create(
+            texture: texture, 
+            rect: new Rect(0, 0, texture.width, texture.height),
+            pivot: Vector2.one / 2.0f);
+        preview.name = name;
+        Acquire(preview);
+        return preview;
     }
 
     private Sprite ReadPreviewInfo(Stream input, string format)
