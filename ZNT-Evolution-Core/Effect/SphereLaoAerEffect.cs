@@ -71,7 +71,7 @@ public class SphereLaoAerEffect : TriggerEffect
         if (_nearest is null) return;
         _human ??= GetComponentInParent<HumanBehaviour>();
         if (_human.State != BehaviourState.Idle) return;
-        _human.SendMessage(methodName: "MoveToTarget", value: _nearest.transform);
+        Traverse.Create(_human).Method("MoveToTarget", _nearest.transform).GetValue();
     }
 
     protected override bool OverrideExecutionMode(out Execution.Mode mode)

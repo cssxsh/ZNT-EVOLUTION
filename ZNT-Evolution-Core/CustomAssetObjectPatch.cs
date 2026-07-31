@@ -465,11 +465,6 @@ internal static class CustomAssetObjectPatch
                 health.SetVisible(true);
             }
 
-            if (prefab.GetComponentInChildren<tk2dBaseSprite>() is not null)
-            {
-                _ = prefab.GetComponentSafe<SpriteEditor>();
-            }
-
             if (prefab.TryGetComponent(out OneWayCollider collider))
             {
                 _ = collider.gameObject.GetComponentSafe<OneWayEditor>();
@@ -479,6 +474,12 @@ internal static class CustomAssetObjectPatch
                     resize.RoundToNearest = 1f / 4f;
                     resize.Bounds = new Bounds(center: Vector2.zero, size: Vector2.one);
                 }
+            }
+
+            if (prefab.name is "Elevator1Spawn" or "Elevator2Spawn" or "LawnMowerSpawn" or "MovingContainerSpawn" &&
+                prefab.TryGetComponent(out SpawnPoint spawn))
+            {
+                Traverse.Create(spawn).Field("levelEditorOptions").Field<bool>("ShowDamages").Value = true;
             }
 
             switch (prefab.GetComponentInChildren<BaseBehaviour>())
@@ -502,12 +503,15 @@ internal static class CustomAssetObjectPatch
                 case MovingObjectBehaviour:
                     _ = prefab.GetComponentSafe<PropMoveableEditor>();
                     _ = prefab.GetComponentSafe<LayerEditor>();
+                    _ = prefab.GetComponentSafe<SpriteEditor>();
                     break;
                 case SentryGunBehaviour:
                     _ = prefab.GetComponentSafe<LayerEditor>();
+                    _ = prefab.GetComponentSafe<SpriteEditor>();
                     break;
                 case HumanBehaviour:
                     _ = prefab.GetComponentSafe<HumanEditor>();
+                    _ = prefab.GetComponentSafe<SpriteEditor>();
                     break;
             }
         }

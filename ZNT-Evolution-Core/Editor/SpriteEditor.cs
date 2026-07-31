@@ -9,7 +9,7 @@ using ZNT.LevelEditor;
 
 namespace ZNT.Evolution.Core.Editor;
 
-[SerializeInEditor(name: "Sprite")]
+[SerializeInEditor(name: "Sprite", devOnly: true)]
 [DisallowMultipleComponent]
 public class SpriteEditor : Editor, IEditorOverride, IEditorUpdate
 {

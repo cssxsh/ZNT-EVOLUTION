@@ -14,6 +14,7 @@ internal class HookAsset : CustomAssetObject
     {
         var hook = CreateInstance<HookAsset>();
         hook._action = action;
+        DontDestroyOnLoad(hook);
         return hook;
     }
 }

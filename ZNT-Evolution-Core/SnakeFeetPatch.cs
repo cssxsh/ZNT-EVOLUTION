@@ -161,18 +161,6 @@ internal class SnakeFeetPatch
                 __result.Fields[typeof(TrapEffect).GetField(nameof(TrapEffect.DamageType))] = trap.DamageType;
             }
                 break;
-            // case RayConeDetection:
-            // {
-            //     __result.Fields.Remove(typeof(RayConeDetection)
-            //         .GetProperty(nameof(RayConeDetection.GeneralDirection))!);
-            // }
-            //     break;
-            // case MovingObjectBehaviour:
-            // {
-            //     __result.Fields.Remove(typeof(MovingObjectBehaviour)
-            //         .GetProperty(nameof(MovingObjectBehaviour.Orientation))!);
-            // }
-            //     break;
         }
     }
 

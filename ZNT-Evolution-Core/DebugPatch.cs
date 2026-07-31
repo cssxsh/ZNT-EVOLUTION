@@ -22,8 +22,8 @@ internal static class DebugPatch
     }
 
     [HarmonyPrefix]
-    [HarmonyPatch(typeof(Material), "GetTexture", typeof(string))]
-    public static bool GetTexture(Material __instance, string name) => __instance.HasProperty(name);
+    [HarmonyPatch(typeof(Material), "mainTexture", MethodType.Getter)]
+    public static bool GetMainTexture(Material __instance) => __instance.HasProperty(Shader.PropertyToID("_MainTex"));
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(I2.Loc.LocalizationManager), "GetTermTranslation")]

@@ -73,18 +73,6 @@ internal static class StartManagerPatch
                     moving.Speed = 15.0f;
                     Logger.LogDebug($"Fix Speed for {moving}");
                     break;
-                case LevelElement
-                {
-                    name: "elevator_1_spawn" or "elevator_2_spawn" or "lawn_mower_spawn" or "moving_container_spawn",
-                    Brush: Rotorz.Tile.OrientedBrush brush
-                } element:
-                {
-                    if (brush.DefaultOrientation.GetVariation(0) is not GameObject prefab) break;
-                    if (!prefab.TryGetComponent(out SpawnPoint spawn) || spawn is CharacterSpawnPoint) break;
-                    Traverse.Create(spawn).Field("levelEditorOptions").Field<bool>("ShowDamages").Value = true;
-                    Logger.LogDebug($"Fix SpawnPoint for {element}");
-                }
-                    break;
                 case LevelElement { name: "drone_exterminator" } drone:
                     drone.Title = "Drone Exterminator";
                     Logger.LogDebug($"Fix Title for {drone}");
@@ -116,6 +104,15 @@ internal static class StartManagerPatch
                     Logger.LogDebug($"Fix Title for {survivor}");
                     survivor.CustomAsset.HierarchyName = "Survivor Molotov";
                     Logger.LogDebug($"Fix HierarchyName for {survivor.CustomAsset}");
+                    break;
+                case LevelElement { name: "chopter" } chopper:
+                    chopper.Title = "Chopper";
+                    if (chopper.AssetId is "2ffed9d7ca4fcd3479073a4189277809") chopper.name = "chopper";
+                    Logger.LogDebug($"Fix Title for {chopper.AssetId}");
+                    break;
+                case LevelElement { name: "sewer_ladder", AssetId: "818b6793cae9cca49b49bfb01e4f45aa" } ladder:
+                    ladder.name = "city_" + ladder.name;
+                    Logger.LogDebug($"Fix Name for {ladder.AssetId}");
                     break;
                 case LevelElement { CustomAsset: HumanAsset human } element:
                 {

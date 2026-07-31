@@ -102,6 +102,8 @@ internal class ObjectConverter : CustomCreationConverter<UnityEngine.Object>
             return lazy;
         }
 
+        if (type == typeof(tk2dSpriteCollectionData)) throw new AssetException(key);
+
         Logger.LogError($"NotFound {t.FullName} {{ name: \"{name}\" }}");
         return null;
     }
