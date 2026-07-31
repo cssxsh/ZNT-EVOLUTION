@@ -53,6 +53,11 @@ internal class MaterialMerge : EvolutionMerge<Material>
         foreach (var (name, texture) in Textures) clone.SetTexture(name, texture);
         foreach (var (name, value) in Floats) clone.SetFloat(name, value);
         foreach (var (name, color) in Colors) clone.SetColor(name, color);
+        if (Textures.TryGetValue("_FlipTex", out var flip))
+        {
+            Shader.SetGlobalTexture(flip.name, flip);
+            Shader.SetGlobalTexture(clone.mainTexture.name, clone.mainTexture);
+        }
 
         Object.DontDestroyOnLoad(clone);
         return clone;

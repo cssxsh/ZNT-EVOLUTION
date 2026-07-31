@@ -156,39 +156,52 @@ internal static class CustomAssetObjectPatch
     }
 
     [HarmonyPostfix]
+    [HarmonyPatch(typeof(MovingObjectBehaviour), "OnSpawn")]
     [HarmonyPatch(typeof(MovingObjectBehaviour), "Orientation", MethodType.Setter)]
-    public static void SetOrientation(MovingObjectBehaviour __instance, Vector3 value)
+    public static void SetOrientation(MovingObjectBehaviour __instance)
     {
         var orientation = __instance.GetComponent<ObjectOrientation>();
-        Traverse.Create(orientation).Field<ObjectOrientation.Orientation>("currentOrientation").Value =
-            value == Vector3.forward ? ObjectOrientation.Orientation.Right : ObjectOrientation.Orientation.Left;
-        var controller = (MovingObjectAnimationController)__instance.AnimationController;
-        if (controller.Asset.name.EndsWith("(Clone)"))
-        {
-            var asset = (MovingObjectAsset)__instance.GetComponent<AssetComponent>().Asset;
-            var direction = value == Vector3.forward ? "right" : "left";
-            controller.Asset.StandAnimation = string.Format(asset.StandAnimation, direction);
-            controller.Asset.DisableAnimation = string.Format(asset.DisableAnimation, direction);
-            controller.Asset.MoveAnimation = string.Format(asset.MoveAnimation, direction);
-            controller.Asset.StopAnimation = string.Format(asset.StopAnimation, direction);
-            controller.Asset.HitAnimation = string.Format(asset.HitAnimation, direction);
-            controller.Asset.DestroyAnimation = string.Format(asset.DestroyAnimation, direction);
-        }
-
-        controller.Animator.Sprite.SortingOrder = value == Vector3.forward ? 0 : -1;
-        if (controller.Animator.IsPlaying()) return;
-        var frame = controller.Animator.GetAnimationClip(controller.Asset.StandAnimation).frames[0];
-        controller.Animator.Sprite.SetSprite(frame.spriteCollection, frame.spriteId);
+        orientation?.CurrentOrientation = __instance.Orientation == Vector3.forward
+            ? ObjectOrientation.Orientation.Right
+            : ObjectOrientation.Orientation.Left;
     }
 
-    [HarmonyPrefix]
+    [HarmonyPostfix]
     [HarmonyPatch(typeof(ObjectOrientation), "orientation", MethodType.Setter)]
-    public static bool SetOrientation(ObjectOrientation __instance, ObjectOrientation.Orientation value)
+    public static void SetOrientation(ObjectOrientation __instance, ObjectOrientation.Orientation value)
     {
-        var behaviour = __instance.GetComponent<MovingObjectBehaviour>();
-        if (behaviour is null) return true;
-        behaviour.Orientation = value == ObjectOrientation.Orientation.Right ? Vector3.forward : Vector3.back;
-        return false;
+        if (__instance.TryGetComponent(out MovingObjectBehaviour moving))
+        {
+            Traverse.Create(moving).Field<Vector3>("orientation").Value =
+                value == ObjectOrientation.Orientation.Right ? Vector3.forward : Vector3.back;
+            var controller = (MovingObjectAnimationController)moving.AnimationController;
+            if (controller.Asset.name.EndsWith("(Clone)"))
+            {
+                var asset = (MovingObjectAsset)__instance.GetComponent<AssetComponent>().Asset;
+                var direction = value == ObjectOrientation.Orientation.Right ? "right" : "left";
+                controller.Asset.StandAnimation = string.Format(asset.StandAnimation, direction);
+                controller.Asset.DisableAnimation = string.Format(asset.DisableAnimation, direction);
+                controller.Asset.MoveAnimation = string.Format(asset.MoveAnimation, direction);
+                controller.Asset.StopAnimation = string.Format(asset.StopAnimation, direction);
+                controller.Asset.HitAnimation = string.Format(asset.HitAnimation, direction);
+                controller.Asset.DestroyAnimation = string.Format(asset.DestroyAnimation, direction);
+            }
+
+            if (Execution.SceneMode is Execution.Mode.Edition)
+            {
+                var frame = controller.Animator.GetAnimationClip(controller.Asset.StandAnimation).frames[0];
+                controller.Animator.Sprite.SetSprite(frame.spriteCollection, frame.spriteId);
+            }
+        }
+
+        var sprite = moving?.AnimationController.Animator.Sprite
+                     ?? __instance.GetComponentInChildren<tk2dBaseSprite>();
+        if (sprite is null) return;
+        sprite.SortingOrder = value == ObjectOrientation.Orientation.Right ? 0 : -1;
+        var texture = Shader.GetGlobalTexture(value == ObjectOrientation.Orientation.Right
+            ? sprite.Collection.name + "_atlas"
+            : sprite.Collection.name + "_flip_atlas");
+        if (texture) sprite.CachedRenderer.material.mainTexture = texture;
     }
 
     [HarmonyPostfix]
