@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
+using Rotorz.Tile;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -104,6 +105,46 @@ internal static class GlobalSettingsPatch
     [HarmonyPostfix]
     [HarmonyPatch(typeof(LevelElement), "Useable", MethodType.Getter)]
     public static bool Usable(bool __result) => ShowAllElement || __result;
+
+    private static bool NoEraseElement => EvolutionCorePlugin.NoEraseElement.Value;
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(LevelEditorManager), "PaintTile")]
+    public static bool PaintTile(TileSystem system, LevelElement element, TileIndex index)
+    {
+        var a = new TileIndex(
+            row: index.row - (int)element.Pivot.y,
+            column: index.column - (int)element.Pivot.x);
+        var b = new TileIndex(
+            row: index.row + (int)element.Size.y - (int)element.Pivot.y - 1,
+            column: index.column + (int)element.Size.x - (int)element.Pivot.x - 1);
+        system.ClampIndex(ref a);
+        system.ClampIndex(ref b);
+        for (var row = a.row; row <= b.row; row++)
+        {
+            for (var column = a.column; column <= b.column; column++)
+            {
+                if (EraseTile(system, new TileIndex(row, column))) continue;
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(LevelEditorManager), "EraseTile")]
+    public static bool EraseTile(TileSystem tileSystem, TileIndex index)
+    {
+        if (tileSystem.GetTileOrNull(index) is not { HasGameObject: true } tile) return true;
+        var o = tile.brush == LevelElement.ExtentBrush
+            ? tile.GetGameObject().GetComponent<TileExtent>().ParentObject
+            : tile.GetGameObject();
+        var settings = o?.GetComponent<ObjectSettings>();
+        if (settings is null) return true;
+        // TODO check lock
+        return !NoEraseElement;
+    }
 
     #endregion
 

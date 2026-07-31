@@ -17,6 +17,8 @@ public class EvolutionCorePlugin : BaseUnityPlugin
 
     internal static ConfigEntry<bool> ShowAllElement;
 
+    internal static ConfigEntry<bool> NoEraseElement;
+
     internal static ConfigEntry<bool> ShowAllAnimationClip;
 
     internal static ConfigEntry<bool> ShowDevComponent;
@@ -40,6 +42,7 @@ public class EvolutionCorePlugin : BaseUnityPlugin
         CorpsesCountMax = Config.Bind("config", nameof(CorpsesCountMax), GameConf.MaxAliveCorpses, "尸体数量上限");
         VisionMaterialization = Config.Bind("config", nameof(VisionMaterialization), false, "视觉射线渲染");
         ShowAllElement = Config.Bind("config", nameof(ShowAllElement), false, "显示所有元件");
+        NoEraseElement = Config.Bind("config", nameof(NoEraseElement), false, "禁止擦除元件");
         ShowAllAnimationClip = Config.Bind("config", nameof(ShowAllAnimationClip), false, "显示所有动画");
         ShowDevComponent = Config.Bind("config", nameof(ShowDevComponent), false, "显示实验组件");
     }
