@@ -198,10 +198,9 @@ internal static class CustomAssetObjectPatch
                      ?? __instance.GetComponentInChildren<tk2dBaseSprite>();
         if (sprite is null) return;
         sprite.SortingOrder = value == ObjectOrientation.Orientation.Right ? 0 : -1;
-        var texture = Shader.GetGlobalTexture(value == ObjectOrientation.Orientation.Right
-            ? sprite.Collection.name + "_atlas"
-            : sprite.Collection.name + "_flip_atlas");
-        if (texture) sprite.CachedRenderer.material.mainTexture = texture;
+        var properties = new MaterialPropertyBlock();
+        properties.SetFloat(Shader.PropertyToID("_UseFlip"), (int)value);
+        sprite.CachedRenderer.SetPropertyBlock(properties);
     }
 
     [HarmonyPostfix]

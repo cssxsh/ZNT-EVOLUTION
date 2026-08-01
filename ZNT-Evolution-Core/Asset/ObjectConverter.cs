@@ -71,7 +71,13 @@ internal class ObjectConverter : CustomCreationConverter<UnityEngine.Object>
 
         var key = serializer.Deserialize<string>(reader);
         if (key == null) return null;
-        if (type == typeof(Shader)) return Shader.Find(key);
+        if (type == typeof(Shader))
+        {
+            if (Shader.Find(key) is {} shader) return shader;
+            if (CustomAssetUtility.Cache.TryGetValue(key, out var s) && s is Shader) return s;
+            Logger.LogError($"NotFound {type.FullName} {{ name: \"{key}\" }}");
+            return null;
+        }
 
         if (type == typeof(FMODAsset))
         {

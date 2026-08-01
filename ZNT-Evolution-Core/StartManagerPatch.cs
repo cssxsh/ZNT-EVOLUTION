@@ -234,6 +234,11 @@ internal static class StartManagerPatch
                     break;
             }
         });
+        yield return CustomAssetUtility.LoadPatch<Shader>(shader =>
+        {
+            CustomAssetUtility.Cache[shader.name] = shader;
+            Logger.LogInfo($"Loaded Patch {shader}");
+        });
         yield return CustomAssetUtility.LoadPatch<TMPro.TMP_FontAsset>(font =>
         {
             TMPro.TMP_Settings.fallbackFontAssets.Add(font);

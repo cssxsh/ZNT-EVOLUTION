@@ -35,11 +35,12 @@ internal class MaterialMerge : EvolutionMerge<Material>
         Dictionary<string, float> floats = null,
         Dictionary<string, Color> colors = null) : base(name, source)
     {
-        Shader = shader ?? Source?.shader;
+        Shader = shader;
         Textures = textures ?? new Dictionary<string, Texture>();
         Floats = floats ?? new Dictionary<string, float>();
         Colors = colors ?? new Dictionary<string, Color>();
         if (string.IsNullOrEmpty(Name)) Logger.LogWarning("Name is null");
+        if (Shader is null) Logger.LogWarning("Shader is null");
         if (Source is null) Logger.LogWarning("Source is null");
     }
 
@@ -48,16 +49,11 @@ internal class MaterialMerge : EvolutionMerge<Material>
         var clone = new Material(Source)
         {
             name = Name,
-            shader = Shader
+            shader = Shader ?? Source.shader
         };
         foreach (var (name, texture) in Textures) clone.SetTexture(name, texture);
         foreach (var (name, value) in Floats) clone.SetFloat(name, value);
         foreach (var (name, color) in Colors) clone.SetColor(name, color);
-        if (Textures.TryGetValue("_FlipTex", out var flip))
-        {
-            Shader.SetGlobalTexture(flip.name, flip);
-            Shader.SetGlobalTexture(clone.mainTexture.name, clone.mainTexture);
-        }
 
         Object.DontDestroyOnLoad(clone);
         return clone;
