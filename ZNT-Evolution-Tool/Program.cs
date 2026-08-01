@@ -32,60 +32,13 @@ internal static class Program
             GameData = Manager.LoadBundleFile($"{GamePath}/znt_Data/data.unity3d");
         }
 
-        foreach (var assets in LoadAssetsFiles())
-        {
-            // foreach (var asset in assets.LoadTexture2D())
-            // {
-            //     var fields = Manager.GetBaseField(assets, asset);
-            //     var name = fields["m_Name"].AsString;
-            //     Console.WriteLine($"| `{assets.name}` | `{asset.PathId}` | `{name} : UnityEngine.Texture2D` |");
-            // }
-            //
-            // foreach (var asset in assets.LoadShader())
-            // {
-            //     var fields = Manager.GetBaseField(assets, asset);
-            //     var name = fields["m_ParsedForm"]["m_Name"].AsString;
-            //     Console.WriteLine($"| `{assets.name}` | `{asset.PathId}` | `{name}` |");
-            // }
-            //
-            // foreach (var asset in assets.LoadMaterial())
-            // {
-            //     var fields = Manager.GetBaseField(assets, asset);
-            //     var name = fields["m_Name"].AsString;
-            //     Console.WriteLine($"| `{assets.name}` | `{asset.PathId}` | `{name}` |");
-            // }
-            //
-            // foreach (var asset in assets.LoadSprites())
-            // {
-            //     var fields = Manager.GetBaseField(assets, asset);
-            //     var name = Manager.GetExtAsset(assets, fields["m_GameObject"]).baseField["m_Name"].AsString;
-            //     Console.WriteLine($"| `{assets.name}` | `{asset.PathId}` | `{name} : tk2dSpriteCollectionData` |");
-            // }
-            //
-            // foreach (var asset in assets.LoadAnimation())
-            // {
-            //     var fields = Manager.GetBaseField(assets, asset);
-            //     var name = Manager.GetExtAsset(assets, fields["m_GameObject"]).baseField["m_Name"].AsString;
-            //     Console.WriteLine($"| `{assets.name}` | `{asset.PathId}` | `{name} : tk2dSpriteAnimation` |");
-            // }
-            //
-            // foreach (var asset in assets.LoadAssetElement())
-            // {
-            //     var fields = Manager.GetBaseField(assets, asset);
-            //     var script = Manager.GetExtAsset(assets, fields["m_Script"]);
-            //     var name = fields["m_Name"].AsString;
-            //     var type = script.baseField["m_ClassName"].AsString;
-            //     // if (script.baseField["m_Namespace"].AsString != "") throw new Exception(type);
-            //     Console.WriteLine($"| `{assets.name}` | `{asset.PathId}` | `{name} : {type}` |");
-            // }
-        }
-
         {
             Manager.UnloadBundleFile(GameData);
             Manager.UnloadAssetsFile(GameRes);
         }
     }
 
+    // ReSharper disable once UnusedMember.Local
     private static IEnumerable<AssetsFileInstance> LoadAssetsFiles()
     {
         yield return GameRes;
@@ -94,7 +47,7 @@ internal static class Program
             yield return Manager.LoadAssetsFileFromBundle(GameData, index, true);
         }
     }
-    
+
     // ReSharper disable once UnusedMember.Local
     private static IEnumerable<AssetFileInfo> LoadTexture2D(this AssetsFileInstance assets)
     {
@@ -108,10 +61,7 @@ internal static class Program
     // ReSharper disable once UnusedMember.Local
     private static IEnumerable<AssetFileInfo> LoadShader(this AssetsFileInstance assets)
     {
-        return from asset in assets.file.GetAssetsOfType(AssetClassID.Shader)
-            let fields = Manager.GetBaseField(assets, asset)
-            // where fields["m_ParsedForm"]["m_Name"].AsString.StartsWith("ZNT/")
-            select asset;
+        return assets.file.GetAssetsOfType(AssetClassID.Shader);
     }
 
     // ReSharper disable once UnusedMember.Local
