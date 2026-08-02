@@ -21,6 +21,71 @@
   * <u>ref Library</u> `tk2dSpriteAnimation`
   * Clips `string[]` 动画片段名
 
+### Animations
+
+> 动画类型
+
+```csharp
+public enum Animations
+{
+  Spawn,
+  Stand,
+  Idle,
+  Turn,
+  Walk,
+  Run,
+  StepOver,
+  StepOverSprint,
+  SprintStart,
+  Sprint,
+  Decelerate,
+  Fall,
+  FallLandingLow,
+  FallLandingHigh,
+  FallLandingSprint,
+  ClimbStart,
+  ClimbStartRun,
+  Climb,
+  ClimbOut,
+  ClimbOutRun,
+  ClimbRun,
+  Jump,
+  JumpFall,
+  JumpReception,
+  JumpWallReception,
+  Attack,
+  AttackProp,
+  AttackSprint,
+  Repulse,
+  AimStart,
+  Aim,
+  AimStop,
+  Reload,
+  ReloadEnd,
+  AlertStart,
+  AlertStartTurn,
+  Alerted,
+  AlertEnd,
+  Scared,
+  Paralised,
+  ParalisedEnd,
+  ContaminationRise,
+  CrawlerTransformm,
+  TankTransform,
+  OverlordTransfom,
+  Explode,
+  Sacrifice,
+  Spit,
+  Scream,
+  HitWall,
+  Grabbed,
+  Reborn,
+  ScreamClimb,
+  SpitAim,
+  Empty,
+}
+```
+
 ## 实例
 
 - `MeleeAnimations`
