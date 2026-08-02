@@ -1,10 +1,8 @@
+using System.Collections.Generic;
 using System.Linq;
+using HarmonyLib;
 using UnityEngine;
 
-// ReSharper disable MemberCanBePrivate.Global
-// ReSharper disable FieldCanBeMadeReadOnly.Global
-// ReSharper disable ConvertToConstant.Global
-// ReSharper disable UnassignedField.Global
 namespace ZNT.Evolution.Core.Asset;
 
 public class SpawnPointAsset : CustomAssetObject
@@ -33,15 +31,11 @@ public class SpawnPointAsset : CustomAssetObject
 
     public bool applyDamages = true;
 
-    public CharacterMutation spawnMutation;
-
-    public MoveSpeed defaultSpeed;
-
     public override void LoadFromAsset(GameObject gameObject)
     {
         base.LoadFromAsset(gameObject);
         var spawn = gameObject.GetComponent<SpawnPoint>();
-        spawn.SpawnableObjects = spawnableObjects?.ToList();
+        spawn.SpawnableObjects = spawnableObjects.ToList();
         spawn.Interval = interval;
         spawn.StartDelay = startDelay;
         spawn.Count = count;
@@ -53,12 +47,12 @@ public class SpawnPointAsset : CustomAssetObject
         spawn.Speed = speed;
         spawn.Duration = duration;
         spawn.ApplyDamages = applyDamages;
-        switch (spawn)
-        {
-            case CharacterSpawnPoint character:
-                character.SpawnMutation = spawnMutation;
-                character.DefaultSpeed = defaultSpeed;
-                break;
-        }
+        if (spawn is not CharacterSpawnPoint) return;
+        var chooser = gameObject.GetComponent<SpawnCharacterChooser>();
+        var characters = Traverse.Create(chooser).Field<List<CharacterAsset>>("selectableCharacters").Value;
+        characters.Clear();
+        characters.AddRange(spawnableObjects.Cast<CharacterAsset>());
+        Traverse.Create(chooser).Method("OnCreate").GetValue();
+        chooser.OnDeserialized();
     }
 }
