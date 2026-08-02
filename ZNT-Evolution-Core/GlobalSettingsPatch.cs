@@ -148,6 +148,20 @@ internal static class GlobalSettingsPatch
 
     #endregion
 
+    #region Dialogue
+
+    private static bool DialogueRichText => EvolutionCorePlugin.DialogueRichText.Value;
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(Dialogue), "SetText")]
+    private static void SetText(Dialogue __instance)
+    {
+        var tm = Traverse.Create(__instance).Field<TMPro.TextMeshProUGUI>("text").Value;
+        tm.richText = DialogueRichText;
+    }
+
+    #endregion
+
     #region UserManager
 
     private static bool ShowDevComponent => EvolutionCorePlugin.ShowDevComponent.Value;
