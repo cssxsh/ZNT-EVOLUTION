@@ -32,6 +32,12 @@ public static class BaseComponentExtensions
     }
 
     [UsedImplicitly]
+    public static T CreateDelegate<T>(this BaseComponent component, string method) where T : System.Delegate
+    {
+        return System.Delegate.CreateDelegate(typeof(T), component, method) as T;
+    }
+
+    [UsedImplicitly]
     public static SupportedTypeBinder ListBinder(this SelectionMenu menu)
     {
         return menu.InstantiateCustomBinder(menu.CustomBinders.IntStringList);

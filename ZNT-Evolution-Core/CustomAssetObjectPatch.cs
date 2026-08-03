@@ -43,7 +43,7 @@ internal static class CustomAssetObjectPatch
     {
         if (animation == null) return;
         Traverse.Create(despawn).Field<AnimationEventHandler>("eventHandler").Value?
-            .RegisterEndEvent(animation, (Action)Delegate.CreateDelegate(typeof(Action), despawn, "Despawn"));
+            .RegisterEndEvent(animation, despawn.CreateDelegate<Action>("Despawn"));
     }
 
     private static IReadOnlyCollection<GameObject> Prefabs(this Rotorz.Tile.OrientedBrush brush)
@@ -526,28 +526,31 @@ internal static class CustomAssetObjectPatch
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(TutorialScreen), "SetNews")]
-    private static void SetNews(TutorialScreen __instance, out List<string> __state)
+    private static bool SetNews(TutorialScreen __instance)
     {
-        __state = Traverse.Create(__instance).Field<List<string>>("breakingNews").Value;
         var settings = Traverse.Create(__instance).Field<TutorialSettings>("tutorialSettings").Value;
-        if (!settings.ShowBreakingNews) return;
+        if (!settings.ShowBreakingNews) return true;
         var news = settings.GetComponent<TutorialBreakingNews>();
-        if (news is null) return;
-        var lines = new List<string>(news);
-        if (lines.Count == 0) return;
-        Traverse.Create(__instance).Field<List<string>>("breakingNews").Value = lines;
-    }
-
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(TutorialScreen), "SetNews")]
-    private static void SetNews(TutorialScreen __instance, List<string> __state)
-    {
-        Traverse.Create(__instance).Field<List<string>>("breakingNews").Value = __state;
-        foreach (var (key, gui) in Traverse.Create(__instance)
-                     .Field<Dictionary<string, TMPro.TextMeshProUGUI>>("currentNews").Value)
+        if (news is null) return true;
+        var current = Traverse.Create(__instance).Field<Dictionary<string, TMPro.TextMeshProUGUI>>("currentNews").Value;
+        var count = Traverse.Create(__instance).Field<int>("newsCount").Value;
+        var prefab = Traverse.Create(__instance).Field<RectTransform>("newsPrefab").Value;
+        var container = Traverse.Create(__instance).Field<RectTransform>("newsContainer").Value;
+        current.Clear();
+        foreach (var line in news.OrderBy(_ => UnityEngine.Random.value).Take(count))
         {
-            gui.text = gui.text.StartsWith("Headlines/") ? key : gui.text;
+            var target = ComponentSingleton<GamePoolManager>.Instance.Spawn(prefab);
+            target.SetParent(container);
+            target.localScale = Vector3.one;
+            var tm = target.GetComponent<TMPro.TextMeshProUGUI>();
+            tm.text = line;
+            Traverse.Create(__instance).Method("AddScrollRecycler", target).GetValue();
+            current.Add(line, tm);
         }
+
+        if (current.Count == 0) return true;
+        Timer.DelayedCall(0.2f, __instance.CreateDelegate<DG.Tweening.TweenCallback>("AddFiller"));
+        return false;
     }
 
     [HarmonyPostfix]
