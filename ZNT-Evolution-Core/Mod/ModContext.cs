@@ -447,6 +447,8 @@ public class ModContext
             {
                 var element = ReadLevelElement(buffer, resource.Format);
                 Logger.LogDebug($"{resource.Path} -> {element}");
+                if (element is { CustomAsset: HumanAsset { RiseAsset: LazyRef l } h }) h.RiseAsset = l.Fetch() ?? l;
+
                 // ReSharper disable once InvertIf
                 if (element is { ElementType: LevelElement.Type.Brush, Brush: null, LinkedElement.Element: not null })
                 {

@@ -71,9 +71,17 @@ internal class ObjectConverter : CustomCreationConverter<UnityEngine.Object>
 
         var key = serializer.Deserialize<string>(reader);
         if (key == null) return null;
+
+        if (type == typeof(LazyRef))
+        {
+            var lazy = ScriptableObject.CreateInstance<LazyRef>();
+            lazy.HierarchyName = key;
+            return lazy;
+        }
+
         if (type == typeof(Shader))
         {
-            if (Shader.Find(key) is {} shader) return shader;
+            if (Shader.Find(key) is { } shader) return shader;
             if (CustomAssetUtility.Cache.TryGetValue(key, out var s) && s is Shader) return s;
             Logger.LogError($"NotFound {type.FullName} {{ name: \"{key}\" }}");
             return null;
@@ -98,14 +106,6 @@ internal class ObjectConverter : CustomCreationConverter<UnityEngine.Object>
             if (asset.name != name) continue;
             CustomAssetUtility.Cache[key] = asset;
             return asset;
-        }
-
-        if (type == typeof(CustomAssetObject))
-        {
-            var lazy = ScriptableObject.CreateInstance<LazyRef>();
-            lazy.HierarchyName = key;
-            lazy.name = name;
-            return lazy;
         }
 
         if (type == typeof(tk2dSpriteCollectionData)) throw new AssetException(key);
