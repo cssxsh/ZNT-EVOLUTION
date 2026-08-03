@@ -37,7 +37,8 @@ public static class CustomAssetUtility
             new Vector3Converter(),
             new Vector4Converter(),
             new Matrix4x4Converter(),
-            new RectConverter()
+            new RectConverter(),
+            new AnimationCurveConverter()
         }
     });
 
