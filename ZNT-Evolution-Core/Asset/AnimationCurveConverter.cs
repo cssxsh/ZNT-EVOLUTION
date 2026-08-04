@@ -11,11 +11,11 @@ namespace ZNT.Evolution.Core.Asset;
 internal class AnimationCurveConverter : CustomCreationConverter<AnimationCurve>
 {
     private static readonly Regex LinearRegex = new(
-        @"^(?<float>[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?)\((\k<float>), (\k<float>)\) - \((\k<float>), (\k<float>)\)$",
+        @"^\(([+-]?\d*\.?\d+), ([+-]?\d*\.?\d+)\) - \(([+-]?\d*\.?\d+), ([+-]?\d*\.?\d+)\)$",
         RegexOptions.Compiled);
 
     private static readonly Regex CurveRegex = new(
-        @"^(?<float>[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?)\((\k<float>), (\k<float>), (\k<float>)\) ~ \((\k<float>), (\k<float>), (\k<float>)\)$",
+        @"^\(([+-]?\d*\.?\d+), ([+-]?\d*\.?\d+), ([+-]?\d*\.?\d+)\) ~ \(([+-]?\d*\.?\d+), ([+-]?\d*\.?\d+), ([+-]?\d*\.?\d+)\)$",
         RegexOptions.Compiled);
 
     public override bool CanWrite => true;
