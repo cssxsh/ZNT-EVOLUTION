@@ -234,6 +234,20 @@ internal static class StartManagerPatch
                     break;
             }
         });
+        yield return CustomAssetUtility.LoadBuildIn<TMPro.TMP_Asset>(asset =>
+        {
+            switch (asset)
+            {
+                case TMPro.TMP_FontAsset font:
+                    TMPro.TMP_Settings.fallbackFontAssets.RemoveAll(f => f is null);
+                    TMPro.TMP_Settings.fallbackFontAssets.Add(font);
+                    break;
+                case TMPro.TMP_SpriteAsset sprite:
+                    Traverse.Create(TMPro.TMP_Settings.instance)
+                        .Field<TMPro.TMP_SpriteAsset>("m_defaultSpriteAsset").Value ??= sprite;
+                    break;
+            }
+        });
         yield return CustomAssetUtility.LoadPatch<Shader>(shader =>
         {
             CustomAssetUtility.Cache[shader.name] = shader;
