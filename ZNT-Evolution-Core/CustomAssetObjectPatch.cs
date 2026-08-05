@@ -252,16 +252,17 @@ internal static class CustomAssetObjectPatch
             if (physic.Body.velocity.magnitude <= physic.StartForce * 0.5) __instance.OnDie(null);
         }
 
-        var targets = other.GetComponent<Character>()?.AnimationController switch
+        var target = other.GetComponent<Character>()?.AnimationController switch
         {
             ZombieAnimationController => ExplodeSurfaceConverter.Zombie,
             ClimberAnimationController => ExplodeSurfaceConverter.Climber,
             BlockerAnimationController => ExplodeSurfaceConverter.Blocker,
             TankAnimationController => ExplodeSurfaceConverter.Tank,
+            HumanAnimationController { gameObject.layer: 0x1D } => ExplodeSurfaceConverter.WorldEnemy,
             _ => ExplodeSurfaceConverter.None
         };
-        if (targets == ExplodeSurfaceConverter.None) return false;
-        if (__instance.ExplodeOn.HasFlag(targets)) __instance.OnDie(null);
+        if (target is ExplodeSurfaceConverter.None) return false;
+        if (__instance.ExplodeOn.HasFlag(target)) __instance.OnDie(null);
         return false;
     }
 
