@@ -113,9 +113,7 @@ public static class CustomAssetUtility
         var create = AssetBundle.LoadFromStreamAsync(fs ?? throw new FileNotFoundException("index.bundle"));
         yield return create;
         var bundle = create.assetBundle;
-        var request = typeof(CustomAsset).IsAssignableFrom(typeof(T))
-            ? bundle.LoadAssetWithSubAssetsAsync<T>("asset")
-            : bundle.LoadAllAssetsAsync<T>();
+        var request = bundle.LoadAllAssetsAsync<T>();
         yield return request;
         try
         {

@@ -16,9 +16,15 @@ internal class FrameworkInputsConverter : CustomCreationConverter<Framework.Inpu
         var handling = serializer.TypeNameHandling;
         serializer.Converters.RemoveAt(index);
         serializer.TypeNameHandling = TypeNameHandling.Objects;
-        serializer.Serialize(writer, value);
-        serializer.Converters.Insert(index, this);
-        serializer.TypeNameHandling = handling;
+        try
+        {
+            serializer.Serialize(writer, value);
+        }
+        finally
+        {
+            serializer.Converters.Insert(index, this);
+            serializer.TypeNameHandling = handling;
+        }
     }
 
     public override bool CanRead => true;

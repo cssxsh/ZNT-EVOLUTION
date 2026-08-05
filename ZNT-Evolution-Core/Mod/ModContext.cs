@@ -91,7 +91,7 @@ public class ModContext
         State = ModState.Idle;
     }
 
-    private static readonly Regex InfoRegex = new("""^(?:.+\/)?([^.]+)(?:\.(.*))?\.(\w+)$""");
+    private static readonly Regex InfoRegex = new("""^(?:.+\/)?([^.]+)(?:\.(.*))?\.(\w+)$""", RegexOptions.Compiled);
 
     public bool IsLoadReady()
     {
@@ -128,6 +128,7 @@ public class ModContext
                 Logger.LogInfo($"[{Metadata.Name} {Metadata.Version}] is already loaded");
                 return;
             }
+
             State = ModState.Frozen;
 
             foreach (var (id, version) in Metadata.Dependencies)
@@ -659,7 +660,7 @@ public class ModContext
         texture.LoadImage(input, true);
         texture.name = name;
         var preview = Sprite.Create(
-            texture: texture, 
+            texture: texture,
             rect: new Rect(0, 0, texture.width, texture.height),
             pivot: Vector2.one / 2.0f);
         preview.name = name;
