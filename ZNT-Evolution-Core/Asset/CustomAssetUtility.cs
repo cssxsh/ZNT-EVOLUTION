@@ -42,6 +42,9 @@ public static class CustomAssetUtility
         }
     });
 
+    // ReSharper disable once InconsistentNaming
+    private static Encoding UTF8NoBOM => field ??= new UTF8Encoding(false, true);
+
     public static string NameAndType(this Object o) => $"{o.name} : {o.GetType()}";
 
     [UsedImplicitly]
@@ -56,7 +59,7 @@ public static class CustomAssetUtility
     {
         using JsonWriter writer = bson
             ? new BsonDataWriter(target)
-            : new JsonTextWriter(new StreamWriter(target, Encoding.UTF8, 1024, true));
+            : new JsonTextWriter(new StreamWriter(target, UTF8NoBOM, 1024, true));
         writer.Formatting = Formatting.Indented;
         Serializer.Serialize(writer, data);
     }
