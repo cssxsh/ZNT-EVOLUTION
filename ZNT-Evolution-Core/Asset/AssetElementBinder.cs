@@ -83,6 +83,30 @@ public static class AssetElementBinder
         return asset.AssetId;
     }
 
+    public static int Bind(this TMPro.TMP_Asset asset)
+    {
+        if (asset.hashCode == 0) asset.hashCode = TMPro.TMP_TextUtilities.GetSimpleHashCode(asset.name);
+        lock (TMPro.MaterialReferenceManager.instance)
+        {
+            switch (asset)
+            {
+                case TMPro.TMP_FontAsset font:
+                    TMPro.MaterialReferenceManager.AddFontAsset(font);
+                    TMPro.TMP_Settings.fallbackFontAssets.RemoveAll(f => f is null);
+                    TMPro.TMP_Settings.fallbackFontAssets.Add(font);
+                    break;
+                case TMPro.TMP_SpriteAsset emoji:
+                    TMPro.MaterialReferenceManager.AddSpriteAsset(emoji);
+                    if (emoji.hashCode is not 160120832) break;
+                    Traverse.Create(TMPro.TMP_Settings.instance)
+                        .Field<TMPro.TMP_SpriteAsset>("m_defaultSpriteAsset").Value = emoji;
+                    break;
+            }
+        }
+
+        return asset.hashCode;
+    }
+
     public static void Unbind(this AssetElement asset)
     {
         lock (AssetElementIndex.IndexPath)
@@ -104,6 +128,30 @@ public static class AssetElementBinder
                     break;
                 default:
                     throw new NotSupportedException($"Unbind: {asset}");
+            }
+        }
+    }
+
+    public static void Unbind(this TMPro.TMP_Asset asset)
+    {
+        lock (TMPro.MaterialReferenceManager.instance)
+        {
+            switch (asset)
+            {
+                case TMPro.TMP_FontAsset font:
+                    Traverse.Create(TMPro.MaterialReferenceManager.instance)
+                        .Field<Dictionary<int, TMPro.TMP_FontAsset>>("m_FontAssetReferenceLookup")
+                        .Value.Remove(font.hashCode);
+                    TMPro.TMP_Settings.fallbackFontAssets.Remove(font);
+                    break;
+                case TMPro.TMP_SpriteAsset emoji:
+                    Traverse.Create(TMPro.MaterialReferenceManager.instance)
+                        .Field<Dictionary<int, TMPro.TMP_SpriteAsset>>("m_SpriteAssetReferenceLookup")
+                        .Value.Remove(emoji.hashCode);
+                    if (TMPro.TMP_Settings.defaultSpriteAsset != emoji) break;
+                    Traverse.Create(TMPro.TMP_Settings.instance)
+                        .Field<TMPro.TMP_SpriteAsset>("m_defaultSpriteAsset").Value = null;
+                    break;
             }
         }
     }

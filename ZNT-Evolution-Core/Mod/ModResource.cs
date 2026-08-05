@@ -21,6 +21,8 @@ internal record ModResource<T> : IComparable<ModResource<T>>
         { Type: "animation", Format: "json" or "bson" } => 0x0002_0003,
         { Type: "animation.addition", Format: "json" or "bson" } => 0x0002_0004,
         { Type: "visual", Format: "json" or "bson" } => 0x0002_0005,
+        { Type: "font", Format: "json" or "bson" } => 0x0002_0006,
+        { Type: "emoji", Format: "json" or "bson" } => 0x0002_0007,
         { Type: "explosion", Format: "json" or "bson" } => 0x0003_0001,
         { Type: "decor", Format: "json" or "bson" } => 0x0003_0002,
         { Type: "breakable", Format: "json" or "bson" } => 0x0003_0003,

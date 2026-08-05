@@ -239,12 +239,10 @@ internal static class StartManagerPatch
             switch (asset)
             {
                 case TMPro.TMP_FontAsset font:
-                    TMPro.TMP_Settings.fallbackFontAssets.RemoveAll(f => f is null);
-                    TMPro.TMP_Settings.fallbackFontAssets.Add(font);
+                    TMPro.MaterialReferenceManager.AddFontAsset(font);
                     break;
-                case TMPro.TMP_SpriteAsset sprite:
-                    Traverse.Create(TMPro.TMP_Settings.instance)
-                        .Field<TMPro.TMP_SpriteAsset>("m_defaultSpriteAsset").Value ??= sprite;
+                case TMPro.TMP_SpriteAsset emoji:
+                    TMPro.MaterialReferenceManager.AddSpriteAsset(emoji);
                     break;
             }
         });
@@ -253,12 +251,23 @@ internal static class StartManagerPatch
             CustomAssetUtility.Cache[shader.name] = shader;
             Logger.LogInfo($"Loaded Patch {shader}");
         });
-        yield return CustomAssetUtility.LoadPatch<TMPro.TMP_FontAsset>(font =>
+        yield return CustomAssetUtility.LoadPatch<TMPro.TMP_Asset>(asset =>
         {
-            TMPro.TMP_Settings.fallbackFontAssets.Add(font);
-            Logger.LogInfo($"Loaded Patch {font}");
-            if (font.name is not "wqy-microhei SDF") return;
-            TMPro.TMP_Settings.defaultFontAsset.fallbackFontAssets.Insert(0, font);
+            switch (asset)
+            {
+                case TMPro.TMP_FontAsset font:
+                    TMPro.MaterialReferenceManager.AddFontAsset(font);
+                    Logger.LogInfo($"Loaded Patch {font}");
+                    TMPro.TMP_Settings.fallbackFontAssets.RemoveAll(f => f is null);
+                    TMPro.TMP_Settings.fallbackFontAssets.Add(font);
+                    if (font.name is not "wqy-microhei SDF") break;
+                    TMPro.TMP_Settings.defaultFontAsset.fallbackFontAssets.Insert(0, font);
+                    break;
+                case TMPro.TMP_SpriteAsset emoji:
+                    TMPro.MaterialReferenceManager.AddSpriteAsset(emoji);
+                    Logger.LogInfo($"Loaded Patch {emoji}");
+                    break;
+            }
         });
         InvisibleShield.PoolPrefab();
         FogOfWar.PoolPrefab();

@@ -348,6 +348,20 @@ public class ModContext
                 Logger.LogDebug($"{resource.Path} -> {visual} from {visual.animation?.Library}");
             }
                 break;
+            // TMPro.TMP_FontAsset
+            case { Type: "font", Format: "json" or "bson" }:
+            {
+                var font = ReadFont(buffer, resource.Format);
+                Logger.LogDebug($"{resource.Path} -> {font} from {font.material}");
+            }
+                break;
+            // TMPro.TMP_SpriteAsset
+            case { Type: "emoji", Format: "json" or "bson" }:
+            {
+                var emoji = ReadEmoji(buffer, resource.Format);
+                Logger.LogDebug($"{resource.Path} -> {emoji} from {emoji.material}");
+            }
+                break;
             // ExplosionAsset
             case { Type: "explosion", Format: "json" or "bson" }:
             {
@@ -567,6 +581,20 @@ public class ModContext
         return visual;
     }
 
+    private TMPro.TMP_FontAsset ReadFont(Stream input, string format)
+    {
+        var font = CustomAssetUtility.DeserializeObject<TMPro.TMP_FontAsset>(input, format is "bson");
+        Acquire(font);
+        return font;
+    }
+
+    private TMPro.TMP_SpriteAsset ReadEmoji(Stream input, string format)
+    {
+        var emoji = CustomAssetUtility.DeserializeObject<TMPro.TMP_SpriteAsset>(input, format is "bson");
+        Acquire(emoji);
+        return emoji;
+    }
+
     #endregion
 
     #region Asset
@@ -746,6 +774,10 @@ public class ModContext
                 _ = element.Bind();
                 Logger.LogInfo($"Bind LevelElement {element.AssetId} - {element.Title}");
                 break;
+            case TMPro.TMP_Asset tmp:
+                _ = tmp.Bind();
+                Logger.LogInfo($"Bind TMPro.TMP_Asset 0x{tmp.hashCode:x08} - {tmp.name}");
+                break;
         }
 
         CustomAssetUtility.Cache[key] = obj;
@@ -777,6 +809,10 @@ public class ModContext
             case LevelElement element:
                 element.Unbind();
                 Logger.LogInfo($"Unbind LevelElement {element.AssetId} - {element.Title}");
+                break;
+            case TMPro.TMP_Asset tmp:
+                tmp.Unbind();
+                Logger.LogInfo($"Unbind TMPro.TMP_Asset 0x{tmp.hashCode:x08} - {tmp.name}");
                 break;
         }
 
