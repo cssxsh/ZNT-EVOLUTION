@@ -1,19 +1,17 @@
 using System;
 using System.Linq;
 using System.Text.RegularExpressions;
-using BepInEx.Logging;
 using HarmonyLib;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
-using BepInExLogger = BepInEx.Logging.Logger;
 
 namespace ZNT.Evolution.Core.Asset;
 
 public class LayerMaskConverter : CustomCreationConverter<LayerMask>
 {
-    private static readonly ManualLogSource Logger = BepInExLogger.CreateLogSource(nameof(LayerMaskConverter));
+    private static readonly Regex FlagRegex = new("""(\w(?:[\s\w]*\w)?)""", RegexOptions.Compiled);
 
     public override bool CanWrite => true;
 
@@ -44,27 +42,10 @@ public class LayerMaskConverter : CustomCreationConverter<LayerMask>
         if (reader.TokenType == JsonToken.Integer) return (LayerMask)serializer.Deserialize<int>(reader);
         if (reader.TokenType != JsonToken.String) return JToken.Load(reader).ToObject<LayerMask>();
         var value = serializer.Deserialize<string>(reader);
-        var mask = 0x00000000;
-        foreach (var match in Regex.Matches(value, """(\w(?:[\s\w]*\w)?)""").Cast<Match>())
-        {
-            var layer = LayerMask.NameToLayer(match.Value);
-            if (layer is not -1 || int.TryParse(match.Value, out layer))
-            {
-                mask |= 0x01 << layer;
-                continue;
-            }
-
-            // SplitCamelCase
-            layer = LayerMask.NameToLayer(Regex.Replace(match.Value, "(?:[a-z])([A-Z])", " $1"));
-            if (layer is not -1)
-            {
-                mask |= 0x01 << layer;
-                continue;
-            }
-
-            Logger.LogError($"Invalid Layer '{match.Value}'");
-        }
-
+        var mask = FlagRegex.Matches(value).Cast<Match>()
+            .Select(match => LayerConverter.TextToLayer(match.Value))
+            .Where(layer => layer is not -1)
+            .Aggregate(0x00000000, (current, layer) => current | 0x01 << layer);
         return (LayerMask)mask;
     }
 }
