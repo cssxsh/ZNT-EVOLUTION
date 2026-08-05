@@ -172,6 +172,23 @@ internal static class DebugPatch
         return false;
     }
 
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(HumanBehaviour), "OnStateChanged")]
+    public static void OnStateChanged(HumanBehaviour __instance)
+    {
+        // ReSharper disable once SwitchStatementMissingSomeEnumCasesNoDefault
+        switch (__instance.PreviousState)
+        {
+            case BehaviourState.Alerted:
+            {
+                if (__instance.IgnoreHumanAlertTimer.Started) break;
+                __instance.IgnoreHumanAlertTimer.Start(__instance.AlertedTimer.Duration);
+                __instance.AlertReporter.ReportAlertEnd();
+            }
+                break;
+        }
+    }
+
     [HarmonyPrefix]
     [HarmonyPatch("CharacterBehaviour+ResetCharacterBehaviour, Assembly-CSharp", "Reset")]
     public static void Reset(CharacterBehaviour component)
