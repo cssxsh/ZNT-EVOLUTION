@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using HarmonyLib;
 using Rotorz.Tile;
 using UnityEngine;
@@ -152,12 +153,35 @@ internal static class GlobalSettingsPatch
 
     private static bool DialogueRichText => EvolutionCorePlugin.DialogueRichText.Value;
 
-    [HarmonyPrefix]
+    private static readonly Regex EmoteRegex = new("""\[[^]]+\]""", RegexOptions.Compiled);
+
+    [HarmonyPostfix]
     [HarmonyPatch(typeof(Dialogue), "SetText")]
     private static void SetText(Dialogue __instance)
     {
         var tm = Traverse.Create(__instance).Field<TMPro.TextMeshProUGUI>("text").Value;
         tm.richText = DialogueRichText;
+        if (!tm.richText) return;
+        tm.text = EmoteRegex.Replace(tm.text, EmoteEvaluator);
+    }
+
+    private static string EmoteEvaluator(Match emote)
+    {
+        // ReSharper disable once InvertIf
+        if (TMPro.MaterialReferenceManager.TryGetSpriteAsset(160120832, out var bilibili))
+        {
+            var index = bilibili.GetSpriteIndexFromName(emote.Value);
+            if (index is not -1) return $"""<sprite="bilibili" index={index}>""";
+        }
+
+        // ReSharper disable once InvertIf
+        if (TMPro.MaterialReferenceManager.TryGetSpriteAsset(-2023423273, out var arknights))
+        {
+            var index = arknights.GetSpriteIndexFromName(emote.Value);
+            if (index is not -1) return $"""<sprite="arknights" index={index}>""";
+        }
+
+        return emote.Value;
     }
 
     #endregion
