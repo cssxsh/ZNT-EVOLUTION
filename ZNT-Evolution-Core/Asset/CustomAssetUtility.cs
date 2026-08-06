@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using HarmonyLib;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -93,17 +92,6 @@ public static class CustomAssetUtility
     {
         using var json = new JTokenReader(token);
         return Serializer.Deserialize<T>(json);
-    }
-
-    internal static void Merge(Object o, IDictionary<string, JToken> fields)
-    {
-        foreach (var (path, token) in fields)
-        {
-            var field = path.Split('.').Aggregate(Traverse.Create(o), (t, name) => t.Field(name));
-            using var json = new JTokenReader(token);
-            var value = Serializer.Deserialize(json, field.GetValueType());
-            field.SetValue(value);
-        }
     }
 
     internal static IEnumerator LoadBuildIn<T>(UnityAction<T> action)

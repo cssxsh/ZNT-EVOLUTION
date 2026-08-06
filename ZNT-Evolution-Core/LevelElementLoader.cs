@@ -173,14 +173,6 @@ public static class LevelElementLoader
         var preview = bundle.LoadAsset<Sprite>("preview");
         if (preview) Logger.LogDebug($"preview -> {preview} -> {preview.texture}");
 
-        foreach (var file in Directory.EnumerateFiles(path, "*.object.merge.json"))
-        {
-            var filename = Path.GetFileName(file);
-            var merge = DeserializeObject<ObjectMerge>(folder: path, file: filename);
-            var component = merge.Create();
-            Logger.LogDebug($"{filename} -> {component}");
-        }
-
         foreach (var file in Directory.EnumerateFiles(path, "*.explosion.json"))
         {
             var filename = Path.GetFileName(file);
@@ -533,14 +525,6 @@ public static class LevelElementLoader
 
     private static void ApplyElementFromFolder(this AssetBundle _, string path)
     {
-        foreach (var file in Directory.EnumerateFiles(path, "*.object.merge.json"))
-        {
-            var filename = Path.GetFileName(file);
-            var merge = DeserializeObject<ObjectMerge>(folder: path, file: filename);
-            var component = merge.Create();
-            Logger.LogDebug($"{filename} -> {component}");
-        }
-
         foreach (var file in Directory.EnumerateFiles(path, "*.explosion.json"))
         {
             var filename = Path.GetFileName(file);
