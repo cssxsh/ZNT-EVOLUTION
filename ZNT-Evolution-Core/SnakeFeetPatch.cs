@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using HarmonyLib;
 using UIWidgets;
 using UnityEngine;
@@ -112,94 +111,5 @@ internal class SnakeFeetPatch
         Traverse.Create(__instance).Field<Spinner>("maxZombieSpinner").Value.Max = 1024;
         Traverse.Create(__instance).Field<Spinner>("maxEnemySpinner").Value.Max = 1024;
         Traverse.Create(__instance).Field<SpinnerFloat>("maxZoomSpinner").Value.Max = 1024f;
-    }
-
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(EditorComponent), "FromComponent")]
-    public static void FromComponent(BaseComponent component, EditorComponent __result)
-    {
-        if (__result == null) return;
-        switch (component)
-        {
-            case Patroller patroller:
-            {
-                var editing = typeof(Patroller).GetTypeInfo().GetDeclaredField("editing");
-                __result.Fields.Remove(editing);
-                __result.Fields[typeof(Patroller).GetField(nameof(Patroller.Voice))] = patroller.Voice;
-                __result.Fields[editing] = editing.GetValue(component);
-            }
-                break;
-            case HumanBehaviour human:
-            {
-                __result.Fields[typeof(HumanBehaviour)
-                    .GetField(nameof(HumanBehaviour.ResistScream))] = human.ResistScream;
-                __result.Fields[typeof(HumanBehaviour)
-                    .GetField(nameof(HumanBehaviour.AllowMultipleAttackers))] = human.AllowMultipleAttackers;
-                __result.Fields[typeof(HumanBehaviour)
-                    .GetField(nameof(HumanBehaviour.GrabbedOnAttacked))] = human.GrabbedOnAttacked;
-                __result.Fields[typeof(HumanBehaviour)
-                    .GetField(nameof(HumanBehaviour.IgnoreDamages))] = human.IgnoreDamages;
-                __result.Fields[typeof(HumanBehaviour)
-                    .GetField(nameof(HumanBehaviour.InvincibleOnAttack))] = human.InvincibleOnAttack;
-                __result.Fields[typeof(HumanBehaviour)
-                    .GetField(nameof(HumanBehaviour.FleeBeforeZombieExplode))] = human.FleeBeforeZombieExplode;
-                __result.Fields[typeof(HumanBehaviour)
-                    .GetField(nameof(HumanBehaviour.MoveTowardStaticTargets))] = human.MoveTowardStaticTargets;
-                __result.Fields[typeof(HumanBehaviour)
-                    .GetField(nameof(HumanBehaviour.VisionFollowTarget))] = human.VisionFollowTarget;
-                __result.Fields[typeof(HumanBehaviour)
-                    .GetField(nameof(HumanBehaviour.Attitude))] = human.Attitude;
-            }
-                break;
-            case TrapEffect trap:
-            {
-                __result.Fields.Clear();
-                __result.Fields[typeof(TrapEffect).GetField(nameof(TrapEffect.Mode))] = trap.Mode;
-                __result.Fields[typeof(TrapEffect).GetField(nameof(TrapEffect.KillDelay))] = trap.KillDelay;
-                __result.Fields[typeof(TrapEffect).GetField(nameof(TrapEffect.Damage))] = trap.Damage;
-                __result.Fields[typeof(TrapEffect).GetField(nameof(TrapEffect.DamageRate))] = trap.DamageRate;
-                __result.Fields[typeof(TrapEffect).GetField(nameof(TrapEffect.DamageType))] = trap.DamageType;
-            }
-                break;
-        }
-    }
-
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(SignalReceiverLinker), "Start")]
-    public static void Start(SignalReceiverLinker __instance)
-    {
-        // ReSharper disable once InvertIf
-        if (__instance.TryGetComponent(out MovingObjectBehaviour moving))
-        {
-            var hit = new ReceiverLink
-            {
-                GameObject = __instance.gameObject,
-                Component = moving,
-                Name = nameof(MovingObjectBehaviour.OnHitCharacter),
-                Title = "Hit"
-            };
-            Traverse.Create(__instance).Method("AddReceiver", moving, hit).GetValue();
-        }
-
-        // ReSharper disable once InvertIf
-        if (__instance.TryGetComponent(out SentryGunBehaviour sentry))
-        {
-            var hit = new ReceiverLink
-            {
-                GameObject = __instance.gameObject,
-                Component = sentry,
-                Name = nameof(SentryGunBehaviour.OnDamage),
-                Title = "Hit"
-            };
-            Traverse.Create(__instance).Method("AddReceiver", sentry, hit).GetValue();
-            var die = new ReceiverLink
-            {
-                GameObject = __instance.gameObject,
-                Component = sentry,
-                Name = nameof(SentryGunBehaviour.OnDie),
-                Title = "Break"
-            };
-            Traverse.Create(__instance).Method("AddReceiver", sentry, die).GetValue();
-        }
     }
 }

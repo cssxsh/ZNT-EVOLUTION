@@ -429,6 +429,7 @@ internal static class SceneLoaderPatch
             Traverse.Create(__instance).Field<RectTransform>("mainContainer").Value = panel;
             try
             {
+                component.FixFields();
                 foreach (var (member, _) in component.Fields)
                 {
                     if (overrider != null && overrider.OverrideMemberUi(__instance, component, member)) continue;
@@ -448,6 +449,53 @@ internal static class SceneLoaderPatch
         foreach (var updater in updaters) updater.OnEditorOpen();
 
         return false;
+    }
+
+    private static void FixFields(this EditorComponent component)
+    {
+        switch (component.Data)
+        {
+            case Patroller patroller:
+            {
+                var editing = typeof(Patroller).GetTypeInfo().GetDeclaredField("editing");
+                component.Fields.Remove(editing);
+                component.Fields[typeof(Patroller).GetField(nameof(Patroller.Voice))] = patroller.Voice;
+                component.Fields[editing] = editing.GetValue(component.Data);
+            }
+                break;
+            case HumanBehaviour human:
+            {
+                component.Fields[typeof(HumanBehaviour)
+                    .GetField(nameof(HumanBehaviour.ResistScream))] = human.ResistScream;
+                component.Fields[typeof(HumanBehaviour)
+                    .GetField(nameof(HumanBehaviour.AllowMultipleAttackers))] = human.AllowMultipleAttackers;
+                component.Fields[typeof(HumanBehaviour)
+                    .GetField(nameof(HumanBehaviour.GrabbedOnAttacked))] = human.GrabbedOnAttacked;
+                component.Fields[typeof(HumanBehaviour)
+                    .GetField(nameof(HumanBehaviour.IgnoreDamages))] = human.IgnoreDamages;
+                component.Fields[typeof(HumanBehaviour)
+                    .GetField(nameof(HumanBehaviour.InvincibleOnAttack))] = human.InvincibleOnAttack;
+                component.Fields[typeof(HumanBehaviour)
+                    .GetField(nameof(HumanBehaviour.FleeBeforeZombieExplode))] = human.FleeBeforeZombieExplode;
+                component.Fields[typeof(HumanBehaviour)
+                    .GetField(nameof(HumanBehaviour.MoveTowardStaticTargets))] = human.MoveTowardStaticTargets;
+                component.Fields[typeof(HumanBehaviour)
+                    .GetField(nameof(HumanBehaviour.VisionFollowTarget))] = human.VisionFollowTarget;
+                component.Fields[typeof(HumanBehaviour)
+                    .GetField(nameof(HumanBehaviour.Attitude))] = human.Attitude;
+            }
+                break;
+            case TrapEffect trap:
+            {
+                component.Fields.Clear();
+                component.Fields[typeof(TrapEffect).GetField(nameof(TrapEffect.Mode))] = trap.Mode;
+                component.Fields[typeof(TrapEffect).GetField(nameof(TrapEffect.KillDelay))] = trap.KillDelay;
+                component.Fields[typeof(TrapEffect).GetField(nameof(TrapEffect.Damage))] = trap.Damage;
+                component.Fields[typeof(TrapEffect).GetField(nameof(TrapEffect.DamageRate))] = trap.DamageRate;
+                component.Fields[typeof(TrapEffect).GetField(nameof(TrapEffect.DamageType))] = trap.DamageType;
+            }
+                break;
+        }
     }
 
     [HarmonyPostfix]
@@ -556,6 +604,94 @@ internal static class SceneLoaderPatch
         l.onValueChanged.AddListener(value => member.SetMemberValue(component.Data, value ? a : b));
         (member.GetMemberValue<object>(component.Data).Equals(a) ? l : r).isOn = true;
         return false;
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(SignalReceiverLinker), "Start")]
+    public static void Start(SignalReceiverLinker __instance)
+    {
+        switch (__instance.GetComponent<BaseBehaviour>())
+        {
+            case MovingObjectBehaviour moving:
+                __instance.AddReceiver(new ReceiverLink
+                {
+                    GameObject = moving.gameObject,
+                    Component = moving,
+                    Name = nameof(MovingObjectBehaviour.OnHitCharacter),
+                    Title = "Hit"
+                });
+                break;
+            case SentryGunBehaviour sentry:
+                __instance.AddReceiver(new ReceiverLink
+                {
+                    GameObject = sentry.gameObject,
+                    Component = sentry,
+                    Name = nameof(SentryGunBehaviour.OnDamage),
+                    Title = "Hit"
+                });
+                __instance.AddReceiver(new ReceiverLink
+                {
+                    GameObject = __instance.gameObject,
+                    Component = sentry,
+                    Name = nameof(SentryGunBehaviour.OnDie),
+                    Title = "Break"
+                });
+                break;
+            case CharacterBehaviour { Character: { } character }:
+                __instance.AddReceiver(new ReceiverLink
+                {
+                    GameObject = __instance.gameObject,
+                    Component = character,
+                    Name = nameof(Character.OnDamage),
+                    Title = "Hit"
+                });
+                __instance.AddReceiver(new ReceiverLink
+                {
+                    GameObject = __instance.gameObject,
+                    Component = character,
+                    Name = nameof(Character.OnDie),
+                    Title = "Kill"
+                });
+                break;
+        }
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(SignalSenderLinker), "Start")]
+    public static void Start(SignalSenderLinker __instance)
+    {
+        // ReSharper disable once InvertIf
+        // ReSharper disable once RedundantBoolCompare
+        if (__instance.GetComponentInChildren<Health>() is { } health &&
+            __instance.ExcludedGameObjects.Contains(health.gameObject) is false)
+        {
+            __instance.AddSender(new SenderLink
+            {
+                GameObject = health.gameObject,
+                Component = health,
+                SignalSender = health.OnDamage,
+                Name = nameof(health.OnDamage),
+                Title = nameof(health.OnDamage)
+            });
+            __instance.AddSender(new SenderLink
+            {
+                GameObject = health.gameObject,
+                Component = health,
+                SignalSender = health.OnDie,
+                Name = nameof(health.OnDie),
+                Title = nameof(health.OnDie)
+            });
+        }
+    }
+
+    private static void AddReceiver(this SignalReceiverLinker linker, ReceiverLink link)
+    {
+        Traverse.Create(linker).Method("AddReceiver", link.Component, link).GetValue();
+    }
+
+    private static void AddSender(this SignalSenderLinker linker, SenderLink link)
+    {
+        Traverse.Create(linker).Method("AddSender", link.Component, link).GetValue();
     }
 
     [HarmonyPrefix]

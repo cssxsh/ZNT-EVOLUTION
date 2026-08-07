@@ -90,15 +90,8 @@ internal static class CustomAssetObjectPatch
     {
         if (Traverse.Create(__instance).Field<bool>("autoExplode").Value) return;
         _ = gameObject.GetComponentSafe<ExplosionEditor>();
-        if (gameObject.transform.parent is null)
-        {
-            _ = gameObject.GetComponentSafe<SignalReceiverLinker>();
-        }
-        else
-        {
-            UnityEngine.Object.Destroy(gameObject.GetComponent<SignalLinkerGui>());
-            UnityEngine.Object.Destroy(gameObject.GetComponent<SignalReceiverLinker>());
-        }
+        if (gameObject.transform.parent is not null) return;
+        _ = gameObject.GetComponentSafe<SignalReceiverLinker>();
     }
 
     [HarmonyPostfix]
@@ -482,7 +475,20 @@ internal static class CustomAssetObjectPatch
         {
             if (prefab.GetComponentInChildren<Health>() is { } health)
             {
+                health.EditorVisibility.CustomName ??= nameof(Health);
                 health.SetVisible(true);
+                if (health.name is "Components" &&
+                    health.gameObject.GetComponentSafe<SignalSenderLinker>() is { ExcludedComponents: null } linker)
+                {
+                    linker.ExcludedComponents ??= [];
+                    linker.ExcludedGameObjects ??= linker.gameObject.GetChildren(true);
+                    var proxy = linker.GetComponentInChildren<HealthSignalProxy>();
+                    if (proxy)
+                    {
+                        linker.ExcludedGameObjects.Remove(proxy.gameObject);
+                        linker.ExcludedGameObjects.Add(health.gameObject);
+                    }
+                }
             }
 
             if (prefab.TryGetComponent(out OneWayCollider collider))
@@ -502,10 +508,12 @@ internal static class CustomAssetObjectPatch
                 case BonusBarrelBehaviour:
                 case BreakableProp:
                 case DoorBehaviour:
+                    _ = prefab.GetComponentSafe<SignalSenderLinker>();
                     _ = prefab.GetComponentSafe<LayerEditor>();
                     break;
                 case MineBehaviour:
                     _ = prefab.GetComponentSafe<MineTrapEditor>();
+                    _ = prefab.GetComponentSafe<SignalSenderLinker>();
                     _ = prefab.GetComponentSafe<LayerEditor>();
                     break;
                 case StairBehaviour:

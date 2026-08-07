@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using HarmonyLib;
 using MonoMod.Utils;
 using UnityEngine;
@@ -327,8 +326,7 @@ internal static class DebugPatch
     [HarmonyPatch(typeof(SignalReceiverLinker), "OnAwake")]
     public static void OnAwake(SignalReceiverLinker __instance)
     {
-        __instance.ExcludedComponents ??= __instance.GetComponentsInChildren<BaseComponent>(includeInactive: true)
-            .Where(component => !component.EditorVisibility).ToList();
+        __instance.ExcludedComponents ??= [];
         __instance.ExcludedGameObjects ??= [];
     }
 
@@ -336,8 +334,7 @@ internal static class DebugPatch
     [HarmonyPatch(typeof(SignalSenderLinker), "OnAwake")]
     public static void OnAwake(SignalSenderLinker __instance)
     {
-        __instance.ExcludedComponents ??= __instance.GetComponentsInChildren<BaseComponent>(includeInactive: true)
-            .Where(component => !component.EditorVisibility).ToList();
+        __instance.ExcludedComponents ??= [];
         __instance.ExcludedGameObjects ??= [];
     }
 }
