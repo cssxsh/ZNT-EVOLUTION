@@ -31,8 +31,7 @@ public class HumanEditor : CharacterEditor
     public int WeaponMagazineSize
     {
         get => Behaviour.Weapon.DefaultMag.Size;
-        set => Traverse.Create(Behaviour.Weapon).Field<Magazine>("currentMagazine").Value =
-            Behaviour.Weapon.DefaultMag = new Magazine(value);
+        set => Behaviour.Weapon.SetMagazine(value);
     }
 
     [JsonIgnore]

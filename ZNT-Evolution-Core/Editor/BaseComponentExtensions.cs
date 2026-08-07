@@ -38,6 +38,13 @@ public static class BaseComponentExtensions
     }
 
     [UsedImplicitly]
+    public static void SetMagazine(this Weapon weapon, int size)
+    {
+        weapon.DefaultMag = new Magazine(size);
+        weapon.Initialize();
+    }
+
+    [UsedImplicitly]
     public static SupportedTypeBinder ListBinder(this SelectionMenu menu)
     {
         return menu.InstantiateCustomBinder(menu.CustomBinders.IntStringList);
