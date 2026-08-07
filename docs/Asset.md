@@ -137,11 +137,11 @@ public enum CharacterType
 | `0x00` | `0x00000001` |      `Default`      |
 | `0x01` | `0x00000002` |   `TransparentFX`   |
 | `0x02` | `0x00000004` |  `Ignore Raycast`   |
-| `0x03` | `0x00000008` |         `3`         |
+| `0x03` | `0x00000008` |                     |
 | `0x04` | `0x00000010` |       `Water`       |
 | `0x05` | `0x00000020` |        `UI`         |
-| `0x06` | `0x00000040` |         `6`         |
-| `0x07` | `0x00000080` |         `7`         |
+| `0x06` | `0x00000040` |                     |
+| `0x07` | `0x00000080` |                     |
 | `0x08` | `0x00000100` |      `Zombie`       |
 | `0x09` | `0x00000200` |       `Human`       |
 | `0x0A` | `0x00000400` | `Ignore Collisions` |
@@ -249,6 +249,15 @@ public enum CharacterType
 | `0x94DD6639` | `LevelEditor`         | `24`  |
 | `0x4629EB59` | `UI`                  | `25`  |
 
+# UnityEngine.AnimationCurve
+
+> 动画曲线
+
+ZNT 将其化用为衰减函数，x 轴是标准化的距离，y 轴是倍率  
+根据实际使用情况，插件提供两种简写：  
+- `(x1, y1) - (x2, y2)`
+- `(x1, y1, k1) ~ (x2, y2, k2)`
+
 # ExplosionAsset
 
 > 爆炸资源
@@ -257,7 +266,10 @@ public enum CharacterType
 
 > `*.explosion.json`
 
-- `Type` : `Normal`/`Fragmentation`/`Continuous` 起爆类型
+- `Type` : `ExplosionType` 起爆类型
+    * `Normal`
+    * `Fragmentation`
+    * `Continuous`
 - `DamageType` : [`DamageType`](#damagetype) 伤害类型
 - `DetectedLayers` : [`UnityEngine.LayerMask`](#layer) 作用图层
 - `OriginOffset` : `UnityEngine.Vector3`
@@ -267,12 +279,14 @@ public enum CharacterType
 - `TileRadius` : `float`
 - `ApplyDamageOn` : [`Tag`](#tag) 伤害作用于
 - `Damage` : `float` 伤害值
-- `DamageDistanceFallof` : `AnimationCurve` 伤害衰变
+- `DamageDistanceFallof` : `UnityEngine.AnimationCurve` 伤害衰变
 - `ApplyForceOn` : [`Tag`](#tag) 推力作用于
-- `ForceMode` : `Force`/`Impulse`
+- `ForceMode` : `UnityEngine.ForceMode2D`
+    * `Force`
+    * `Impulse`
 - `Force` : `float` 推力大小
 - `ForceMultipliers` : `UnityDictionary<Layer, float>` 推力倍率
-- `ForceDistanceFallof` : `AnimationCurve` 推力衰变
+- `ForceDistanceFallof` : `UnityEngine.AnimationCurve` 推力衰变
 - `CustomForceDirection` : `bool` 锁定推力方向，用于反击
 - `ForceDirection` : `UnityEngine.Vector2` 推力方向
 - `TransformForceDirection` : `bool` 根据 `Transform` 锁定推力方向
@@ -301,8 +315,10 @@ public enum CharacterType
 - `EffectToSpawn` : [`VisualEffect`](Sprite.md#visualeffect) 起爆时生成特效
 - `HierarchyName` : `string`
 - `Prefab` : `UnityEngine.Transform` 预制体
+    * `CircularExplosion`
+    * `CircularEnemyExplosion`
 - `Tag` : [`Tag`](#tag) 标签
-- `Layer` : [`Layer`](#layer) 图层
+- `Layer` : [`UnityEngine.Layer`](#layer) 图层
 - `assetId` : `string`
 - `name` : `string` 爆炸名称
 
@@ -323,64 +339,12 @@ public enum CharacterType
   "TileRadius": 3.0,
   "ApplyDamageOn": "Human, Breakable, WorldEnemy, Projectile",
   "Damage": 300.0,
-  "DamageDistanceFallof": {
-    "keys": [
-      {
-        "time": 0.299999982,
-        "value": 1.0,
-        "inTangent": -0.00412149727,
-        "outTangent": -0.00412149727,
-        "inWeight": 0.333333343,
-        "outWeight": 0.333333343,
-        "weightedMode": "None",
-        "tangentMode": 0
-      },
-      {
-        "time": 1.0,
-        "value": 0.25,
-        "inTangent": -3.20778656,
-        "outTangent": -3.20778656,
-        "inWeight": 0.333333343,
-        "outWeight": 0.333333343,
-        "weightedMode": "None",
-        "tangentMode": 0
-      }
-    ],
-    "length": 2,
-    "preWrapMode": "ClampForever",
-    "postWrapMode": "ClampForever"
-  },
+  "DamageDistanceFallof": "(0.3, 1, -0.004121497) ~ (1, 0.25, -3.207787)",
   "ApplyForceOn": "Human, Zombie, WorldEnemy",
   "ForceMode": "Impulse",
   "Force": 9.0,
   "ForceMultipliers": {},
-  "ForceDistanceFallof": {
-    "keys": [
-      {
-        "time": 0.5,
-        "value": 1.0,
-        "inTangent": -0.00412149727,
-        "outTangent": -0.00412149727,
-        "inWeight": 0.333333343,
-        "outWeight": 0.333333343,
-        "weightedMode": "None",
-        "tangentMode": 0
-      },
-      {
-        "time": 1.0,
-        "value": 0.5,
-        "inTangent": -2.41442442,
-        "outTangent": -2.41442442,
-        "inWeight": 0.333333343,
-        "outWeight": 0.333333343,
-        "weightedMode": "None",
-        "tangentMode": 0
-      }
-    ],
-    "length": 2,
-    "preWrapMode": "ClampForever",
-    "postWrapMode": "ClampForever"
-  },
+  "ForceDistanceFallof": "(0.5, 1, -0.004121497) ~ (1, 0.5, -2.414424)",
   "CustomForceDirection": false,
   "ForceDirection": {
     "$type": "UnityEngine.Vector2, UnityEngine.CoreModule",
@@ -421,6 +385,41 @@ public enum CharacterType
 }
 ```
 
+## BuildIn
+
+| Assets                 | PathID | Name                        | Prefab                   | Type            |
+|:-----------------------|:-------|:----------------------------|:-------------------------|:----------------|
+| `sharedassets3.assets` | `113`  | `BasicExplosion`            | `CircularExplosion`      | `Normal`        |
+| `sharedassets3.assets` | `114`  | `BlockerExplosion`          | `CircularExplosion`      | `Fragmentation` |
+| `sharedassets3.assets` | `115`  | `BasicSpitExplosion`        | `CircularExplosion`      | `Normal`        |
+| `sharedassets3.assets` | `116`  | `CrawlerSpitExplosion`      | `CircularExplosion`      | `Normal`        |
+| `sharedassets3.assets` | `117`  | `OverlordSpitExplosion`     | `CircularExplosion`      | `Normal`        |
+| `sharedassets3.assets` | `118`  | `TankSpitExplosion`         | `TankSpitExplosion`      | `Continuous`    |
+| `resources.assets`     | `9659` | `AstrogoliathEscape`        | `CircularExplosion`      | `Normal`        |
+| `resources.assets`     | `9660` | `AstrogoliathLandingAttack` | `CircularExplosion`      | `Normal`        |
+| `resources.assets`     | `9661` | `ChemistRepulse`            | `CircularExplosion`      | `Normal`        |
+| `resources.assets`     | `9662` | `DrugLordRepulse`           | `CircularExplosion`      | `Normal`        |
+| `resources.assets`     | `9663` | `GertrudeAttack`            | `CircularExplosion`      | `Normal`        |
+| `resources.assets`     | `9664` | `GertrudeRepulse`           | `CircularExplosion`      | `Normal`        |
+| `resources.assets`     | `9665` | `KamikazeExplosion`         | `CircularExplosion`      | `Normal`        |
+| `resources.assets`     | `9666` | `RickRepulse`               | `CircularExplosion`      | `Normal`        |
+| `resources.assets`     | `9667` | `TerminatorRepulse`         | `CircularExplosion`      | `Normal`        |
+| `resources.assets`     | `9668` | `ClimberExplosion`          | `CircularExplosion`      | `Normal`        |
+| `resources.assets`     | `9669` | `SubExplosion`              | `FragExplosion`          | `Normal`        |
+| `resources.assets`     | `9670` | `TankExplosion`             | `CircularExplosion`      | `Fragmentation` |
+| `resources.assets`     | `9671` | `TankJumpExplosion`         | `CircularExplosion`      | `Normal`        |
+| `resources.assets`     | `9672` | `TankScream`                | `TankScream`             | `Continuous`    |
+| `resources.assets`     | `9673` | `BarrelExplosion`           | `CircularEnemyExplosion` | `Normal`        |
+| `resources.assets`     | `9674` | `CannonballExplosion`       | `CircularEnemyExplosion` | `Normal`        |
+| `resources.assets`     | `9675` | `GazolineTankExplosion`     | `CircularEnemyExplosion` | `Normal`        |
+| `resources.assets`     | `9676` | `GrenadeExplosion`          | `CircularEnemyExplosion` | `Normal`        |
+| `resources.assets`     | `9677` | `LaserShotExplosion`        | `CircularExplosion`      | `Normal`        |
+| `resources.assets`     | `9678` | `MachineGunnerRepulse`      | `CircularExplosion`      | `Normal`        |
+| `resources.assets`     | `9679` | `MineExplosion`             | `CircularEnemyExplosion` | `Normal`        |
+| `resources.assets`     | `9680` | `MolotovExplosion`          | `CircularEnemyExplosion` | `Normal`        |
+| `resources.assets`     | `9681` | `SentryCannonExplosion`     | `CircularEnemyExplosion` | `Normal`        |
+| `resources.assets`     | `9682` | `SentryPlasmaExplosion`     | `CircularExplosion`      | `Normal`        |
+
 # DecorAsset
 
 > 物件资源
@@ -435,12 +434,14 @@ public enum CharacterType
 - `UseStaticAnimation` : `bool`
 - `ActiveAnimation` : `string`
 - `InactiveAnimation` : `string`
-- `playSounds` : `bool` 释放播放声音
+- `playSounds` : `bool` 是否播放声音
 - `sound` : [`FMODAsset`](FMODAsset.md)
 - `HierarchyName` : `string`
 - `Prefab` : `UnityEngine.Transform` 预制体
+    * `IndicatorDoor`
+    * `ActivableDecor`
 - `Tag` : [`Tag`](#tag) 标签
-- `Layer` : [`Layer`](#layer) 图层
+- `Layer` : [`UnityEngine.Layer`](#layer) 图层
 - `assetId` : `string`
 - `name` : `string` 物件名称
 
@@ -464,6 +465,34 @@ public enum CharacterType
 }
 ```
 
+## BuildIn
+
+| Assets             | PathID | Name                 | Prefab            | Animation               |
+|:-------------------|:-------|:---------------------|:------------------|:------------------------|
+| `resources.assets` | `9633` | `Alarm`              | `Alarm`           | `anim_traps`            |
+| `resources.assets` | `9634` | `Aliens1`            | `Aliens1`         | `anim_aliens_cinematic` |
+| `resources.assets` | `9635` | `Aliens2`            | `Aliens2`         | `anim_aliens_cinematic` |
+| `resources.assets` | `9636` | `Aliens3`            | `Aliens3`         | `anim_aliens_cinematic` |
+| `resources.assets` | `9637` | `Aliens5`            | `Aliens5`         | `anim_aliens_cinematic` |
+| `resources.assets` | `9638` | `Aliens6`            | `Aliens6`         | `anim_aliens_cinematic` |
+| `resources.assets` | `9639` | `Aliens7`            | `Aliens7`         | `anim_aliens_cinematic` |
+| `resources.assets` | `9640` | `Aliens8`            | `Aliens8`         | `anim_aliens_cinematic` |
+| `resources.assets` | `9641` | `Aliens9`            | `Aliens9`         | `anim_aliens_cinematic` |
+| `resources.assets` | `9642` | `ElevatorDoor`       | `ElevatorDoor`    | `anim_props`            |
+| `resources.assets` | `9643` | `FanHospital`        | `FanHospital`     | `anim_props`            |
+| `resources.assets` | `9644` | `GarbageGirl`        | `GarbageGirl`     | `anim_girl_3_garbage`   |
+| `resources.assets` | `9645` | `IndicatorDoor`      | `IndicatorDoor`   | `anim_props`            |
+| `resources.assets` | `9646` | `MotherBrain`        | `MotherbrainRoom` | `anim_props`            |
+| `resources.assets` | `9647` | `Plier`              | `Plier`           | `anim_chemist_pliers`   |
+| `resources.assets` | `9648` | `Radio`              | `ActivableDecor`  | `anim_props`            |
+| `resources.assets` | `9649` | `RomeroBlinking`     | `RomeroBlinking`  | `anim_props`            |
+| `resources.assets` | `9650` | `Troll`              | `ActivableDecor`  | `anim_traps`            |
+| `resources.assets` | `9651` | `TutorialClick`      | `ActivableDecor`  | `anim_props`            |
+| `resources.assets` | `9652` | `TutorialExplode`    | `ActivableDecor`  | `anim_props`            |
+| `resources.assets` | `9653` | `TutorialOverlord`   | `ActivableDecor`  | `anim_props`            |
+| `resources.assets` | `9654` | `TutorialScream`     | `ActivableDecor`  | `anim_props`            |
+| `resources.assets` | `9655` | `TutorialScreamWall` | `ActivableDecor`  | `anim_props`            |
+
 # BreakablePropAsset
 
 > 可破坏道具资源
@@ -484,8 +513,10 @@ public enum CharacterType
 - `MenuOffset` : `UnityEngine.Vector2`
 - `HierarchyName` : `string`
 - `Prefab` : `UnityEngine.Transform` 预制体
+    * `BreakablePropinteractable`
+    * `BreakableProp`
 - `Tag` : [`Tag`](#tag) 标签
-- `Layer` : [`Layer`](#layer) 图层
+- `Layer` : [`UnityEngine.Layer`](#layer) 图层
 - `assetId` : `string`
 - `name` : `string` 可破坏道具名称
 
@@ -523,6 +554,16 @@ public enum CharacterType
 }
 ```
 
+## BuildIn
+
+| Assets             | PathID | Name                    | Prefab                      | Animation    |
+|:-------------------|:-------|:------------------------|:----------------------------|:-------------|
+| `resources.assets` | `9686` | `ElectricGenerator 1`   | `BreakablePropinteractable` | `anim_traps` |
+| `resources.assets` | `9687` | `ElectricGenerator 2`   | `BreakablePropinteractable` | `anim_traps` |
+| `resources.assets` | `9688` | `ElectricGenerator Big` | `BreakableProp`             | `anim_traps` |
+| `resources.assets` | `9689` | `GazolineTank`          | `Gazoline Tank`             | `anim_traps` |
+| `resources.assets` | `9690` | `Monolith`              | `BreakablePropinteractable` | `anim_traps` |
+
 # TriggerAsset
 
 > 开关资源
@@ -531,20 +572,37 @@ public enum CharacterType
 
 > `*.trigger.json`
 
-- `type` : `Receiver`/`Trap`/`Trigger`/`Both`
+- `type` : `TriggerAsset.TrapType` 触发类型
+    * `Receiver`
+    * `Trap`
+    * `Trigger`
+    * `Both`
 - `OverrideAnimations` : `bool`
 - `PlaySounds` : `bool`
 - `DetectedLayers` : [`UnityEngine.LayerMask`](#layer) 作用图层
 - `CheckTags` : `bool`
 - `DetectedTags` : [`Tag`](#tag) 作用标签
-- `resizeMode` : `None`/`Horizontal`/`Vertical`/`Both`
-- `clampMethod` : `None`/`Relative`/`Absolute`
+- `resizeMode` : `TriggerAsset.ResizeAxis`
+    * `None`
+    * `Horizontal`
+    * `Vertical`
+    * `Both`
+- `clampMethod` : `ResizeHandles.ClampType`
+    * `None`
+    * `Relative`
+    * `Absolute`
 - `minSize` : `UnityEngine.Vector2`
 - `roundToNeareset` : `bool`
 - `RendererColor` : `UnityEngine.Color`
-- `RenderMode` : `Tiled`/`SlicedAndTiled`/`Sliced`/`None`
+- `RenderMode` : `TrapRenderMode`
+    * `Tiled`
+    * `SlicedAndTiled`
+    * `Sliced`
+    * `None`
 - `PixelsPerMeter` : `int`
 - `EffectPrefab` : `ResizableParticleSystem`
+    * `ElectricArc`
+    * `HeatWaves`
 - `Animation` : [`tk2dSpriteAnimation`](Sprite.md#tk2dspriteanimation)
 - `ActiveAnimation` : `string`
 - `InactiveAnimation` : `string`
@@ -553,15 +611,18 @@ public enum CharacterType
 - `ActivateEvent` : [`FMODAsset`](FMODAsset.md)
 - `EventFollowObject` : `bool`
 - `Type` : [`DamageType`](#damagetype) 伤害类型
-- `Mode` : `Damage`/`Kill`
+- `Mode` : `TrapMode`
+    * `Damage`
+    * `Kill`
 - `KillDelay` : `float`
 - `Damage` : `float`
 - `DamageRate` : `float`
 - `Name` : `string` 菜单栏中的名字
 - `HierarchyName` : `string`
 - `Prefab` : `UnityEngine.Transform` 预制体
+    * `InvisibleTrigger`
 - `Tag` : [`Tag`](#tag) 标签
-- `Layer` : [`Layer`](#layer) 图层
+- `Layer` : [`UnityEngine.Layer`](#layer) 图层
 - `assetId` : `string`
 - `name` : `string` 开关名称
 
@@ -614,6 +675,78 @@ public enum CharacterType
 }
 ```
 
+## BuildIn
+
+| Assets             | PathID | Name                    | Prefab                    |
+|:-------------------|:-------|:------------------------|:--------------------------|
+| `resources.assets` | `9691` | `ActivationFilter`      | `ActivationFilter`        |
+| `resources.assets` | `9692` | `BonusReward`           | `BonusReward`             |
+| `resources.assets` | `9693` | `CameraControl`         | `CameraControl`           |
+| `resources.assets` | `9694` | `CameraMover`           | `CameraMover`             |
+| `resources.assets` | `9695` | `CameraShake`           | `CameraShake`             |
+| `resources.assets` | `9696` | `CameraZoomer`          | `CameraZoomer`            |
+| `resources.assets` | `9697` | `ChallengeTrigger`      | `ChallengeTrigger`        |
+| `resources.assets` | `9698` | `CharacterCondition`    | `ActiveCharactersControl` |
+| `resources.assets` | `9699` | `CountdownTimer`        | `CountdownTimer`          |
+| `resources.assets` | `9700` | `Counter`               | `Counter`                 |
+| `resources.assets` | `9701` | `EndDemoLoader`         | `EndDemoLoader`           |
+| `resources.assets` | `9702` | `EndGameControl`        | `EndGameControl`          |
+| `resources.assets` | `9703` | `ExecutionTimer`        | `ExecutionTimer`          |
+| `resources.assets` | `9704` | `GamePause`             | `GamePause`               |
+| `resources.assets` | `9705` | `HudControl`            | `HudControl`              |
+| `resources.assets` | `9706` | `LevelLoader`           | `LevelLoader`             |
+| `resources.assets` | `9707` | `LoopTimer`             | `LoopTimer`               |
+| `resources.assets` | `9708` | `MutationLocker`        | `MutationLocker`          |
+| `resources.assets` | `9709` | `ProgressionUnlock`     | `ProgressionUnlock`       |
+| `resources.assets` | `9710` | `SlowMotion`            | `SlowMotion`              |
+| `resources.assets` | `9711` | `AstronautDeath`        | `AstronautDeath`          |
+| `resources.assets` | `9712` | `BloodSpurt`            | `BloodSpurt`              |
+| `resources.assets` | `9713` | `CaveDebris`            | `CaveDebris`              |
+| `resources.assets` | `9714` | `ChemistBossFinalIntro` | `BossChemistFinal_intro`  |
+| `resources.assets` | `9715` | `FloatingZombie1`       | `FloatingZombie1`         |
+| `resources.assets` | `9716` | `FloatingZombie2`       | `FloatingZombie2`         |
+| `resources.assets` | `9717` | `FloatingZombie3`       | `FloatingZombie3`         |
+| `resources.assets` | `9718` | `FlyingStars`           | `FlyingStars`             |
+| `resources.assets` | `9719` | `GreenFog`              | `GreenFog`                |
+| `resources.assets` | `9720` | `GreenHaze`             | `GreenHaze`               |
+| `resources.assets` | `9721` | `GreenSteam`            | `GreenSteam`              |
+| `resources.assets` | `9722` | `MeteoriteCrash`        | `MeteoriteCrash`          |
+| `resources.assets` | `9723` | `MonolithBreak`         | `MonolithBreak`           |
+| `resources.assets` | `9724` | `RocketCrash`           | `RocketCrash`             |
+| `resources.assets` | `9725` | `RocketTakeOff`         | `RocketTakeOff`           |
+| `resources.assets` | `9726` | `RoofDebris`            | `RoofDebris`              |
+| `resources.assets` | `9727` | `SpaceTimeTeleport`     | `SpaceTimeTeleport`       |
+| `resources.assets` | `9728` | `Sprinkler`             | `Sprinkler`               |
+| `resources.assets` | `9729` | `Tunnel`                | `TunnelCamera`            |
+| `resources.assets` | `9730` | `Vortex`                | `Vortex`                  |
+| `resources.assets` | `9731` | `VortexWind`            | `VortexWind`              |
+| `resources.assets` | `9732` | `WhiteFog`              | `WhiteFog`                |
+| `resources.assets` | `9775` | `Acid`                  | `AcidTrap`                |
+| `resources.assets` | `9776` | `BreakableFloor`        | `BreakableFloor`          |
+| `resources.assets` | `9777` | `Electricity`           | `BaseTrap`                |
+| `resources.assets` | `9778` | `Fire`                  | `BaseTrap`                |
+| `resources.assets` | `9779` | `InvisibleTrap`         | `InvisibleTrap`           |
+| `resources.assets` | `9780` | `Laser`                 | `LaserTrap`               |
+| `resources.assets` | `9781` | `Mine`                  | `MineTrap`                |
+| `resources.assets` | `9782` | `MovingSurface`         | `MovingSurface`           |
+| `resources.assets` | `9783` | `Radioactivity`         | `RadioactivityTrap`       |
+| `resources.assets` | `9788` | `Spikes`                | `BaseTrap`                |
+| `resources.assets` | `9789` | `SteamDown`             | `SteamDownTrap`           |
+| `resources.assets` | `9790` | `SteamUp`               | `SteamUpTrap`             |
+| `resources.assets` | `9791` | `Water`                 | `WaterTrap`               |
+| `resources.assets` | `9792` | `Wind`                  | `WindArea`                |
+| `resources.assets` | `9793` | `CharacterTrigger`      | `InvisibleTrigger`        |
+| `resources.assets` | `9794` | `ClickableObject`       | `ClickableObject`         |
+| `resources.assets` | `9795` | `DespawnTrigger`        | `DespawnTrigger`          |
+| `resources.assets` | `9796` | `HumanTrigger`          | `InvisibleTrigger`        |
+| `resources.assets` | `9797` | `JumpTrigger`           | `JumpTrigger`             |
+| `resources.assets` | `9798` | `PreventClick`          | `PreventClick`            |
+| `resources.assets` | `9799` | `SpitTrigger`           | `InvisibleTrigger`        |
+| `resources.assets` | `9800` | `StartTrigger`          | `StartTrigger`            |
+| `resources.assets` | `9801` | `VipTrigger`            | `InvisibleTrigger`        |
+| `resources.assets` | `9802` | `ZombieEscape`          | `EscapeTrigger`           |
+| `resources.assets` | `9803` | `ZombieTrigger`         | `InvisibleTrigger`        |
+
 # MovingObjectAsset
 
 > 动体资源
@@ -636,14 +769,26 @@ public enum CharacterType
 - `HitSound` : [`FMODAsset`](FMODAsset.md)
 - `HideOnDisable` : `bool`
 - `AttachOnCollide` : `bool`
-- `ColliderType` : `None`/`Box`/`Circle`
+- `ColliderType` : `MovingObjectAsset.Collider`
+    * `None`
+    * `Box`
+    * `Circle`
 - `ColliderIsTrigger` : `bool`
 - `ColliderMaterial` : `UnityEngine.PhysicsMaterial2D`
+    * `BossBrainPhysic`
+    * `BonusPhysic`
+    * `CratePhysic`
+    * `BarrelPhysic`
+    * `RippedPhysic`
+    * `SpitPhysic`
+    * `CorpsePhysic`
 - `ColliderOffset` : `UnityEngine.Vector2`
 - `BoxSize` : `UnityEngine.Vector2`
 - `CircleRadius` : `float`
 - `ApplyDamage` : `bool`
-- `DamageShape` : `Box`/`Circle`
+- `DamageShape` : `MovingObjectAsset.Shape`
+    * `Box`
+    * `Circle`
 - `DamageOffset` : `UnityEngine.Vector2`
 - `DamageSize` : `UnityEngine.Vector2`
 - `DamageRadius` : `float`
@@ -653,8 +798,9 @@ public enum CharacterType
 - `MoveOnStart` : `bool`
 - `HierarchyName` : `string`
 - `Prefab` : `UnityEngine.Transform` 预制体
+    * `MovingObject`
 - `Tag` : [`Tag`](#tag) 标签
-- `Layer` : [`Layer`](#layer) 图层
+- `Layer` : [`UnityEngine.Layer`](#layer) 图层
 - `assetId` : `string`
 - `name` : `string` 动体名称
 
@@ -715,6 +861,29 @@ public enum CharacterType
 }
 ```
 
+## BuildIn
+
+| Assets             | PathID | Name                    | Prefab                        | Animation    |
+|:-------------------|:-------|:------------------------|:------------------------------|:-------------|
+| `resources.assets` | `9757` | `Car`                   | `MovingObject`                | `anim_traps` |
+| `resources.assets` | `9758` | `CarBoss`               | `MovingCarBoss`               | `anim_traps` |
+| `resources.assets` | `9759` | `CircularSaw`           | `CircularSaw`                 | `anim_traps` |
+| `resources.assets` | `9760` | `Elevator 1`            | `MovingElevator 1`            | `anim_traps` |
+| `resources.assets` | `9761` | `Elevator 2`            | `MovingElevator 2`            | `anim_traps` |
+| `resources.assets` | `9762` | `Elevator 3`            | `MovingElevator 3`            | `anim_traps` |
+| `resources.assets` | `9763` | `ElevatorExterior`      | `MovingElevatorExterior`      | `anim_traps` |
+| `resources.assets` | `9764` | `ElevatorPlatform`      | `MovingElevatorPlatform`      | `anim_traps` |
+| `resources.assets` | `9765` | `ElevatorPlatformMoon`  | `MovingMoonPlatform`          | `anim_traps` |
+| `resources.assets` | `9766` | `ElevatorPlatformSmall` | `MovingElevatorPlatformSmall` | `anim_traps` |
+| `resources.assets` | `9767` | `Harvester`             | `Harvester`                   | `anim_traps` |
+| `resources.assets` | `9768` | `InvisibleMovingTrap`   | `InvisibleMovingTrap`         | `anim_traps` |
+| `resources.assets` | `9769` | `LawnMower`             | `MovingObject`                | `anim_traps` |
+| `resources.assets` | `9770` | `MovingContainer`       | `MovingObject`                | `anim_traps` |
+| `resources.assets` | `9771` | `PressWall`             | `MovingPressWall`             | `anim_traps` |
+| `resources.assets` | `9772` | `Subway`                | `MovingSubway`                | `anim_traps` |
+| `resources.assets` | `9773` | `SubwayTrap`            | `MovingSubway`                | `anim_traps` |
+| `resources.assets` | `9774` | `TankCage`              | `TankCage`                    | `anim_traps` |
+
 # PhysicObjectAsset
 
 > 物体资源
@@ -734,7 +903,16 @@ public enum CharacterType
 - `GravityScale` : `float` 重力系数
 - `ColliderRadius` : `float` 碰撞半径
 - `ColliderOffset` : `UnityEngine.Vector2`
-- `ExplodeOn` : `Wall`/`Ground`/`Ceiling`/`Target`/`Zombie`/`Climber`/`Blocker`/`Tank`/`IgnoreHuman` 爆炸作用类型
+- `ExplodeOn` : `PhysicObjectBehaviour.ExplodeSurface` 爆炸作用类型
+    * `Wall`
+    * `Ground`
+    * `Ceiling`
+    * `Target` 碰到角色就会爆炸
+    * `Zombie`
+    * `Climber`
+    * `Blocker`
+    * `Tank`
+    * `WorldEnemy`
 - `DamageRadius` : `float` 穿透伤害半径
 - `DamageOffset` : `UnityEngine.Vector2`
 - `DamageCharacterOnTrigger` : `bool` 开启伤害在穿透时
@@ -757,14 +935,18 @@ public enum CharacterType
 - `RolDetectionRadius` : `float`
 - `HierarchyName` : `string`
 - `Prefab` : `UnityEngine.Transform` 预制体
+    * `PhysicObject`
+    * `Grenade`
+    * `Molotov`
+    * `MoonCanonProjectile`
 - `Tag` : [`Tag`](#tag) 标签
-- `Layer` : [`Layer`](#layer) 图层
+- `Layer` : [`UnityEngine.Layer`](#layer) 图层
 - `assetId` : `string`
 - `name` : `string` 物体名称
 
 当 `ignoreCollisionDuration` 开启会检查是否卡住（速度为零时爆炸）  
 当 `ExplodeOn` 包含 `Target` 会对角色图层产生碰撞（使用默认图层，反之使用忽略角色的图层）  
-`ExplodeOn` 的 `Zombie`/`Climber`/`Blocker`/`Tank`/`IgnoreHuman` 为代码扩展
+`ExplodeOn` 的 `Zombie`/`Climber`/`Blocker`/`Tank`/`WorldEnemy` 为代码扩展，不要和 `Target` 一起使用
 
 ```json
 {
@@ -822,6 +1004,35 @@ public enum CharacterType
 }
 ```
 
+## BuildIn
+
+| Assets             | PathID | Name                        | Prefab                | Animation           |
+|:-------------------|:-------|:----------------------------|:----------------------|:--------------------|
+| `resources.assets` | `9733` | `AstrogoliathLandingAttack` | `PhysicObject`        | `anim_traps`        |
+| `resources.assets` | `9734` | `Cannonball`                | `PhysicObject`        | `anim_traps`        |
+| `resources.assets` | `9735` | `ChemistAttack`             | `RollingBoss`         | `anim_boss_chemist` |
+| `resources.assets` | `9736` | `GertrudeAttack`            | `PhysicObject`        | `anim_traps`        |
+| `resources.assets` | `9737` | `Grenade 1`                 | `Grenade`             | `anim_traps`        |
+| `resources.assets` | `9738` | `Grenade 2`                 | `Grenade`             | `anim_traps`        |
+| `resources.assets` | `9739` | `Grenade 3`                 | `Grenade`             | `anim_traps`        |
+| `resources.assets` | `9740` | `Grenade 4`                 | `Grenade`             | `anim_traps`        |
+| `resources.assets` | `9741` | `Grenade Cutscene`          | `Grenade Cutscene`    | `anim_traps`        |
+| `resources.assets` | `9742` | `LaserShot`                 | `PhysicObject`        | `anim_traps`        |
+| `resources.assets` | `9743` | `Molotov 2_short`           | `Molotov`             | `anim_traps`        |
+| `resources.assets` | `9744` | `Molotov 3_long`            | `Molotov`             | `anim_traps`        |
+| `resources.assets` | `9745` | `Molotov 4_high`            | `Molotov`             | `anim_traps`        |
+| `resources.assets` | `9746` | `Molotov 5_grange`          | `Molotov`             | `anim_traps`        |
+| `resources.assets` | `9747` | `Molotov 6_homerun`         | `Molotov`             | `anim_traps`        |
+| `resources.assets` | `9748` | `Molotov`                   | `Molotov`             | `anim_traps`        |
+| `resources.assets` | `9749` | `PhysicBarrel 1`            | `PhysicObject`        | `anim_traps`        |
+| `resources.assets` | `9750` | `PhysicBarrel 2`            | `PhysicObject`        | `anim_traps`        |
+| `resources.assets` | `9751` | `SentryPlasma1`             | `MoonCanonProjectile` | `anim_traps`        |
+| `resources.assets` | `9752` | `SentryPlasma2`             | `MoonCanonProjectile` | `anim_traps`        |
+| `resources.assets` | `9753` | `SentryPlasma3`             | `MoonCanonProjectile` | `anim_traps`        |
+| `resources.assets` | `9754` | `SentryPlasma4`             | `MoonCanonProjectile` | `anim_traps`        |
+| `resources.assets` | `9755` | `SentryProjectile`          | `PhysicObject`        | `anim_traps`        |
+| `resources.assets` | `9756` | `SentryProjectileSlow`      | `PhysicObject`        | `anim_traps`        |
+
 # SentryGunAsset
 
 > 炮台资源
@@ -833,9 +1044,9 @@ public enum CharacterType
 - `Hp` : `float`
 - `Invincible` : `bool`
 - `DamageMultipliers` : `UnityDictionary<DamageType, float>` 伤害倍率
-- `AllDetection` : `DetectionAsset` `SentryAllDetection`
-- `HumanDetection` : `DetectionAsset` `SentryHumanDetection`
-- `ZombieDetection` : `DetectionAsset` `SentryZombieDetection`
+- `AllDetection` : `DetectionAsset` 恒为 `SentryAllDetection`
+- `HumanDetection` : `DetectionAsset` 恒为 `SentryHumanDetection`
+- `ZombieDetection` : `DetectionAsset` 恒为 `SentryZombieDetection`
 - `GeneralDirection` : `UnityEngine.Vector3`
 - `DeviationAngle` : `float`
 - `FieldOfView` : `float`
@@ -856,8 +1067,8 @@ public enum CharacterType
 - `MissChance` : `float`
 - `ThrowableObjects` : [`PhysicObjectAsset[]`](#physicobjectasset)
 - `SpriteCollection` : [`tk2dSpriteCollectionData`](Sprite.md#tk2dspritecollectiondata)
-- `SpriteIndex`: `int`
-- `Animation` - [`tk2dSpriteAnimation`](Sprite.md#tk2dspriteanimation)
+- `SpriteIndex` : `int`
+- `Animation` : [`tk2dSpriteAnimation`](Sprite.md#tk2dspriteanimation)
 - `ActiveAnimation` : `string`
 - `InactiveAnimation` : `string`
 - `ActivateAnimation` : `string`
@@ -868,8 +1079,9 @@ public enum CharacterType
 - `BreakAnimation` : `string`
 - `HierarchyName` : `string`
 - `Prefab` : `UnityEngine.Transform` 预制体
+    * `SentryGun`
 - `Tag` : [`Tag`](#tag) 标签
-- `Layer` : [`Layer`](#layer) 图层
+- `Layer` : [`UnityEngine.Layer`](#layer) 图层
 - `assetId` : `string`
 - `name` : `string` 炮台名称
 
@@ -926,6 +1138,15 @@ public enum CharacterType
 }
 ```
 
+## BuildIn
+
+| Assets             | PathID | Name               | Prefab      | Animation    |
+|:-------------------|:-------|:-------------------|:------------|:-------------|
+| `resources.assets` | `9784` | `SentryCannon`     | `SentryGun` | `anim_traps` |
+| `resources.assets` | `9785` | `SentryCannonSlow` | `SentryGun` | `anim_traps` |
+| `resources.assets` | `9786` | `SentryGun`        | `SentryGun` | `anim_traps` |
+| `resources.assets` | `9787` | `SentryMoonCannon` | `SentryGun` | `anim_traps` |
+
 # HumanAsset
 
 > 人类资源
@@ -934,7 +1155,11 @@ public enum CharacterType
 
 > `*.human.json`
 
-- `Attitude` : `Combative`/`Neutral`/`Fearfull`/`Ignore`
+- `Attitude` : `HumanAttitude`
+    * `Combative`
+    * `Neutral`
+    * `Fearfull`
+    * `Ignore`
 - `DangerRadius` : `float`
 - `AlertRadius` : `float`
 - `AlertRelayRadius` : `float`
@@ -974,7 +1199,10 @@ public enum CharacterType
 - `RiseAsset` : `CustomAssetObject` 感染后转变的单位
 - `TimeToRise` : `Range`
 - `RemoveCorpse` : `bool`
-- `ReloadType` : `Automatic`/`ShellByShell`/`Stamina` 换弹类型
+- `ReloadType` : `ReloadType` 换弹类型
+    * `Automatic`
+    * `ShellByShell`
+    * `Stamina`
 - `StaminaRefillTimer` : `float` 补弹时间
 - `ReloadTime` : `float` 换弹时间
 - `DirectAim` : `bool` 直接瞄准
@@ -1033,7 +1261,7 @@ public enum CharacterType
 - `AttackRange` : `float` 攻击射程
 - `DamageRange` : `float` 破坏射程
 - `MovingAttackRange` : `float` 移动攻击射程
-- `DamageFalloff` : `AnimationCurve`
+- `DamageFalloff` : `UnityEngine.AnimationCurve`
 - `AttackFrequency` : `float`
 - `SpriteCollection` : [`tk2dSpriteCollectionData`](Sprite.md#tk2dspritecollectiondata)
 - `SpriteIndex` : `int`
@@ -1055,8 +1283,10 @@ public enum CharacterType
     * `ZombieSounds`
 - `HierarchyName` : `string` 选择列表中的名称
 - `Prefab` : `UnityEngine.Transform` 预制体
+    * `Human`
+    * `WorldEnemy`
 - `Tag` : [`Tag`](#tag) 标签
-- `Layer` : [`Layer`](#layer) 图层
+- `Layer` : [`UnityEngine.Layer`](#layer) 图层
 - `assetId` : `string`
 - `name` : `string` 人类名称
 
@@ -1184,33 +1414,7 @@ public enum CharacterType
   "AttackRange": 15.0,
   "DamageRange": 2.0,
   "MovingAttackRange": 13.0,
-  "DamageFalloff": {
-    "keys": [
-      {
-        "time": 0.0,
-        "value": 1.0,
-        "inTangent": 0.0,
-        "outTangent": 0.0,
-        "inWeight": 0.333333343,
-        "outWeight": 0.333333343,
-        "weightedMode": "None",
-        "tangentMode": 0
-      },
-      {
-        "time": 1.0,
-        "value": 1.0,
-        "inTangent": 0.0,
-        "outTangent": 0.0,
-        "inWeight": 0.333333343,
-        "outWeight": 0.333333343,
-        "weightedMode": "None",
-        "tangentMode": 0
-      }
-    ],
-    "length": 2,
-    "preWrapMode": "ClampForever",
-    "postWrapMode": "ClampForever"
-  },
+  "DamageFalloff": "(0, 1) - (1, 1)",
   "AttackFrequency": 4.0,
   "SpriteCollection": "sprites_boss : tk2dSpriteCollectionData",
   "SpriteIndex": 1091,
@@ -1227,6 +1431,100 @@ public enum CharacterType
 }
 ```
 
+## BuildIn
+
+| Assets             | PathID | Name                           | Prefab       | Animation                |
+|:-------------------|:-------|:-------------------------------|:-------------|:-------------------------|
+| `resources.assets` | `9540` | `Bouncer`                      | `Human`      | `anim_bouncer`           |
+| `resources.assets` | `9541` | `Cheerleader`                  | `Human`      | `anim_cheerleader`       |
+| `resources.assets` | `9542` | `FootballPlayer`               | `Human`      | `anim_football`          |
+| `resources.assets` | `9543` | `Gunner`                       | `Human`      | `anim_gunner`            |
+| `resources.assets` | `9544` | `GunnerTutorial`               | `Human`      | `anim_gunner`            |
+| `resources.assets` | `9545` | `Melee`                        | `Human`      | `anim_melee`             |
+| `resources.assets` | `9546` | `Shotgunner`                   | `Human`      | `anim_shotgun`           |
+| `resources.assets` | `9547` | `BossChemist`                  | `Human`      | `anim_boss_chemist`      |
+| `resources.assets` | `9548` | `BossChemistInvincible`        | `Human`      | `anim_boss_chemist`      |
+| `resources.assets` | `9549` | `BossDrugLord`                 | `Human`      | `anim_boss_1`            |
+| `resources.assets` | `9550` | `BossGertrude`                 | `Human`      | `anim_boss_2`            |
+| `resources.assets` | `9551` | `BossGertrudeCinematic`        | `Human`      | `anim_boss_cinematic`    |
+| `resources.assets` | `9552` | `CivilianDirector`             | `Human`      | `anim_director`          |
+| `resources.assets` | `9553` | `CivilianDsk`                  | `Human`      | `anim_dsk`               |
+| `resources.assets` | `9554` | `CivilianFemale`               | `Human`      | `anim_girl`              |
+| `resources.assets` | `9555` | `CivilianFemaleBlack`          | `Human`      | `anim_girl_2`            |
+| `resources.assets` | `9556` | `CivilianFemaleBlonde`         | `Human`      | `anim_girl_3`            |
+| `resources.assets` | `9557` | `CivilianFemaleBlondeGarbage`  | `Human`      | `anim_girl_3_garbage`    |
+| `resources.assets` | `9558` | `CivilianFemaleHostage`        | `Human`      | `anim_girl_hostage`      |
+| `resources.assets` | `9559` | `CivilianFemaleNude`           | `Human`      | `anim_nudegirl`          |
+| `resources.assets` | `9560` | `CivilianGranny`               | `Human`      | `anim_granny`            |
+| `resources.assets` | `9561` | `CivilianMale`                 | `Human`      | `anim_civil`             |
+| `resources.assets` | `9562` | `CivilianMaleBlack`            | `Human`      | `anim_civil_3`           |
+| `resources.assets` | `9563` | `CivilianMaleBlackExplosive`   | `Human`      | `anim_civil_3_explosive` |
+| `resources.assets` | `9564` | `CivilianMaleHostage`          | `Human`      | `anim_civil_hostage`     |
+| `resources.assets` | `9565` | `CivilianMaleNude`             | `Human`      | `anim_nudeguy`           |
+| `resources.assets` | `9566` | `CivilianMaleYoung`            | `Human`      | `anim_civil_2`           |
+| `resources.assets` | `9567` | `CivilianPerchman`             | `Human`      | `anim_soundman`          |
+| `resources.assets` | `9568` | `CivilianToiletGuy`            | `Human`      | `anim_toiletguy`         |
+| `resources.assets` | `9569` | `Driver`                       | `Human`      | `anim_driver`            |
+| `resources.assets` | `9570` | `Homeless`                     | `Human`      | `anim_homeless`          |
+| `resources.assets` | `9571` | `CopRilfeman`                  | `Human`      | `anim_assault_rifle_cop` |
+| `resources.assets` | `9572` | `Crs`                          | `Human`      | `anim_crs`               |
+| `resources.assets` | `9573` | `Kamikaze`                     | `Human`      | `anim_kamikaze`          |
+| `resources.assets` | `9574` | `Ninja`                        | `Human`      | `anim_ninja`             |
+| `resources.assets` | `9575` | `Priest`                       | `Human`      | `anim_priest`            |
+| `resources.assets` | `9576` | `Virgin`                       | `Human`      | `anim_virgin`            |
+| `resources.assets` | `9577` | `MenInBlackBrawler`            | `Human`      | `anim_men_in_black_2`    |
+| `resources.assets` | `9578` | `MenInBlackGunner`             | `Human`      | `anim_men_in_black`      |
+| `resources.assets` | `9579` | `MenInBlackRilfeman`           | `Human`      | `anim_men_in_black_3`    |
+| `resources.assets` | `9580` | `MenInBlackShotgunner`         | `Human`      | `anim_men_in_black_4`    |
+| `resources.assets` | `9581` | `Astrogoliath`                 | `Human`      | `anim_astrogoliath`      |
+| `resources.assets` | `9582` | `Astronaut`                    | `Human`      | `anim_astronaut`         |
+| `resources.assets` | `9583` | `Bishop`                       | `Human`      | `anim_bishop`            |
+| `resources.assets` | `9584` | `Spacegirl_1`                  | `Human`      | `anim_spacegirl_1`       |
+| `resources.assets` | `9585` | `Spacegirl_2`                  | `Human`      | `anim_spacegirl_1`       |
+| `resources.assets` | `9586` | `Spaceman_1`                   | `Human`      | `anim_spaceman_1`        |
+| `resources.assets` | `9587` | `Spaceman_2`                   | `Human`      | `anim_spaceman_2`        |
+| `resources.assets` | `9588` | `DoctorFemale`                 | `Human`      | `anim_doctor_girl_1`     |
+| `resources.assets` | `9589` | `ScientistFemale 1`            | `Human`      | `anim_doctor_girl_1`     |
+| `resources.assets` | `9590` | `ScientistFemale 2`            | `Human`      | `anim_doctor_girl_1`     |
+| `resources.assets` | `9591` | `ScientistHazmat`              | `Human`      | `anim_hazmat`            |
+| `resources.assets` | `9592` | `ScientistMale 1`              | `Human`      | `anim_doctor`            |
+| `resources.assets` | `9593` | `ScientistMale 2`              | `Human`      | `anim_scientist_2`       |
+| `resources.assets` | `9594` | `ScientistMale 3`              | `Human`      | `anim_scientist_3`       |
+| `resources.assets` | `9595` | `Chemist`                      | `Human`      | `anim_chemist`           |
+| `resources.assets` | `9596` | `ChemistChair`                 | `Human`      | `anim_chemist-chair`     |
+| `resources.assets` | `9597` | `ChemistPlier`                 | `Human`      | `anim_chemist_pliers`    |
+| `resources.assets` | `9598` | `Clown`                        | `Human`      | `anim_clown`             |
+| `resources.assets` | `9599` | `CopWeak`                      | `WorldEnemy` | `anim_assault_rifle_cop` |
+| `resources.assets` | `9600` | `DaftPunk1`                    | `Human`      | `anim_daft_punk_1`       |
+| `resources.assets` | `9601` | `DaftPunk2`                    | `Human`      | `anim_daft_punk_2`       |
+| `resources.assets` | `9602` | `Drone`                        | `Human`      | `anim_drone`             |
+| `resources.assets` | `9603` | `DroneExterminator`            | `WorldEnemy` | `anim_drone`             |
+| `resources.assets` | `9604` | `DroneInvincible`              | `Human`      | `anim_drone`             |
+| `resources.assets` | `9605` | `DroneInvisible`               | `Human`      | `anim_drone`             |
+| `resources.assets` | `9606` | `Preacher`                     | `Human`      | `anim_preacher`          |
+| `resources.assets` | `9607` | `Terminator`                   | `WorldEnemy` | `anim_terminator`        |
+| `resources.assets` | `9608` | `CivilianFemaleBlondeSurvivor` | `Human`      | `anim_girl_survivor_2`   |
+| `resources.assets` | `9609` | `CivilianFemaleSurvivor`       | `Human`      | `anim_girl_survivor_1`   |
+| `resources.assets` | `9610` | `CivilianSurvivor`             | `Human`      | `anim_civil`             |
+| `resources.assets` | `9611` | `CivilianSurvivorMolotov`      | `Human`      | `anim_civil_2`           |
+| `resources.assets` | `9612` | `CivilianSurvivorTorch`        | `Human`      | `anim_civil_2_torch`     |
+| `resources.assets` | `9613` | `Lumberjack`                   | `Human`      | `anim_lumberjack`        |
+| `resources.assets` | `9614` | `MachineGunner`                | `Human`      | `anim_machine_gunner`    |
+| `resources.assets` | `9615` | `Sniper`                       | `Human`      | `anim_sniper`            |
+| `resources.assets` | `9616` | `Sniper2`                      | `Human`      | `anim_sniper_2`          |
+| `resources.assets` | `9617` | `SurvivorGunner`               | `Human`      | `anim_rick`              |
+| `resources.assets` | `9618` | `SurvivorRilfeman`             | `Human`      | `anim_assault_survivor`  |
+| `resources.assets` | `9619` | `SurvivorShotgunner`           | `Human`      | `anim_shotgun_survivor`  |
+| `resources.assets` | `9620` | `SwordWomen`                   | `Human`      | `anim_swordwomen`        |
+| `resources.assets` | `9621` | `Worker 1`                     | `Human`      | `anim_worker_1`          |
+| `resources.assets` | `9622` | `Worker 2`                     | `Human`      | `anim_worker_2`          |
+| `resources.assets` | `9623` | `Worker 3`                     | `Human`      | `anim_worker_3`          |
+| `resources.assets` | `9624` | `Worker 4`                     | `Human`      | `anim_worker_4`          |
+| `resources.assets` | `9628` | `FakeCrawler`                  | `Human`      | `anim_zombie_climber`    |
+| `resources.assets` | `9629` | `FakeOverlord`                 | `Human`      | `anim_zombie_blocker`    |
+| `resources.assets` | `9630` | `FakeTank`                     | `Human`      | `anim_zombie_tank`       |
+| `resources.assets` | `9631` | `FakeZombie`                   | `Human`      | `anim_zombie_base`       |
+
 # ZNT.Evolution.Core.Asset.SpawnPointAsset
 
 > 生成点资源
@@ -1235,7 +1533,7 @@ public enum CharacterType
 
 > `*.spawn.json`
 
-- `spawnableObjects` - `CustomAssetObject[]`
+- `spawnableObjects` : `CustomAssetObject[]`
 - `interval` : `float`
 - `startDelay` : `float`
 - `count` : `int`
@@ -1245,8 +1543,10 @@ public enum CharacterType
 - `orientation` : `UnityEngine.Vector3`
 - `HierarchyName` : `string` 选择列表中的名称
 - `Prefab` : `UnityEngine.Transform` 预制体
+    * `HumanSpawn`
+    * `HumanSpawnInvisible`
 - `Tag` : [`Tag`](#tag) 标签
-- `Layer` : [`Layer`](#layer) 图层
+- `Layer` : [`UnityEngine.Layer`](#layer) 图层
 - `assetId` : `string`
 - `name` : `string` 生成点名称
 
@@ -1276,3 +1576,23 @@ public enum CharacterType
   "hideFlags": "None"
 }
 ```
+
+## BuildIn
+
+| Assets             | PathID  | Prefab                 | Type                  |
+|:-------------------|:--------|:-----------------------|:----------------------|
+| `resources.assets` | `13723` | `LawnMowerSpawn`       | `SpawnPoint`          |
+| `resources.assets` | `13729` | `HumanSpawnPortal`     | `CharacterSpawnPoint` |
+| `resources.assets` | `13778` | `HumanSpawnVan`        | `CharacterSpawnPoint` |
+| `resources.assets` | `13788` | `MovingContainerSpawn` | `SpawnPoint`          |
+| `resources.assets` | `13790` | `ZombieSpawnInvisible` | `CharacterSpawnPoint` |
+| `resources.assets` | `13804` | `HumanSpawnInvisible`  | `CharacterSpawnPoint` |
+| `resources.assets` | `13806` | `Elevator1Spawn`       | `SpawnPoint`          |
+| `resources.assets` | `13811` | `ZombieSpawn`          | `CharacterSpawnPoint` |
+| `resources.assets` | `13819` | `HumanSpawn`           | `CharacterSpawnPoint` |
+| `resources.assets` | `13827` | `ZombieSpawnDoor`      | `CharacterSpawnPoint` |
+| `resources.assets` | `13847` | `Elevator2Spawn`       | `SpawnPoint`          |
+| `resources.assets` | `13860` | `Subway2Spawn`         | `SpawnPoint`          |
+| `resources.assets` | `13869` | `ZombieSpawnReborn`    | `CharacterSpawnPoint` |
+| `resources.assets` | `13919` | `SubwaySpawn`          | `SpawnPoint`          |
+| `resources.assets` | `13928` | `ZombieSpawnCemetary`  | `CharacterSpawnPoint` |

@@ -1,3 +1,13 @@
+# UnityEngine.Texture2D
+
+> 贴图
+
+## Load Image
+
+> `*.tga`, `*.png`, `*.exr`
+
+图片尺寸应为 `2` 的幂，例如 `1024`
+
 # UnityEngine.Material
 
 > 纹理
@@ -13,7 +23,7 @@
     * `_MainTex` 必选，纹理主贴图
     * `_RimTex` 可选，纹理描边贴图，没有制作时请设置为 `null`
 - `Floats` : `Dictionary<string, float>` 纹理的参数，需要和 `Shader` 配合使用
-- `Colors` : `Dictionary<string, UnityEngine.Texture>` 纹理的颜色，需要和 `Shader` 配合使用
+- `Colors` : `Dictionary<string, UnityEngine.Color>` 纹理的颜色，需要和 `Shader` 配合使用
     * `_Color` 纹理的主颜色，复用 `Source` 效果时请不要设置
 
 ```json
@@ -177,18 +187,18 @@
 
 > `*.sprite.info.json`
 
-- `OrthoSize` : `float` - 正交尺寸，默认取 `0.5`
-- `TargetHeight` : `float` - 目标高度，默认取 `12.0` ，对应游戏中一个网格的像素尺寸
-- `Names` : `string[]` - 精灵图名
-- `Regions` : `UnityEngine.Rect[]` - 精灵区域
-- `Anchors` : `UnityEngine.Vector2[]` - 精灵锚点
-- `AttachPoints` : `Dictionary<int, tk2dSpriteDefinition.AttachPoint[]>` - 附着点，用于确定特效和抛出点的位置
+- `OrthoSize` : `float` 正交尺寸，默认取 `0.5`
+- `TargetHeight` : `float` 目标高度，默认取 `12.0` ，对应游戏中一个网格的像素尺寸
+- `Names` : `string[]` 精灵图名
+- `Regions` : `UnityEngine.Rect[]` 精灵区域
+- `Anchors` : `UnityEngine.Vector2[]` 精灵锚点
+- `AttachPoints` : `Dictionary<int, tk2dSpriteDefinition.AttachPoint[]>` 附着点，用于确定特效和抛出点的位置
     * `name` : `string` 组件名称
     * `position` : `UnityEngine.Vector3`
     * `angle` : `float`
-- `Material` : `UnityEngine.Material` - 纹理
-- `Name` : `string` - 精灵图集名称
-- `Transformed` : `bool` - Regions 和 Anchors 默认取左上角为坐标原点，开启 Transformed 后取左下角为坐标原点
+- `Material` : `UnityEngine.Material` 纹理
+- `Name` : `string` 精灵图集名称
+- `Transformed` : `bool` Regions 和 Anchors 默认取左上角为坐标原点，开启 Transformed 后取左下角为坐标原点
 
 ```json
 {
@@ -245,13 +255,13 @@
 
 > `*.sprite.merge.json`
 
-- `Source` : `tk2dSpriteCollectionData` - 原型图集，以其为蓝本，替换纹理
-- `Name` : `string` - 纹理名称
-- `AttachPoints` : `Dictionary<int, tk2dSpriteDefinition.AttachPoint[]>` - 附着点，用于确定特效和抛出点的位置
+- `Source` : `tk2dSpriteCollectionData` 原型图集，以其为蓝本，替换纹理
+- `Name` : `string` 纹理名称
+- `AttachPoints` : `Dictionary<int, tk2dSpriteDefinition.AttachPoint[]>` 附着点，用于确定特效和抛出点的位置
     * `name` : `string` 组件名称
     * `position` : `UnityEngine.Vector3`
     * `angle` : `float`
-- `Material` : `UnityEngine.Material` - 纹理
+- `Material` : `UnityEngine.Material` 纹理
 
 ```json
 {
@@ -335,35 +345,52 @@
 - `clips` : `tk2dSpriteAnimationClip[]` 片段集
     * `name` : `string` 片段名
     * `frames` : `tk2dSpriteAnimationFrame[]` 片段帧集
-        + `spriteCollection` : `tk2dSpriteCollectionData` 精灵图集
-        + `spriteId` : `int` 在精灵图集合中的序号
-        + `triggerEvent` : `bool` 触发事件
-        + `eventInfo` : `string` 事件名
-        + `eventInt` : `int` 事件参数
-        + `eventFloat` : `float` 事件参数
-        + `useAttachedEffects` : `bool`
-        + `attachedEffects` : `tk2dSpriteAnimationFrame.AttachedEffect[]`
-            + `Name` : `string`
-            + `VisualEffect` : `VisualEffect`
-            + `RandomEffect` : `bool`
-            + `RandomVisualEffects` : `List<VisualEffect>`
-            + `AttachToPoint` : `bool`
-            + `AttachIfUsed` : `DoNothing`/`Add`/`Replace`
-        + `shaderAnimator` : `ShaderAnimator`
-        + `playSound` : `bool`
-        + `soundAsset` : [`FMODAsset`](FMODAsset.md)
-        + `soundPlayMode` : `PlayOneshot`/`StartEvent`/`StopEvent`/`None`
-        + `stopEventOnAnimChange` : `bool`
-        + `preventSoundRestart` : `bool`
-        + `setSoundParam` : `bool`
-        + `soundParamName` : `string`
-        + `soundParamValue` : `float`
     * `fps` : `float` 帧率
     * `loopStart` : `int` 循环起始点
     * `useableInLevelEditor` : `bool`
     * `staticAnimation` : `bool`
-    * `wrapMode` : `Loop`/`LoopSection`/`Once`/`PingPong`/`RandomFrame`/`RandomLoop`/`Single`
+    * `wrapMode` : `tk2dSpriteAnimationClip.WrapMode`
+        + `Loop`
+        + `LoopSection`
+        + `Once`
+        + `PingPong`
+        + `RandomFrame`
+        + `RandomLoop`
+        + `Single`
 - `name` : `string` 精灵动画名称
+
+tk2dSpriteAnimationFrame:
+
+- `spriteCollection` : `tk2dSpriteCollectionData` 精灵图集
+- `spriteId` : `int` 在精灵图集合中的序号
+- `triggerEvent` : `bool` 触发事件
+- `eventInfo` : `string` 事件名
+- `eventInt` : `int` 事件参数
+- `eventFloat` : `float` 事件参数
+- `useAttachedEffects` : `bool`
+- `attachedEffects` : `tk2dSpriteAnimationFrame.AttachedEffect[]`
+    * `Name` : `string`
+    * `VisualEffect` : `VisualEffect`
+    * `RandomEffect` : `bool`
+    * `RandomVisualEffects` : `List<VisualEffect>`
+    * `AttachToPoint` : `bool`
+    * `AttachIfUsed` : `tk2dSpriteAnimationFrame.AttachedEffect.AttachSetting`
+        + `DoNothing`
+        + `Add`
+        + `Replace`
+- `shaderAnimator` : `ShaderAnimator`
+- `playSound` : `bool`
+- `soundAsset` : [`FMODAsset`](FMODAsset.md)
+- `soundPlayMode` : `tk2dSpriteAnimationFrame.SoundPlayMode`
+    * `PlayOneshot`
+    * `StartEvent`
+    * `StopEvent`
+    * `None`
+- `stopEventOnAnimChange` : `bool`
+- `preventSoundRestart` : `bool`
+- `setSoundParam` : `bool`
+- `soundParamName` : `string`
+- `soundParamValue` : `float`
 
 ```json
 {
@@ -532,10 +559,12 @@
 
 - `animation` : `AnimationSettings` 自定义动画
     * `PlayAnimation` : `bool`
-    * `OverrideLibrary` : `bool` 关闭时使用预制体中的默认动画
+    * `OverrideLibrary` : `bool` 关闭时使用预制体中的默认精灵动画 `anim_explosions`
     * `Library` : `tk2dSpriteAnimation`
     * `Clips` : `string[]`
 - `prefab` : `UnityEngine.Transform` 预制体
+    * `BarrelExplosion`
+    * `MolotovExplosion`
 - `name` : `string` 特效名称
 
 ```json

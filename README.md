@@ -5,6 +5,12 @@
 * `ZNTGamePath` 游戏文件目录
 * `ZNTModsPath` 游戏模组目录
 
+### 存档位置
+
+```
+%LocalAppData%Low\NoClip\Zombie Night Terror
+```
+
 ## 游戏文件结构
 
 ```text
@@ -23,15 +29,9 @@ Zombie Night Terror
 
 MOD 放入 `znt_Data/Mods` 目录下
 
-### 存档位置
-
-```
-%LocalAppData%Low\NoClip\Zombie Night Terror
-```
-
 ## 插件文件结构
 
-### 元数据
+### Metadata
 
 > `metadata.json`
 
@@ -64,7 +64,7 @@ MOD 放入 `znt_Data/Mods` 目录下
 
 #### `UnityEngine.Texture2D`
 
-> `*.tga`, `*.png`, `*.exr`
+> `*.png`
 
 导入新的贴图，命名规范 `sprites_xxx_atlas`
 
@@ -165,12 +165,21 @@ MOD 放入 `znt_Data/Mods` 目录下
 
 #### `Rotorz.Tile.OrientedBrush`
 
-> `*.brush.info.json`, `*.brush.merge.json`
+> `*.brush.merge.json`
+
+导入新的笔刷，命名规范 `brush_xxx`  
+参考 [Element.md - Brush Merge](docs/Element.md#brush-merge)
 
 #### `UnityEngine.Sprite`
 
 > `*.preview.png`, `*.preview.info.json`
 
+导入新的预览，命名规范为 LevelElement 同名  
+参考 [Element.md - Preview Create](docs/Element.md#preview-create)
+
 #### `LevelElement`
 
 > `*.element.json`
+
+导入新的单位  
+参考 [Element.md - Element Create](docs/Element.md#element-create)
