@@ -436,6 +436,7 @@
         <Compile Include="Asset\SpriteMerge.cs"/>
         <Compile Include="Editor\BaseComponentExtensions.cs"/>
         <Compile Include="Editor\CharacterEditor.cs"/>
+        <Compile Include="Editor\CharacterSpawnPointEditor.cs"/>
         <Compile Include="Editor\Editor.cs"/>
         <Compile Include="Editor\ExplosionEditor.cs"/>
         <Compile Include="Editor\HumanEditor.cs"/>

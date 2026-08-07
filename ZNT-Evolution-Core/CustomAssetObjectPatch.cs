@@ -312,6 +312,26 @@ internal static class CustomAssetObjectPatch
     }
 
     [HarmonyPostfix]
+    [HarmonyPatch(typeof(CharacterBehaviour), "OnSpawn")]
+    public static void OnSpawn(CharacterBehaviour __instance, Parameters param)
+    {
+        if (param == null) return;
+        if (__instance is not HumanBehaviour human) return;
+        // ReSharper disable once InvertIf
+        if (param.ContainsKey("dialogue_text"))
+        {
+            var text = param.GetValue<LocalizableString>("dialogue_text");
+            var duration = param.GetValue<float>("dialogue_duration");
+            var voice = param.GetValue<Voice>("dialogue_voice");
+            var patroller = human.Patroller;
+            var dialogue = ComponentSingleton<GamePoolManager>.Instance
+                .Spawn(nameof(Dialogue)).GetComponent<Dialogue>();
+            dialogue.SetText(text, duration);
+            dialogue.Show(patroller, patroller.DialogueOffset, voice);
+        }
+    }
+
+    [HarmonyPostfix]
     [HarmonyPatch(typeof(HumanBehaviour), "OnDespawned")]
     public static void OnDespawned(HumanBehaviour __instance)
     {
@@ -476,12 +496,6 @@ internal static class CustomAssetObjectPatch
                 }
             }
 
-            if (prefab.name is "Elevator1Spawn" or "Elevator2Spawn" or "LawnMowerSpawn" or "MovingContainerSpawn" &&
-                prefab.TryGetComponent(out SpawnPoint spawn))
-            {
-                Traverse.Create(spawn).Field("levelEditorOptions").Field<bool>("ShowDamages").Value = true;
-            }
-
             switch (prefab.GetComponentInChildren<BaseBehaviour>())
             {
                 case BarricadeBehaviour:
@@ -499,6 +513,12 @@ internal static class CustomAssetObjectPatch
                     break;
                 case TutorialLoader:
                     _ = prefab.GetComponentSafe<TutorialBreakingNews>();
+                    break;
+                case CharacterSpawnPoint:
+                    _ = prefab.GetComponentSafe<CharacterSpawnPointEditor>();
+                    break;
+                case SpawnPoint spawn when spawn.SpawnableObjects.Any(asset => asset is MovingObjectAsset):
+                    Traverse.Create(spawn).Field("levelEditorOptions").Field<bool>("ShowDamages").Value = true;
                     break;
                 case MovingObjectBehaviour:
                     _ = prefab.GetComponentSafe<PropMoveableEditor>();
