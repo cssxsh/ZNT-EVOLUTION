@@ -15,6 +15,8 @@ internal class ExplodeSurfaceConverter : CustomCreationConverter<ExplodeSurface>
 {
     private static readonly ManualLogSource Logger = BepInExLogger.CreateLogSource(nameof(ExplodeSurface));
 
+    private static readonly Regex FlagRegex = new("""(\w(?:[\s\w]*\w)?)""", RegexOptions.Compiled);
+
     public const ExplodeSurface None = 0x00000000;
 
     public const ExplodeSurface Wall = ExplodeSurface.Wall;
@@ -42,9 +44,9 @@ internal class ExplodeSurfaceConverter : CustomCreationConverter<ExplodeSurface>
     public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
     {
         var mask = (ExplodeSurface)value;
-        if (mask == None)
+        if (mask == 0x00000000)
         {
-            writer.WriteValue((int)None);
+            writer.WriteValue(0x00000000);
             return;
         }
 
@@ -63,14 +65,14 @@ internal class ExplodeSurfaceConverter : CustomCreationConverter<ExplodeSurface>
 
     public override bool CanRead => true;
 
-    public override ExplodeSurface Create(Type type) => None;
+    public override ExplodeSurface Create(Type type) => 0x00000000;
 
     public override object ReadJson(JsonReader reader, Type type, object _, JsonSerializer serializer)
     {
         if (reader.TokenType == JsonToken.Integer) return (ExplodeSurface)serializer.Deserialize<int>(reader);
         var value = serializer.Deserialize<string>(reader);
         var mask = None;
-        foreach (var match in Regex.Matches(value, """\w+""").Cast<Match>())
+        foreach (var match in FlagRegex.Matches(value).Cast<Match>())
         {
             var flag = match.Value switch
             {
@@ -79,15 +81,15 @@ internal class ExplodeSurfaceConverter : CustomCreationConverter<ExplodeSurface>
                 nameof(Ceiling) => Ceiling,
                 nameof(Target) => Target,
                 nameof(Zombie) => Zombie,
-                nameof(Climber) => Climber,
+                nameof(Climber) or "Crawler" => Climber,
                 nameof(Blocker) => Blocker,
                 nameof(Tank) => Tank,
-                nameof(WorldEnemy) => WorldEnemy,
-                nameof(IgnoreHuman) => IgnoreHuman,
+                nameof(WorldEnemy) or "World Enemy" => WorldEnemy,
+                nameof(IgnoreHuman) or "Ignore Human" => IgnoreHuman,
                 _ => None
             };
             mask |= flag;
-            if (flag != None) continue;
+            if (flag is not None) continue;
             Logger.LogError($"Invalid ExplodeSurface '{match.Value}'");
         }
 

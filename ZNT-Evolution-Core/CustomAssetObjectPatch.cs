@@ -216,10 +216,7 @@ internal static class CustomAssetObjectPatch
         if (behaviour.Physic.StartDirection.IsZero()
             && behaviour.Physic.StartForce != 0) Logger.LogWarning($"{__instance} StartDirection is zero");
         behaviour.DamageTriger.enabled = behaviour.DamageCharacterOnTrigger
-                                         || behaviour.ExplodeOn.HasFlag(ExplodeSurfaceConverter.Zombie)
-                                         || behaviour.ExplodeOn.HasFlag(ExplodeSurfaceConverter.Climber)
-                                         || behaviour.ExplodeOn.HasFlag(ExplodeSurfaceConverter.Blocker)
-                                         || behaviour.ExplodeOn.HasFlag(ExplodeSurfaceConverter.Tank);
+                                         || (behaviour.ExplodeOn & ExplodeSurfaceConverter.IgnoreHuman) != 0;
 
         if (behaviour.DamageTriger.enabled && behaviour.ExplodeOn.HasFlag(ExplodeSurfaceConverter.Target))
         {
