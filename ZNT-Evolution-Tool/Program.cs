@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using AssetsTools.NET;
 using AssetsTools.NET.Extra;
 
 namespace ZNT.Evolution.Tool;
@@ -11,10 +10,13 @@ internal static class Program
 {
     private static string GamePath => Environment.GetEnvironmentVariable("ZNTGamePath") ?? ".";
 
+    // ReSharper disable once MemberCanBePrivate.Global
     public static AssetsManager Manager { get; private set; }
 
+    // ReSharper disable once MemberCanBePrivate.Global
     public static AssetsFileInstance GameRes { get; private set; }
 
+    // ReSharper disable once MemberCanBePrivate.Global
     public static BundleFileInstance GameData { get; private set; }
 
     public static void Main(string[] args)
@@ -56,37 +58,43 @@ internal static class Program
     }
 
     // ReSharper disable once UnusedMember.Local
-    private static IEnumerable<AssetExternal> LoadTexture2D(this AssetsFileInstance assets)
+    private static IEnumerable<AssetExternal> LoadTexture2D()
     {
-        return from asset in assets.file.GetAssetsOfType(AssetClassID.Texture2D)
+        return
+            from assets in LoadAssetsFiles()
+            from asset in assets.file.GetAssetsOfType(AssetClassID.Texture2D)
             let fields = Manager.GetBaseField(assets, asset)
-            let name = fields["m_Name"].AsString
-            where name.EndsWith("_atlas")
+            where fields["m_Name"].AsString.EndsWith("_atlas")
             select new AssetExternal { file = assets, baseField = fields, info = asset };
     }
 
     // ReSharper disable once UnusedMember.Local
-    private static IEnumerable<AssetExternal> LoadShader(this AssetsFileInstance assets)
+    private static IEnumerable<AssetExternal> LoadShader()
     {
-        return from asset in assets.file.GetAssetsOfType(AssetClassID.Shader)
+        return
+            from assets in LoadAssetsFiles()
+            from asset in assets.file.GetAssetsOfType(AssetClassID.Shader)
             let fields = Manager.GetBaseField(assets, asset)
             select new AssetExternal { file = assets, baseField = fields, info = asset };
     }
 
     // ReSharper disable once UnusedMember.Local
-    private static IEnumerable<AssetExternal> LoadMaterial(this AssetsFileInstance assets)
+    private static IEnumerable<AssetExternal> LoadMaterial()
     {
-        return from asset in assets.file.GetAssetsOfType(AssetClassID.Material)
+        return
+            from assets in LoadAssetsFiles()
+            from asset in assets.file.GetAssetsOfType(AssetClassID.Material)
             let fields = Manager.GetBaseField(assets, asset)
-            let name = fields["m_Name"].AsString
-            where name.EndsWith("_mat")
+            where fields["m_Name"].AsString.EndsWith("_mat")
             select new AssetExternal { file = assets, baseField = fields, info = asset };
     }
 
     // ReSharper disable once UnusedMember.Local
-    private static IEnumerable<AssetExternal> LoadSprites(this AssetsFileInstance assets)
+    private static IEnumerable<AssetExternal> LoadSprites()
     {
-        return from asset in assets.file.GetAssetsOfType(AssetClassID.MonoBehaviour)
+        return
+            from assets in LoadAssetsFiles()
+            from asset in assets.file.GetAssetsOfType(AssetClassID.MonoBehaviour)
             let fields = Manager.GetBaseField(assets, asset)
             let script = Manager.GetExtAsset(assets, fields["m_Script"])
             where script.baseField["m_ClassName"].AsString == "tk2dSpriteCollectionData"
@@ -94,9 +102,11 @@ internal static class Program
     }
 
     // ReSharper disable once UnusedMember.Local
-    private static IEnumerable<AssetExternal> LoadAnimation(this AssetsFileInstance assets)
+    private static IEnumerable<AssetExternal> LoadAnimation()
     {
-        return from asset in assets.file.GetAssetsOfType(AssetClassID.MonoBehaviour)
+        return
+            from assets in LoadAssetsFiles()
+            from asset in assets.file.GetAssetsOfType(AssetClassID.MonoBehaviour)
             let fields = Manager.GetBaseField(assets, asset)
             let script = Manager.GetExtAsset(assets, fields["m_Script"])
             where script.baseField["m_ClassName"].AsString == "tk2dSpriteAnimation"
@@ -104,9 +114,35 @@ internal static class Program
     }
 
     // ReSharper disable once UnusedMember.Local
-    private static IEnumerable<AssetExternal> LoadAssetElement(this AssetsFileInstance assets)
+    private static IEnumerable<AssetExternal> LoadVisualEffect()
     {
-        return from asset in assets.file.GetAssetsOfType(AssetClassID.MonoBehaviour)
+        return
+            from assets in LoadAssetsFiles()
+            from asset in assets.file.GetAssetsOfType(AssetClassID.MonoBehaviour)
+            let fields = Manager.GetBaseField(assets, asset)
+            let script = Manager.GetExtAsset(assets, fields["m_Script"])
+            where script.baseField["m_ClassName"].AsString == "VisualEffect"
+            select new AssetExternal { file = assets, baseField = fields, info = asset };
+    }
+
+    // ReSharper disable once UnusedMember.Local
+    private static IEnumerable<AssetExternal> LoadResizableParticleSystem()
+    {
+        return
+            from assets in LoadAssetsFiles()
+            from asset in assets.file.GetAssetsOfType(AssetClassID.MonoBehaviour)
+            let fields = Manager.GetBaseField(assets, asset)
+            let script = Manager.GetExtAsset(assets, fields["m_Script"])
+            where script.baseField["m_ClassName"].AsString == "ResizableParticleSystem"
+            select new AssetExternal { file = assets, baseField = fields, info = asset };
+    }
+
+    // ReSharper disable once UnusedMember.Local
+    private static IEnumerable<AssetExternal> LoadAssetElement()
+    {
+        return
+            from assets in LoadAssetsFiles()
+            from asset in assets.file.GetAssetsOfType(AssetClassID.MonoBehaviour)
             let fields = Manager.GetBaseField(assets, asset)
             let script = Manager.GetExtAsset(assets, fields["m_Script"])
             where script.baseField["m_ClassName"].AsString is
@@ -155,9 +191,11 @@ internal static class Program
     }
 
     // ReSharper disable once UnusedMember.Local
-    private static IEnumerable<AssetExternal> LoadTMProAsset(this AssetsFileInstance assets)
+    private static IEnumerable<AssetExternal> LoadTMProAsset()
     {
-        return from asset in assets.file.GetAssetsOfType(AssetClassID.MonoBehaviour)
+        return
+            from assets in LoadAssetsFiles()
+            from asset in assets.file.GetAssetsOfType(AssetClassID.MonoBehaviour)
             let fields = Manager.GetBaseField(assets, asset)
             let script = Manager.GetExtAsset(assets, fields["m_Script"])
             where script.baseField["m_Namespace"].AsString is "TMPro" &&
