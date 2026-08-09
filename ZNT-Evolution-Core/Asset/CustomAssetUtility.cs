@@ -11,6 +11,7 @@ using Newtonsoft.Json.Linq;
 using UnityEngine;
 using UnityEngine.Events;
 
+// ReSharper disable Unity.PerformanceCriticalCodeInvocation
 namespace ZNT.Evolution.Core.Asset;
 
 public static class CustomAssetUtility
@@ -145,6 +146,21 @@ public static class CustomAssetUtility
             {
                 prefab = info.Prefab;
                 if (info.Prefab.name == name) return true;
+            }
+        }
+
+        {
+            using var fs = Assembly.GetExecutingAssembly()
+                .GetManifestResourceStream("ZNT.Evolution.Core.Resources.index.bundle");
+            var bundle = AssetBundle.LoadFromStream(fs ?? throw new FileNotFoundException("index.bundle"));
+            try
+            {
+                prefab = bundle.LoadAsset<GameObject>($"prefab/{name}")?.transform;
+                if (prefab is not null) return true;
+            }
+            finally
+            {
+                bundle.Unload(false);
             }
         }
 
