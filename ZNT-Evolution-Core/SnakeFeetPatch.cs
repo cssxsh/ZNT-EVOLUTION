@@ -97,7 +97,7 @@ internal class SnakeFeetPatch
         __instance.Damage -= total * 50.0f;
     }
 
-    [HarmonyPostfix]
+    [HarmonyFinalizer]
     [HarmonyPatch(typeof(ExplosionEffect), "OnApplyOnGameObject")]
     public static void OnApplyOnGameObject(ExplosionEffect __instance, float __state)
     {

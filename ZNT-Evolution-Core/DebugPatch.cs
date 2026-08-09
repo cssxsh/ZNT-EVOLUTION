@@ -77,7 +77,7 @@ internal static class DebugPatch
         Traverse.Create(__instance).Field<LayerMask>("groundLayers").Value = __state & ~mask;
     }
 
-    [HarmonyPostfix]
+    [HarmonyFinalizer]
     [HarmonyPatch(typeof(Moveable), "UpdateIsGrounded")]
     public static void UpdateIsGrounded(Moveable __instance, LayerMask __state)
     {
@@ -102,7 +102,7 @@ internal static class DebugPatch
         Traverse.Create(__instance.Mover).Field<LayerMask>("groundLayers").Value = __state & ~mask;
     }
 
-    [HarmonyPostfix]
+    [HarmonyFinalizer]
     [HarmonyPatch(typeof(TankBehaviour), "AfterStepping")]
     [HarmonyPatch(typeof(CharacterBehaviour), "AfterStepping")]
     public static void AfterStepping(CharacterBehaviour __instance, LayerMask __state)

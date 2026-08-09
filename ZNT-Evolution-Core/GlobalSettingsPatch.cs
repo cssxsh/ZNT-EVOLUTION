@@ -2,31 +2,55 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using BepInEx.Configuration;
 using HarmonyLib;
 using Rotorz.Tile;
 using UnityEngine;
 using UnityEngine.UI;
+using ZNT.LevelEditor;
 
 // ReSharper disable InconsistentNaming
 namespace ZNT.Evolution.Core;
 
 internal static class GlobalSettingsPatch
 {
+    private static ConfigFile Config => EvolutionCorePlugin.Instance.Config;
+
+    [Harmony]
+    [HarmonyPrepare]
+    private static void Init()
+    {
+        Config.SettingChanged += OnSettingChanged;
+        CorpsesCountMax = Config.Bind("config", nameof(CorpsesCountMax), GameConf.MaxAliveCorpses, "尸体数量上限");
+        VisionMaterialization = Config.Bind("config", nameof(VisionMaterialization), false, "视觉射线渲染");
+        NoEraseElement = Config.Bind("config", nameof(NoEraseElement), false, "禁止擦除元件");
+        DialogueRichText = Config.Bind("config", nameof(DialogueRichText), true, "对话框富文本");
+        ShowAllElement = Config.Bind("config", nameof(ShowAllElement), false, "显示所有元件");
+        ShowAllAnimationClip = Config.Bind("config", nameof(ShowAllAnimationClip), false, "显示所有动画");
+        ShowDevComponent = Config.Bind("config", nameof(ShowDevComponent), false, "显示实验组件");
+        IsUserDev = ShowDevComponent.Value;
+    }
+
+    private static void OnSettingChanged(object sender, SettingChangedEventArgs e)
+    {
+        if (e.ChangedSetting == ShowDevComponent) IsUserDev = ShowDevComponent.Value;
+    }
+
     #region CorpseBehaviour
 
-    private static int CorpsesCountMax => EvolutionCorePlugin.CorpsesCountMax.Value;
+    internal static ConfigEntry<int> CorpsesCountMax;
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(CorpseBehaviour), "AddAliveCorpse")]
     public static IEnumerator AddAliveCorpse(IEnumerator __result, CorpseBehaviour __instance)
     {
-        if (CorpsesCountMax < 0) yield break;
+        if (CorpsesCountMax.Value < 0) yield break;
         var parameters = Traverse.Create(__instance).Field<CorpseParameter>("parameters").Value;
         if (parameters.Rise) yield break;
         yield return Wait.ForFiveSeconds;
         var corpses = Traverse.Create<CorpseBehaviour>().Field<Queue<CorpseBehaviour>>("aliveCorpses").Value;
         corpses.Enqueue(__instance);
-        if (corpses.Count <= CorpsesCountMax) yield break;
+        if (corpses.Count <= CorpsesCountMax.Value) yield break;
         corpses.Dequeue().Dissolve();
     }
 
@@ -34,7 +58,7 @@ internal static class GlobalSettingsPatch
 
     #region RayConeDetection
 
-    private static bool VisionMaterialization => EvolutionCorePlugin.VisionMaterialization.Value;
+    internal static ConfigEntry<bool> VisionMaterialization;
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(RayConeDetection), "UpdateAngles")]
@@ -50,7 +74,7 @@ internal static class GlobalSettingsPatch
     public static void UpdateAngles(RayConeDetection __instance, bool __state)
     {
         if (!__state) return;
-        if (!VisionMaterialization) return;
+        if (!VisionMaterialization.Value) return;
         for (var i = __instance.Origin.childCount; i < __instance.RayCount; i++)
         {
             var laser = ComponentSingleton<GamePoolManager>.Instance
@@ -101,13 +125,13 @@ internal static class GlobalSettingsPatch
 
     #region LevelElement
 
-    private static bool ShowAllElement => EvolutionCorePlugin.ShowAllElement.Value;
+    internal static ConfigEntry<bool> ShowAllElement;
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(LevelElement), "Useable", MethodType.Getter)]
-    public static bool Usable(bool __result) => ShowAllElement || __result;
+    public static bool Usable(bool __result) => ShowAllElement.Value || __result;
 
-    private static bool NoEraseElement => EvolutionCorePlugin.NoEraseElement.Value;
+    internal static ConfigEntry<bool> NoEraseElement;
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(LevelEditorManager), "PaintTile")]
@@ -144,14 +168,14 @@ internal static class GlobalSettingsPatch
         var settings = o?.GetComponent<ObjectSettings>();
         if (settings is null) return true;
         // TODO check lock
-        return !NoEraseElement;
+        return !NoEraseElement.Value;
     }
 
     #endregion
 
     #region Dialogue
 
-    private static bool DialogueRichText => EvolutionCorePlugin.DialogueRichText.Value;
+    internal static ConfigEntry<bool> DialogueRichText;
 
     private static readonly Regex EmoteRegex = new("""\[[^]]+\]""", RegexOptions.Compiled);
 
@@ -160,7 +184,7 @@ internal static class GlobalSettingsPatch
     private static void SetText(Dialogue __instance)
     {
         var tm = Traverse.Create(__instance).Field<TMPro.TextMeshProUGUI>("text").Value;
-        tm.richText = DialogueRichText;
+        tm.richText = DialogueRichText.Value;
         if (!tm.richText) return;
         tm.text = EmoteRegex.Replace(tm.text, EmoteEvaluator);
     }
@@ -188,40 +212,43 @@ internal static class GlobalSettingsPatch
 
     #region UserManager
 
-    private static bool ShowDevComponent => EvolutionCorePlugin.ShowDevComponent.Value;
+    internal static ConfigEntry<bool> ShowDevComponent;
 
-    [HarmonyPrefix]
-    [HarmonyPatch(typeof(SignalSenderLinker), "Start")]
-    [HarmonyPatch(typeof(SignalReceiverLinker), "OnAwake")]
-    [HarmonyPatch(typeof(EditorComponent), "FromComponent")]
-    [HarmonyPatch(typeof(SerializableComponent), "SetComponentValues")]
-    public static void IsUserDev(out bool __state)
+    private static HashSet<ulong> DevIds => Traverse.Create(typeof(UserManager)).Field<HashSet<ulong>>("DevIds").Value;
+
+    private static bool IsUserDev
     {
-        __state = UserManager.IsUserDev;
-        Traverse.Create(typeof(UserManager)).Field<bool>(nameof(UserManager.IsUserDev)).Value |= ShowDevComponent;
+        get => DevIds.Contains(ComponentSingleton<SteamManager>.Instance.GetUserIdentifier().m_SteamID);
+        set => Traverse.Create(typeof(UserManager)).Field<bool>(nameof(UserManager.IsUserDev)).Value = value;
     }
 
     [HarmonyPostfix]
-    [HarmonyPatch(typeof(SignalSenderLinker), "Start")]
-    [HarmonyPatch(typeof(SignalReceiverLinker), "OnAwake")]
-    [HarmonyPatch(typeof(EditorComponent), "FromComponent")]
-    [HarmonyPatch(typeof(SerializableComponent), "SetComponentValues")]
-    public static void IsUserDev(bool __state)
+    [HarmonyPatch(typeof(EditChapterMenu), "OnCreate")]
+    [HarmonyPatch(typeof(LoadLevelMenu), "OnCreate")]
+    [HarmonyPatch(typeof(NewLevelMenu), "Start")]
+    public static void OnCreate(BaseComponent __instance)
     {
-        Traverse.Create(typeof(UserManager)).Field<bool>(nameof(UserManager.IsUserDev)).Value = __state;
+        var dropdown = __instance switch
+        {
+            EditChapterMenu => Traverse.Create(__instance).Field<Dropdown>("sourceDropdown").Value,
+            LoadLevelMenu => Traverse.Create(__instance).Field<Dropdown>("sourceDropdown").Value,
+            NewLevelMenu => Traverse.Create(__instance).Field<Dropdown>("levelSource").Value,
+            _ => null
+        };
+        dropdown?.value = 1;
     }
 
     #endregion
 
     #region PatrolAnimationUi
 
-    private static bool ShowAllAnimationClip => EvolutionCorePlugin.ShowAllAnimationClip.Value;
+    internal static ConfigEntry<bool> ShowAllAnimationClip;
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(PatrolAnimationUi), "Clips", MethodType.Getter)]
     public static void GetClips(PatrolAnimationUi __instance, List<Dropdown.OptionData> __result)
     {
-        if (!ShowAllAnimationClip) return;
+        if (!ShowAllAnimationClip.Value) return;
         var action = Traverse.Create(__instance).Field<PatrolAction>("Action").Value;
         var animation = action.Patroller.Animator.AnimationLibrary;
         if (__result.Count == animation.clips.Count(clip => !string.IsNullOrEmpty(clip.name))) return;

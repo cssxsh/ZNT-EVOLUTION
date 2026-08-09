@@ -96,7 +96,7 @@ internal static class SceneLoaderPatch
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(MainMenu), "Start")]
-    public static void Start(MainMenu __instance)
+    public static void MainMenuScene(MainMenu __instance)
     {
         var stats = (RectTransform)__instance.transform.Find("Canvas/Stats Button");
         var mod = Object.Instantiate(original: stats, parent: stats.parent);
@@ -108,13 +108,6 @@ internal static class SceneLoaderPatch
         Traverse.Create(tooltip).Field<string>("text").Value = "Evolution/Mod_Folder";
         var button = mod.GetComponent<Button>();
         button.OnClick(() => System.Diagnostics.Process.Start(ModManager.ModsPath));
-    }
-
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(MainMenu), "Quit")]
-    public static void Quit(MainMenu __instance)
-    {
-        // ...
     }
 
     #endregion
