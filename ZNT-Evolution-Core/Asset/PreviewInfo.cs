@@ -11,7 +11,7 @@ namespace ZNT.Evolution.Core.Asset;
 [UsedImplicitly]
 internal class PreviewInfo : EvolutionInfo<Sprite>
 {
-    private static readonly ManualLogSource Logger = BepInExLogger.CreateLogSource(nameof(SpriteInfo));
+    private static readonly ManualLogSource Logger = BepInExLogger.CreateLogSource(nameof(PreviewInfo));
 
     [JsonProperty("Texture")]
     public readonly Texture2D Texture;
@@ -33,7 +33,7 @@ internal class PreviewInfo : EvolutionInfo<Sprite>
         float pixelsPerUnit = 100) : base(name)
     {
         Texture = texture;
-        Rect = rect ?? new Rect(0f, 0f, 128, 128);
+        Rect = rect ?? new Rect(Vector2.zero, Vector2.one * 128);
         Pivot = pivot ?? Vector2.one * 0.5f;
         PixelsPerUnit = pixelsPerUnit;
         if (Texture is null) Logger.LogWarning("Source is null");

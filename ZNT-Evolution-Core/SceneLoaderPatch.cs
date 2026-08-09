@@ -407,7 +407,7 @@ internal static class SceneLoaderPatch
         var scroll = Traverse.Create(__instance).Field<ScrollRect>("scrollRect").Value;
         var empty = __instance.transform.Find("Empty") as RectTransform;
 
-        foreach (var transform in container.Cast<Transform>())
+        foreach (var transform in container.Cast<RectTransform>())
         {
             _ = transform.gameObject.activeSelf ? Activated.Add(transform.name) : Activated.Remove(transform.name);
             Object.Destroy(transform.gameObject);
@@ -571,8 +571,8 @@ internal static class SceneLoaderPatch
         {
             var input = Traverse.Create(__instance).Field<Text>("text").Value.transform.parent;
             // Hide UnityEngine.Vector3.z
-            input.Find("Container/X Text").gameObject.SetActive(false);
-            input.Find("Container/X Input").gameObject.SetActive(false);
+            input.Find("Container/Z Text").gameObject.SetActive(false);
+            input.Find("Container/Z Input").gameObject.SetActive(false);
         }
     }
 
@@ -610,7 +610,7 @@ internal static class SceneLoaderPatch
     [HarmonyPatch(typeof(SignalReceiverLinker), "Start")]
     public static void Start(SignalReceiverLinker __instance)
     {
-        switch (__instance.GetComponent<BaseBehaviour>())
+        switch (__instance.GetComponentInParent<BaseBehaviour>())
         {
             case MovingObjectBehaviour moving:
                 __instance.AddReceiver(new ReceiverLink

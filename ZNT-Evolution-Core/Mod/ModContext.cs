@@ -465,7 +465,7 @@ public class ModContext
 
                 // ReSharper disable once InvertIf
                 if (element is { CustomAsset: HumanAsset { RiseAsset: LazyRef lazy } human } &&
-                    lazy.Fetch() is {} rise)
+                    lazy.Fetch() is { } rise)
                 {
                     human.RiseAsset = rise;
                     Object.Destroy(lazy);

@@ -11,6 +11,7 @@ using ZNT.Evolution.Core.Effect;
 using BepInExLogger = BepInEx.Logging.Logger;
 
 // ReSharper disable InconsistentNaming
+// ReSharper disable Unity.PreferAddressByIdToGraphicsParams
 namespace ZNT.Evolution.Core;
 
 internal static class CustomAssetObjectPatch
@@ -61,7 +62,7 @@ internal static class CustomAssetObjectPatch
     {
         if (Traverse.Create(__instance).Field<bool>("autoExplode").Value) return;
         _ = gameObject.GetComponentSafe<ExplosionEditor>();
-        if (gameObject.transform.parent is not null) return;
+        if (gameObject.GetComponentInParent<SignalReceiverLinker>()) return;
         _ = gameObject.GetComponentSafe<SignalReceiverLinker>();
     }
 
@@ -163,7 +164,7 @@ internal static class CustomAssetObjectPatch
         if (sprite is null) return;
         sprite.SortingOrder = value == ObjectOrientation.Orientation.Right ? 0 : -1;
         var properties = new MaterialPropertyBlock();
-        properties.SetFloat(Shader.PropertyToID("_UseFlip"), (int)value);
+        properties.SetFloat("_UseFlip", (int)value);
         sprite.CachedRenderer.SetPropertyBlock(properties);
     }
 

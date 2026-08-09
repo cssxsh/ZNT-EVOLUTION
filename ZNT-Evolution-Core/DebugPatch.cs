@@ -7,6 +7,7 @@ using ZNT.Evolution.Core.Editor;
 using ZNT.LevelEditor;
 
 // ReSharper disable InconsistentNaming
+// ReSharper disable Unity.PreferAddressByIdToGraphicsParams
 namespace ZNT.Evolution.Core;
 
 internal static class DebugPatch
@@ -22,7 +23,7 @@ internal static class DebugPatch
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(Material), "mainTexture", MethodType.Getter)]
-    public static bool GetMainTexture(Material __instance) => __instance.HasProperty(Shader.PropertyToID("_MainTex"));
+    public static bool GetMainTexture(Material __instance) => __instance.HasProperty("_MainTex");
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(I2.Loc.LocalizationManager), "GetTermTranslation")]
