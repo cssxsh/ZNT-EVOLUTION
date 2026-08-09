@@ -211,9 +211,8 @@ internal static class AnimationEventHandlerPatch
     public static void Summon(BaseAnimationController controller, tk2dSpriteAnimationFrame frame)
     {
         if (string.IsNullOrEmpty(frame.soundParamName)) return;
-        var element = LevelElementIndex.Index.Values
-            .FirstOrDefault(element => element.AssetId == frame.soundParamName || element.name == frame.soundParamName);
-        if (element is not LevelElement { CustomAsset: HumanAsset asset }) return;
+        var asset = CustomAssetUtility.DeserializeObject<HumanAsset>(new JValue(frame.soundParamName));
+        if (asset is null) return;
         var human = asset.CreateGameObject(position: controller.transform.position).GetComponent<HumanBehaviour>();
         human.Character.OnSpawn(new Parameters(id: frame.eventInfo)
             .Update("spawn_animations", human.HumanAnimation.AnimationExists("rise_2") ? new[] { "rise_2" } : null)

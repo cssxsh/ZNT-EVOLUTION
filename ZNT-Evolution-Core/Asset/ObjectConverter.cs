@@ -94,6 +94,13 @@ internal class ObjectConverter : CustomCreationConverter<UnityEngine.Object>
             return null;
         }
 
+        if (typeof(CustomAssetObject).IsAssignableFrom(type))
+        {
+            if (LevelElementIndex.Index.Elements.TryGetValue(key, out var element) &&
+                element is LevelElement { CustomAsset: { } asset } &&
+                type.IsInstanceOfType(asset)) return asset;
+        }
+
         if (CustomAssetUtility.Cache.TryGetValue(key, out var value)) return value;
         var name = key.Split(':')[0].Trim();
         var t = key.IndexOf(':') >= 0 ? AccessTools.TypeByName(key.Split(':')[1].Trim()) ?? type : type;
