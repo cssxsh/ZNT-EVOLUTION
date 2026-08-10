@@ -457,15 +457,17 @@ internal static class CustomAssetObjectPatch
         var prefab = Traverse.Create(__instance).Field<RectTransform>("newsPrefab").Value;
         var container = Traverse.Create(__instance).Field<RectTransform>("newsContainer").Value;
         current.Clear();
-        foreach (var line in news.OrderBy(_ => UnityEngine.Random.value).Take(count))
+        foreach (var line in news.OrderBy(_ => UnityEngine.Random.value))
         {
+            if (current.ContainsKey(line.Content)) continue;
             var target = ComponentSingleton<GamePoolManager>.Instance.Spawn(prefab);
             target.SetParent(container);
             target.localScale = Vector3.one;
             var tm = target.GetComponent<TMPro.TextMeshProUGUI>();
-            tm.text = line;
+            tm.text = line.Content;
             Traverse.Create(__instance).Method("AddScrollRecycler", target).GetValue();
-            current.Add(line, tm);
+            current.Add(line.Content, tm);
+            if (current.Count >= count) break;
         }
 
         if (current.Count == 0) return true;

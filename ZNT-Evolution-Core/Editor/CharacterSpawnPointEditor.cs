@@ -24,7 +24,7 @@ public class CharacterSpawnPointEditor : Editor, IEditorOverride
     }
 
     [SerializeInEditor(name: "Dialogue Text")]
-    public string DialogueText = "";
+    public LocalizableString DialogueText = new() { Localize = false, Category = "Dialogues" };
 
     [SerializeInEditor(name: "Dialogue Duration")]
     public float DialogueDuration = 10;
@@ -35,10 +35,10 @@ public class CharacterSpawnPointEditor : Editor, IEditorOverride
     private void Start()
     {
         // ReSharper disable once InvertIf
-        if (!string.IsNullOrEmpty(DialogueText) && DialogueDuration > 0)
+        if (!string.IsNullOrEmpty(DialogueText.Content) && DialogueDuration > 0)
         {
             SendParams.Update(
-                "dialogue_text", new LocalizableString { Localize = false, Content = DialogueText },
+                "dialogue_text", DialogueText,
                 "dialogue_duration", DialogueDuration,
                 "dialogue_voice", DialogueVoice);
         }

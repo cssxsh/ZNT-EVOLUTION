@@ -349,11 +349,33 @@ internal static class SceneLoaderPatch
 
     private static void FixBinder(this SelectionMenu menu)
     {
-        var prefabs = Traverse.Create(menu).Field<SupportedTypePrefabs>("typePrefabs").Value;
-        var binder = prefabs[EditorComponent.SupportedType.Vector4];
-        var fields = binder.GetComponentsInChildren<InputField>();
-        // ReSharper disable once CoVariantArrayConversion
-        Traverse.Create(binder).Field<UIBehaviour[]>("uiComponents").Value = fields;
+        {
+            var prefabs = Traverse.Create(menu).Field<SupportedTypePrefabs>("typePrefabs").Value;
+            var binder = prefabs[EditorComponent.SupportedType.Vector4];
+            var fields = binder.GetComponentsInChildren<InputField>();
+            // ReSharper disable once CoVariantArrayConversion
+            Traverse.Create(binder).Field<UIBehaviour[]>("uiComponents").Value = fields;
+        }
+        {
+            var prefabs = Traverse.Create(menu).Field<SupportedTypePrefabs>("typePrefabs").Value;
+            var binder = prefabs[EditorComponent.SupportedType.LocalizableString];
+            var components = Traverse.Create(binder).Field<UIBehaviour[]>("uiComponents").Value;
+            var localizable = (LocalizableStringMenu)components[0];
+            var placeholder = (Text)Traverse.Create(localizable).Field<InputField>("contentField").Value.placeholder;
+            placeholder.text = "Enter text...";
+        }
+        {
+            var prefabs = Traverse.Create(menu).Field<SupportedTypePrefabs>("typePrefabs").Value;
+            var binder = prefabs[EditorComponent.SupportedType.TutorialPageList];
+            var components = Traverse.Create(binder).Field<UIBehaviour[]>("uiComponents").Value;
+            var tutorial = (TutorialPageMenu)components[0];
+            var title = Traverse.Create(tutorial).Field<LocalizableStringMenu>("titleMenu").Value;
+            var title_placeholder = (Text)Traverse.Create(title).Field<InputField>("contentField").Value.placeholder;
+            title_placeholder.text = "Enter title...";
+            var text = Traverse.Create(tutorial).Field<LocalizableStringMenu>("textMenu").Value;
+            var text_placeholder = (Text)Traverse.Create(text).Field<InputField>("contentField").Value.placeholder;
+            text_placeholder.text = "Enter text...";
+        }
     }
 
     private static void CopyObject(this SelectionMenu menu, bool active)
@@ -542,6 +564,26 @@ internal static class SceneLoaderPatch
         text.text = name;
         text.transform.parent.name = $"{name} Input";
         return false;
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(SupportedTypeBinder), "BindLocalizableString")]
+    public static void BindLocalizableString(
+        SupportedTypeBinder __instance, EditorComponent component, MemberInfo member)
+    {
+        var components = Traverse.Create(__instance).Field<UIBehaviour[]>("uiComponents").Value;
+        var value = member.GetMemberValue<LocalizableString>(component.Data);
+        var localizable = (LocalizableStringMenu)components[0];
+        if (member.DeclaringType == typeof(TutorialSettings)) value.Category ??= "Tutorials";
+        if (string.IsNullOrEmpty(value.Category))
+        {
+            Traverse.Create(localizable).Field<CanvasGroup>("toggleGroup").Value.interactable = false;
+        }
+        else
+        {
+            Traverse.Create(localizable).Field<bool>("useStringCategory").Value = false;
+            Traverse.Create(localizable).Field<string>("category").Value = value.Category;
+        }
     }
 
     [HarmonyPostfix]
