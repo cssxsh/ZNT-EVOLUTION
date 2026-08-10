@@ -1,6 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
-using HarmonyLib;
 using UnityEngine;
 
 namespace ZNT.Evolution.Core.Effect;
@@ -47,14 +45,6 @@ public class CharacterAllocationEffect : TriggerEffect
     public int capacity = 114514;
 
     private int Spare => capacity - _cache.Count;
-
-    protected override void OnCreate()
-    {
-        var trigger = GetComponent<Trigger>();
-        if (trigger.Effects.Contains(this)) return;
-        Traverse.Create(trigger).Field<TriggerEffect[]>("effects").Value = null;
-        _ = trigger.Effects;
-    }
 
     public override void OnStartEffect()
     {

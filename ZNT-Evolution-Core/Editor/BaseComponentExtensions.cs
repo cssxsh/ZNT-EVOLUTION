@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using HarmonyLib;
 using JetBrains.Annotations;
@@ -38,10 +40,34 @@ public static class BaseComponentExtensions
     }
 
     [UsedImplicitly]
+    public static T GetEffect<T>(this Trigger trigger) where T : TriggerEffect
+    {
+        var effect = trigger.gameObject.GetComponentSafe<T>();
+        // ReSharper disable once InvertIf
+        if (Traverse.Create(trigger).Field<TriggerEffect[]>("effects").Value is { } effects &&
+            !effects.Contains(effect))
+        {
+            Traverse.Create(trigger).Field<TriggerEffect[]>("effects").Value = null;
+            _ = trigger.Effects;
+            // Traverse.Create(trigger).Field<INoAllocEffect[]>("noAllocEffects").Value
+        }
+
+        return effect;
+    }
+
+    [UsedImplicitly]
     public static void SetMagazine(this Weapon weapon, int size)
     {
         weapon.DefaultMag = new Magazine(size);
         weapon.Initialize();
+    }
+
+    [UsedImplicitly]
+    public static bool IsTalking(this Patroller patroller)
+    {
+        return Traverse.Create(typeof(Dialogue))
+            .Field<Dictionary<UnityEngine.Transform, Dialogue>>("Talking").Value
+            .ContainsKey(patroller.Root.transform);
     }
 
     [UsedImplicitly]

@@ -99,6 +99,23 @@ internal static class CustomAssetObjectPatch
 
     #endregion
 
+    #region TriggerAsset
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(TriggerAsset), "LoadFromAsset")]
+    public static void LoadFromAsset(TriggerAsset __instance, GameObject gameObject)
+    {
+        // ReSharper disable once InvertIf
+        if (__instance.Name is "Human")
+        {
+            var dialogue = gameObject.GetComponent<Trigger>().GetEffect<DialogueEffect>();
+            dialogue.SetVisible(true);
+            dialogue.Mode = DialogueEffect.DetectionMode.SignalOnEnter;
+        }
+    }
+
+    #endregion
+
     #region MovingObjectAsset
 
     [HarmonyPostfix]
@@ -390,7 +407,7 @@ internal static class CustomAssetObjectPatch
     public static void Initialize(Stopper __instance, bool block, int maxOpponents)
     {
         var detector = Traverse.Create(__instance).Field<BoxDetection>("detector").Value;
-        var effect = detector.gameObject.GetComponentSafe<CharacterAllocationEffect>();
+        var effect = detector.GetComponent<Trigger>().GetEffect<CharacterAllocationEffect>();
         effect.capacity = block ? maxOpponents : 0;
         if (block) effect.StartEffect();
         else effect.StopEffect();
