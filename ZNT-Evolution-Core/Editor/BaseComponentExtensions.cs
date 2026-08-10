@@ -71,6 +71,13 @@ public static class BaseComponentExtensions
     }
 
     [UsedImplicitly]
+    public static SupportedTypeBinder TextBinder(this SelectionMenu menu)
+    {
+        var prefabs = Traverse.Create(menu).Field<SupportedTypePrefabs>("typePrefabs").Value;
+        return menu.InstantiateCustomBinder(prefabs[EditorComponent.SupportedType.String]);
+    }
+
+    [UsedImplicitly]
     public static SupportedTypeBinder ListBinder(this SelectionMenu menu)
     {
         return menu.InstantiateCustomBinder(menu.CustomBinders.IntStringList);

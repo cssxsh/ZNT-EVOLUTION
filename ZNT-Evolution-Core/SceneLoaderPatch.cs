@@ -551,6 +551,14 @@ internal static class SceneLoaderPatch
             return false;
         }
 
+        // ReSharper disable once InvertIf
+        if (member.GetMemberType() == typeof(Color))
+        {
+            // HexColorField
+            __instance.TextBinder().BindString(component, member);
+            return false;
+        }
+
         return true;
     }
 
@@ -563,6 +571,33 @@ internal static class SceneLoaderPatch
         var text = Traverse.Create(__instance).Field<Text>("text").Value;
         text.text = name;
         text.transform.parent.name = $"{name} Input";
+        return false;
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(SupportedTypeBinder), "BindString")]
+    public static bool BindString(SupportedTypeBinder __instance, EditorComponent component, MemberInfo member)
+    {
+        if (member.GetMemberType() != typeof(Color)) return true;
+        __instance.SetName(member);
+        var components = Traverse.Create(__instance).Field<UIBehaviour[]>("uiComponents").Value;
+        var input = (InputField)components[0];
+        input.onEndEdit.RemoveAllListeners();
+        input.onEndEdit.AddListener(text =>
+        {
+            if (ColorUtility.TryParseHtmlString(text, out var color))
+            {
+                input.colors = input.colors with { normalColor = Color.white };
+                input.text = "#" + ColorUtility.ToHtmlStringRGBA(color);
+                member.SetMemberValue(component.Data, color);
+            }
+            else
+            {
+                input.colors = input.colors with { normalColor = Color.red };
+            }
+        });
+        var color = member.GetMemberValue<Color>(component.Data);
+        input.text = "#" + ColorUtility.ToHtmlStringRGBA(color);
         return false;
     }
 

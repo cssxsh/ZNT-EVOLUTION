@@ -41,6 +41,14 @@ public class SpriteEditor : Editor, IEditorOverride, IEditorUpdate
     }
 
     [JsonIgnore]
+    [SerializeInEditor(name: "Sprite Color")]
+    public Color SpriteColor
+    {
+        get => Sprite.color;
+        set => Sprite.color = value;
+    }
+
+    [JsonIgnore]
     [SerializeInEditor(name: "Sprite Layer")]
     public string SpriteLayer
     {
