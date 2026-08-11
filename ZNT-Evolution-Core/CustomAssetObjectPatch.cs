@@ -253,14 +253,6 @@ internal static class CustomAssetObjectPatch
     [HarmonyPatch(typeof(HumanBehaviour), "Initialize")]
     public static void Initialize(HumanBehaviour __instance)
     {
-        if (__instance.SharedAsset.OverrideOnAim == __instance.Vision.Detection.EditorVisibility)
-        {
-            __instance.Vision.Detection.EditorVisibility = new Visibility(!__instance.SharedAsset.OverrideOnAim)
-            {
-                CustomName = "Vision"
-            };
-        }
-
         if (__instance.SharedAsset.CharacterType is CharacterType.Cultist
             && !CultistBuff.ContainsKey(__instance.Character))
         {

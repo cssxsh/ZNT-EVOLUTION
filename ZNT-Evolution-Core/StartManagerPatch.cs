@@ -289,6 +289,14 @@ internal static class StartManagerPatch
             }
         }
 
+        if (prefab.GetComponentInChildren<RayConeDetection>() is { } vision)
+        {
+            var identifier = vision.GetComponent<SerialIdentifier>();
+            Traverse.Create(identifier).Field<bool>("serialize").Value = true;
+            vision.SetVisible(true);
+            vision.SetIgnoreSerialization(false);
+        }
+
         if (prefab.TryGetComponent(out OneWayCollider collider))
         {
             _ = collider.gameObject.GetComponentSafe<OneWayEditor>();
