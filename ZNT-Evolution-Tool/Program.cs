@@ -90,6 +90,24 @@ internal static class Program
     }
 
     // ReSharper disable once UnusedMember.Local
+    private static IEnumerable<AssetExternal> LoadPrefab()
+    {
+        return
+            from assets in LoadAssetsFiles()
+            where !assets.name.StartsWith("level")
+            from info in assets.file.GetAssetsOfType(AssetClassID.GameObject)
+            let fields = Manager.GetBaseField(assets, info)
+            let name = fields["m_Name"].AsString
+            where !(
+                name.StartsWith("sprites_") ||
+                name.StartsWith("sprite_") ||
+                name.StartsWith("anim_"))
+            let transform = Manager.GetExtAsset(assets, fields["m_Component.Array"][0]["component"])
+            where transform.baseField["m_Father"]["m_PathID"].AsLong is 0
+            select new AssetExternal { file = assets, baseField = fields, info = info };
+    }
+
+    // ReSharper disable once UnusedMember.Local
     private static IEnumerable<AssetExternal> LoadSprites()
     {
         return
@@ -126,14 +144,14 @@ internal static class Program
     }
 
     // ReSharper disable once UnusedMember.Local
-    private static IEnumerable<AssetExternal> LoadResizableParticleSystem()
+    private static IEnumerable<AssetExternal> LoadBaseBehaviour()
     {
         return
             from assets in LoadAssetsFiles()
             from asset in assets.file.GetAssetsOfType(AssetClassID.MonoBehaviour)
             let fields = Manager.GetBaseField(assets, asset)
             let script = Manager.GetExtAsset(assets, fields["m_Script"])
-            where script.baseField["m_ClassName"].AsString == "ResizableParticleSystem"
+            where script.baseField["m_ClassName"].AsString == "BaseBehaviour"
             select new AssetExternal { file = assets, baseField = fields, info = asset };
     }
 
