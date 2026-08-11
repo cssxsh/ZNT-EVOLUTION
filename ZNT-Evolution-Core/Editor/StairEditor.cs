@@ -8,7 +8,7 @@ namespace ZNT.Evolution.Core.Editor;
 public class StairEditor : Editor, IActivable
 {
     [JsonIgnore]
-    protected StairBehaviour Behaviour => field ??= GetComponent<StairBehaviour>();
+    protected StairBehaviour Behaviour => field ??= GetComponentInChildren<StairBehaviour>();
 
     [JsonIgnore]
     public bool IsActive => Behaviour.UseStairs;
