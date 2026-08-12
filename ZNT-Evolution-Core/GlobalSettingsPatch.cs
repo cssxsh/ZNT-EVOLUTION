@@ -32,26 +32,25 @@ internal static class GlobalSettingsPatch
         BepInExToUnityLog = Config.Bind("config", nameof(BepInExToUnityLog), false, "写入内部日志");
     }
 
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(GameSettings), "LoadIfNeeded")]
-    public static void LoadIfNeeded()
-    {
-        // UnityEngine.Debug.unityLogger.logEnabled = false;
-        UnityLogListener ??= BepInEx.Logging.Logger.Listeners.OfType<BepInEx.Logging.UnityLogListener>().Single();
-        UnityLog = BepInExToUnityLog.Value;
-        IsUserDev = ShowDevComponent.Value;
-    }
-
     private static void OnSettingChanged(object sender, SettingChangedEventArgs e)
     {
-        if (e.ChangedSetting == ShowDevComponent) IsUserDev = ShowDevComponent.Value;
+        switch (e.ChangedSetting)
+        {
+            case { Definition.Key: nameof(BepInExToUnityLog) }:
+                UnityLog = BepInExToUnityLog.Value;
+                break;
+            case { Definition.Key: nameof(ShowDevComponent) }:
+                IsUserDev = ShowDevComponent.Value;
+                break;
+        }
     }
 
     #region UnityLogListener
 
     internal static ConfigEntry<bool> BepInExToUnityLog;
 
-    private static BepInEx.Logging.UnityLogListener UnityLogListener;
+    private static BepInEx.Logging.UnityLogListener UnityLogListener =>
+        field ??= BepInEx.Logging.Logger.Listeners.OfType<BepInEx.Logging.UnityLogListener>().Single();
 
     [UsedImplicitly]
     internal static bool UnityLog
