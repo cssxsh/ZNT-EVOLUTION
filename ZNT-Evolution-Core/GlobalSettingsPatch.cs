@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using BepInEx.Configuration;
 using HarmonyLib;
+using JetBrains.Annotations;
 using Rotorz.Tile;
 using UnityEngine;
 using UnityEngine.UI;
@@ -28,6 +29,16 @@ internal static class GlobalSettingsPatch
         ShowAllElement = Config.Bind("config", nameof(ShowAllElement), false, "显示所有元件");
         ShowAllAnimationClip = Config.Bind("config", nameof(ShowAllAnimationClip), false, "显示所有动画");
         ShowDevComponent = Config.Bind("config", nameof(ShowDevComponent), false, "显示实验组件");
+        BepInExToUnityLog = Config.Bind("config", nameof(BepInExToUnityLog), false, "写入内部日志");
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(GameSettings), "LoadIfNeeded")]
+    public static void LoadIfNeeded()
+    {
+        // UnityEngine.Debug.unityLogger.logEnabled = false;
+        UnityLogListener ??= BepInEx.Logging.Logger.Listeners.OfType<BepInEx.Logging.UnityLogListener>().Single();
+        UnityLog = BepInExToUnityLog.Value;
         IsUserDev = ShowDevComponent.Value;
     }
 
@@ -35,6 +46,26 @@ internal static class GlobalSettingsPatch
     {
         if (e.ChangedSetting == ShowDevComponent) IsUserDev = ShowDevComponent.Value;
     }
+
+    #region UnityLogListener
+
+    internal static ConfigEntry<bool> BepInExToUnityLog;
+
+    private static BepInEx.Logging.UnityLogListener UnityLogListener;
+
+    [UsedImplicitly]
+    internal static bool UnityLog
+    {
+        get => BepInEx.Logging.Logger.Listeners.Contains(UnityLogListener);
+        set
+        {
+            if (value == BepInEx.Logging.Logger.Listeners.Contains(UnityLogListener)) return;
+            if (value) BepInEx.Logging.Logger.Listeners.Add(UnityLogListener);
+            else BepInEx.Logging.Logger.Listeners.Remove(UnityLogListener);
+        }
+    }
+
+    #endregion
 
     #region CorpseBehaviour
 
@@ -216,7 +247,8 @@ internal static class GlobalSettingsPatch
 
     private static HashSet<ulong> DevIds => Traverse.Create(typeof(UserManager)).Field<HashSet<ulong>>("DevIds").Value;
 
-    private static bool IsUserDev
+    [UsedImplicitly]
+    internal static bool IsUserDev
     {
         get => DevIds.Contains(ComponentSingleton<SteamManager>.Instance.GetUserIdentifier().m_SteamID);
         set => Traverse.Create(typeof(UserManager)).Field<bool>(nameof(UserManager.IsUserDev)).Value = value;
