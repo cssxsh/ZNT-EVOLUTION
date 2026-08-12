@@ -36,11 +36,11 @@ internal static class GlobalSettingsPatch
     {
         switch (e.ChangedSetting)
         {
-            case { Definition.Key: nameof(BepInExToUnityLog) }:
-                UnityLog = BepInExToUnityLog.Value;
+            case ConfigEntry<bool> { Definition.Key: nameof(BepInExToUnityLog) } log:
+                UnityLog = log.Value;
                 break;
-            case { Definition.Key: nameof(ShowDevComponent) }:
-                IsUserDev = ShowDevComponent.Value;
+            case ConfigEntry<bool> { Definition.Key: nameof(ShowDevComponent) } dev:
+                IsUserDev = dev.Value;
                 break;
         }
     }
