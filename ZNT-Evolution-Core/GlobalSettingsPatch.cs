@@ -17,10 +17,11 @@ internal static class GlobalSettingsPatch
 {
     private static ConfigFile Config => EvolutionCorePlugin.Instance.Config;
 
-    [Harmony]
-    [HarmonyPrepare]
-    private static void Init()
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(InitManager), "Start")]
+    public static IEnumerator Start(IEnumerator __result, InitManager __instance)
     {
+        yield return __result;
         Config.SettingChanged += OnSettingChanged;
         CorpsesCountMax = Config.Bind("config", nameof(CorpsesCountMax), GameConf.MaxAliveCorpses, "尸体数量上限");
         VisionMaterialization = Config.Bind("config", nameof(VisionMaterialization), false, "视觉射线渲染");

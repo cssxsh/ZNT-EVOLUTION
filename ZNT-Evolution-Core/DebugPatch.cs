@@ -16,28 +16,24 @@ namespace ZNT.Evolution.Core;
 internal static class DebugPatch
 {
     [HarmonyPrefix]
-    [HarmonyPatch(typeof(Challenge), "IsFailed")]
-    [HarmonyPatch(typeof(Challenge), "IsCompleted")]
-    public static void IsCompleted(Challenge __instance)
-    {
-        if (Traverse.Create(__instance).Field<List<ChallengeRule>>("checkList").Value != null) return;
-        __instance.Initialize();
-    }
+    [HarmonyPatch(typeof(SteamManager), "DeleteSteamAppId")]
+    public static bool DeleteSteamAppId(Challenge __instance) => false;
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(Material), "mainTexture", MethodType.Getter)]
+    public static bool GetMainTexture(Material __instance) => __instance.HasProperty("_MainTex");
 
     [HarmonyTranspiler]
-    [HarmonyPatch(typeof(JsonWriter), "WriteToken", typeof(JsonReader), typeof(int))]
     [HarmonyPatch(typeof(JValue), "WriteTo")]
+    [HarmonyPatch(typeof(JsonWriter), "WriteToken", typeof(JsonReader), typeof(int))]
     public static IEnumerable<CodeInstruction> WriteToken(IEnumerable<CodeInstruction> instructions)
     {
         var _ToInt64 = AccessTools.Method(
-            typeof(Convert), nameof(Convert.ToInt64),
-            [typeof(object), typeof(IFormatProvider)]);
+            typeof(Convert), nameof(Convert.ToInt64), [typeof(object), typeof(IFormatProvider)]);
         var _Write_long = AccessTools.Method(
-            typeof(JsonWriter), nameof(JsonWriter.WriteValue),
-            [typeof(long)]);
+            typeof(JsonWriter), nameof(JsonWriter.WriteValue), [typeof(long)]);
         var _Write_object = AccessTools.Method(
-            typeof(JsonWriter), nameof(JsonWriter.WriteValue),
-            [typeof(object)]);
+            typeof(JsonWriter), nameof(JsonWriter.WriteValue), [typeof(object)]);
         foreach (var instruction in instructions)
         {
             if (instruction.OperandIs(_ToInt64))
@@ -55,13 +51,18 @@ internal static class DebugPatch
         }
     }
 
-    [HarmonyPrefix]
-    [HarmonyPatch(typeof(Material), "mainTexture", MethodType.Getter)]
-    public static bool GetMainTexture(Material __instance) => __instance.HasProperty("_MainTex");
-
     [HarmonyPostfix]
     [HarmonyPatch(typeof(I2.Loc.LocalizationManager), "GetTermTranslation")]
     public static string GetTermTranslation(string __result, string Term) => __result ?? Term;
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(Challenge), "IsFailed")]
+    [HarmonyPatch(typeof(Challenge), "IsCompleted")]
+    public static void IsCompleted(Challenge __instance)
+    {
+        if (Traverse.Create(__instance).Field<List<ChallengeRule>>("checkList").Value != null) return;
+        __instance.Initialize();
+    }
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(AchievementManager), "OnCreate")]
