@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection.Emit;
 using HarmonyLib;
 using MonoMod.Utils;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using UnityEngine;
 using ZNT.Evolution.Core.Editor;
 using ZNT.LevelEditor;
@@ -19,6 +22,37 @@ internal static class DebugPatch
     {
         if (Traverse.Create(__instance).Field<List<ChallengeRule>>("checkList").Value != null) return;
         __instance.Initialize();
+    }
+
+    [HarmonyTranspiler]
+    [HarmonyPatch(typeof(JsonWriter), "WriteToken", typeof(JsonReader), typeof(int))]
+    [HarmonyPatch(typeof(JValue), "WriteTo")]
+    public static IEnumerable<CodeInstruction> WriteToken(IEnumerable<CodeInstruction> instructions)
+    {
+        var _ToInt64 = AccessTools.Method(
+            typeof(Convert), nameof(Convert.ToInt64),
+            [typeof(object), typeof(IFormatProvider)]);
+        var _Write_long = AccessTools.Method(
+            typeof(JsonWriter), nameof(JsonWriter.WriteValue),
+            [typeof(long)]);
+        var _Write_object = AccessTools.Method(
+            typeof(JsonWriter), nameof(JsonWriter.WriteValue),
+            [typeof(object)]);
+        foreach (var instruction in instructions)
+        {
+            if (instruction.OperandIs(_ToInt64))
+            {
+                yield return instruction.Clone(OpCodes.Pop);
+            }
+            else if (instruction.OperandIs(_Write_long))
+            {
+                yield return instruction.Clone(_Write_object);
+            }
+            else
+            {
+                yield return instruction;
+            }
+        }
     }
 
     [HarmonyPrefix]
