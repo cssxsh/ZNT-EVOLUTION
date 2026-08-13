@@ -62,8 +62,15 @@ internal static class CustomAssetObjectPatch
     {
         if (Traverse.Create(__instance).Field<bool>("autoExplode").Value) return;
         _ = gameObject.GetComponentSafe<ExplosionEditor>();
-        if (gameObject.GetComponentInParent<SignalReceiverLinker>()) return;
-        _ = gameObject.GetComponentSafe<SignalReceiverLinker>();
+        var linker = gameObject.GetComponentInParent<SignalReceiverLinker>()
+                     ?? gameObject.GetComponentSafe<SignalReceiverLinker>();
+        linker.ExcludedComponents ??= [];
+        linker.ExcludedGameObjects ??= [];
+        foreach (var child in gameObject.transform.Cast<Transform>())
+        {
+            if (linker.ExcludedGameObjects.Contains(child.gameObject)) continue;
+            linker.ExcludedGameObjects.Add(child.gameObject);
+        }
     }
 
     [HarmonyPostfix]
