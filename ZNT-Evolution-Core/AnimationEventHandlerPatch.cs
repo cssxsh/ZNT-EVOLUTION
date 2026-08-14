@@ -219,4 +219,14 @@ internal static class AnimationEventHandlerPatch
             .Update("move_on_start", false)
             .Update("orientation", controller.transform.forward));
     }
+
+    [UsedImplicitly]
+    [Description("RegisterTriggerEvent:alert")]
+    public static void Alert(BaseAnimationController controller, tk2dSpriteAnimationFrame frame)
+    {
+        var effect = ComponentSingleton<GamePoolManager>.Instance
+            .Spawn("AlertRelayerOneshot", controller.transform).GetComponent<AlertEffect>();
+        effect.AlertRadius = frame.eventFloat;
+        effect.Alerter = controller.gameObject;
+    }
 }
