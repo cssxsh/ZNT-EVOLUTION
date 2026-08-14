@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -81,6 +82,8 @@ public class ModContext
 
     public ModState State { private set; get; }
 
+    public readonly I2.Loc.LanguageSourceData Localization;
+
     public System.Version Version => System.Version.Parse(Metadata.Version);
 
     private ModContext(string path, ModMetadata metadata)
@@ -89,6 +92,11 @@ public class ModContext
         Metadata = metadata;
         Logger = BepInExLogger.CreateLogSource(metadata.Name);
         State = ModState.Idle;
+        Localization = new I2.Loc.LanguageSourceData
+        {
+            GoogleUpdateFrequency = I2.Loc.LanguageSourceData.eGoogleUpdateFrequency.Never,
+            GoogleInEditorCheckFrequency = I2.Loc.LanguageSourceData.eGoogleUpdateFrequency.Never
+        };
     }
 
     private static readonly Regex InfoRegex = new("""^(?:.+\/)?([^.]+)(?:\.(.*))?\.(\w+)$""", RegexOptions.Compiled);
@@ -211,6 +219,11 @@ public class ModContext
                 }
             }
 
+            if (Localization.mTerms.Count > 0 && !I2.Loc.LocalizationManager.Sources.Contains(Localization))
+            {
+                I2.Loc.LocalizationManager.Sources.Add(Localization);
+            }
+
             State = ModState.Loaded;
         }
         finally
@@ -266,6 +279,7 @@ public class ModContext
                 }
             }
 
+            I2.Loc.LocalizationManager.Sources.Remove(Localization);
             State = ModState.Idle;
         }
         finally
@@ -280,6 +294,13 @@ public class ModContext
         {
             // ModMetadata
             case { Name: "metadata", Type: "", Format: "json" }:
+                return;
+            // Localization
+            case { Type: "localization", Format: "csv" }:
+            {
+                Localization.Import_CSV(Category: resource.Name, CSVstring: Encoding.UTF8.GetString(buffer.ToArray()));
+                Logger.LogDebug($"{resource.Path} -> Localization");
+            }
                 return;
             // FMOD.Studio.Bank
             case { Format: "bank", Type: "strings" }:

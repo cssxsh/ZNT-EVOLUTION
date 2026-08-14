@@ -13,6 +13,7 @@ internal record ModResource<T> : IComparable<ModResource<T>>
     public int Order => this switch
     {
         { Name: "metadata", Type: "", Format: "json" } => 0x0000_0000,
+        { Type: "localization", Format: "csv" } => 0x0000_0001,
         { Format: "bank", Type: "strings" } => 0x0001_0000,
         { Format: "bank" } => 0x0001_0001,
         { Format: "tga" or "png" or "exr", Type: "" } => 0x0002_0000,
