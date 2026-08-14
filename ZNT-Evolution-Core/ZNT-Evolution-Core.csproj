@@ -407,6 +407,7 @@
         <Compile Include="Asset\AnimationCurveConverter.cs"/>
         <Compile Include="Asset\AssetAddition.cs"/>
         <Compile Include="Asset\AssetElementBinder.cs"/>
+        <Compile Include="Asset\BankAsset.cs"/>
         <Compile Include="Asset\BrushInfo.cs"/>
         <Compile Include="Asset\BrushMerge.cs"/>
         <Compile Include="Asset\BsonDataReader.cs"/>

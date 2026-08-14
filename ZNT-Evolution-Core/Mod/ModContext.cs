@@ -494,12 +494,11 @@ public class ModContext
 
     #region FMOD
 
-    private TextAsset ReadBank(string name, byte[] input)
+    private BankAsset ReadBank(string name, byte[] input)
     {
-        var bank = new TextAsset { name = name };
-        bank.SetBytes(input);
+        var bank = new BankAsset { name = name, data = input };
         Acquire(bank);
-        bank.SetBytes(null);
+        bank.data = null;
         return bank;
     }
 
@@ -757,20 +756,9 @@ public class ModContext
 
         switch (obj)
         {
-            case TextAsset bank when bank.name.EndsWith(".strings"):
-                FMODUnity.RuntimeManager.LoadBank(bank);
-                FMODUnity.RuntimeManager.WaitForAllLoads();
-                break;
-            case TextAsset bank:
-                FMODUnity.RuntimeManager.LoadBank(bank);
-                FMODUnity.RuntimeManager.WaitForAllLoads();
-            {
-                Logger.LogInfo($"Fetch FMODAsset from bank:/{bank.name}");
-                foreach (var (_, asset) in AssetElementBinder.FetchFMODAsset(path: $"bank:/{bank.name}"))
-                {
-                    Logger.LogDebug($"Bind FMODAsset {asset.path} - {bank.name}");
-                }
-            }
+            case BankAsset bank:
+                bank.Load();
+                Logger.LogInfo($"Fetch FMODAsset from {bank.Path}");
                 break;
             case VisualEffect visual:
                 _ = visual.Bind();
@@ -800,13 +788,9 @@ public class ModContext
 
         switch (o)
         {
-            case TextAsset bank when bank.name.EndsWith(".strings"):
-                FMODUnity.RuntimeManager.UnloadBank(bank.name);
-                break;
-            case TextAsset bank:
-                Logger.LogInfo($"Clear FMODAsset from bank:/{bank.name}");
-                AssetElementBinder.ClearFMODAsset(path: $"bank:/{bank.name}");
-                FMODUnity.RuntimeManager.UnloadBank(bank.name);
+            case BankAsset bank:
+                bank.UnLoad();
+                Logger.LogInfo($"Clear FMODAsset from {bank.Path}");
                 break;
             case VisualEffect visual:
                 visual.Unbind();
