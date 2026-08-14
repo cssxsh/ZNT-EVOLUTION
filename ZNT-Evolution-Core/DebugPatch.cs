@@ -17,7 +17,7 @@ internal static class DebugPatch
 {
     [HarmonyPrefix]
     [HarmonyPatch(typeof(SteamManager), "DeleteSteamAppId")]
-    public static bool DeleteSteamAppId(Challenge __instance) => false;
+    public static bool DeleteSteamAppId(SteamManager __instance) => false;
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(Material), "mainTexture", MethodType.Getter)]
