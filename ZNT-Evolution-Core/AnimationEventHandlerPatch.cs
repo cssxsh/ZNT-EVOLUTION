@@ -5,7 +5,6 @@ using System.Reflection;
 using BepInEx.Logging;
 using HarmonyLib;
 using JetBrains.Annotations;
-using Newtonsoft.Json.Linq;
 using ZNT.Evolution.Core.Asset;
 using ZNT.Evolution.Core.Editor;
 using BepInExLogger = BepInEx.Logging.Logger;
@@ -36,6 +35,12 @@ internal static class AnimationEventHandlerPatch
         return Traverse.Create(handler)
             .Field<Dictionary<tk2dSpriteAnimationClip, System.Action>>("endEvents").Value
             .ContainsKey(clip);
+    }
+
+    [UsedImplicitly]
+    internal static T GetAsset<T>(this tk2dSpriteAnimationFrame frame) where T : CustomAsset
+    {
+        return CustomAssetUtility.DeserializeObject<T>(frame.soundParamName);
     }
 
     [HarmonyPostfix]
@@ -124,30 +129,25 @@ internal static class AnimationEventHandlerPatch
     [Description("RegisterTriggerEvent:throw")]
     public static void Throw(MovingObjectAnimationController controller, tk2dSpriteAnimationFrame frame)
     {
-        var physic = CustomAssetUtility.DeserializeObject<PhysicObjectAsset>(JValue.CreateString(frame.soundParamName));
-        if (physic is null) return;
-        // var behaviour = Traverse.Create(controller).Field<MovingObjectBehaviour>("Behaviour").Value;
+        var asset = frame.GetAsset<PhysicObjectAsset>();
+        if (asset is null) return;
         var definition = frame.spriteCollection.spriteDefinitions[frame.spriteId];
         var point = definition.attachPoints.FirstOrDefault(point => point.name is "throw")
                     ?? new tk2dSpriteDefinition.AttachPoint();
         var position = controller.transform.position + point.position;
         var orientation = controller.transform.forward;
-        {
-            var component = physic.CreateGameObject(position: position).GetComponent<PhysicObjectBehaviour>();
-            component.transform.localScale = orientation == UnityEngine.Vector3.back
-                ? new UnityEngine.Vector3(-1f, 1f, 1f)
-                : new UnityEngine.Vector3(1f, 1f, 1f);
-            // if (component.CarryParent)
-            //     component.SetParent(parent, health);
-            component.ExplosionParent = physic.AttachToParent ? controller.transform : null;
-            component.IgnoreCollisions(controller.GetComponent<UnityEngine.Collider2D>(), true);
-            var sign = UnityEngine.Mathf.Sign(orientation.z);
-            var direction = component.Physic.StartDirection;
-            direction.x *= sign;
-            component.Physic.StartDirection = direction;
-            component.Physic.Body.angularVelocity = -physic.StartAngularVelocity * sign;
-            component.Physic.Throw();
-        }
+        var physic = asset.CreateGameObject(position: position).GetComponent<PhysicObjectBehaviour>();
+        physic.transform.localScale = orientation == UnityEngine.Vector3.back
+            ? new UnityEngine.Vector3(-1f, 1f, 1f)
+            : new UnityEngine.Vector3(1f, 1f, 1f);
+        physic.ExplosionParent = asset.AttachToParent ? controller.transform : null;
+        physic.IgnoreCollisions(controller.GetComponent<UnityEngine.Collider2D>(), true);
+        var sign = UnityEngine.Mathf.Sign(orientation.z);
+        var direction = physic.Physic.StartDirection;
+        direction.x *= sign;
+        physic.Physic.StartDirection = direction;
+        physic.Physic.Body.angularVelocity = -asset.StartAngularVelocity * sign;
+        physic.Physic.Throw();
     }
 
     [UsedImplicitly]
@@ -210,13 +210,12 @@ internal static class AnimationEventHandlerPatch
     [Description("RegisterTriggerEvent:summon_human")]
     public static void Summon(BaseAnimationController controller, tk2dSpriteAnimationFrame frame)
     {
-        if (frame.soundParamName is null or "") return;
-        var asset = CustomAssetUtility.DeserializeObject<HumanAsset>(new JValue(frame.soundParamName));
+        var asset = frame.GetAsset<HumanAsset>();
         if (asset is null) return;
         var human = asset.CreateGameObject(position: controller.transform.position).GetComponent<HumanBehaviour>();
         human.Character.OnSpawn(new Parameters(id: frame.eventInfo)
             .Update("spawn_animations", human.HumanAnimation.AnimationExists("rise_2") ? new[] { "rise_2" } : null)
-            .Update("move_on_start", false)
+            .Update("move_on_start", frame.eventInt is not 0)
             .Update("orientation", controller.transform.forward));
     }
 
