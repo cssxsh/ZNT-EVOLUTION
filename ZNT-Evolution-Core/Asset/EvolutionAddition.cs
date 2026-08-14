@@ -13,7 +13,7 @@ public abstract class EvolutionAddition<TK, TV> :
 
     public abstract void Apply();
 
-    protected abstract void OnDestroy();
+    public abstract void Clear();
 
     public abstract IEnumerator<KeyValuePair<TK, TV>> GetEnumerator();
 

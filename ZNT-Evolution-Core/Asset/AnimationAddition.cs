@@ -30,42 +30,32 @@ internal class AnimationAddition : EvolutionAddition<tk2dSpriteAnimation, tk2dSp
 
     public override void Apply()
     {
-        var changed = new C5.HashSet<tk2dSpriteAnimation>();
         foreach (var (animation, clip) in this)
         {
             if (animation.clips.Contains(clip)) continue;
             var id = animation.GetClipIdByName(clip.name);
             if (id != -1) Logger.LogWarning($"{animation.name} already exists clip {clip.name} at {id}");
             animation.clips = animation.clips.AddToArray(clip);
-            changed.Add(animation);
+            Traverse.Create(animation).Field<Dictionary<string, int>>("idNameCache").Value = null;
         }
 
-        foreach (var animation in changed)
+        foreach (var (animation, _) in this)
         {
-            Traverse.Create(animation)
-                .Field<Dictionary<string, tk2dSpriteAnimationClip>>("clipNameCache").Value = null;
-            Traverse.Create(animation)
-                .Field<Dictionary<string, int>>("idNameCache").Value = null;
             animation.InitializeClipCache();
         }
     }
 
-    protected override void OnDestroy()
+    public override void Clear()
     {
-        var changed = new C5.HashSet<tk2dSpriteAnimation>();
         foreach (var (animation, clip) in this)
         {
             if (!animation.clips.Contains(clip)) continue;
             animation.clips = animation.clips.Where(item => item != clip).ToArray();
-            changed.Add(animation);
+            Traverse.Create(animation).Field<Dictionary<string, int>>("idNameCache").Value = null;
         }
 
-        foreach (var animation in changed)
+        foreach (var (animation, _) in this)
         {
-            Traverse.Create(animation)
-                .Field<Dictionary<string, tk2dSpriteAnimationClip>>("clipNameCache").Value = null;
-            Traverse.Create(animation)
-                .Field<Dictionary<string, int>>("idNameCache").Value = null;
             animation.InitializeClipCache();
         }
     }

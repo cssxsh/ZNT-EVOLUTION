@@ -567,7 +567,6 @@ public class ModContext
     private AnimationAddition ReadAnimationAddition(Stream input, string format)
     {
         var addition = CustomAssetUtility.DeserializeObject<AnimationAddition>(input, format is "bson");
-        addition.Apply();
         Acquire(addition);
         return addition;
     }
@@ -772,6 +771,12 @@ public class ModContext
                 _ = tmp.Bind();
                 Logger.LogInfo($"Bind TMPro.TMP_Asset 0x{tmp.hashCode:x08} - {tmp.name}");
                 break;
+            case AnimationAddition addition:
+                addition.Apply();
+                break;
+            case AssetAddition addition:
+                addition.Apply();
+                break;
         }
 
         CustomAssetUtility.Cache[key] = obj;
@@ -803,6 +808,12 @@ public class ModContext
             case TMPro.TMP_Asset tmp:
                 tmp.Unbind();
                 Logger.LogInfo($"Unbind TMPro.TMP_Asset 0x{tmp.hashCode:x08} - {tmp.name}");
+                break;
+            case AnimationAddition addition:
+                addition.Clear();
+                break;
+            case AssetAddition addition:
+                addition.Clear();
                 break;
         }
 

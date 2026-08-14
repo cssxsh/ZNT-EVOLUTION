@@ -87,7 +87,7 @@ internal class AssetAddition : EvolutionAddition<CustomAsset, UnityEngine.Object
         }
     }
 
-    protected override void OnDestroy()
+    public override void Clear()
     {
         // TODO Reset AssetAddition
     }
