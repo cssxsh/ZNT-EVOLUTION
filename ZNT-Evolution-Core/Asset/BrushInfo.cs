@@ -48,7 +48,7 @@ internal class BrushInfo : EvolutionInfo<Rotorz.Tile.OrientedBrush>
         ForceOverrideFlags = forceOverrideFlags;
         Coalesce = coalesce;
         Prefab = prefab ?? variation;
-        if (string.IsNullOrEmpty(Name)) Logger.LogWarning("Name is null");
+        if (Name is null or "") Logger.LogWarning("Name is null");
         if (Prefab is null) Logger.LogWarning("Prefab is null");
     }
 

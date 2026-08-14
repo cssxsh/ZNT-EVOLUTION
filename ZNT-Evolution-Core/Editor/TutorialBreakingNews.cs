@@ -39,16 +39,16 @@ public class TutorialBreakingNews : Editor, IEnumerable<LocalizableString>
 
     public IEnumerator<LocalizableString> GetEnumerator()
     {
-        if (!string.IsNullOrEmpty(Headline1.Content)) yield return Headline1;
-        if (!string.IsNullOrEmpty(Headline2.Content)) yield return Headline2;
-        if (!string.IsNullOrEmpty(Headline3.Content)) yield return Headline3;
-        if (!string.IsNullOrEmpty(Headline4.Content)) yield return Headline4;
-        if (!string.IsNullOrEmpty(Headline5.Content)) yield return Headline5;
-        if (!string.IsNullOrEmpty(Headline6.Content)) yield return Headline6;
-        if (!string.IsNullOrEmpty(Headline7.Content)) yield return Headline7;
-        if (!string.IsNullOrEmpty(Headline8.Content)) yield return Headline8;
-        if (!string.IsNullOrEmpty(Headline9.Content)) yield return Headline9;
-        if (!string.IsNullOrEmpty(HeadlineX.Content)) yield return HeadlineX;
+        if (Headline1.Content is not (null or "")) yield return Headline1;
+        if (Headline2.Content is not (null or "")) yield return Headline2;
+        if (Headline3.Content is not (null or "")) yield return Headline3;
+        if (Headline4.Content is not (null or "")) yield return Headline4;
+        if (Headline5.Content is not (null or "")) yield return Headline5;
+        if (Headline6.Content is not (null or "")) yield return Headline6;
+        if (Headline7.Content is not (null or "")) yield return Headline7;
+        if (Headline8.Content is not (null or "")) yield return Headline8;
+        if (Headline9.Content is not (null or "")) yield return Headline9;
+        if (HeadlineX.Content is not (null or "")) yield return HeadlineX;
     }
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();

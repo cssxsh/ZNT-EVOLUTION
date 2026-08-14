@@ -28,7 +28,7 @@ public class LayerMaskConverter : CustomCreationConverter<LayerMask>
             from index in Enumerable.Range(0x00, 0x20)
             where (mask.value | (0x01 << index)) == mask.value
             let name = LayerMask.LayerToName(index)
-            select string.IsNullOrEmpty(name) ? index.ToString() : name;
+            select name is null or "" ? index.ToString() : name;
 
         writer.WriteValue(names.Join());
     }

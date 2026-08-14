@@ -57,7 +57,7 @@ public static class AssetElementBinder
 
     public static string Bind(this AssetElement asset)
     {
-        if (string.IsNullOrEmpty(asset.AssetId)) Traverse.Create(asset).Field<string>("assetId").Value = asset.name;
+        if (asset.AssetId is null or "") Traverse.Create(asset).Field<string>("assetId").Value = asset.name;
         lock (AssetElementIndex.IndexPath)
         {
             switch (asset)

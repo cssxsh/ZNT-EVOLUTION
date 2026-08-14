@@ -39,7 +39,7 @@ internal class MaterialMerge : EvolutionMerge<Material>
         Textures = textures ?? new Dictionary<string, Texture>();
         Floats = floats ?? new Dictionary<string, float>();
         Colors = colors ?? new Dictionary<string, Color>();
-        if (string.IsNullOrEmpty(Name)) Logger.LogWarning("Name is null");
+        if (Name is null or "") Logger.LogWarning("Name is null");
         if (Shader is null) Logger.LogWarning("Shader is null");
         if (Source is null) Logger.LogWarning("Source is null");
     }

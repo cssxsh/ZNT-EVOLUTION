@@ -354,7 +354,7 @@ internal static class DebugPatch
     [HarmonyPatch(typeof(Framework.Events.SignalReceiver), "Initialize")]
     public static void Initialize(Framework.Events.SignalReceiver __instance)
     {
-        if (string.IsNullOrEmpty(__instance.ComponentName) || string.IsNullOrEmpty(__instance.MethodName)) return;
+        if (__instance.ComponentName is null or "" || __instance.MethodName is null or "") return;
         Traverse.Create(__instance).Field<bool>("methodHasParam").Value |= __instance.MethodName.EndsWith(" (param)");
     }
 

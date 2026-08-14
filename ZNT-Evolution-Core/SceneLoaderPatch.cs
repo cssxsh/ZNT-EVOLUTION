@@ -240,7 +240,7 @@ internal static class SceneLoaderPatch
                     toggle.SetIsOnWithoutNotify((int)entry.BoxedValue >= 0);
                     input.OnEndEdit(value =>
                     {
-                        if (string.IsNullOrEmpty(value)) entry.BoxedValue = entry.DefaultValue;
+                        if (value is null or "") entry.BoxedValue = entry.DefaultValue;
                         else entry.SetSerializedValue(value);
                     });
                     input.SetTextWithoutNotify(((int)entry.BoxedValue & int.MaxValue).ToString());
@@ -567,7 +567,7 @@ internal static class SceneLoaderPatch
     public static bool SetName(this SupportedTypeBinder __instance, MemberInfo member)
     {
         var attribute = member.GetCustomAttribute<SerializeInEditorAttribute>();
-        var name = string.IsNullOrEmpty(attribute?.Name) ? member.Name : attribute.Name;
+        var name = attribute?.Name is null or "" ? member.Name : attribute.Name;
         var text = Traverse.Create(__instance).Field<Text>("text").Value;
         text.text = name;
         text.transform.parent.name = $"{name} Input";
@@ -610,7 +610,7 @@ internal static class SceneLoaderPatch
         var value = member.GetMemberValue<LocalizableString>(component.Data);
         var localizable = (LocalizableStringMenu)components[0];
         if (member.DeclaringType == typeof(TutorialSettings)) value.Category ??= "Tutorials";
-        if (string.IsNullOrEmpty(value.Category))
+        if (value.Category is null or "")
         {
             Traverse.Create(localizable).Field<CanvasGroup>("toggleGroup").Value.interactable = false;
         }

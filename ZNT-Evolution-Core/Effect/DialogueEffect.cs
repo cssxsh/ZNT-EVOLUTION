@@ -61,7 +61,7 @@ public class DialogueEffect : TriggerEffect
 
     public override void OnApplyOnGameObject(GameObject target)
     {
-        if (string.IsNullOrEmpty(Text.Content) || Duration <= 0) return;
+        if (Text.Content is null or "" || Duration <= 0) return;
         var human = target?.GetComponent<HumanBehaviour>();
         if (human is null) return;
         var patroller = human.Patroller;

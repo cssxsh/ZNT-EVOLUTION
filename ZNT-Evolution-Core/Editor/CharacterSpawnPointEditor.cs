@@ -35,7 +35,7 @@ public class CharacterSpawnPointEditor : Editor, IEditorOverride
     private void Start()
     {
         // ReSharper disable once InvertIf
-        if (!string.IsNullOrEmpty(DialogueText.Content) && DialogueDuration > 0)
+        if (!(DialogueText.Content is null or "" || DialogueDuration <= 0))
         {
             SendParams.Update(
                 "dialogue_text", DialogueText,

@@ -283,10 +283,10 @@ internal static class GlobalSettingsPatch
         if (!ShowAllAnimationClip.Value) return;
         var action = Traverse.Create(__instance).Field<PatrolAction>("Action").Value;
         var animation = action.Patroller.Animator.AnimationLibrary;
-        if (__result.Count == animation.clips.Count(clip => !string.IsNullOrEmpty(clip.name))) return;
+        if (__result.Count == animation.clips.Count(clip => !clip.Empty)) return;
         __result.Clear();
         __result.AddRange(animation.clips
-            .Where(clip => !string.IsNullOrEmpty(clip.name))
+            .Where(clip => !clip.Empty)
             .OrderBy(clip => clip.name)
             .Select(clip => new Dropdown.OptionData(text: clip.name))
         );

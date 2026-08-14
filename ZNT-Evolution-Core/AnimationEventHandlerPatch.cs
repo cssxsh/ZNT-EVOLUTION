@@ -210,7 +210,7 @@ internal static class AnimationEventHandlerPatch
     [Description("RegisterTriggerEvent:summon_human")]
     public static void Summon(BaseAnimationController controller, tk2dSpriteAnimationFrame frame)
     {
-        if (string.IsNullOrEmpty(frame.soundParamName)) return;
+        if (frame.soundParamName is null or "") return;
         var asset = CustomAssetUtility.DeserializeObject<HumanAsset>(new JValue(frame.soundParamName));
         if (asset is null) return;
         var human = asset.CreateGameObject(position: controller.transform.position).GetComponent<HumanBehaviour>();

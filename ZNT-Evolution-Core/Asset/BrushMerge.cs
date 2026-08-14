@@ -23,7 +23,7 @@ internal class BrushMerge : EvolutionMerge<Rotorz.Tile.OrientedBrush>
         GameObject prefab) : base(name, source)
     {
         Prefab = prefab;
-        if (string.IsNullOrEmpty(Name)) Logger.LogWarning("Name is null");
+        if (Name is null or "") Logger.LogWarning("Name is null");
         if (Source is null) Logger.LogWarning("Source is null");
         if (Prefab is null) Logger.LogWarning("Prefab is null");
     }

@@ -22,7 +22,7 @@ public class LayerConverter : CustomCreationConverter<int>
     {
         var layer = (int)value;
         var name = LayerMask.LayerToName(layer);
-        if (string.IsNullOrEmpty(name)) writer.WriteValue(layer);
+        if (name is null or "") writer.WriteValue(layer);
         else writer.WriteValue(name);
     }
 

@@ -47,7 +47,7 @@ public class LayerEditor : Editor, IEditorOverride
         var names =
             from index in Enumerable.Range(0x00, 0x20)
             let name = LayerMask.LayerToName(index)
-            select string.IsNullOrEmpty(name) ? index.ToString() : name;
+            select name is null or "" ? index.ToString() : name;
         switch (member.Name)
         {
             case nameof(Main):

@@ -16,7 +16,7 @@ public abstract class CharacterEditor : Editor
 
     public void ApplyBuff(Parameters parameters)
     {
-        if (parameters == null || string.IsNullOrEmpty(parameters.Id)) return;
+        if (parameters?.Id is null or "") return;
         var buff = ScriptableObject.CreateInstance<CharacterBuff>();
         buff.Load(parameters);
         if (Buffs.TryGetValue(buff.AssetId, out var prev))
