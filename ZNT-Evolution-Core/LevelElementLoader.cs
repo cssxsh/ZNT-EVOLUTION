@@ -519,8 +519,10 @@ public static class LevelElementLoader
         }
 
         var addition = DeserializeObject<AnimationAddition>(folder: path, file: "animation.addition.json");
+        addition.name = Path.GetFileName(path);
         addition.Apply();
-        Logger.LogInfo($"{addition.Targets.Length} animation clips added");
+        UnityEngine.Object.DontDestroyOnLoad(addition);
+        Logger.LogInfo($"{addition.Count} animation clips added");
     }
 
     private static void ApplyElementFromFolder(this AssetBundle _, string path)
@@ -538,10 +540,6 @@ public static class LevelElementLoader
             var physic = DeserializeObject<PhysicObjectAsset>(folder: path, file: file);
             Logger.LogDebug($"{filename} -> {physic} from {physic.Explosion}");
         }
-
-        var element = DeserializeObject<LevelElementAddition>(folder: path, file: "element.addition.json");
-        element.Apply();
-        Logger.LogInfo($"{element.Targets.Length} elements apply");
     }
 
     public static IEnumerator LoadAssetFromFolder(string path)

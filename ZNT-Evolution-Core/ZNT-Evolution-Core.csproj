@@ -405,6 +405,7 @@
         <Compile Include="TextAssetPatch.cs"/>
         <Compile Include="Asset\AnimationAddition.cs"/>
         <Compile Include="Asset\AnimationCurveConverter.cs"/>
+        <Compile Include="Asset\AssetAddition.cs"/>
         <Compile Include="Asset\AssetElementBinder.cs"/>
         <Compile Include="Asset\BrushInfo.cs"/>
         <Compile Include="Asset\BrushMerge.cs"/>
@@ -423,8 +424,6 @@
         <Compile Include="Asset\HookAsset.cs"/>
         <Compile Include="Asset\LayerConverter.cs"/>
         <Compile Include="Asset\LayerMaskConverter.cs"/>
-        <Compile Include="Asset\LazyRef.cs"/>
-        <Compile Include="Asset\LevelElementAddition.cs"/>
         <Compile Include="Asset\MaterialMerge.cs"/>
         <Compile Include="Asset\ObjectContractResolver.cs"/>
         <Compile Include="Asset\ObjectConverter.cs"/>

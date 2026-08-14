@@ -19,6 +19,10 @@ internal static class StartManagerPatch
 {
     private static readonly ManualLogSource Logger = BepInExLogger.CreateLogSource(nameof(StartManager));
 
+    private static AnimationAddition AnimationPatch;
+
+    private static AssetAddition AssetPatch;
+
     private static IEnumerator ToCoroutine(this Task task, YieldInstruction instruction = null)
     {
         while (!task.IsCompleted) yield return instruction;
@@ -53,6 +57,12 @@ internal static class StartManagerPatch
     private static IEnumerator Initialize()
     {
         Logger.LogInfo("Initializing");
+        AnimationPatch ??= ScriptableObject.CreateInstance<AnimationAddition>();
+        AnimationPatch.name = "animation_patch";
+        Object.DontDestroyOnLoad(AnimationPatch);
+        AssetPatch ??= ScriptableObject.CreateInstance<AssetAddition>();
+        AssetPatch.name = "asset_patch";
+        Object.DontDestroyOnLoad(AssetPatch);
         yield return CustomAssetUtility.LoadBuildIn<CustomAsset>(HandleAsset);
         yield return CustomAssetUtility.LoadBuildIn<tk2dSpriteCollectionData>(HandleAsset);
         yield return CustomAssetUtility.LoadBuildIn<tk2dSpriteAnimation>(HandleAsset);
@@ -60,6 +70,8 @@ internal static class StartManagerPatch
         yield return CustomAssetUtility.LoadBuildIn<GameObject>(HandleAsset);
         yield return CustomAssetUtility.LoadPatch<Shader>(HandlePatch);
         yield return CustomAssetUtility.LoadPatch<TMPro.TMP_Asset>(HandlePatch);
+        AnimationPatch.Apply();
+        AssetPatch.Apply();
         InvisibleShield.PoolPrefab();
         FogOfWar.PoolPrefab();
         SphereBuffEffect.PoolPrefab();
@@ -182,64 +194,59 @@ internal static class StartManagerPatch
             case { name: "anim_astrogoliath" or "anim_clown" or "anim_machine_gunner" }:
             {
                 var talk = animation.GetClipByName("talk");
-                new AnimationAddition([animation], [
-                    new tk2dSpriteAnimationClip(talk)
+                AnimationPatch.Push(animation, new tk2dSpriteAnimationClip(talk)
                     {
                         name = "rise",
                         useableInLevelEditor = false,
                         wrapMode = tk2dSpriteAnimationClip.WrapMode.Once
                     }
-                ]).Apply();
+                );
                 Logger.LogInfo($"Feat rise for {animation}");
             }
                 break;
             case { name: "anim_boss_1" }:
             {
                 var talk = animation.GetClipByName("stand_phone_talk");
-                new AnimationAddition([animation], [
-                    new tk2dSpriteAnimationClip(talk)
+                AnimationPatch.Push(animation, new tk2dSpriteAnimationClip(talk)
                     {
                         name = "rise",
                         useableInLevelEditor = false,
                         wrapMode = tk2dSpriteAnimationClip.WrapMode.Once
                     }
-                ]).Apply();
+                );
                 Logger.LogInfo($"Feat rise for {animation}");
             }
                 break;
             case { name: "anim_boss_chemist" }:
             {
                 var transform = animation.GetClipByName("transform");
-                new AnimationAddition([animation], [
-                    new tk2dSpriteAnimationClip(transform)
+                AnimationPatch.Push(animation, new tk2dSpriteAnimationClip(transform)
                     {
                         name = "rise",
                         useableInLevelEditor = false,
                         wrapMode = tk2dSpriteAnimationClip.WrapMode.Once
                     }
-                ]).Apply();
+                );
                 Logger.LogInfo($"Feat rise for {animation}");
             }
                 break;
             case { name: "anim_daft_punk_1" or "anim_daft_punk_2" }:
             {
                 var teleport = animation.GetClipByName("teleport_in");
-                new AnimationAddition([animation], [
-                    new tk2dSpriteAnimationClip(teleport)
+                AnimationPatch.Push(animation, new tk2dSpriteAnimationClip(teleport)
                     {
                         name = "rise",
                         useableInLevelEditor = false,
                         wrapMode = tk2dSpriteAnimationClip.WrapMode.Once
                     }
-                ]).Apply();
+                );
                 Logger.LogInfo($"Feat rise for {animation}");
             }
                 break;
             case { name: "anim_traps" }:
             {
                 var missile = animation.GetClipByName("sentry_moon_canon_missile");
-                new AnimationAddition([animation], [
-                    new tk2dSpriteAnimationClip
+                AnimationPatch.Push(animation, new tk2dSpriteAnimationClip(missile)
                     {
                         name = "empty",
                         frames = [missile.frames[1]],
@@ -249,7 +256,7 @@ internal static class StartManagerPatch
                         staticAnimation = false,
                         wrapMode = tk2dSpriteAnimationClip.WrapMode.Single
                     }
-                ]).Apply();
+                );
                 Logger.LogInfo($"Feat empty for {animation}");
             }
                 break;
@@ -401,16 +408,6 @@ internal static class StartManagerPatch
             if (directory.EndsWith("新建文件夹")) continue;
             var target = Path.GetFullPath(directory);
             yield return LevelElementLoader.LoadFromFolder(path: target, type: LevelElement.Type.Brush);
-        }
-
-        foreach (var element in LevelElementIndex.Index.Values.Cast<LevelElement>())
-        {
-            switch (element.CustomAsset)
-            {
-                case HumanAsset { RiseAsset: LazyRef lazy } human:
-                    human.RiseAsset = lazy.Fetch() ?? lazy;
-                    break;
-            }
         }
     }
 

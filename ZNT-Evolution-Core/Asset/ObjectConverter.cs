@@ -72,13 +72,6 @@ internal class ObjectConverter : CustomCreationConverter<UnityEngine.Object>
         var key = serializer.Deserialize<string>(reader);
         if (key == null) return null;
 
-        if (type == typeof(LazyRef))
-        {
-            var lazy = ScriptableObject.CreateInstance<LazyRef>();
-            lazy.HierarchyName = key;
-            return lazy;
-        }
-
         if (type == typeof(Shader))
         {
             if (Shader.Find(key) is { } shader) return shader;

@@ -1,12 +1,33 @@
-using Newtonsoft.Json;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
-// ReSharper disable UnusedMemberInSuper.Global
 namespace ZNT.Evolution.Core.Asset;
 
-public abstract class EvolutionAddition<T>(T[] targets) where T : UnityEngine.Object
+public abstract class EvolutionAddition<TK, TV> :
+    ScriptableObject,
+    IReadOnlyCollection<KeyValuePair<TK, TV>>,
+    ISerializationCallbackReceiver
 {
-    [JsonProperty("Targets")]
-    public readonly T[] Targets = targets;
+    public abstract void Push(TK target, TV source);
 
     public abstract void Apply();
+
+    protected abstract void OnDestroy();
+
+    public abstract IEnumerator<KeyValuePair<TK, TV>> GetEnumerator();
+
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+    public abstract int Count { get; }
+
+    public virtual void OnBeforeSerialize()
+    {
+        // ...
+    }
+
+    public virtual void OnAfterDeserialize()
+    {
+        // ...
+    }
 }

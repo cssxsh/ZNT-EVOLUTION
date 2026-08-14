@@ -338,7 +338,7 @@ public class ModContext
             case { Type: "animation.addition", Format: "json" or "bson" }:
             {
                 var addition = ReadAnimationAddition(buffer, resource.Format);
-                Logger.LogDebug($"{resource.Path} -> {addition.Clips.Length} clips");
+                Logger.LogDebug($"{resource.Path} -> {addition}");
             }
                 break;
             // ZNT.Evolution.Core.Asset.CustomVisualEffect
@@ -427,6 +427,13 @@ public class ModContext
                 Logger.LogDebug($"{resource.Path} -> {spawn}");
             }
                 break;
+            // ZNT.Evolution.Core.Asset.AnimationAddition
+            case { Type: "asset.addition", Format: "json" or "bson" }:
+            {
+                var addition = ReadAssetAddition(buffer, resource.Format);
+                Logger.LogDebug($"{resource.Path} -> {addition}");
+            }
+                break;
             // Rotorz.Tile.OrientedBrush
             case { Type: "brush.info", Format: "json" or "bson" }:
             {
@@ -462,14 +469,6 @@ public class ModContext
             {
                 var element = ReadLevelElement(buffer, resource.Format);
                 Logger.LogDebug($"{resource.Path} -> {element}");
-
-                // ReSharper disable once InvertIf
-                if (element is { CustomAsset: HumanAsset { RiseAsset: LazyRef lazy } human } &&
-                    lazy.Fetch() is { } rise)
-                {
-                    human.RiseAsset = rise;
-                    Object.Destroy(lazy);
-                }
 
                 // ReSharper disable once InvertIf
                 if (element is { ElementType: LevelElement.Type.Brush, Brush: null, LinkedElement.Element: not null })
@@ -570,7 +569,7 @@ public class ModContext
     {
         var addition = CustomAssetUtility.DeserializeObject<AnimationAddition>(input, format is "bson");
         addition.Apply();
-        // TODO Acquire(addition);
+        Acquire(addition);
         return addition;
     }
 
@@ -660,6 +659,13 @@ public class ModContext
         var spawn = CustomAssetUtility.DeserializeObject<SpawnPointAsset>(input, format is "bson");
         Acquire(spawn);
         return spawn;
+    }
+
+    private AssetAddition ReadAssetAddition(Stream input, string format)
+    {
+        var addition = CustomAssetUtility.DeserializeObject<AssetAddition>(input, format is "bson");
+        Acquire(addition);
+        return addition;
     }
 
     #endregion

@@ -36,10 +36,6 @@ internal class ObjectContractResolver() : DefaultContractResolver(shareCache: tr
                 property.ShouldSerialize = points => points is List<AttachPoint> { Count: > 0 };
                 property.DefaultValueHandling = DefaultValueHandling.Populate;
                 break;
-            case { Name: nameof(HumanAsset.RiseAsset) }
-                when typeof(HumanAsset).IsAssignableFrom(member.DeclaringType):
-                property.PropertyType = typeof(LazyRef);
-                break;
             case not null
                 when member.IsDefined(typeof(LayerAttribute)):
                 property.PropertyType = typeof(int);
