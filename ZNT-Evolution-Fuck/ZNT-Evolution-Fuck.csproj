@@ -386,7 +386,7 @@
     </ItemGroup>
     <ItemGroup>
         <Compile Include="Properties\AssemblyInfo.cs"/>
-        <Compile Include="SteamManagerPatcher.cs"/>
+        <Compile Include="SteamworksPatcher.cs"/>
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets"/>
     <Target Name="AfterBuild">
