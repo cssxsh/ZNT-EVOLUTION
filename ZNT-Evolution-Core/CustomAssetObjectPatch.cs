@@ -389,8 +389,7 @@ internal static class CustomAssetObjectPatch
         Traverse.Create(__instance).Field<Timer>("refillTimer").Value = timer;
         Traverse.Create(__instance).Field<int>("currentHitCount").Value = hits;
         repulse.GetComponent<ExplosionEditor>().StartExplosion();
-        Traverse.Create(__instance).Field("events").Field<BoolEvent>("OnRage").Value
-            .Invoke(__instance.FreezeOnRage);
+        __instance.Event<BoolEvent>("OnRage").Invoke(__instance.FreezeOnRage);
         return false;
     }
 

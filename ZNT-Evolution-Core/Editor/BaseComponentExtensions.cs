@@ -40,6 +40,12 @@ public static class BaseComponentExtensions
     }
 
     [UsedImplicitly]
+    public static T Event<T>(this BaseComponent component, string name) where T : UnityEngine.Events.UnityEventBase
+    {
+        return Traverse.Create(component).Field("events").Field<T>(name).Value;
+    }
+
+    [UsedImplicitly]
     public static T GetEffect<T>(this Trigger trigger) where T : TriggerEffect
     {
         var effect = trigger.gameObject.GetComponentSafe<T>();

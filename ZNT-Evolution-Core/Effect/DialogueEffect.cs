@@ -13,14 +13,6 @@ public class DialogueEffect : TriggerEffect
     [JsonIgnore]
     private SignalEffect Signal => field ??= GetComponent<SignalEffect>();
 
-    [JsonIgnore]
-    private GameObjectEvent SignalOnDetected =>
-        Traverse.Create(Signal).Field("events").Field<GameObjectEvent>("OnDetected").Value;
-
-    [JsonIgnore]
-    private GameObjectEvent SignalOnOnDetectedExit =>
-        Traverse.Create(Signal).Field("events").Field<GameObjectEvent>("OnDetectedExit").Value;
-
     [SerializeInEditor(name: "Mode")]
     public DetectionMode Mode = DetectionMode.Normal;
 
@@ -43,16 +35,16 @@ public class DialogueEffect : TriggerEffect
         switch (Mode)
         {
             case DetectionMode.Normal:
-                SignalOnDetected.RemoveListener(OnApplyOnGameObject);
-                SignalOnOnDetectedExit.RemoveListener(OnApplyOnGameObject);
+                Signal.Event<GameObjectEvent>("OnDetected").RemoveListener(OnApplyOnGameObject);
+                Signal.Event<GameObjectEvent>("OnDetectedExit").RemoveListener(OnApplyOnGameObject);
                 break;
             case DetectionMode.SignalOnEnter:
-                SignalOnDetected.AddListener(OnApplyOnGameObject);
-                SignalOnOnDetectedExit.RemoveListener(OnApplyOnGameObject);
+                Signal.Event<GameObjectEvent>("OnDetected").AddListener(OnApplyOnGameObject);
+                Signal.Event<GameObjectEvent>("OnDetectedExit").RemoveListener(OnApplyOnGameObject);
                 break;
             case DetectionMode.SignalOnExit:
-                SignalOnDetected.RemoveListener(OnApplyOnGameObject);
-                SignalOnOnDetectedExit.AddListener(OnApplyOnGameObject);
+                Signal.Event<GameObjectEvent>("OnDetected").RemoveListener(OnApplyOnGameObject);
+                Signal.Event<GameObjectEvent>("OnDetectedExit").AddListener(OnApplyOnGameObject);
                 break;
         }
     }
