@@ -79,7 +79,10 @@ internal static class StartManagerPatch
         foreach (var (_, info) in BepInEx.Bootstrap.Chainloader.PluginInfos)
         {
             if (!info.Metadata.GUID.Contains("znt")) continue;
-            AnimationEventHandlerPatch.RegisterAnimationEvent(info.Instance.GetType().Assembly);
+            foreach (var type in info.Instance.GetType().Assembly.GetTypes())
+            {
+                AnimationEventHandlerPatch.RegisterAnimationEvent(type);
+            }
         }
     }
 

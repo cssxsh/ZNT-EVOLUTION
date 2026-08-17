@@ -75,12 +75,6 @@ internal static class AnimationEventHandlerPatch
     }
 
     [UsedImplicitly]
-    public static void RegisterAnimationEvent(Assembly assembly)
-    {
-        foreach (var type in assembly.GetTypes()) RegisterAnimationEvent(type);
-    }
-
-    [UsedImplicitly]
     public static void RegisterAnimationEvent(System.Type type)
     {
         var methods = type.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
