@@ -1,7 +1,9 @@
 using System;
+using HarmonyLib;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
 using UnityEngine;
 
 namespace ZNT.Evolution.Core.Asset;
@@ -18,7 +20,16 @@ internal class FrameworkInputsConverter : CustomCreationConverter<Framework.Inpu
         serializer.TypeNameHandling = TypeNameHandling.Objects;
         try
         {
-            serializer.Serialize(writer, value);
+            Traverse.Create(serializer)
+                .Field("_serializerWriter")
+                .Method("SerializeObject", [
+                    typeof(JsonWriter),
+                    typeof(object),
+                    typeof(JsonObjectContract),
+                    typeof(JsonProperty),
+                    typeof(JsonContract)
+                ])
+                .GetValue(writer, value, serializer.ContractResolver.ResolveContract(value.GetType()), null, null);
         }
         finally
         {
