@@ -372,8 +372,8 @@ internal static class CustomAssetObjectPatch
         var repulse = Traverse.Create(__instance).Field<GameObject>("repulse").Value;
         if (repulse is null) return false;
         var flags = DamageFlagsConverter.GetDamageFlags(__instance.DamageType);
-        var damage = param.GetDamageType();
-        if (flags.All(flag => flag != DamageType.None && flag != damage)) return false;
+        var damage = DamageFlagsConverter.GetDamageFlags(param.GetDamageType());
+        if (!(flags is 0 || flags.HasFlag(damage))) return false;
         var timer = Traverse.Create(__instance).Field<Timer>("refillTimer").Value;
         var hits = Traverse.Create(__instance).Field<int>("currentHitCount").Value;
         if (--hits > 0)

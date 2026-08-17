@@ -26,15 +26,16 @@ internal class ObjectContractResolver() : DefaultContractResolver(shareCache: tr
                 when member.IsDefined(typeof(NonSerializedAttribute)):
             case FieldInfo { IsPrivate: true }
                 when !member.IsDefined(typeof(SerializeField)):
-            case { Name: nameof(LevelElement.SpriteDefinition) }
-                when typeof(LevelElement).IsAssignableFrom(member.DeclaringType):
+            case { Name: nameof(LevelElement.SpriteDefinition) } when typeof(LevelElement) == member.DeclaringType:
                 property.Ignored = true;
                 break;
-            case { Name: nameof(LevelElement.AttachPoints) }
-                when typeof(LevelElement).IsAssignableFrom(member.DeclaringType):
+            case { Name: nameof(LevelElement.AttachPoints) } when typeof(LevelElement) == member.DeclaringType:
                 property.DefaultValue ??= new List<AttachPoint>();
                 property.ShouldSerialize = points => points is List<AttachPoint> { Count: > 0 };
                 property.DefaultValueHandling = DefaultValueHandling.Populate;
+                break;
+            case { Name: nameof(HumanAsset.RageDamageType) } when typeof(HumanAsset) == member.DeclaringType:
+                property.Converter = property.MemberConverter = DamageFlagsConverter.Instance;
                 break;
             case not null
                 when member.IsDefined(typeof(LayerAttribute)):

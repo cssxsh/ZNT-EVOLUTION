@@ -29,7 +29,6 @@ public static class CustomAssetUtility
             new GenericDictionaryConverter(),
             new ObjectConverter(),
             new ExplodeSurfaceConverter(),
-            new DamageFlagsConverter(),
             new StringEnumConverter(),
             new LayerMaskConverter(),
             new ColorConverter(),
