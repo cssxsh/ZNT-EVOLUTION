@@ -51,10 +51,24 @@ internal static class Program
     }
 
     // ReSharper disable once UnusedMember.Local
-    private static string GetName(this AssetExternal asset)
+    private static AssetExternal GetGameObject(this AssetExternal asset)
     {
-        var o = Manager.GetExtAsset(asset.file, asset.baseField["m_GameObject"]);
-        return (o.baseField ?? asset.baseField)["m_Name"].AsString;
+        return (AssetClassID)asset.info.TypeId switch
+        {
+            AssetClassID.GameObject => asset,
+            _ => Manager.GetExtAsset(asset.file, asset.baseField["m_GameObject"]),
+        };
+    }
+
+    // ReSharper disable once UnusedMember.Local
+    private static string GetPath(this AssetExternal asset)
+    {
+        var o = asset.GetGameObject();
+        var name = o.baseField["m_Name"].AsString;
+        var transform = Manager.GetExtAsset(o.file, o.baseField["m_Component.Array"][0]["component"]);
+        if (transform.baseField["m_Father"]["m_PathID"].AsLong is 0) return name;
+        var father = Manager.GetExtAsset(transform.file, transform.baseField["m_Father"]);
+        return $"{father.GetPath()}/{name}";
     }
 
     // ReSharper disable once UnusedMember.Local
@@ -144,14 +158,14 @@ internal static class Program
     }
 
     // ReSharper disable once UnusedMember.Local
-    private static IEnumerable<AssetExternal> LoadBaseBehaviour()
+    private static IEnumerable<AssetExternal> LoadMonoBehaviour(string type)
     {
         return
             from assets in LoadAssetsFiles()
             from asset in assets.file.GetAssetsOfType(AssetClassID.MonoBehaviour)
             let fields = Manager.GetBaseField(assets, asset)
             let script = Manager.GetExtAsset(assets, fields["m_Script"])
-            where script.baseField["m_ClassName"].AsString == "BaseBehaviour"
+            where script.baseField["m_ClassName"].AsString == type
             select new AssetExternal { file = assets, baseField = fields, info = asset };
     }
 
