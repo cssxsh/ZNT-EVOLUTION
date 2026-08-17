@@ -332,8 +332,8 @@ internal static class StartManagerPatch
                 _ = prefab.GetComponentSafe<SignalSenderLinker>();
                 _ = prefab.GetComponentSafe<LayerEditor>();
                 break;
-            case StairBehaviour:
-                _ = prefab.GetComponentSafe<StairEditor>();
+            case StairBehaviour stair:
+                _ = stair.gameObject.GetComponentSafe<StairEditor>();
                 break;
             case TutorialLoader:
                 _ = prefab.GetComponentSafe<TutorialBreakingNews>();
