@@ -46,6 +46,12 @@ public static class BaseComponentExtensions
     }
 
     [UsedImplicitly]
+    public static void SetSerialize(this SerialIdentifier identifier, bool value)
+    {
+        Traverse.Create(identifier).Field<bool>("serialize").Value = value;
+    }
+
+    [UsedImplicitly]
     public static T GetEffect<T>(this Trigger trigger) where T : TriggerEffect
     {
         var effect = trigger.gameObject.GetComponentSafe<T>();

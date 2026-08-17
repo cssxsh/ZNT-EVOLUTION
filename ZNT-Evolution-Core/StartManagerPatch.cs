@@ -281,30 +281,10 @@ internal static class StartManagerPatch
 
     private static void HandleAsset(GameObject prefab)
     {
-        if (prefab.GetComponentInChildren<Health>() is { } health)
+        if (prefab.TryGetComponent(out Health health))
         {
             health.EditorVisibility.CustomName ??= nameof(Health);
             health.SetVisible(true);
-            if (health.name is "Components" &&
-                health.gameObject.GetComponentSafe<SignalSenderLinker>() is { ExcludedComponents: null } linker)
-            {
-                linker.ExcludedComponents ??= [];
-                linker.ExcludedGameObjects ??= linker.gameObject.GetChildren(true);
-                var proxy = linker.GetComponentInChildren<HealthSignalProxy>();
-                if (proxy)
-                {
-                    linker.ExcludedGameObjects.Remove(proxy.gameObject);
-                    linker.ExcludedGameObjects.Add(health.gameObject);
-                }
-            }
-        }
-
-        if (prefab.GetComponentInChildren<RayConeDetection>() is { } vision)
-        {
-            var identifier = vision.GetComponent<SerialIdentifier>();
-            Traverse.Create(identifier).Field<bool>("serialize").Value = true;
-            vision.SetVisible(true);
-            vision.SetIgnoreSerialization(false);
         }
 
         if (prefab.TryGetComponent(out OneWayCollider collider))
@@ -318,7 +298,8 @@ internal static class StartManagerPatch
             }
         }
 
-        switch (prefab.GetComponentInChildren<BaseBehaviour>())
+        switch (prefab.GetComponent<BaseBehaviour>() ??
+                prefab.transform.Find("Behaviour")?.GetComponent<BaseBehaviour>())
         {
             case BarricadeBehaviour:
             case BonusBarrelBehaviour:
@@ -349,13 +330,60 @@ internal static class StartManagerPatch
                 _ = prefab.GetComponentSafe<LayerEditor>();
                 _ = prefab.GetComponentSafe<SpriteEditor>();
                 break;
-            case SentryGunBehaviour:
+            case SentryGunBehaviour sentry:
                 _ = prefab.GetComponentSafe<LayerEditor>();
                 _ = prefab.GetComponentSafe<SpriteEditor>();
+                sentry.Vision.Detection.SetVisible(true);
+                sentry.Vision.Detection.SetIgnoreSerialization(false);
+                sentry.Vision.Detection.GetComponent<SerialIdentifier>().SetSerialize(true);
+                sentry.Health.EditorVisibility.CustomName ??= nameof(Health);
+                sentry.Health.SetVisible(true);
+            {
+                var components = sentry.Health.gameObject;
+                if (components.GetComponentSafe<SignalSenderLinker>() is { ExcludedComponents: null } linker)
+                {
+                    linker.ExcludedComponents ??= [];
+                    linker.ExcludedGameObjects ??= linker.gameObject.GetChildren(true);
+                }
+            }
                 break;
-            case HumanBehaviour:
+            case ZombieBehaviour zombie:
+                zombie.Vision.Detection.SetVisible(true);
+                zombie.Vision.Detection.SetIgnoreSerialization(false);
+                zombie.Vision.Detection.GetComponent<SerialIdentifier>().SetSerialize(true);
+                zombie.Health.EditorVisibility.CustomName ??= nameof(Health);
+                zombie.Health.SetVisible(true);
+            {
+                var components = zombie.Health.gameObject;
+                if (components.GetComponentSafe<SignalSenderLinker>() is { ExcludedComponents: null } linker)
+                {
+                    linker.ExcludedComponents ??= [];
+                    linker.ExcludedGameObjects ??= linker.gameObject.GetChildren(true);
+                }
+            }
+                break;
+            case HumanBehaviour human:
                 _ = prefab.GetComponentSafe<HumanEditor>();
                 _ = prefab.GetComponentSafe<SpriteEditor>();
+                human.Vision.Detection.SetVisible(true);
+                human.Vision.Detection.SetIgnoreSerialization(false);
+                human.Vision.Detection.GetComponent<SerialIdentifier>().SetSerialize(true);
+                human.Health.EditorVisibility.CustomName ??= nameof(Health);
+                human.Health.SetVisible(true);
+            {
+                var components = human.Health.gameObject;
+                if (components.GetComponentSafe<SignalSenderLinker>() is { ExcludedComponents: null } linker)
+                {
+                    linker.ExcludedComponents ??= [];
+                    linker.ExcludedGameObjects ??= linker.gameObject.GetChildren(true);
+                    var proxy = linker.GetComponentInChildren<HealthSignalProxy>();
+                    if (proxy)
+                    {
+                        linker.ExcludedGameObjects.Remove(proxy.gameObject);
+                        linker.ExcludedGameObjects.Add(components);
+                    }
+                }
+            }
                 break;
         }
     }
