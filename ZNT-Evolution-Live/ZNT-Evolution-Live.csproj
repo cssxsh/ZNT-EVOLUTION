@@ -127,10 +127,6 @@
             <HintPath>$(ZNTGamePath)\znt_Data\Managed\System.Security.dll</HintPath>
             <Private>False</Private>
         </Reference>
-        <Reference Include="System.Threading">
-            <HintPath>$(ZNTGamePath)\znt_Data\Managed\System.Threading.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
         <Reference Include="System.Xml">
             <HintPath>$(ZNTGamePath)\znt_Data\Managed\System.Xml.dll</HintPath>
             <Private>False</Private>
@@ -405,6 +401,9 @@
         <Compile Include="BiliBili\Data\SuperChat.cs"/>
         <Compile Include="BiliBili\Data\SuperChatDelete.cs"/>
         <Compile Include="BiliBili\Data\WebsocketInfo.cs"/>
+        <Compile Include="Net\BsonDataReader.cs"/>
+        <Compile Include="Net\BsonDataWriter.cs"/>
+        <Compile Include="Net\GameClient.cs"/>
     </ItemGroup>
     <ItemGroup>
         <EmbeddedResource Include="Resources\**"/>
@@ -419,12 +418,4 @@
         <Copy SourceFiles="$(OutputPath)\$(AssemblyName).dll" DestinationFiles="$(ZNTGamePath)\BepInEx\plugins\$(MSBuildProjectName)\$(AssemblyName).$(Version).dll"/>
         <Copy SourceFiles="$(OutputPath)\$(AssemblyName).pdb" DestinationFiles="$(ZNTGamePath)\BepInEx\plugins\$(MSBuildProjectName)\$(AssemblyName).$(Version).pdb"/>
     </Target>
-    <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-         Other similar extension points exist, see Microsoft.Common.targets.
-    <Target Name="BeforeBuild">
-    </Target>
-    <Target Name="AfterBuild">
-    </Target>
-    -->
-
 </Project>

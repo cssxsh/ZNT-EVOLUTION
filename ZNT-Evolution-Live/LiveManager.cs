@@ -10,6 +10,7 @@ using JetBrains.Annotations;
 using UnityEngine.Networking;
 using ZNT.Evolution.Live.BiliBili;
 using ZNT.Evolution.Live.BiliBili.Data;
+using ZNT.Evolution.Live.Net;
 using BepInExLogger = BepInEx.Logging.Logger;
 
 // ReSharper disable InconsistentNaming
@@ -59,6 +60,7 @@ public class LiveManager : ComponentSingleton<LiveManager>, IActivable, I2.Loc.I
         }
         SourceData.Awake();
         SceneLoader.BeforeLoadScene += Users.Clear;
+        SceneLoader.BeforeLoadScene += SpawnPoints.Clear;
         BiliApi = gameObject.AddComponent<BiliApi>();
         BiliApi.enabled = false;
         // ReSharper disable UnusedParameter.Local
@@ -194,9 +196,9 @@ public class LiveManager : ComponentSingleton<LiveManager>, IActivable, I2.Loc.I
                 text: Icons.AnimationExists(dm.Message) ? dm.Message : $"{dm.UserName}: {dm.Message}",
                 duration: 10);
         }
-        else if (Regex.IsMatch(dm.Message, @"^(\d+)$"))
+        else if (Regex.IsMatch(dm.Message, @"^(\d+)$") &&
+                 SpawnPoints.TryGetValue(dm.Message, out var point))
         {
-            var point = SpawnPoints[dm.Message];
             var asset = Assets[UnityEngine.Random.Range(0, Assets.Count)];
             Users[dm.OpenId] = point.Spawn(asset);
             Users[dm.OpenId].name = dm.OpenId;

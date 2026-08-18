@@ -1,27 +1,37 @@
 using BepInEx;
 using BepInEx.Configuration;
 using HarmonyLib;
+using JetBrains.Annotations;
 
 namespace ZNT.Evolution.Live;
 
 [BepInPlugin(GUID: "xyz.cssxsh.znt.evolution.live", Name: "Evolution Live", Version: "0.1.0")]
 public class EvolutionLivePlugin : BaseUnityPlugin
 {
+    [UsedImplicitly]
     internal static EvolutionLivePlugin Instance;
 
+    [UsedImplicitly]
+    internal static Harmony Harmony;
+
+    [UsedImplicitly]
     internal static ConfigEntry<string> AccessKeyId;
 
+    [UsedImplicitly]
     internal static ConfigEntry<string> AccessKeySecret;
 
+    [UsedImplicitly]
     internal static ConfigEntry<long> AppId;
 
+    [UsedImplicitly]
     internal static ConfigEntry<string> Code;
 
     public void Awake()
     {
         Instance = this;
-        Harmony.CreateAndPatchAll(typeof(MainMenuPatch));
-        Harmony.CreateAndPatchAll(typeof(CharacterSpawnPointPatch));
+        Harmony ??= new Harmony(Info.Metadata.GUID);
+        Harmony.PatchAll(typeof(MainMenuPatch));
+        Harmony.PatchAll(typeof(CharacterSpawnPointPatch));
     }
 
     public void Start()

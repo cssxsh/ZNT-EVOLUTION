@@ -1,6 +1,7 @@
 using System;
 using BepInEx.Logging;
 using HarmonyLib;
+using JetBrains.Annotations;
 using UnityEngine;
 using BepInExLogger = BepInEx.Logging.Logger;
 
@@ -9,6 +10,7 @@ namespace ZNT.Evolution.Live;
 
 public static class CharacterSpawnPointPatch
 {
+    [UsedImplicitly]
     private static readonly ManualLogSource Logger = BepInExLogger.CreateLogSource(nameof(CharacterSpawnPoint));
 
     // ReSharper disable Unity.PerformanceAnalysis
@@ -53,7 +55,7 @@ public static class CharacterSpawnPointPatch
     [HarmonyPatch(typeof(CharacterSpawnPoint), "Start")]
     public static void Start(CharacterSpawnPoint __instance)
     {
-        if (__instance.Active) return;
+        // if (__instance.Active) return;
         if (Traverse.Create(__instance).Field<Enum>("spawnType").Value.ToString() is not "Human") return;
         if (GameManager.Instance is null) return;
         var system = GameManager.Instance.DecorSystems[DecorSystemLayer.LayerType.Foreground];
@@ -93,18 +95,6 @@ public static class CharacterSpawnPointPatch
                     LiveManager.SpawnPoints["10"] = __instance;
                     return;
             }
-        }
-    }
-
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(SpawnPoint), "StopSpawn")]
-    public static void StopSpawn(SpawnPoint __instance)
-    {
-        foreach (var (key, value) in LiveManager.SpawnPoints)
-        {
-            if (value != __instance) continue;
-            LiveManager.SpawnPoints.Remove(key);
-            return;
         }
     }
 
