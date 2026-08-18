@@ -99,10 +99,10 @@ public static class ModManager
     public static async Task ReloadAll()
     {
         await UnloadAll();
+        System.GC.Collect();
         await LoadAll();
     }
 
-    [UsedImplicitly]
     private static IEnumerable<string> ModsFolder()
     {
         if (Directory.Exists(ModsPath)) yield return ModsPath;
