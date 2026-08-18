@@ -98,6 +98,7 @@ internal static class SceneLoaderPatch
     [HarmonyPatch(typeof(MainMenu), "Start")]
     public static void MainMenuScene(MainMenu __instance)
     {
+        Logger.LogInfo("Update MainMenuScene");
         var stats = (RectTransform)__instance.transform.Find("Canvas/Stats Button");
         var mod = Object.Instantiate(original: stats, parent: stats.parent);
         mod.name = "Mod Button";
@@ -309,6 +310,19 @@ internal static class SceneLoaderPatch
         reset.Find("Text Default").GetComponent<I2.Loc.Localize>().Term = $"Evolution/{name}_Reset";
 
         return panel;
+    }
+
+    #endregion
+
+    #region EditorStartScene
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(PublishChapterMenu), "SelectDestination")]
+    public static void SelectDestination(PublishChapterMenu __instance, int value)
+    {
+        Traverse.Create(__instance)
+            .Field<CanvasGroup>("chapterGroup").Value
+            .transform.Find("Visible").gameObject.SetActive(value is 0);
     }
 
     #endregion
