@@ -399,6 +399,7 @@
         <Compile Include="EvolutionCorePlugin.cs"/>
         <Compile Include="GlobalSettingsPatch.cs"/>
         <Compile Include="LevelElementLoader.cs"/>
+        <Compile Include="PublishManagerPatch.cs"/>
         <Compile Include="SceneLoaderPatch.cs"/>
         <Compile Include="SnakeFeetPatch.cs"/>
         <Compile Include="StartManagerPatch.cs"/>

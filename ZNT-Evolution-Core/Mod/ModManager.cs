@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BepInEx.Logging;
 using JetBrains.Annotations;
+using Steamworks;
 using BepInExLogger = BepInEx.Logging.Logger;
 
 namespace ZNT.Evolution.Core.Mod;
@@ -28,28 +29,32 @@ public static class ModManager
     {
         var allocated = new List<ModContext>();
 
-        foreach (var path in Directory.EnumerateFileSystemEntries(ModsPath))
+        foreach (var folder in ModsFolder())
         {
-            if (path.EndsWith(".zip") || path.EndsWith(".mod"))
+            Logger.LogDebug($"find mod from '{folder}'");
+            foreach (var path in Directory.EnumerateFileSystemEntries(folder))
             {
-                Logger.LogDebug($"allocate context from package '{path}'");
-            }
-            else if (Directory.Exists(path) && File.Exists($"{path}/metadata.json"))
-            {
-                Logger.LogDebug($"allocate context from folder '{path}'");
-            }
-            else
-            {
-                continue;
-            }
+                if (path.EndsWith(".zip") || path.EndsWith(".mod"))
+                {
+                    Logger.LogDebug($"allocate context from package '{path}'");
+                }
+                else if (Directory.Exists(path) && File.Exists($"{path}/metadata.json"))
+                {
+                    Logger.LogDebug($"allocate context from folder '{path}'");
+                }
+                else
+                {
+                    continue;
+                }
 
-            try
-            {
-                allocated.Add(ModContext.Allocate(path));
-            }
-            catch (System.Exception e)
-            {
-                Logger.LogError(e);
+                try
+                {
+                    allocated.Add(ModContext.Allocate(path));
+                }
+                catch (System.Exception e)
+                {
+                    Logger.LogError(e);
+                }
             }
         }
 
@@ -95,5 +100,22 @@ public static class ModManager
     {
         await UnloadAll();
         await LoadAll();
+    }
+
+    [UsedImplicitly]
+    private static IEnumerable<string> ModsFolder()
+    {
+        if (Directory.Exists(ModsPath)) yield return ModsPath;
+
+        var count = SteamUGC.GetNumSubscribedItems();
+        var ids = new PublishedFileId_t[count];
+        _ = SteamUGC.GetSubscribedItems(ids, count);
+        foreach (var id in ids)
+        {
+            _ = SteamUGC.GetItemInstallInfo(id, out _, out var folder, 1024U, out _);
+            if (folder is null) continue;
+            var path = $"{folder}/Mods";
+            if (Directory.Exists(path)) yield return path;
+        }
     }
 }

@@ -475,7 +475,7 @@ internal static class StartManagerPatch
     private static IEnumerator LoadModsFolder()
     {
         ModManager.ModsPath ??= Path.Combine(Application.dataPath, "Mods");
-        Logger.LogInfo($"Loading Mods Folder '{ModManager.ModsPath}'");
+        Logger.LogInfo("Loading Mods Folder");
         if (!Directory.Exists(ModManager.ModsPath)) Directory.CreateDirectory(ModManager.ModsPath);
         yield return ModManager.LoadAll().ToCoroutine();
     }
