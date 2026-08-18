@@ -509,14 +509,5 @@ internal static class CustomAssetObjectPatch
         editor?.SpeedTween(__instance, __instance.Speed, 0);
     }
 
-    [HarmonyPrefix]
-    [HarmonyPatch(typeof(ResizableParticleSystem), "SetActive", typeof(bool))]
-    private static bool SetActive(ResizableParticleSystem __instance, bool state)
-    {
-        if (__instance is not FogOfWar fog) return true;
-        fog.SetActive(state);
-        return false;
-    }
-
     #endregion
 }

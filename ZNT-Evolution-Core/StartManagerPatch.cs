@@ -73,7 +73,6 @@ internal static class StartManagerPatch
         AnimationPatch.Apply();
         AssetPatch.Apply();
         InvisibleShield.PoolPrefab();
-        FogOfWar.PoolPrefab();
         SphereBuffEffect.PoolPrefab();
         SphereLaoAerEffect.PoolPrefab();
         foreach (var (_, info) in BepInEx.Bootstrap.Chainloader.PluginInfos)
