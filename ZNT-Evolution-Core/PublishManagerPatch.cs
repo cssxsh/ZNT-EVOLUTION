@@ -28,9 +28,10 @@ internal static class PublishManagerPatch
                      .Where(context => context.Metadata.Link == steam_link || context.Metadata.Link == web_link))
         {
             Logger.LogInfo($"Copy {context.Path} to {folder}");
+            var prefix = Path.GetDirectoryName(context.Path)!;
             foreach (var file in context.Files())
             {
-                var dest = folder + file.Substring(context.Path.Length);
+                var dest = file.Replace(prefix, folder);
                 var directory = Path.GetDirectoryName(dest)!;
                 if (!Directory.Exists(directory)) Directory.CreateDirectory(directory);
                 File.Copy(file, dest);
