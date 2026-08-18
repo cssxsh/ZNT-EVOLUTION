@@ -25,7 +25,7 @@ internal class ObjectContractResolver() : DefaultContractResolver(shareCache: tr
             case not null
                 when member.IsDefined(typeof(NonSerializedAttribute)):
             case FieldInfo { IsPrivate: true }
-                when !member.IsDefined(typeof(SerializeField)):
+                when !(member.IsDefined(typeof(SerializeField)) || member.IsDefined(typeof(JsonPropertyAttribute))):
             case { Name: nameof(LevelElement.SpriteDefinition) } when typeof(LevelElement) == member.DeclaringType:
                 property.Ignored = true;
                 break;
