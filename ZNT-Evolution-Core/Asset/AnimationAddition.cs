@@ -32,16 +32,17 @@ internal class AnimationAddition : EvolutionAddition<tk2dSpriteAnimation, tk2dSp
     {
         foreach (var (animation, clip) in this)
         {
+            if (animation is null || clip is null) continue;
             if (animation.clips.Contains(clip)) continue;
             var id = animation.GetClipIdByName(clip.name);
             if (id != -1) Logger.LogWarning($"{animation.name} already exists clip {clip.name} at {id}");
             animation.clips = animation.clips.AddToArray(clip);
-            Traverse.Create(animation).Field<Dictionary<string, int>>("idNameCache").Value = null;
+            Traverse.Create(animation).Field<Dictionary<string, int>>("clipNameCache").Value = null;
         }
 
         foreach (var (animation, _) in this)
         {
-            animation.InitializeClipCache();
+            animation?.InitializeClipCache();
         }
     }
 
@@ -49,14 +50,15 @@ internal class AnimationAddition : EvolutionAddition<tk2dSpriteAnimation, tk2dSp
     {
         foreach (var (animation, clip) in this)
         {
+            if (animation is null || clip is null) continue;
             if (!animation.clips.Contains(clip)) continue;
             animation.clips = animation.clips.Where(item => item != clip).ToArray();
-            Traverse.Create(animation).Field<Dictionary<string, int>>("idNameCache").Value = null;
+            Traverse.Create(animation).Field<Dictionary<string, int>>("clipNameCache").Value = null;
         }
 
         foreach (var (animation, _) in this)
         {
-            animation.InitializeClipCache();
+            animation?.InitializeClipCache();
         }
     }
 
@@ -67,7 +69,6 @@ internal class AnimationAddition : EvolutionAddition<tk2dSpriteAnimation, tk2dSp
         {
             var animation = Targets[i];
             var clip = Clips[i];
-            if (animation is null || clip is null) continue;
             yield return new KeyValuePair<tk2dSpriteAnimation, tk2dSpriteAnimationClip>(animation, clip);
         }
     }

@@ -31,6 +31,7 @@ internal class AssetAddition : EvolutionAddition<CustomAsset, UnityEngine.Object
     {
         foreach (var (target, source) in this)
         {
+            if (target is null || source is null) continue;
             switch (target, source)
             {
                 case (MovingObjectAsset moving, tk2dSpriteAnimation animation):
@@ -97,10 +98,9 @@ internal class AssetAddition : EvolutionAddition<CustomAsset, UnityEngine.Object
         var length = Count;
         for (var i = 0; i < length; i++)
         {
-            var element = Targets[i];
-            var asset = Assets[i];
-            if (element is null || asset is null) continue;
-            yield return new KeyValuePair<CustomAsset, UnityEngine.Object>(element, asset);
+            var target = Targets[i];
+            var source = Assets[i];
+            yield return new KeyValuePair<CustomAsset, UnityEngine.Object>(target, source);
         }
     }
 
