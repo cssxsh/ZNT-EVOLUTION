@@ -142,11 +142,17 @@ public static class AssetElementBinder
                     Traverse.Create(TMPro.MaterialReferenceManager.instance)
                         .Field<Dictionary<int, TMPro.TMP_FontAsset>>("m_FontAssetReferenceLookup")
                         .Value.Remove(font.hashCode);
+                    Traverse.Create(TMPro.MaterialReferenceManager.instance)
+                        .Field<Dictionary<int, Material>>("m_FontMaterialReferenceLookup")
+                        .Value.Remove(font.materialHashCode);
                     TMPro.TMP_Settings.fallbackFontAssets.Remove(font);
                     break;
                 case TMPro.TMP_SpriteAsset emoji:
                     Traverse.Create(TMPro.MaterialReferenceManager.instance)
                         .Field<Dictionary<int, TMPro.TMP_SpriteAsset>>("m_SpriteAssetReferenceLookup")
+                        .Value.Remove(emoji.hashCode);
+                    Traverse.Create(TMPro.MaterialReferenceManager.instance)
+                        .Field<Dictionary<int, Material>>("m_FontMaterialReferenceLookup")
                         .Value.Remove(emoji.hashCode);
                     if (TMPro.TMP_Settings.defaultSpriteAsset != emoji) break;
                     Traverse.Create(TMPro.TMP_Settings.instance)
