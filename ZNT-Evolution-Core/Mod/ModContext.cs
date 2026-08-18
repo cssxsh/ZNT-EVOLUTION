@@ -330,8 +330,7 @@ public class ModContext
             case { Type: "material.merge", Format: "json" or "bson" }:
             {
                 var material = ReadMaterial(buffer, resource.Format);
-                var texture = material.mainTexture;
-                Logger.LogDebug($"{resource.Path} -> {material} with {texture}, {material.shader}");
+                Logger.LogDebug($"{resource.Path} -> {material} with {material.shader}");
             }
                 break;
             // tk2dSpriteCollectionData
@@ -530,7 +529,7 @@ public class ModContext
     private Texture2D ReadTexture2D(string name, byte[] input)
     {
         var texture = new Texture2D(0, 0, TextureFormat.RGBA32, false, true);
-        texture.LoadImage(input);
+        texture.LoadImage(input, true);
         texture.name = name;
         texture.filterMode = FilterMode.Point;
         texture.wrapMode = TextureWrapMode.Clamp;
