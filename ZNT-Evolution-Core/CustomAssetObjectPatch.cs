@@ -406,6 +406,8 @@ internal static class CustomAssetObjectPatch
     public static void Initialize(Stopper __instance, bool block, int maxOpponents)
     {
         var detector = Traverse.Create(__instance).Field<BoxDetection>("detector").Value;
+        var collider = detector.GetComponent<Collider2D>();
+        SnakeFeetPatch.Opponents[collider] = block ? maxOpponents : 0;
         var effect = detector.GetComponent<Trigger>().GetEffect<CharacterAllocationEffect>();
         effect.capacity = block ? maxOpponents : 0;
         if (block) effect.StartEffect();
@@ -427,6 +429,8 @@ internal static class CustomAssetObjectPatch
     public static void OnDespawned(Stopper __instance)
     {
         var detector = Traverse.Create(__instance).Field<BoxDetection>("detector").Value;
+        var collider = detector.GetComponent<Collider2D>();
+        SnakeFeetPatch.Opponents.Remove(collider);
         var effect = detector.GetComponent<CharacterAllocationEffect>();
         effect.StopEffect();
     }

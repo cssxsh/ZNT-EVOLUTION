@@ -71,6 +71,8 @@ internal class SnakeFeetPatch
         }
     }
 
+    internal static readonly Dictionary<Collider2D, int> Opponents = new();
+
     [HarmonyPrefix]
     [HarmonyPatch(typeof(ExplosionEffect), "OnApplyOnGameObject")]
     public static void OnApplyOnGameObject(ExplosionEffect __instance, GameObject target, out float __state)
@@ -86,11 +88,7 @@ internal class SnakeFeetPatch
         for (var i = 0; i < count; i++)
         {
             var hit = DetectionHelper.DistanceCheck[i];
-            var stopper = hit.collider.GetComponentInParent<Stopper>();
-            if (stopper is null) continue;
-            var opponents = Traverse.Create(stopper).Field<bool>("blockOpponents").Value
-                ? Traverse.Create(stopper).Field<int>("MaxOpponents").Value
-                : 0;
+            var opponents = Opponents.GetValueOrDefault(hit.collider, 0);
             total += opponents;
         }
 
