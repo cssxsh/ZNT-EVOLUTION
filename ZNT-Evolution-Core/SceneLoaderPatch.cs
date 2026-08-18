@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -15,6 +16,7 @@ using ZNT.LevelEditor;
 using BepInExLogger = BepInEx.Logging.Logger;
 
 // ReSharper disable InconsistentNaming
+// ReSharper disable Unity.PerformanceCriticalCodeInvocation
 namespace ZNT.Evolution.Core;
 
 internal static class SceneLoaderPatch
@@ -22,6 +24,13 @@ internal static class SceneLoaderPatch
     private static readonly ManualLogSource Logger = BepInExLogger.CreateLogSource(nameof(SceneLoader));
 
     private static bool HasModChanged;
+
+    private static IEnumerator ToCoroutine<T>(this T task, System.Action<T> @finally = null) where T : Task
+    {
+        while (!task.IsCompleted) yield return null;
+        if (task.Exception != null) Logger.LogError(task.Exception.GetBaseException());
+        @finally?.Invoke(task);
+    }
 
     private static void ToggleActivation(this RectTransform transform)
     {
@@ -131,16 +140,12 @@ internal static class SceneLoaderPatch
     private static void AddModPanel(this SettingsMenu menu)
     {
         var panel = menu.AddPanel("Mod");
-        var reset = (RectTransform)panel.Find("Reset Entry/Container/ResetButton");
-        reset.GetComponent<Button>().OnClick(() =>
+        var reset = panel.Find("Reset Entry/Container/ResetButton").GetComponent<Button>();
+        reset.OnClick(() =>
         {
             Logger.LogInfo("Reloading Mods Folder");
             HasModChanged = true;
-            ModManager.ReloadAll().ContinueWith(task =>
-            {
-                if (task.Exception != null) Logger.LogError(task.Exception);
-                menu.FlushModPanel();
-            }, TaskScheduler.FromCurrentSynchronizationContext());
+            reset.StartCoroutine(ModManager.ReloadAll().ToCoroutine(_ => menu.FlushModPanel()));
         });
 
         menu.FlushModPanel();
@@ -160,6 +165,20 @@ internal static class SceneLoaderPatch
             item.gameObject.SetActive(false);
             var localize = item.Find("Text").GetComponent<I2.Loc.Localize>();
             localize.Term = context.Metadata.GetTermData().Term;
+            localize.gameObject.AddComponent<Button>().onClick.AddListener(() =>
+            {
+                switch (context.Metadata.Link)
+                {
+                    case null or "":
+                        break;
+                    case not null when context.Metadata.Link.StartsWith("steam://"):
+                        Steamworks.SteamFriends.ActivateGameOverlayToWebPage(context.Metadata.Link);
+                        break;
+                    default:
+                        Application.OpenURL(context.Metadata.Link);
+                        break;
+                }
+            });
             var toggle = item.Find("Toggle").GetComponent<Toggle>();
             toggle.SetIsOnWithoutNotify(context.State is ModState.Loaded);
             toggle.OnValueChanged(value =>
@@ -167,20 +186,18 @@ internal static class SceneLoaderPatch
                 switch (value)
                 {
                     case true when context.IsLoadReady():
-                        context.Load().ContinueWith(task =>
+                        toggle.StartCoroutine(context.Load().ToCoroutine(_ =>
                         {
                             HasModChanged = true;
-                            if (task.Exception != null) Logger.LogError(task.Exception);
                             toggle.SetIsOnWithoutNotify(context.State is ModState.Loaded);
-                        }, TaskScheduler.FromCurrentSynchronizationContext());
+                        }));
                         break;
                     case false when context.IsUnloadReady():
-                        context.Unload().ContinueWith(task =>
+                        toggle.StartCoroutine(context.Unload().ToCoroutine(_ =>
                         {
                             HasModChanged = true;
-                            if (task.Exception != null) Logger.LogError(task.Exception);
                             toggle.SetIsOnWithoutNotify(context.State is ModState.Loaded);
-                        }, TaskScheduler.FromCurrentSynchronizationContext());
+                        }));
                         break;
                     default:
                         toggle.SetIsOnWithoutNotify(context.State is ModState.Loaded);

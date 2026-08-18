@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.IO.Compression;
 using Newtonsoft.Json;
@@ -9,12 +8,18 @@ namespace ZNT.Evolution.Core.Mod;
 
 // ReSharper disable once ClassNeverInstantiated.Global
 [JsonObject]
-public class ModMetadata(string id, string name, string version, Dictionary<string, string> dependencies)
+public class ModMetadata(
+    string id,
+    string name,
+    string version,
+    string link = null,
+    Dictionary<string, string> dependencies = null)
 {
     public readonly string Id = id;
     public readonly string Name = name;
     public readonly string Version = version;
-    public readonly ReadOnlyDictionary<string, string> Dependencies = new(dependencies);
+    public readonly string Link = link;
+    public readonly IReadOnlyDictionary<string, string> Dependencies = dependencies ?? new(0);
 
     public static ModMetadata FromPackage(string path)
     {
