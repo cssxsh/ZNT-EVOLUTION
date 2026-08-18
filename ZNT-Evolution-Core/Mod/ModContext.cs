@@ -84,6 +84,8 @@ public class ModContext
 
     public readonly I2.Loc.LanguageSourceData Localization;
 
+    public string Title => $"{Metadata.Name} v{Metadata.Version}";
+
     public System.Version Version => System.Version.Parse(Metadata.Version);
 
     private ModContext(string path, ModMetadata metadata)
@@ -133,7 +135,7 @@ public class ModContext
         {
             if (State is ModState.Loaded)
             {
-                Logger.LogInfo($"[{Metadata.Name} {Metadata.Version}] is already loaded");
+                Logger.LogInfo($"[{Title}] is already loaded");
                 return;
             }
 
@@ -147,13 +149,13 @@ public class ModContext
                 if (Contexts.TryGetValue(id, out var allocated) &&
                     allocated.Version >= need &&
                     allocated.State is ModState.Loaded) continue;
-                throw new AssetException($"[{Metadata.Name} {Metadata.Version}] dependency {id} - {version}]");
+                throw new AssetException($"[{Title}] dependency {id} - {version}]");
             }
 
             using var buffer = new MemoryStream();
             if (Directory.Exists(Path))
             {
-                Logger.LogInfo($"load [{Metadata.Name} {Metadata.Version}] from folder '{Path}'");
+                Logger.LogInfo($"load [{Title}] from folder '{Path}'");
                 var folder = new DirectoryInfo(Path);
                 foreach (var resource in
                          from file in folder.EnumerateFiles("*", SearchOption.AllDirectories)
@@ -181,13 +183,13 @@ public class ModContext
                     }
                     catch (System.Exception e)
                     {
-                        throw new AssetException($"[{Metadata.Name} {Metadata.Version}]", e);
+                        throw new AssetException($"[{Title}]", e);
                     }
                 }
             }
             else
             {
-                Logger.LogInfo($"load [{Metadata.Name} {Metadata.Version}] from package '{Path}'");
+                Logger.LogInfo($"load [{Title}] from package '{Path}'");
                 using var package = ZipStorer.Open(Path, FileAccess.Read);
                 foreach (var resource in
                          from entry in package.ReadCentralDir()
@@ -214,7 +216,7 @@ public class ModContext
                     }
                     catch (System.Exception e)
                     {
-                        throw new AssetException($"[{Metadata.Name} {Metadata.Version}]", e);
+                        throw new AssetException($"[{Title}]", e);
                     }
                 }
             }
@@ -275,7 +277,7 @@ public class ModContext
                 }
                 catch (System.Exception e)
                 {
-                    throw new AssetException($"[{Metadata.Name} {Metadata.Version}]", e);
+                    throw new AssetException($"[{Title}]", e);
                 }
             }
 
