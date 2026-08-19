@@ -373,7 +373,7 @@ internal static class StartManagerPatch
                 sender.ExcludedComponents ??= [];
                 sender.ExcludedGameObjects ??= components.GetChildren(true);
                 var proxy = components.GetComponentInChildren<HealthSignalProxy>();
-                if (proxy)
+                if (sender.ExcludedGameObjects.Contains(proxy.gameObject))
                 {
                     sender.ExcludedGameObjects.Remove(proxy.gameObject);
                     sender.ExcludedGameObjects.Add(components);

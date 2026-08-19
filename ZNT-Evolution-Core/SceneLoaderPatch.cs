@@ -92,10 +92,10 @@ internal static class SceneLoaderPatch
         Logger.LogInfo("Evolution LanguageSource Loaded.");
     }
 
-    private static I2.Loc.TermData GetTermData(this ModMetadata metadata)
+    private static I2.Loc.TermData GetTermData(this ModContext context)
     {
-        var term = _localization.AddTerm($"Evolution/{metadata.Id}");
-        term.SetTranslation(0, $"{metadata.Name} {metadata.Version}");
+        var term = _localization.AddTerm($"Evolution/{context.Metadata.Id}");
+        term.SetTranslation(0, context.Title);
         return term;
     }
 
@@ -164,7 +164,7 @@ internal static class SceneLoaderPatch
             item.name = $"{context.Metadata.Name} Entry";
             item.gameObject.SetActive(false);
             var localize = item.Find("Text").GetComponent<I2.Loc.Localize>();
-            localize.Term = context.Metadata.GetTermData().Term;
+            localize.Term = context.GetTermData().Term;
             localize.gameObject.AddComponent<Button>().onClick.AddListener(() =>
             {
                 switch (context.Metadata.Link)
@@ -598,7 +598,7 @@ internal static class SceneLoaderPatch
     public static bool SetName(this SupportedTypeBinder __instance, MemberInfo member)
     {
         var attribute = member.GetCustomAttribute<SerializeInEditorAttribute>();
-        var name = attribute?.Name is null or "" ? member.Name : attribute.Name;
+        var name = attribute?.Name is null or "" ? member.Name.SplitCamelCase() : attribute.Name;
         var text = Traverse.Create(__instance).Field<Text>("text").Value;
         text.text = name;
         text.transform.parent.name = $"{name} Input";

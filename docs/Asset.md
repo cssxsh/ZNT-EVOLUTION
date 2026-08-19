@@ -620,6 +620,8 @@ ZNT 将其化用为衰减函数，x 轴是标准化的距离，y 轴是倍率
 - `Name` : `string` 菜单栏中的名字
 - `HierarchyName` : `string`
 - `Prefab` : `UnityEngine.Transform` 预制体
+    * `BaseTrap`
+    * `InvisibleTrap`
     * `InvisibleTrigger`
 - `Tag` : [`Tag`](#tag) 标签
 - `Layer` : [`UnityEngine.Layer`](#layer) 图层

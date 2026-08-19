@@ -89,7 +89,7 @@ internal static class CustomAssetObjectPatch
     public static bool Explode(MineBehaviour __instance)
     {
         var prefab = Traverse.Create(__instance).Field<Transform>("explosionPrefab").Value;
-        if (!prefab.IsChildOf(__instance.transform)) return true;
+        if (!(prefab is not null && prefab.IsChildOf(__instance.transform))) return true;
         Traverse.Create(__instance).Field<Trigger>("trigger").Value.enabled = false;
         prefab.GetComponent<ExplosionEditor>().StartExplosion();
         Traverse.Create(__instance).Field<MineAnimationController>("animation").Value.PlayExplosion();
@@ -458,7 +458,7 @@ internal static class CustomAssetObjectPatch
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(OneWayCollider), "Start")]
-    private static IEnumerator Start(IEnumerator __result, OneWayCollider __instance)
+    public static IEnumerator Start(IEnumerator __result, OneWayCollider __instance)
     {
         if (__instance.TryGetComponent(out OneWayEditor _)) yield break;
         yield return __result;
@@ -466,7 +466,7 @@ internal static class CustomAssetObjectPatch
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(TutorialScreen), "SetNews")]
-    private static bool SetNews(TutorialScreen __instance)
+    public static bool SetNews(TutorialScreen __instance)
     {
         var settings = Traverse.Create(__instance).Field<TutorialSettings>("tutorialSettings").Value;
         if (!settings.ShowBreakingNews) return true;
@@ -498,7 +498,7 @@ internal static class CustomAssetObjectPatch
     [HarmonyPostfix]
     [HarmonyPatch(typeof(PropMoveable), "Move", [])]
     [HarmonyPatch(typeof(PropMoveable), "MoveOpposite")]
-    private static void Move(PropMoveable __instance)
+    public static void Move(PropMoveable __instance)
     {
         if (__instance.StopAtNextStep) return;
         var editor = __instance.GetComponent<PropMoveableEditor>();
@@ -507,7 +507,7 @@ internal static class CustomAssetObjectPatch
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(PropMoveable), "Stop")]
-    private static void Stop(PropMoveable __instance)
+    public static void Stop(PropMoveable __instance)
     {
         if (__instance.StopAtNextStep) return;
         var editor = __instance.GetComponent<PropMoveableEditor>();

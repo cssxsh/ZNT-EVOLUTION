@@ -161,7 +161,7 @@ public class ModContext
                          from file in folder.EnumerateFiles("*", SearchOption.AllDirectories)
                          let match = InfoRegex.Match(file.Name)
                          where match.Success
-                         select new ModResource<FileInfo>
+                         let resource = new ModResource<FileInfo>
                          {
                              File = file,
                              Path = file.FullName.Substring(folder.FullName.Length + 1).Replace('\\', '/'),
@@ -169,7 +169,6 @@ public class ModContext
                              Type = match.Groups[2].Value,
                              Format = match.Groups[3].Value
                          }
-                         into resource
                          orderby resource.Order
                          select resource)
                 {
@@ -195,7 +194,7 @@ public class ModContext
                          from entry in package.ReadCentralDir()
                          let match = InfoRegex.Match(entry.FilenameInZip)
                          where match.Success
-                         select new ModResource<ZipFileEntry>
+                         let resource = new ModResource<ZipFileEntry>
                          {
                              File = entry,
                              Path = entry.FilenameInZip,
@@ -203,7 +202,6 @@ public class ModContext
                              Type = match.Groups[2].Value,
                              Format = match.Groups[3].Value
                          }
-                         into resource
                          orderby resource.Order
                          select resource)
                 {

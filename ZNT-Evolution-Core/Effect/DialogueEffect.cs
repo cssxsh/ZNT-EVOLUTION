@@ -1,4 +1,3 @@
-using HarmonyLib;
 using Newtonsoft.Json;
 using UnityEngine;
 using ZNT.Evolution.Core.Editor;
@@ -63,7 +62,7 @@ public class DialogueEffect : TriggerEffect
         dialogue.SetText(Text, Duration);
         dialogue.Show(patroller, patroller.DialogueOffset, Voice);
     }
-    
+
     public enum DetectionMode
     {
         Normal,

@@ -10,7 +10,7 @@
         <AppDesignerFolder>Properties</AppDesignerFolder>
         <RootNamespace>ZNT.Evolution.Core</RootNamespace>
         <AssemblyName>ZNT-Evolution-Core</AssemblyName>
-        <Version>0.7.3</Version>
+        <Version>1.0.0</Version>
         <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
         <FileAlignment>512</FileAlignment>
         <LangVersion>preview</LangVersion>
@@ -125,10 +125,6 @@
         </Reference>
         <Reference Include="System.Security">
             <HintPath>$(ZNTGamePath)\znt_Data\Managed\System.Security.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="System.Threading">
-            <HintPath>$(ZNTGamePath)\znt_Data\Managed\System.Threading.dll</HintPath>
             <Private>False</Private>
         </Reference>
         <Reference Include="System.Xml">
@@ -477,12 +473,4 @@
         <Copy SourceFiles="$(OutputPath)\$(AssemblyName).pdb" DestinationFiles="$(ZNTGamePath)\BepInEx\plugins\$(MSBuildProjectName)\$(AssemblyName).$(Version).pdb"/>
         <Copy SourceFiles="$(OutputPath)\ZipStorer.dll" DestinationFiles="$(ZNTGamePath)\BepInEx\plugins\$(MSBuildProjectName)\ZipStorer.dll"/>
     </Target>
-    <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-         Other similar extension points exist, see Microsoft.Common.targets.
-    <Target Name="BeforeBuild">
-    </Target>
-    <Target Name="AfterBuild">
-    </Target>
-    -->
-
 </Project>

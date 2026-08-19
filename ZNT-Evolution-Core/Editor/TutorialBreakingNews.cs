@@ -26,7 +26,7 @@ public class TutorialBreakingNews : Editor, IEnumerable<LocalizableString>
     public LocalizableString Headline6 = new() { Localize = false, Category = "Headlines" };
 
     [SerializeInEditor(name: "Headline 7")]
-    public LocalizableString Headline7 =  new() { Localize = false, Category = "Headlines" };
+    public LocalizableString Headline7 = new() { Localize = false, Category = "Headlines" };
 
     [SerializeInEditor(name: "Headline 8")]
     public LocalizableString Headline8 = new() { Localize = false, Category = "Headlines" };

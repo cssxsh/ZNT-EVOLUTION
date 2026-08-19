@@ -40,6 +40,7 @@ MOD 放入 `znt_Data/Mods` 目录下
 - `Id` - 插件唯一标识符，不可重复
 - `Name` - 插件名称
 - `Version` - 插件版本
+- `Link` - 插件链接
 - `Dependencies` - 插件依赖
 
 ```json
@@ -47,6 +48,7 @@ MOD 放入 `znt_Data/Mods` 目录下
   "Id": "io.github.cssxsh.znt.mod.example",
   "Name": "Example Mod",
   "Version": "0.1.0.0",
+  "Link": "https://steamcommunity.com/sharedfiles/filedetails/?id=3785243204",
   "Dependencies": {
     "xyz.cssxsh.znt.evolution.core": "0.0.0.0"
   }
