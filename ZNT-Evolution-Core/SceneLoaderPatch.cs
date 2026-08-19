@@ -613,12 +613,13 @@ internal static class SceneLoaderPatch
         __instance.SetName(member);
         var components = Traverse.Create(__instance).Field<UIBehaviour[]>("uiComponents").Value;
         var input = (InputField)components[0];
+        var normal = input.colors.normalColor;
         input.onEndEdit.RemoveAllListeners();
         input.onEndEdit.AddListener(text =>
         {
             if (ColorUtility.TryParseHtmlString(text, out var color))
             {
-                input.colors = input.colors with { normalColor = Color.white };
+                input.colors = input.colors with { normalColor = normal };
                 input.text = "#" + ColorUtility.ToHtmlStringRGBA(color);
                 member.SetMemberValue(component.Data, color);
             }

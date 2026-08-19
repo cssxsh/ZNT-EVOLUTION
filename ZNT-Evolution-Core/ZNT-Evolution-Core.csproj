@@ -437,10 +437,10 @@
         <Compile Include="Asset\SpriteMerge.cs"/>
         <Compile Include="Editor\BaseComponentExtensions.cs"/>
         <Compile Include="Editor\CharacterEditor.cs"/>
-        <Compile Include="Editor\CharacterSpawnPointEditor.cs"/>
         <Compile Include="Editor\Editor.cs"/>
         <Compile Include="Editor\ExplosionEditor.cs"/>
         <Compile Include="Editor\HumanEditor.cs"/>
+        <Compile Include="Editor\HumanSpawnPointEditor.cs"/>
         <Compile Include="Editor\InvisibleShield.cs"/>
         <Compile Include="Editor\LayerEditor.cs"/>
         <Compile Include="Editor\MineTrapEditor.cs"/>

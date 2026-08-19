@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using HarmonyLib;
 using UIWidgets;
 using UnityEngine;
@@ -27,21 +25,6 @@ internal class SnakeFeetPatch
         {
             __instance.Vision.Frequency = frequency;
         }
-    }
-
-    [HarmonyPrefix]
-    [HarmonyPatch(typeof(SpawnCharacterChooser), "OnCreate")]
-    public static void OnCreate(SpawnCharacterChooser __instance)
-    {
-        var spawn = Traverse.Create(__instance).Field<CharacterSpawnPoint>("spawn").Value;
-        if (Traverse.Create(spawn).Field<Enum>("spawnType").Value.ToString() is not "Human") return;
-        var characters = Traverse.Create(__instance).Field<List<CharacterAsset>>("selectableCharacters").Value;
-        characters.AddRange(LevelElementIndex.Index.Values.Cast<LevelElement>()
-            .Where(element => element.Useable)
-            .Select(element => element.CustomAsset)
-            .OfType<HumanAsset>()
-            .Where(asset => !characters.Contains(asset) && asset.AnimationLibrary.AnimationExists("rise"))
-            .Distinct());
     }
 
     [HarmonyPostfix]

@@ -318,11 +318,11 @@ internal static class StartManagerPatch
             case TutorialLoader:
                 _ = prefab.GetComponentSafe<TutorialBreakingNews>();
                 break;
-            case CharacterSpawnPoint:
-                _ = prefab.GetComponentSafe<CharacterSpawnPointEditor>();
+            case CharacterSpawnPoint spawn when spawn.GetSpawnType() is CorpseType.Human:
+                _ = prefab.GetComponentSafe<HumanSpawnPointEditor>();
                 break;
             case SpawnPoint spawn when spawn.SpawnableObjects.Any(asset => asset is MovingObjectAsset):
-                Traverse.Create(spawn).Field("levelEditorOptions").Field<bool>("ShowDamages").Value = true;
+                spawn.ShowDamages(true);
                 break;
             case MovingObjectBehaviour:
                 _ = prefab.GetComponentSafe<PropMoveableEditor>();

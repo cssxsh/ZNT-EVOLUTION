@@ -1,6 +1,4 @@
-using System.Collections.Generic;
 using System.Linq;
-using HarmonyLib;
 using UnityEngine;
 
 namespace ZNT.Evolution.Core.Asset;
@@ -47,12 +45,5 @@ public class SpawnPointAsset : CustomAssetObject
         spawn.Speed = speed;
         spawn.Duration = duration;
         spawn.ApplyDamages = applyDamages;
-        if (spawn is not CharacterSpawnPoint) return;
-        var chooser = gameObject.GetComponent<SpawnCharacterChooser>();
-        var characters = Traverse.Create(chooser).Field<List<CharacterAsset>>("selectableCharacters").Value;
-        characters.Clear();
-        characters.AddRange(spawnableObjects.Cast<CharacterAsset>());
-        Traverse.Create(chooser).Method("OnCreate").GetValue();
-        chooser.OnDeserialized();
     }
 }

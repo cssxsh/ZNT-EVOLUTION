@@ -68,6 +68,42 @@ public static class BaseComponentExtensions
     }
 
     [UsedImplicitly]
+    public static void ShowDirection(this SpawnPoint spawn, bool value)
+    {
+        Traverse.Create(spawn).Field("levelEditorOptions").Field<bool>("ShowDirection").Value = true;
+    }
+
+    [UsedImplicitly]
+    public static void ShowSpeed(this SpawnPoint spawn, bool value)
+    {
+        Traverse.Create(spawn).Field("levelEditorOptions").Field<bool>("ShowSpeed").Value = true;
+    }
+
+    [UsedImplicitly]
+    public static void ShowDuration(this SpawnPoint spawn, bool value)
+    {
+        Traverse.Create(spawn).Field("levelEditorOptions").Field<bool>("ShowDuration").Value = true;
+    }
+
+    [UsedImplicitly]
+    public static void ShowMoveOnStart(this SpawnPoint spawn, bool value)
+    {
+        Traverse.Create(spawn).Field("levelEditorOptions").Field<bool>("ShowMoveOnStart").Value = true;
+    }
+
+    [UsedImplicitly]
+    public static void ShowDamages(this SpawnPoint spawn, bool value)
+    {
+        Traverse.Create(spawn).Field("levelEditorOptions").Field<bool>("ShowDamages").Value = true;
+    }
+
+    [UsedImplicitly]
+    public static CorpseType GetSpawnType(this CharacterSpawnPoint spawn)
+    {
+        return (CorpseType)Traverse.Create(spawn).Field<System.Enum>("spawnType").Value;
+    }
+
+    [UsedImplicitly]
     public static void SetMagazine(this Weapon weapon, int size)
     {
         weapon.DefaultMag = new Magazine(size);
