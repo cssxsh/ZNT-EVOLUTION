@@ -1,6 +1,5 @@
 using System.Linq;
 using System.Reflection;
-using Newtonsoft.Json;
 using UnityEngine;
 using ZNT.LevelEditor;
 
@@ -10,7 +9,6 @@ namespace ZNT.Evolution.Core.Editor;
 [DisallowMultipleComponent]
 public class LayerEditor : Editor, IEditorOverride
 {
-    [JsonIgnore]
     [SerializeInEditor(name: "Main Layer")]
     public int Main
     {
@@ -20,10 +18,8 @@ public class LayerEditor : Editor, IEditorOverride
 
     private GameObject Child(string n) => gameObject.transform.Find(n)?.gameObject;
 
-    [JsonIgnore]
     private GameObject TopCollider => Child(nameof(TopCollider));
 
-    [JsonIgnore]
     [SerializeInEditor(name: "Top Layer")]
     public int Top
     {
@@ -31,10 +27,8 @@ public class LayerEditor : Editor, IEditorOverride
         set => TopCollider?.layer = value;
     }
 
-    [JsonIgnore]
     private GameObject BottomCollider => Child(nameof(BottomCollider));
 
-    [JsonIgnore]
     [SerializeInEditor(name: "Bottom Layer")]
     public int Bottom
     {

@@ -1,5 +1,4 @@
 using System;
-using Newtonsoft.Json;
 using UnityEngine;
 
 namespace ZNT.Evolution.Core.Editor;
@@ -9,7 +8,6 @@ namespace ZNT.Evolution.Core.Editor;
 [DisallowMultipleComponent]
 public class InvisibleShield : Editor, IActivable, IDeserializable
 {
-    [JsonIgnore]
     private BoxCollider2D Collider => field ??= GetComponent<BoxCollider2D>();
 
     [SerializeInEditor(name: "Is Active")]
@@ -29,7 +27,6 @@ public class InvisibleShield : Editor, IActivable, IDeserializable
         };
     } = WallType.Explosion;
 
-    [JsonIgnore]
     [SerializeInEditor(name: "Offset")]
     public Vector2 Offset
     {

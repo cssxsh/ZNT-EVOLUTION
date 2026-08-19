@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using HarmonyLib;
-using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -16,13 +15,10 @@ namespace ZNT.Evolution.Core.Editor;
 [DisallowMultipleComponent]
 public class HumanSpawnPointEditor : Editor, IEditorOverride
 {
-    [JsonIgnore]
     private static SortedDictionary<string, HumanAsset> HumanAssets = new();
 
-    [JsonIgnore]
     private CharacterSpawnPoint Spawn => field ??= GetComponent<CharacterSpawnPoint>();
 
-    [JsonIgnore]
     private Parameters SendParams => Traverse.Create(Spawn).Field<Parameters>("sendParams").Value;
 
     public bool OverrideMemberUi(SelectionMenu menu, EditorComponent component, MemberInfo member)

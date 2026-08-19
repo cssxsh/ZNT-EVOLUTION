@@ -1,4 +1,3 @@
-using Newtonsoft.Json;
 using UnityEngine;
 
 namespace ZNT.Evolution.Core.Editor;
@@ -7,10 +6,8 @@ namespace ZNT.Evolution.Core.Editor;
 [DisallowMultipleComponent]
 public class StairEditor : Editor, IActivable
 {
-    [JsonIgnore]
     protected StairBehaviour Behaviour => field ??= GetComponent<StairBehaviour>();
 
-    [JsonIgnore]
     public bool IsActive => Behaviour.UseStairs;
 
     public void SetActive(bool state)

@@ -475,7 +475,6 @@ internal static class SceneLoaderPatch
             Traverse.Create(__instance).Field<RectTransform>("mainContainer").Value = panel;
             try
             {
-                component.FixFields();
                 foreach (var (member, _) in component.Fields)
                 {
                     if (overrider != null && overrider.OverrideMemberUi(__instance, component, member)) continue;
@@ -497,48 +496,78 @@ internal static class SceneLoaderPatch
         return false;
     }
 
-    private static void FixFields(this EditorComponent component)
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(EditorComponent), "FromComponent")]
+    [HarmonyPatch(typeof(SerializableComponent), "FromComponent")]
+    private static void FromComponent(BaseComponent component, object __result)
     {
-        switch (component.Data)
+        switch (__result, component)
         {
-            case Patroller patroller:
+            case (EditorComponent editor, Patroller patroller):
             {
                 var editing = typeof(Patroller).GetTypeInfo().GetDeclaredField("editing");
-                component.Fields.Remove(editing);
-                component.Fields[typeof(Patroller).GetField(nameof(Patroller.Voice))] = patroller.Voice;
-                component.Fields[editing] = editing.GetValue(component.Data);
+                editor.Fields.Remove(editing);
+                editor.Fields[typeof(Patroller).GetField(nameof(Patroller.Voice))] = patroller.Voice;
+                editor.Fields[editing] = editing.GetValue(patroller);
             }
                 break;
-            case HumanBehaviour human:
+            case (SerializableComponent serializable, Patroller patroller):
             {
-                component.Fields[typeof(HumanBehaviour)
+                serializable.Fields[nameof(Patroller.Voice)] = patroller.Voice;
+            }
+                break;
+            case (EditorComponent editor, HumanBehaviour human):
+            {
+                editor.Fields[typeof(HumanBehaviour)
                     .GetField(nameof(HumanBehaviour.ResistScream))] = human.ResistScream;
-                component.Fields[typeof(HumanBehaviour)
+                editor.Fields[typeof(HumanBehaviour)
                     .GetField(nameof(HumanBehaviour.AllowMultipleAttackers))] = human.AllowMultipleAttackers;
-                component.Fields[typeof(HumanBehaviour)
+                editor.Fields[typeof(HumanBehaviour)
                     .GetField(nameof(HumanBehaviour.GrabbedOnAttacked))] = human.GrabbedOnAttacked;
-                component.Fields[typeof(HumanBehaviour)
+                editor.Fields[typeof(HumanBehaviour)
                     .GetField(nameof(HumanBehaviour.IgnoreDamages))] = human.IgnoreDamages;
-                component.Fields[typeof(HumanBehaviour)
+                editor.Fields[typeof(HumanBehaviour)
                     .GetField(nameof(HumanBehaviour.InvincibleOnAttack))] = human.InvincibleOnAttack;
-                component.Fields[typeof(HumanBehaviour)
+                editor.Fields[typeof(HumanBehaviour)
                     .GetField(nameof(HumanBehaviour.FleeBeforeZombieExplode))] = human.FleeBeforeZombieExplode;
-                component.Fields[typeof(HumanBehaviour)
+                editor.Fields[typeof(HumanBehaviour)
                     .GetField(nameof(HumanBehaviour.MoveTowardStaticTargets))] = human.MoveTowardStaticTargets;
-                component.Fields[typeof(HumanBehaviour)
+                editor.Fields[typeof(HumanBehaviour)
                     .GetField(nameof(HumanBehaviour.VisionFollowTarget))] = human.VisionFollowTarget;
-                component.Fields[typeof(HumanBehaviour)
+                editor.Fields[typeof(HumanBehaviour)
                     .GetField(nameof(HumanBehaviour.Attitude))] = human.Attitude;
             }
                 break;
-            case TrapEffect trap:
+            case (SerializableComponent serializable, HumanBehaviour human):
             {
-                component.Fields.Clear();
-                component.Fields[typeof(TrapEffect).GetField(nameof(TrapEffect.Mode))] = trap.Mode;
-                component.Fields[typeof(TrapEffect).GetField(nameof(TrapEffect.KillDelay))] = trap.KillDelay;
-                component.Fields[typeof(TrapEffect).GetField(nameof(TrapEffect.Damage))] = trap.Damage;
-                component.Fields[typeof(TrapEffect).GetField(nameof(TrapEffect.DamageRate))] = trap.DamageRate;
-                component.Fields[typeof(TrapEffect).GetField(nameof(TrapEffect.DamageType))] = trap.DamageType;
+                serializable.Fields[nameof(HumanBehaviour.ResistScream)] = human.ResistScream;
+                serializable.Fields[nameof(HumanBehaviour.AllowMultipleAttackers)] = human.AllowMultipleAttackers;
+                serializable.Fields[nameof(HumanBehaviour.GrabbedOnAttacked)] = human.GrabbedOnAttacked;
+                serializable.Fields[nameof(HumanBehaviour.IgnoreDamages)] = human.IgnoreDamages;
+                serializable.Fields[nameof(HumanBehaviour.InvincibleOnAttack)] = human.InvincibleOnAttack;
+                serializable.Fields[nameof(HumanBehaviour.FleeBeforeZombieExplode)] = human.FleeBeforeZombieExplode;
+                serializable.Fields[nameof(HumanBehaviour.MoveTowardStaticTargets)] = human.MoveTowardStaticTargets;
+                serializable.Fields[nameof(HumanBehaviour.VisionFollowTarget)] = human.VisionFollowTarget;
+                serializable.Fields[nameof(HumanBehaviour.Attitude)] = human.Attitude;
+            }
+                break;
+            case (EditorComponent editor, TrapEffect trap):
+            {
+                editor.Fields.Clear();
+                editor.Fields[typeof(TrapEffect).GetField(nameof(TrapEffect.Mode))] = trap.Mode;
+                editor.Fields[typeof(TrapEffect).GetField(nameof(TrapEffect.KillDelay))] = trap.KillDelay;
+                editor.Fields[typeof(TrapEffect).GetField(nameof(TrapEffect.Damage))] = trap.Damage;
+                editor.Fields[typeof(TrapEffect).GetField(nameof(TrapEffect.DamageRate))] = trap.DamageRate;
+                editor.Fields[typeof(TrapEffect).GetField(nameof(TrapEffect.DamageType))] = trap.DamageType;
+            }
+                break;
+            case (SerializableComponent serializable, TrapEffect trap):
+            {
+                serializable.Fields[nameof(TrapEffect.Mode)] = trap.Mode;
+                serializable.Fields[nameof(TrapEffect.KillDelay)] = trap.KillDelay;
+                serializable.Fields[nameof(TrapEffect.Damage)] = trap.Damage;
+                serializable.Fields[nameof(TrapEffect.DamageRate)] = trap.DamageRate;
+                serializable.Fields[nameof(TrapEffect.DamageType)] = trap.DamageType;
             }
                 break;
         }
