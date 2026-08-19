@@ -339,11 +339,11 @@ internal static class StartManagerPatch
                 sentry.Health.SetVisible(true);
             {
                 var components = sentry.Health.gameObject;
-                if (components.GetComponentSafe<SignalSenderLinker>() is { ExcludedComponents: null } linker)
-                {
-                    linker.ExcludedComponents ??= [];
-                    linker.ExcludedGameObjects ??= linker.gameObject.GetChildren(true);
-                }
+                var receiver = prefab.GetComponentSafe<SignalReceiverLinker>();
+                receiver.ExcludedComponents.Remove(sentry.Orientation);
+                var sender = prefab.GetComponentSafe<SignalSenderLinker>();
+                sender.ExcludedComponents ??= [];
+                sender.ExcludedGameObjects ??= components.GetChildren(true);
             }
                 break;
             case ZombieBehaviour zombie:
@@ -354,11 +354,9 @@ internal static class StartManagerPatch
                 zombie.Health.SetVisible(true);
             {
                 var components = zombie.Health.gameObject;
-                if (components.GetComponentSafe<SignalSenderLinker>() is { ExcludedComponents: null } linker)
-                {
-                    linker.ExcludedComponents ??= [];
-                    linker.ExcludedGameObjects ??= linker.gameObject.GetChildren(true);
-                }
+                var sender = components.GetComponentSafe<SignalSenderLinker>();
+                sender.ExcludedComponents ??= [];
+                sender.ExcludedGameObjects ??= components.GetChildren(true);
             }
                 break;
             case HumanBehaviour human:
@@ -371,16 +369,14 @@ internal static class StartManagerPatch
                 human.Health.SetVisible(true);
             {
                 var components = human.Health.gameObject;
-                if (components.GetComponentSafe<SignalSenderLinker>() is { ExcludedComponents: null } linker)
+                var sender = components.GetComponentSafe<SignalSenderLinker>();
+                sender.ExcludedComponents ??= [];
+                sender.ExcludedGameObjects ??= components.GetChildren(true);
+                var proxy = components.GetComponentInChildren<HealthSignalProxy>();
+                if (proxy)
                 {
-                    linker.ExcludedComponents ??= [];
-                    linker.ExcludedGameObjects ??= linker.gameObject.GetChildren(true);
-                    var proxy = linker.GetComponentInChildren<HealthSignalProxy>();
-                    if (proxy)
-                    {
-                        linker.ExcludedGameObjects.Remove(proxy.gameObject);
-                        linker.ExcludedGameObjects.Add(components);
-                    }
+                    sender.ExcludedGameObjects.Remove(proxy.gameObject);
+                    sender.ExcludedGameObjects.Add(components);
                 }
             }
                 break;
