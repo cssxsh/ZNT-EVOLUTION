@@ -321,6 +321,9 @@ internal static class StartManagerPatch
             case CharacterSpawnPoint spawn when spawn.GetSpawnType() is CorpseType.Human:
                 _ = prefab.GetComponentSafe<HumanSpawnPointEditor>();
                 break;
+            case CharacterSpawnPoint spawn when spawn.GetSpawnType() is CorpseType.Zombie:
+                _ = prefab.GetComponentSafe<ZombieSpawnPointEditor>();
+                break;
             case SpawnPoint spawn when spawn.SpawnableObjects.Any(asset => asset is MovingObjectAsset):
                 spawn.ShowDamages(true);
                 break;
@@ -357,6 +360,16 @@ internal static class StartManagerPatch
                 var sender = components.GetComponentSafe<SignalSenderLinker>();
                 sender.ExcludedComponents ??= [];
                 sender.ExcludedGameObjects ??= components.GetChildren(true);
+                var patroller = components.GetComponentSafe<Patroller>();
+                patroller.SetVisible(true);
+                patroller.SetDevOnly(true);
+                patroller.SetIgnoreSerialization(false);
+                patroller.PoolIndex = 0x6969_0000;
+                patroller.DialogueOffset = Vector2.up * 3.25f;
+                Traverse.Create(patroller).Field<GameObject>("root").Value = prefab;
+                Traverse.Create(patroller).Field<Character>("character").Value = zombie.Character;
+                Traverse.Create(zombie.Character.Components).Field<GameObject>("gameObject").Value = components;
+                Traverse.Create(zombie.Character.Components).Field<Patroller>("patroller").Value = patroller;
             }
                 break;
             case HumanBehaviour human:

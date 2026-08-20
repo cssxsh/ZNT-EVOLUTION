@@ -113,9 +113,10 @@ internal static class CustomAssetObjectPatch
     public static void LoadFromAsset(TriggerAsset __instance, GameObject gameObject)
     {
         // ReSharper disable once InvertIf
-        if (__instance.Name is "Human")
+        if (__instance.Name is "Human" or "Zombie" or "Character")
         {
             var dialogue = gameObject.GetComponent<Trigger>().GetEffect<DialogueEffect>();
+            dialogue.EditorVisibility.CustomName = __instance.Name + " Dialogue Effect";
             dialogue.SetVisible(true);
             dialogue.Mode = DialogueEffect.DetectionMode.SignalOnEnter;
         }
@@ -295,18 +296,13 @@ internal static class CustomAssetObjectPatch
     public static void OnSpawn(CharacterBehaviour __instance, Parameters param)
     {
         if (param == null) return;
-        if (__instance is not HumanBehaviour human) return;
         // ReSharper disable once InvertIf
         if (param.ContainsKey("dialogue_text"))
         {
             var text = param.GetValue<LocalizableString>("dialogue_text");
             var duration = param.GetValue<float>("dialogue_duration");
             var voice = param.GetValue<Voice>("dialogue_voice");
-            var patroller = human.Patroller;
-            var dialogue = ComponentSingleton<GamePoolManager>.Instance
-                .Spawn(nameof(Dialogue)).GetComponent<Dialogue>();
-            dialogue.SetText(text, duration);
-            dialogue.Show(patroller, patroller.DialogueOffset, voice);
+            __instance.Dialogue(text, duration, voice);
         }
     }
 

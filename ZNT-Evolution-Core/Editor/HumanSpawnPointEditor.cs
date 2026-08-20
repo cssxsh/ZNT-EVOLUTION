@@ -13,13 +13,9 @@ namespace ZNT.Evolution.Core.Editor;
 
 [SerializeInEditor(name: "Human")]
 [DisallowMultipleComponent]
-public class HumanSpawnPointEditor : Editor, IEditorOverride
+public class HumanSpawnPointEditor : CharacterSpawnPointEditor, IEditorOverride
 {
     private static SortedDictionary<string, HumanAsset> HumanAssets = new();
-
-    private CharacterSpawnPoint Spawn => field ??= GetComponent<CharacterSpawnPoint>();
-
-    private Parameters SendParams => Traverse.Create(Spawn).Field<Parameters>("sendParams").Value;
 
     public bool OverrideMemberUi(SelectionMenu menu, EditorComponent component, MemberInfo member)
     {
@@ -37,7 +33,7 @@ public class HumanSpawnPointEditor : Editor, IEditorOverride
             case nameof(SelectedHumanX):
             {
                 var value = member.GetMemberValue<string>(component.Data);
-                var list = new List<string> { HumanAssets.Keys.Contains(value) ? "" : value };
+                var list = new List<string> { HumanAssets.ContainsKey(value) ? "" : value };
                 list.AddRange(HumanAssets.Keys);
                 var binder = menu.ListBinder();
                 binder.BindStringListField(component, member, list);
@@ -60,15 +56,6 @@ public class HumanSpawnPointEditor : Editor, IEditorOverride
                 return false;
         }
     }
-
-    [SerializeInEditor(name: "Dialogue Text")]
-    public LocalizableString DialogueText = new() { Localize = false, Category = "Dialogues" };
-
-    [SerializeInEditor(name: "Dialogue Duration")]
-    public float DialogueDuration = 10;
-
-    [SerializeInEditor(name: "Dialogue Voice")]
-    public Voice DialogueVoice = Voice.None;
 
     [SerializeInEditor(name: "Selected Human 1")]
     public string SelectedHuman1 = "";
@@ -125,17 +112,9 @@ public class HumanSpawnPointEditor : Editor, IEditorOverride
         }
     }
 
-    private void Start()
+    protected override void Start()
     {
-        // ReSharper disable once InvertIf
-        if (!(DialogueText.Content is null or "" || DialogueDuration <= 0))
-        {
-            SendParams.Update(
-                "dialogue_text", DialogueText,
-                "dialogue_duration", DialogueDuration,
-                "dialogue_voice", DialogueVoice);
-        }
-
+        base.Start();
         // ReSharper disable once InvertIf
         if (SelectedHumans().Any())
         {

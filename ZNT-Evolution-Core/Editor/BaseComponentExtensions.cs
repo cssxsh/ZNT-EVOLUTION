@@ -3,6 +3,7 @@ using System.Linq;
 using System.Reflection;
 using HarmonyLib;
 using JetBrains.Annotations;
+using UnityEngine;
 using ZNT.LevelEditor;
 
 namespace ZNT.Evolution.Core.Editor;
@@ -111,11 +112,21 @@ public static class BaseComponentExtensions
     }
 
     [UsedImplicitly]
-    public static bool IsTalking(this Patroller patroller)
+    public static bool IsTalking(this CharacterBehaviour behaviour)
     {
         return Traverse.Create(typeof(Dialogue))
-            .Field<Dictionary<UnityEngine.Transform, Dialogue>>("Talking").Value
-            .ContainsKey(patroller.Root.transform);
+            .Field<Dictionary<Transform, Dialogue>>("Talking").Value
+            .ContainsKey(behaviour.transform);
+    }
+
+    [UsedImplicitly]
+    public static void Dialogue(this CharacterBehaviour behaviour, LocalizableString text, float duration, Voice voice)
+    {
+        var dialogue = ComponentSingleton<GamePoolManager>.Instance
+            .Spawn(nameof(Dialogue)).GetComponent<Dialogue>();
+        var patroller = behaviour.Character.Components.Patroller;
+        dialogue.SetText(text, duration);
+        dialogue.Show(patroller, patroller.DialogueOffset, voice);
     }
 
     [UsedImplicitly]

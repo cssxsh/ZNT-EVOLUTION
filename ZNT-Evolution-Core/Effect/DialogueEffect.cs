@@ -52,15 +52,11 @@ public class DialogueEffect : TriggerEffect
 
     public override void OnApplyOnGameObject(GameObject target)
     {
-        if (Text.Content is null or "" || Duration <= 0) return;
-        var human = target?.GetComponent<HumanBehaviour>();
-        if (human is null) return;
-        var patroller = human.Patroller;
-        if (patroller.IsTalking() && !ForceShow) return;
-        var dialogue = ComponentSingleton<GamePoolManager>.Instance
-            .Spawn(nameof(Dialogue)).GetComponent<Dialogue>();
-        dialogue.SetText(Text, Duration);
-        dialogue.Show(patroller, patroller.DialogueOffset, Voice);
+        if (Duration <= 0 || Text.Content is null or "") return;
+        var behaviour = target?.GetComponent<CharacterBehaviour>();
+        if (behaviour is null) return;
+        if (behaviour.IsTalking() && !ForceShow) return;
+        behaviour.Dialogue(Text, Duration, Voice);
     }
 
     public enum DetectionMode
