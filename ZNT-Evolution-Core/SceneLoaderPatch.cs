@@ -499,7 +499,7 @@ internal static class SceneLoaderPatch
     [HarmonyPostfix]
     [HarmonyPatch(typeof(EditorComponent), "FromComponent")]
     [HarmonyPatch(typeof(SerializableComponent), "FromComponent")]
-    private static void FromComponent(BaseComponent component, object __result)
+    public static void FromComponent(BaseComponent component, object __result)
     {
         switch (__result, component)
         {

@@ -148,18 +148,16 @@ internal static class StartManagerPatch
                 Logger.LogDebug($"Fix Name for {ladder.AssetId}");
                 break;
             case LevelElement { CustomAsset: HumanAsset human } element:
-            {
                 if (human.HierarchyName is "Rick") break;
                 if (human.HierarchyName is "Zombinator") break;
                 if (element.Title.Replace("Human ", "") == human.HierarchyName) break;
                 element.CustomAsset.HierarchyName = element.Title.Replace("Human ", "");
                 Logger.LogDebug($"Fix HierarchyName for {element.CustomAsset}");
-            }
                 break;
             case LevelElement { CustomAsset: not null, Brush: Rotorz.Tile.OrientedBrush brush } element:
-            {
                 if (brush.DefaultOrientation.GetVariation(0) is not GameObject prefab) break;
                 if (element.CustomAsset.Prefab == prefab.transform) break;
+            {
                 if (element.CustomAsset.name == prefab.name)
                 {
                     element.CustomAsset.Prefab = prefab.transform;
@@ -197,12 +195,11 @@ internal static class StartManagerPatch
             {
                 var talk = animation.GetClipByName("talk");
                 AnimationPatch.Push(animation, new tk2dSpriteAnimationClip(talk)
-                    {
-                        name = "rise",
-                        useableInLevelEditor = false,
-                        wrapMode = tk2dSpriteAnimationClip.WrapMode.Once
-                    }
-                );
+                {
+                    name = "rise",
+                    useableInLevelEditor = false,
+                    wrapMode = tk2dSpriteAnimationClip.WrapMode.Once
+                });
                 Logger.LogInfo($"Feat rise for {animation}");
             }
                 break;
@@ -210,12 +207,11 @@ internal static class StartManagerPatch
             {
                 var talk = animation.GetClipByName("stand_phone_talk");
                 AnimationPatch.Push(animation, new tk2dSpriteAnimationClip(talk)
-                    {
-                        name = "rise",
-                        useableInLevelEditor = false,
-                        wrapMode = tk2dSpriteAnimationClip.WrapMode.Once
-                    }
-                );
+                {
+                    name = "rise",
+                    useableInLevelEditor = false,
+                    wrapMode = tk2dSpriteAnimationClip.WrapMode.Once
+                });
                 Logger.LogInfo($"Feat rise for {animation}");
             }
                 break;
@@ -223,12 +219,11 @@ internal static class StartManagerPatch
             {
                 var transform = animation.GetClipByName("transform");
                 AnimationPatch.Push(animation, new tk2dSpriteAnimationClip(transform)
-                    {
-                        name = "rise",
-                        useableInLevelEditor = false,
-                        wrapMode = tk2dSpriteAnimationClip.WrapMode.Once
-                    }
-                );
+                {
+                    name = "rise",
+                    useableInLevelEditor = false,
+                    wrapMode = tk2dSpriteAnimationClip.WrapMode.Once
+                });
                 Logger.LogInfo($"Feat rise for {animation}");
             }
                 break;
@@ -236,12 +231,11 @@ internal static class StartManagerPatch
             {
                 var teleport = animation.GetClipByName("teleport_in");
                 AnimationPatch.Push(animation, new tk2dSpriteAnimationClip(teleport)
-                    {
-                        name = "rise",
-                        useableInLevelEditor = false,
-                        wrapMode = tk2dSpriteAnimationClip.WrapMode.Once
-                    }
-                );
+                {
+                    name = "rise",
+                    useableInLevelEditor = false,
+                    wrapMode = tk2dSpriteAnimationClip.WrapMode.Once
+                });
                 Logger.LogInfo($"Feat rise for {animation}");
             }
                 break;
@@ -249,16 +243,15 @@ internal static class StartManagerPatch
             {
                 var missile = animation.GetClipByName("sentry_moon_canon_missile");
                 AnimationPatch.Push(animation, new tk2dSpriteAnimationClip(missile)
-                    {
-                        name = "empty",
-                        frames = [missile.frames[1]],
-                        fps = 1.0f,
-                        loopStart = 0,
-                        useableInLevelEditor = false,
-                        staticAnimation = false,
-                        wrapMode = tk2dSpriteAnimationClip.WrapMode.Single
-                    }
-                );
+                {
+                    name = "empty",
+                    frames = [missile.frames[1]],
+                    fps = 1.0f,
+                    loopStart = 0,
+                    useableInLevelEditor = false,
+                    staticAnimation = false,
+                    wrapMode = tk2dSpriteAnimationClip.WrapMode.Single
+                });
                 Logger.LogInfo($"Feat empty for {animation}");
             }
                 break;
