@@ -10,9 +10,10 @@ internal class DamageFlagsConverter : CustomCreationConverter<DamageType>
 
     public static Flags GetDamageFlags(DamageType damage)
     {
-        return damage.HasFlag(Flags._)
-            ? (Flags)((int)damage & int.MaxValue)
-            : (Flags)(0x01 << (int)damage);
+        var value = (int)damage;
+        return (value & int.MinValue) is 0
+            ? (Flags)(0x01 << value)
+            : (Flags)(value & int.MaxValue);
     }
 
     public override bool CanWrite => true;
@@ -28,7 +29,7 @@ internal class DamageFlagsConverter : CustomCreationConverter<DamageType>
 
     public override object ReadJson(JsonReader reader, Type type, object _, JsonSerializer serializer)
     {
-        return serializer.Deserialize<Flags>(reader) | Flags._;
+        return (DamageType)((int)serializer.Deserialize<Flags>(reader) | int.MinValue);
     }
 
     [Flags]
@@ -62,7 +63,6 @@ internal class DamageFlagsConverter : CustomCreationConverter<DamageType>
         Tank,
         Boomer,
         Spit,
-        HolyFire,
-        _ = int.MinValue
+        HolyFire
     }
 }
