@@ -178,9 +178,10 @@ internal static class CustomAssetObjectPatch
                 controller.Asset.DestroyAnimation = string.Format(asset.DestroyAnimation, direction);
             }
 
-            if (Execution.SceneMode is Execution.Mode.Edition)
+            if (Execution.SceneMode is Execution.Mode.Edition &&
+                controller.Animator.GetAnimationClip(controller.Asset.StandAnimation) is { Empty: false } clip)
             {
-                var frame = controller.Animator.GetAnimationClip(controller.Asset.StandAnimation).frames[0];
+                var frame = clip.frames[0];
                 controller.Animator.Sprite.SetSprite(frame.spriteCollection, frame.spriteId);
             }
         }
