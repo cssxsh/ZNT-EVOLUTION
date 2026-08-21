@@ -37,6 +37,9 @@ internal class ObjectContractResolver() : DefaultContractResolver(shareCache: tr
             case { Name: nameof(HumanAsset.RageDamageType) } when typeof(HumanAsset) == member.DeclaringType:
                 property.Converter = property.MemberConverter = DamageFlagsConverter.Instance;
                 break;
+            case { Name: nameof(HumanAsset.RiseAsset) } when typeof(HumanAsset) == member.DeclaringType:
+                property.Converter = property.MemberConverter = new LazyAsset.MemberConverter(member);
+                break;
             case not null
                 when member.IsDefined(typeof(LayerAttribute)):
                 property.PropertyType = typeof(int);

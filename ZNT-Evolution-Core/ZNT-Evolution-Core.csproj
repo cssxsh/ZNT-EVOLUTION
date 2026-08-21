@@ -422,6 +422,7 @@
         <Compile Include="Asset\HookAsset.cs"/>
         <Compile Include="Asset\LayerConverter.cs"/>
         <Compile Include="Asset\LayerMaskConverter.cs"/>
+        <Compile Include="Asset\LazyAsset.cs"/>
         <Compile Include="Asset\MaterialMerge.cs"/>
         <Compile Include="Asset\ObjectContractResolver.cs"/>
         <Compile Include="Asset\ObjectConverter.cs"/>
