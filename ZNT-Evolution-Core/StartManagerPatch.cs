@@ -90,6 +90,18 @@ internal static class StartManagerPatch
         CustomAssetUtility.Cache[asset.NameAndType()] = asset;
         switch (asset)
         {
+            case PhysicObjectAsset { DamageCharacterOnTrigger: true, DamageRadius: 0 } physic:
+                physic.DamageCharacterOnTrigger = false;
+                Logger.LogDebug($"Fix DamageCharacterOnTrigger for {physic}");
+                break;
+            case MovingObjectAsset { name: "CarBoss" or "CircularSaw" or "InvisibleMovingTrap" } moving:
+                moving.HierarchyName = moving.name.SplitCamelCase();
+                Logger.LogDebug($"Fix HierarchyName for {moving}");
+                break;
+            case MovingObjectAsset { name: "Elevator 1"or "Elevator 2" } moving:
+                moving.HierarchyName = moving.name;
+                Logger.LogDebug($"Fix HierarchyName for {moving}");
+                break;
             case HumanAsset { BlockOpponents: true, MaxOpponentsBlock: 0 } human:
                 human.BlockOpponents = false;
                 Logger.LogDebug($"Fix BlockOpponents for {human}");
@@ -97,14 +109,6 @@ internal static class StartManagerPatch
             case HumanAsset { name: "Bishop" or "Priest" or "Virgin" or "Preacher" } human:
                 human.CharacterType = CharacterType.Cultist;
                 Logger.LogDebug($"Fix CharacterType for {human}");
-                break;
-            case PhysicObjectAsset { DamageCharacterOnTrigger: true, DamageRadius: 0 } physic:
-                physic.DamageCharacterOnTrigger = false;
-                Logger.LogDebug($"Fix DamageCharacterOnTrigger for {physic}");
-                break;
-            case MovingObjectAsset { Speed: 50.0f } moving:
-                moving.Speed = 15.0f;
-                Logger.LogDebug($"Fix Speed for {moving}");
                 break;
             case LevelElement { name: "drone_exterminator" } drone:
                 drone.Title = "Drone Exterminator";
@@ -152,7 +156,7 @@ internal static class StartManagerPatch
                 if (human.HierarchyName is "Zombinator") break;
                 if (element.Title.Replace("Human ", "") == human.HierarchyName) break;
                 element.CustomAsset.HierarchyName = element.Title.Replace("Human ", "");
-                Logger.LogDebug($"Fix HierarchyName for {element.CustomAsset}");
+                Logger.LogDebug($"Fix HierarchyName for {human}");
                 break;
             case LevelElement { CustomAsset: not null, Brush: Rotorz.Tile.OrientedBrush brush } element:
                 if (brush.DefaultOrientation.GetVariation(0) is not GameObject prefab) break;
@@ -321,10 +325,11 @@ internal static class StartManagerPatch
                 _ = prefab.GetComponentSafe<ZombieSpawnPointEditor>();
                 break;
             case SpawnPoint spawn when spawn.SpawnableObjects.Any(asset => asset is MovingObjectAsset):
+                _ = prefab.GetComponentSafe<MovingObjectSpawnPointEditor>();
                 spawn.ShowDamages(true);
                 break;
             case MovingObjectBehaviour:
-                _ = prefab.GetComponentSafe<PropMoveableEditor>();
+                _ = prefab.GetComponentSafe<MovingObjectEditor>();
                 _ = prefab.GetComponentSafe<LayerEditor>();
                 _ = prefab.GetComponentSafe<SpriteEditor>();
                 break;

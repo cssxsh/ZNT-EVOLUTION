@@ -179,6 +179,20 @@ internal static class CustomAssetObjectPatch
         behaviour.Orientation = behaviour.Orientation;
     }
 
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(MovingObjectBehaviour), "OnSpawn")]
+    public static void OnSpawn(MovingObjectBehaviour __instance, Parameters param)
+    {
+        if (param == null) return;
+        // ReSharper disable once InvertIf
+        if (param.ContainsKey("speed_ease"))
+        {
+            var editor = __instance.GetComponent<MovingObjectEditor>();
+            editor.SpeedEase = param.GetValue<DG.Tweening.Ease>("speed_ease");
+            editor.Duration = param.GetValue<float>("speed_ease_duration");
+        }
+    }
+
     [HarmonyPostfix]
     [HarmonyPatch(typeof(MovingObjectBehaviour), "OnSpawn")]
     [HarmonyPatch(typeof(MovingObjectBehaviour), "Orientation", MethodType.Setter)]
@@ -523,25 +537,6 @@ internal static class CustomAssetObjectPatch
         if (current.Count == 0) return true;
         Timer.DelayedCall(0.2f, __instance.CreateDelegate<DG.Tweening.TweenCallback>("AddFiller"));
         return false;
-    }
-
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(PropMoveable), "Move", [])]
-    [HarmonyPatch(typeof(PropMoveable), "MoveOpposite")]
-    public static void Move(PropMoveable __instance)
-    {
-        if (__instance.StopAtNextStep) return;
-        var editor = __instance.GetComponent<PropMoveableEditor>();
-        editor?.SpeedTween(__instance, 0, __instance.Speed);
-    }
-
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(PropMoveable), "Stop")]
-    public static void Stop(PropMoveable __instance)
-    {
-        if (__instance.StopAtNextStep) return;
-        var editor = __instance.GetComponent<PropMoveableEditor>();
-        editor?.SpeedTween(__instance, __instance.Speed, 0);
     }
 
     #endregion

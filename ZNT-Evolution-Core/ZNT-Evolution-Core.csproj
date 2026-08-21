@@ -442,8 +442,9 @@
         <Compile Include="Editor\InvisibleShield.cs"/>
         <Compile Include="Editor\LayerEditor.cs"/>
         <Compile Include="Editor\MineTrapEditor.cs"/>
+        <Compile Include="Editor\MovingObjectEditor.cs"/>
+        <Compile Include="Editor\MovingObjectSpawnPointEditor.cs"/>
         <Compile Include="Editor\OneWayEditor.cs"/>
-        <Compile Include="Editor\PropMoveableEditor.cs"/>
         <Compile Include="Editor\SpriteEditor.cs"/>
         <Compile Include="Editor\StairEditor.cs"/>
         <Compile Include="Editor\TutorialBreakingNews.cs"/>

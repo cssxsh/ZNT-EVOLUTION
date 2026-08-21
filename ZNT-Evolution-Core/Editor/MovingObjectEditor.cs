@@ -3,15 +3,26 @@ using System.Reflection;
 using DG.Tweening;
 using HarmonyLib;
 using UnityEngine;
+using UnityEngine.Events;
 using ZNT.LevelEditor;
 
 // ReSharper disable InconsistentNaming
 namespace ZNT.Evolution.Core.Editor;
 
-[SerializeInEditor(name: "Prop Movements")]
+[SerializeInEditor(name: "Movement")]
 [DisallowMultipleComponent]
-public class PropMoveableEditor : Editor, IEditorOverride
+public class MovingObjectEditor : Editor, IEditorOverride
 {
+    private PropMoveable Moveable => field ??= GetComponent<PropMoveable>();
+
+    private Tweener Tween;
+
+    public float CurrentSpeed
+    {
+        get => Moveable.CurrentSpeed;
+        set => Traverse.Create(Moveable).Field<float>("currentSpeed").Value = value;
+    }
+
     [SerializeInEditor(name: "Speed Ease")]
     public Ease SpeedEase = Ease.InOutQuad;
 
@@ -45,14 +56,38 @@ public class PropMoveableEditor : Editor, IEditorOverride
         }
     }
 
-    private Tweener Tween;
-
-    public Tweener SpeedTween(PropMoveable moveable, float start, float end)
+    protected override void OnCreate()
     {
-        var speed = Traverse.Create(moveable).Field<float>("currentSpeed");
+        Moveable.Event<UnityEvent>("OnMove").AddListener(OnMove);
+        Moveable.Event<UnityEvent>("OnStop").AddListener(OnStop);
+    }
+
+    private void OnMove()
+    {
+        if (SpeedEase is Ease.Unset || Duration <= 0) return;
+        SpeedTween(0, Moveable.Speed);
+    }
+
+    private void OnStop()
+    {
+        if (Moveable.StopAtNextStep) return;
+        if (SpeedEase is Ease.Unset || Duration <= 0) return;
+        SpeedTween(Moveable.Speed, 0);
+    }
+
+    public Tweener SpeedTween(float start, float end)
+    {
         Tween?.Kill();
+        CurrentSpeed = start;
         return Tween = DOTween
-            .To(value => speed.Value = value, start, end, Duration)
+            .To(value => CurrentSpeed = value, start, end, Duration)
             .SetEase(SpeedEase);
+    }
+
+    private void OnDespawned()
+    {
+        Tween?.Kill();
+        SpeedEase = Ease.Unset;
+        Duration = 0;
     }
 }
