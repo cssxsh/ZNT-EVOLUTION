@@ -238,14 +238,6 @@ internal static class DebugPatch
         Traverse.Create(component).Field<bool>("exploded").Value = true;
     }
 
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(PhysicObjectBehaviour), "Health", MethodType.Getter)]
-    public static Health GetHealth(Health __result, PhysicObjectBehaviour __instance)
-    {
-        if (__result) return __result;
-        return Traverse.Create(__instance).Field<Health>("health").Value = __instance.GetComponent<Health>();
-    }
-
     [HarmonyPrefix]
     [HarmonyPatch(typeof(WeatherRain), "CreateEffect")]
     public static bool CreateEffect(WeatherRain __instance)

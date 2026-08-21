@@ -311,6 +311,9 @@ internal static class StartManagerPatch
             case TutorialLoader:
                 _ = prefab.GetComponentSafe<TutorialBreakingNews>();
                 break;
+            case SceneVisualEffect prop:
+                prop.Tk2dAnimator ??= prop.GetComponentInChildren<tk2dSpriteAnimator>();
+                break;
             case CharacterSpawnPoint spawn when spawn.GetSpawnType() is CorpseType.Human:
                 _ = prefab.GetComponentSafe<HumanSpawnPointEditor>();
                 break;
@@ -324,6 +327,9 @@ internal static class StartManagerPatch
                 _ = prefab.GetComponentSafe<PropMoveableEditor>();
                 _ = prefab.GetComponentSafe<LayerEditor>();
                 _ = prefab.GetComponentSafe<SpriteEditor>();
+                break;
+            case PhysicObjectBehaviour physic:
+                Traverse.Create(physic).Field<Health>("health").Value ??= physic.GetComponentInChildren<Health>();
                 break;
             case SentryGunBehaviour sentry:
                 _ = prefab.GetComponentSafe<LayerEditor>();

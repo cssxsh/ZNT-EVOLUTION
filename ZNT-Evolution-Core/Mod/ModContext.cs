@@ -498,9 +498,9 @@ public class ModContext
                 }
 
                 // ReSharper disable once InvertIf
-                if (element is { ElementType: LevelElement.Type.Brush, DecorPrefab.name: "Chopter" })
+                if (element is { ElementType: LevelElement.Type.Brush, CustomAsset: null, DecorPrefab: not null })
                 {
-                    element.CustomAsset = MakeHook(element);
+                    element.CustomAsset = MakeAsset(element);
                     Logger.LogDebug($"{resource.Path} -> {element.CustomAsset}");
                 }
             }
@@ -746,18 +746,27 @@ public class ModContext
         return brush;
     }
 
-    private HookAsset MakeHook(LevelElement element)
+    private CustomAssetObject MakeAsset(LevelElement element)
     {
-        var hook = HookAsset.Invoke(body =>
+        switch (element.DecorPrefab)
         {
-            var animator = body.GetComponentInChildren<tk2dSpriteAnimator>();
-            animator.Library = element.AnimationLibrary;
-            animator.DefaultClipId = element.AnimClipId;
-            animator.Sprite.SetSprite(element.SpriteCollection, element.SpriteIndex);
-        });
-        hook.name = element.name + "_hook";
-        Acquire(hook);
-        return hook;
+            case { name: "Chopter" }:
+            {
+                var decor = ScriptableObject.CreateInstance<DecorAsset>();
+                decor.name = element.Title.Replace(" ", "");
+                decor.HierarchyName = element.Title;
+                decor.Prefab = element.DecorPrefab.transform;
+                decor.Tag = element.Tags;
+                decor.Layer = element.DecorPrefab.layer;
+                decor.Animation = element.AnimationLibrary;
+                decor.ActiveAnimation = element.AnimationLibrary.GetClipById(element.AnimClipId).name;
+                Object.DontDestroyOnLoad(decor);
+                Acquire(decor);
+                return decor;
+            }
+            default:
+                return null;
+        }
     }
 
     #endregion

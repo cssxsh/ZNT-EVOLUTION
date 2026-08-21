@@ -5,6 +5,7 @@ using System.Linq;
 using BepInEx.Logging;
 using HarmonyLib;
 using UnityEngine;
+using UnityEngine.Events;
 using ZNT.Evolution.Core.Asset;
 using ZNT.Evolution.Core.Editor;
 using ZNT.Evolution.Core.Effect;
@@ -102,6 +103,38 @@ internal static class CustomAssetObjectPatch
     {
         var prefab = Traverse.Create(__instance).Field<Transform>("explosionPrefab").Value;
         ComponentSingleton<GamePoolManager>.Instance.Despawn(prefab);
+    }
+
+    #endregion
+
+    #region DecorAsset
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(DecorAsset), "LoadFromAsset")]
+    public static void LoadFromAsset(DecorAsset __instance, GameObject gameObject)
+    {
+        // ReSharper disable once InvertIf
+        if (gameObject.TryGetComponent(out SceneVisualEffect behaviour))
+        {
+            behaviour.Tk2dAnimator.Library = __instance.Animation;
+            behaviour.Tk2dAnimator.DefaultClipId = __instance.Animation.GetClipIdByName(__instance.ActiveAnimation);
+            behaviour.Event<UnityEvent>("OnActivate").AddListener(behaviour.PlayActivate);
+            behaviour.Event<UnityEvent>("OnDeactivate").AddListener(behaviour.PlayDeactivate);
+        }
+    }
+
+    private static void PlayActivate(this SceneVisualEffect behaviour)
+    {
+        if (behaviour.GetComponent<AssetComponent>() is not { Asset: DecorAsset asset }) return;
+        if (asset.ActivateAnimation is null or "") return;
+        behaviour.Tk2dAnimator.Play(asset.ActivateAnimation);
+    }
+
+    private static void PlayDeactivate(this SceneVisualEffect behaviour)
+    {
+        if (behaviour.GetComponent<AssetComponent>() is not { Asset: DecorAsset asset }) return;
+        if (asset.DeactivateAnimation is null or "") return;
+        behaviour.Tk2dAnimator.Play(asset.DeactivateAnimation);
     }
 
     #endregion
