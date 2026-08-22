@@ -12,7 +12,7 @@ internal class DamageFlagsConverter : CustomCreationConverter<DamageType>
     {
         var value = (int)damage;
         return (value & int.MinValue) is 0
-            ? (Flags)(0x01 << value)
+            ? (Flags)(0x01 << value >> 0x01)
             : (Flags)(value & int.MaxValue);
     }
 
