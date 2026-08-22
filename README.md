@@ -29,7 +29,7 @@ Zombie Night Terror
 
 MOD 放入 `znt_Data/Mods` 目录下
 
-## 插件文件结构
+## 模组文件内容
 
 ### Metadata
 

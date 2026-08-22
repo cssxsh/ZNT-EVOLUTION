@@ -57,7 +57,7 @@
 
 > `*.preview.tga`, `*.preview.png`, `*.preview.exr`
 
-图片尺寸应为 `128`
+图片尺寸应为 `128x128`
 
 ## Preview Create
 
