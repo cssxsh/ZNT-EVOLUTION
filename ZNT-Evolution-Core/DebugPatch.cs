@@ -56,12 +56,11 @@ internal static class DebugPatch
     public static string GetTermTranslation(string __result, string Term) => __result ?? Term;
 
     [HarmonyPrefix]
-    [HarmonyPatch(typeof(Challenge), "IsFailed")]
-    [HarmonyPatch(typeof(Challenge), "IsCompleted")]
-    public static void IsCompleted(Challenge __instance)
+    [HarmonyPatch(typeof(EndGameCondition), "Start")]
+    public static void Start(EndGameCondition __instance)
     {
-        if (Traverse.Create(__instance).Field<List<ChallengeRule>>("checkList").Value != null) return;
-        __instance.Initialize();
+        if (ComponentSingleton<LevelSettings>.Instance.LevelType is LevelType.Cutscene) return;
+        ComponentSingleton<LevelSettings>.Instance.Challenge.Initialize();
     }
 
     [HarmonyPostfix]
