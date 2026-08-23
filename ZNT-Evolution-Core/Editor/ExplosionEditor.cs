@@ -1,4 +1,3 @@
-using System.Linq;
 using UnityEngine;
 
 // ReSharper disable InconsistentNaming
@@ -11,8 +10,6 @@ public class ExplosionEditor : Editor
     private ExplosionEffect Effect => field ??= GetComponent<ExplosionEffect>();
 
     private SphereDetection Detection => field ??= GetComponent<SphereDetection>();
-
-    private ExplosionAsset Asset => field ??= GetComponent<AssetComponent>().Asset as ExplosionAsset;
 
     [SerializeInEditor(name: "Detected Radius")]
     public float DetectedRadius
@@ -34,14 +31,14 @@ public class ExplosionEditor : Editor
         set => Layers = value ? Layers.AddLayer("Human") : Layers.RemoveLayer("Human");
     }
 
-    [SerializeInEditor(name: "Damage Zombie")]
+    [SerializeInEditor(name: "Detected Zombie")]
     public bool DetectedZombie
     {
         get => Layers.ContainsLayer("Zombie");
         set => Layers = value ? Layers.AddLayer("Human") : Layers.RemoveLayer("Zombie");
     }
 
-    [SerializeInEditor(name: "Damage World Enemy")]
+    [SerializeInEditor(name: "Detected World Enemy")]
     public bool DetectedWorldEnemy
     {
         get => Layers.ContainsLayer("World Enemy");
@@ -141,6 +138,6 @@ public class ExplosionEditor : Editor
     public void StartExplosion()
     {
         if (Effect.Started) return;
-        foreach (var effect in GetComponentsInChildren<ExplosionEffect>().Reverse()) effect.StartExplosion(Asset.Delay);
+        Effect.StartExplosion(0);
     }
 }

@@ -7,33 +7,41 @@ namespace ZNT.Evolution.Core.Editor;
 [DisallowMultipleComponent]
 public class MineTrapEditor : Editor
 {
+    private MineBehaviour Behaviour => field ??= GetComponent<MineBehaviour>();
+
     private Trigger Trigger => field ??= GetComponent<Trigger>();
+
+    private Tag DetectedTags
+    {
+        get => Trigger.WithTags;
+        set => Trigger.WithTags = value;
+    }
 
     [SerializeInEditor(name: "Detected Human")]
     public bool DetectedHuman
     {
-        get => Trigger.WithTags.HasFlag(Tag.Human);
-        set => Trigger.WithTags = value ? Trigger.WithTags.Add(Tag.Human) : Trigger.WithTags.Remove(Tag.Human);
+        get => DetectedTags.HasFlag(Tag.Human);
+        set => DetectedTags = value ? DetectedTags.Add(Tag.Human) : DetectedTags.Remove(Tag.Human);
     }
 
     [SerializeInEditor(name: "Detected Zombie")]
     public bool DetectedZombie
     {
-        get => Trigger.WithTags.HasFlag(Tag.Zombie);
-        set => Trigger.WithTags = value ? Trigger.WithTags.Add(Tag.Zombie) : Trigger.WithTags.Remove(Tag.Zombie);
+        get => DetectedTags.HasFlag(Tag.Zombie);
+        set => DetectedTags = value ? DetectedTags.Add(Tag.Zombie) : DetectedTags.Remove(Tag.Zombie);
     }
 
-    private MineBehaviour Behaviour => field ??= GetComponent<MineBehaviour>();
+    [SerializeInEditor(name: "Detected World Enemy")]
+    public bool DetectedWorldEnemy
+    {
+        get => DetectedTags.HasFlag(Tag.WorldEnemy);
+        set => DetectedTags = value ? DetectedTags.Add(Tag.WorldEnemy) : DetectedTags.Remove(Tag.WorldEnemy);
+    }
 
     [SerializeInEditor(name: "Delay")]
     public float Delay
     {
         get => Traverse.Create(Behaviour).Field<float>("Delay").Value;
         set => Traverse.Create(Behaviour).Field<float>("Delay").Value = value;
-    }
-
-    private void OnDespawned()
-    {
-        Delay = 0.15f;
     }
 }
