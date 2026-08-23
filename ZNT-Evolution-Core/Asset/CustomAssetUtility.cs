@@ -4,10 +4,12 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using HarmonyLib;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -45,6 +47,20 @@ public static class CustomAssetUtility
     private static Encoding UTF8NoBOM => field ??= new UTF8Encoding(false, true);
 
     public static string NameAndType(this Object o) => $"{o.name} : {o.GetType()}";
+
+    internal static void SerializeObject(this JsonSerializer serializer, JsonWriter writer, object value)
+    {
+        Traverse.Create(serializer)
+            .Field("_serializerWriter")
+            .Method("SerializeObject", [
+                typeof(JsonWriter),
+                typeof(object),
+                typeof(JsonObjectContract),
+                typeof(JsonProperty),
+                typeof(JsonContract)
+            ])
+            .GetValue(writer, value, serializer.ContractResolver.ResolveContract(value.GetType()), null, null);
+    }
 
     [UsedImplicitly]
     public static void SerializeObjectToPath(string target, object data)

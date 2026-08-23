@@ -3,7 +3,6 @@ using BepInEx.Logging;
 using HarmonyLib;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
-using Newtonsoft.Json.Serialization;
 using UnityEngine;
 using BepInExLogger = BepInEx.Logging.Logger;
 
@@ -20,16 +19,7 @@ internal class ObjectConverter : CustomCreationConverter<UnityEngine.Object>
         if (writer.WriteState is WriteState.Start)
         {
             if (value is ISerializationCallbackReceiver receiver) receiver.OnBeforeSerialize();
-            Traverse.Create(serializer)
-                .Field("_serializerWriter")
-                .Method("SerializeObject", [
-                    typeof(JsonWriter),
-                    typeof(object),
-                    typeof(JsonObjectContract),
-                    typeof(JsonProperty),
-                    typeof(JsonContract)
-                ])
-                .GetValue(writer, value, serializer.ContractResolver.ResolveContract(value.GetType()), null, null);
+            serializer.SerializeObject(writer, value);
             return;
         }
 
