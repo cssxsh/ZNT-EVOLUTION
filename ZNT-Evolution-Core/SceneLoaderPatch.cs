@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using BepInEx.Logging;
 using HarmonyLib;
+using UIWidgets;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
@@ -832,12 +833,41 @@ internal static class SceneLoaderPatch
         if (!__instance.gameObject.activeInHierarchy || !HasModChanged) return;
         __instance.StopAllCoroutines();
         Traverse.Create(__instance)
-            .Field<Dictionary<int, List<UIWidgets.ListViewIconsItemDescription>>>("elements").Value.Clear();
+            .Field<Dictionary<int, List<ListViewIconsItemDescription>>>("elements").Value.Clear();
         Traverse.Create(__instance)
             .Method("FillAccordion").GetValue();
         var input = __instance.GetComponentInChildren<InputField>();
         __instance.FilterList(input.text);
         HasModChanged = false;
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(LevelSettingsMenu), "InitGeneralSettings")]
+    public static void InitGeneralSettings(LevelSettingsMenu __instance)
+    {
+        Traverse.Create(__instance).Field<Spinner>("maxZombieSpinner").Value.Max = short.MaxValue;
+        Traverse.Create(__instance).Field<Spinner>("maxEnemySpinner").Value.Max = short.MaxValue;
+    }
+
+    [HarmonyTranspiler]
+    [HarmonyPatch(typeof(LevelSettingsMenu), "InitCameraSettings")]
+    public static IEnumerable<CodeInstruction> InitCameraSettings(IEnumerable<CodeInstruction> instructions)
+    {
+        foreach (var instruction in instructions)
+        {
+            if (instruction.OperandIs(5f))
+            {
+                yield return instruction.Clone(1f);
+            }
+            else if (instruction.OperandIs(50f))
+            {
+                yield return instruction.Clone(1000f);
+            }
+            else
+            {
+                yield return instruction;
+            }
+        }
     }
 
     #endregion
