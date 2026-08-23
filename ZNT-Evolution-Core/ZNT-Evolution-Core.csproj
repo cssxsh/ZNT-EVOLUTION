@@ -436,6 +436,7 @@
         <Compile Include="Editor\CharacterEditor.cs"/>
         <Compile Include="Editor\CharacterSpawnPointEditor.cs"/>
         <Compile Include="Editor\Editor.cs"/>
+        <Compile Include="Editor\EvolutionSettings.cs"/>
         <Compile Include="Editor\ExplosionEditor.cs"/>
         <Compile Include="Editor\HumanEditor.cs"/>
         <Compile Include="Editor\HumanSpawnPointEditor.cs"/>

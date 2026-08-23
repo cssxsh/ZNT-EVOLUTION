@@ -105,6 +105,37 @@ internal static class CustomAssetObjectPatch
         ComponentSingleton<GamePoolManager>.Instance.Despawn(prefab);
     }
 
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(ExplosionEffect), "OnApplyOnGameObject")]
+    public static void OnApplyOnGameObject(ExplosionEffect __instance, GameObject target, out float __state)
+    {
+        __state = __instance.Damage;
+        if (!target.HasAnyTags(Tag.Human)) return;
+        var proof = EvolutionSettings.Instance.ExplosionProof;
+        if (proof is 0) return;
+        var count = Physics2D.LinecastNonAlloc(
+            start: __instance.Trigger.Detection.Origin.position,
+            end: target.transform.position,
+            results: DetectionHelper.DistanceCheck,
+            layerMask: LayerMask.GetMask("Zombie Stopper"));
+        var total = 0;
+        for (var i = 0; i < count; i++)
+        {
+            var hit = DetectionHelper.DistanceCheck[i];
+            var opponents = Opponents.GetValueOrDefault(hit.collider, 0);
+            total += opponents;
+        }
+
+        __instance.Damage -= total * proof;
+    }
+
+    [HarmonyFinalizer]
+    [HarmonyPatch(typeof(ExplosionEffect), "OnApplyOnGameObject")]
+    public static void OnApplyOnGameObject(ExplosionEffect __instance, float __state)
+    {
+        __instance.Damage = __state;
+    }
+
     #endregion
 
     #region DecorAsset
@@ -277,7 +308,7 @@ internal static class CustomAssetObjectPatch
         var flag = __instance.DamageCharacterOnTrigger
                    && __instance.TargetLayers.ContainsLayer(other.gameObject.layer);
         if (flag) Traverse.Create(__instance).Method("SendTargetDamage", other.gameObject).GetValue();
-        // TODO param by setting
+        // TODO param by EvolutionSettings
         if (flag && __instance.Physic.GravityScale is 0.0f)
         {
             var physic = __instance.Physic;
@@ -451,7 +482,7 @@ internal static class CustomAssetObjectPatch
     {
         var detector = Traverse.Create(__instance).Field<BoxDetection>("detector").Value;
         var collider = detector.GetComponent<Collider2D>();
-        SnakeFeetPatch.Opponents[collider] = block ? maxOpponents : 0;
+        Opponents[collider] = block ? maxOpponents : 0;
         var effect = detector.GetComponent<Trigger>().GetEffect<CharacterAllocationEffect>();
         effect.capacity = block ? maxOpponents : 0;
         if (block) effect.StartEffect();
@@ -474,12 +505,14 @@ internal static class CustomAssetObjectPatch
     {
         var detector = Traverse.Create(__instance).Field<BoxDetection>("detector").Value;
         var collider = detector.GetComponent<Collider2D>();
-        SnakeFeetPatch.Opponents.Remove(collider);
+        Opponents.Remove(collider);
         var effect = detector.GetComponent<CharacterAllocationEffect>();
         effect.StopEffect();
     }
 
     private static readonly Dictionary<Character, SphereBuffEffect> CultistBuff = new();
+
+    private static readonly Dictionary<Collider2D, int> Opponents = new();
 
     #endregion
 

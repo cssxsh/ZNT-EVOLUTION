@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using HarmonyLib;
 using UnityEngine;
+using ZNT.Evolution.Core.Editor;
 
 // ReSharper disable InconsistentNaming
 namespace ZNT.Evolution.Core;
@@ -50,36 +51,5 @@ internal class SnakeFeetPatch
                 __instance.Trigger.WithoutAllTags,
                 __instance.Trigger.InvertTagsMatch);
         }
-    }
-
-    internal static readonly Dictionary<Collider2D, int> Opponents = new();
-
-    [HarmonyPrefix]
-    [HarmonyPatch(typeof(ExplosionEffect), "OnApplyOnGameObject")]
-    public static void OnApplyOnGameObject(ExplosionEffect __instance, GameObject target, out float __state)
-    {
-        __state = __instance.Damage;
-        if (!target.HasAnyTags(Tag.Human)) return;
-        var count = Physics2D.LinecastNonAlloc(
-            start: __instance.Trigger.Detection.Origin.position,
-            end: target.transform.position,
-            results: DetectionHelper.DistanceCheck,
-            layerMask: LayerMask.GetMask("Zombie Stopper"));
-        var total = 0;
-        for (var i = 0; i < count; i++)
-        {
-            var hit = DetectionHelper.DistanceCheck[i];
-            var opponents = Opponents.GetValueOrDefault(hit.collider, 0);
-            total += opponents;
-        }
-
-        __instance.Damage -= total * 50.0f;
-    }
-
-    [HarmonyFinalizer]
-    [HarmonyPatch(typeof(ExplosionEffect), "OnApplyOnGameObject")]
-    public static void OnApplyOnGameObject(ExplosionEffect __instance, float __state)
-    {
-        __instance.Damage = __state;
     }
 }
