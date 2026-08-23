@@ -29,7 +29,7 @@ internal static class SceneLoaderPatch
     private static IEnumerator ToCoroutine<T>(this T task, System.Action<T> @finally = null) where T : Task
     {
         while (!task.IsCompleted) yield return null;
-        if (task.Exception != null) Logger.LogError(task.Exception.GetBaseException());
+        if (task.Exception is not null) Logger.LogError(task.Exception.GetBaseException());
         @finally?.Invoke(task);
     }
 
@@ -71,7 +71,7 @@ internal static class SceneLoaderPatch
     [HarmonyPatch(typeof(I2.Loc.LocalizationManager), "UpdateSources")]
     public static void UpdateSources()
     {
-        if (_localization != null) return;
+        if (_localization is not null) return;
         var localization = new I2.Loc.LanguageSourceData
         {
             GoogleUpdateFrequency = I2.Loc.LanguageSourceData.eGoogleUpdateFrequency.Never,
@@ -478,7 +478,7 @@ internal static class SceneLoaderPatch
             {
                 foreach (var (member, _) in component.Fields)
                 {
-                    if (overrider != null && overrider.OverrideMemberUi(__instance, component, member)) continue;
+                    if (overrider is not null && overrider.OverrideMemberUi(__instance, component, member)) continue;
                     __instance.SetDefaultUi(component, member);
                 }
             }
@@ -486,8 +486,8 @@ internal static class SceneLoaderPatch
             {
                 Traverse.Create(__instance).Field<RectTransform>("mainContainer").Value = container;
                 header.AddComponent<Button>().onClick.AddListener(panel.ToggleActivation);
-                header.SetActive(panel.childCount != 0);
-                panel.gameObject.SetActive(panel.childCount != 0 && Activated.Contains(panel.name));
+                header.SetActive(panel.childCount is not 0);
+                panel.gameObject.SetActive(panel.childCount is not 0 && Activated.Contains(panel.name));
             }
         }
 

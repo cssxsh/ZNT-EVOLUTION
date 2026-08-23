@@ -43,9 +43,9 @@ internal static class CustomAssetObjectPatch
 
     private static void DespawnBy(this AnimationDespawner despawn, AnimationSettings animation)
     {
-        if (animation == null) return;
+        if (animation is null) return;
         Traverse.Create(despawn).Field<AnimationEventHandler>("eventHandler").Value?
-            .RegisterEndEvent(animation, despawn.CreateDelegate<Action>("Despawn"));
+            .RegisterEndEvent(animation, despawn.Delegate<Action>("Despawn"));
     }
 
     [HarmonyPrefix]
@@ -183,7 +183,7 @@ internal static class CustomAssetObjectPatch
     [HarmonyPatch(typeof(MovingObjectBehaviour), "OnSpawn")]
     public static void OnSpawn(MovingObjectBehaviour __instance, Parameters param)
     {
-        if (param == null) return;
+        if (param is null) return;
         // ReSharper disable once InvertIf
         if (param.ContainsKey("speed_ease"))
         {
@@ -211,12 +211,12 @@ internal static class CustomAssetObjectPatch
         if (__instance.TryGetComponent(out MovingObjectBehaviour moving))
         {
             Traverse.Create(moving).Field<Vector3>("orientation").Value =
-                value == ObjectOrientation.Orientation.Right ? Vector3.forward : Vector3.back;
+                value is ObjectOrientation.Orientation.Right ? Vector3.forward : Vector3.back;
             var controller = (MovingObjectAnimationController)moving.AnimationController;
             if (controller.Asset.name.EndsWith("(Clone)"))
             {
                 var asset = (MovingObjectAsset)__instance.GetComponent<AssetComponent>().Asset;
-                var direction = value == ObjectOrientation.Orientation.Right ? "right" : "left";
+                var direction = value is ObjectOrientation.Orientation.Right ? "right" : "left";
                 controller.Asset.StandAnimation = string.Format(asset.StandAnimation, direction);
                 controller.Asset.DisableAnimation = string.Format(asset.DisableAnimation, direction);
                 controller.Asset.MoveAnimation = string.Format(asset.MoveAnimation, direction);
@@ -236,7 +236,7 @@ internal static class CustomAssetObjectPatch
         var sprite = moving?.AnimationController.Animator.Sprite
                      ?? __instance.GetComponentInChildren<tk2dBaseSprite>();
         if (sprite is null) return;
-        sprite.SortingOrder = value == ObjectOrientation.Orientation.Right ? 0 : -1;
+        sprite.SortingOrder = value is ObjectOrientation.Orientation.Right ? 0 : -1;
         var properties = new MaterialPropertyBlock();
         properties.SetFloat("_UseFlip", (int)value);
         sprite.CachedRenderer.SetPropertyBlock(properties);
@@ -260,9 +260,9 @@ internal static class CustomAssetObjectPatch
     {
         var behaviour = gameObject.GetComponent<PhysicObjectBehaviour>();
         if (behaviour.Physic.StartDirection.IsZero()
-            && behaviour.Physic.StartForce != 0) Logger.LogWarning($"{__instance} StartDirection is zero");
+            && behaviour.Physic.StartForce is not 0) Logger.LogWarning($"{__instance} StartDirection is zero");
         behaviour.DamageTriger.enabled = behaviour.DamageCharacterOnTrigger
-                                         || (behaviour.ExplodeOn & ExplodeSurfaceConverter.IgnoreHuman) != 0;
+                                         || (behaviour.ExplodeOn & ExplodeSurfaceConverter.IgnoreHuman) is not 0;
 
         if (behaviour.DamageTriger.enabled && behaviour.ExplodeOn.HasFlag(ExplodeSurfaceConverter.Target))
         {
@@ -278,7 +278,7 @@ internal static class CustomAssetObjectPatch
                    && __instance.TargetLayers.ContainsLayer(other.gameObject.layer);
         if (flag) Traverse.Create(__instance).Method("SendTargetDamage", other.gameObject).GetValue();
         // TODO param by setting
-        if (flag && __instance.Physic.GravityScale == 0.0f)
+        if (flag && __instance.Physic.GravityScale is 0.0f)
         {
             var physic = __instance.Physic;
             var direction = physic.Body.velocity.normalized;
@@ -343,7 +343,7 @@ internal static class CustomAssetObjectPatch
     [HarmonyPatch(typeof(CharacterBehaviour), "OnSpawn")]
     public static void OnSpawn(CharacterBehaviour __instance, Parameters param)
     {
-        if (param == null) return;
+        if (param is null) return;
         // ReSharper disable once InvertIf
         if (param.ContainsKey("dialogue_text"))
         {
@@ -534,8 +534,8 @@ internal static class CustomAssetObjectPatch
             if (current.Count >= count) break;
         }
 
-        if (current.Count == 0) return true;
-        Timer.DelayedCall(0.2f, __instance.CreateDelegate<DG.Tweening.TweenCallback>("AddFiller"));
+        if (current.Count is 0) return true;
+        Timer.DelayedCall(0.2f, __instance.Delegate<DG.Tweening.TweenCallback>("AddFiller"));
         return false;
     }
 

@@ -44,7 +44,7 @@ internal class ExplodeSurfaceConverter : CustomCreationConverter<ExplodeSurface>
     public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
     {
         var mask = (ExplodeSurface)value;
-        if (mask == 0x00000000)
+        if (mask is 0x00000000)
         {
             writer.WriteValue(0x00000000);
             return;
@@ -69,7 +69,7 @@ internal class ExplodeSurfaceConverter : CustomCreationConverter<ExplodeSurface>
 
     public override object ReadJson(JsonReader reader, Type type, object _, JsonSerializer serializer)
     {
-        if (reader.TokenType == JsonToken.Integer) return (ExplodeSurface)serializer.Deserialize<int>(reader);
+        if (reader.TokenType is JsonToken.Integer) return (ExplodeSurface)serializer.Deserialize<int>(reader);
         var value = serializer.Deserialize<string>(reader);
         var mask = None;
         foreach (var match in FlagRegex.Matches(value).Cast<Match>())

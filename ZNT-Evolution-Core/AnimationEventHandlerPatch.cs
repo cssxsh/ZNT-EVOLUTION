@@ -81,12 +81,12 @@ internal static class AnimationEventHandlerPatch
         foreach (var method in methods)
         {
             var infos = method.GetParameters();
-            if (infos.Length != 2) continue;
+            if (infos.Length is not 2) continue;
             if (!typeof(BaseAnimationController).IsAssignableFrom(infos[0].ParameterType)) continue;
             foreach (var description in method.GetCustomAttributes<DescriptionAttribute>())
             {
                 var index = description.Description.IndexOf(':');
-                if (index == -1) continue;
+                if (index is -1) continue;
                 switch (description.Description.Substring(0, index))
                 {
                     case nameof(AnimationEventHandler.RegisterTriggerEvent)
@@ -171,7 +171,7 @@ internal static class AnimationEventHandlerPatch
         var damage = parameters.CharacterAsset.Damage;
         foreach (var target in detected)
         {
-            if (count == 0) break;
+            if (count is 0) break;
             if (!DetectionHelper.ObjectInRange(
                     parameters.Position,
                     target.transform,

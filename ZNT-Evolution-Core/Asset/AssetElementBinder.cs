@@ -15,19 +15,19 @@ public static class AssetElementBinder
     public static Dictionary<string, FMODAsset> FetchFMODAsset(string path)
     {
         var result = FMODUnity.RuntimeManager.StudioSystem.getBank(path, out var bank);
-        if (result != FMOD.RESULT.OK) throw new FMODUnity.BankLoadException(path, result);
+        if (result is not FMOD.RESULT.OK) throw new FMODUnity.BankLoadException(path, result);
         result = bank.getEventList(out var events);
-        if (result != FMOD.RESULT.OK) throw new FMODUnity.BankLoadException(path, result);
+        if (result is not FMOD.RESULT.OK) throw new FMODUnity.BankLoadException(path, result);
         var dictionary = new Dictionary<string, FMODAsset>(events.Length);
         foreach (var description in events)
         {
             var asset = ScriptableObject.CreateInstance<FMODAsset>();
             UnityEngine.Object.DontDestroyOnLoad(asset);
             result = description.getID(out var guid);
-            if (result != FMOD.RESULT.OK) throw new FMODUnity.BankLoadException(path, result);
+            if (result is not FMOD.RESULT.OK) throw new FMODUnity.BankLoadException(path, result);
             asset.id = $"{{{guid}}}";
             result = description.getPath(out asset.path);
-            if (result != FMOD.RESULT.OK) throw new FMODUnity.BankLoadException(path, result);
+            if (result is not FMOD.RESULT.OK) throw new FMODUnity.BankLoadException(path, result);
             asset.name = asset.path.Substring(asset.path.LastIndexOf('/') + 1);
             Traverse.Create(asset).Field<string>("assetId").Value = $"{path} - {asset.path}";
             _ = asset.Bind();
@@ -44,13 +44,13 @@ public static class AssetElementBinder
     public static void ClearFMODAsset(string path)
     {
         var result = FMODUnity.RuntimeManager.StudioSystem.getBank(path, out var bank);
-        if (result != FMOD.RESULT.OK) throw new FMODUnity.BankLoadException(path, result);
+        if (result is not FMOD.RESULT.OK) throw new FMODUnity.BankLoadException(path, result);
         result = bank.getEventList(out var events);
-        if (result != FMOD.RESULT.OK) throw new FMODUnity.BankLoadException(path, result);
+        if (result is not FMOD.RESULT.OK) throw new FMODUnity.BankLoadException(path, result);
         foreach (var description in events)
         {
             result = description.getPath(out var key);
-            if (result != FMOD.RESULT.OK) throw new FMODUnity.BankLoadException(path, result);
+            if (result is not FMOD.RESULT.OK) throw new FMODUnity.BankLoadException(path, result);
             if (FmodAssetIndex.PathIndex.TryGetValue(key, out var asset)) asset.Unbind();
         }
     }
@@ -85,7 +85,7 @@ public static class AssetElementBinder
 
     public static int Bind(this TMPro.TMP_Asset asset)
     {
-        if (asset.hashCode == 0) asset.hashCode = TMPro.TMP_TextUtilities.GetSimpleHashCode(asset.name);
+        if (asset.hashCode is 0) asset.hashCode = TMPro.TMP_TextUtilities.GetSimpleHashCode(asset.name);
         lock (TMPro.MaterialReferenceManager.instance)
         {
             switch (asset)

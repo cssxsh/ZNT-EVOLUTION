@@ -67,7 +67,7 @@ internal static class DebugPatch
     [HarmonyPatch(typeof(AchievementManager), "OnCreate")]
     public static void OnCreate(AchievementManager __instance)
     {
-        __instance.enabled = SteamManager.Initialized && SteamManager.Instance.GetUserName() != "Goldberg";
+        __instance.enabled = SteamManager.Initialized && SteamManager.Instance.GetUserName() is not "Goldberg";
     }
 
     [HarmonyPrefix]
@@ -319,7 +319,7 @@ internal static class DebugPatch
             paintSize: 1U,
             refreshSurrounding: true);
         var tile = system.GetTileOrNull(ti);
-        if (tile == null) return false;
+        if (tile is null) return false;
         __instance.gameObject.CopyTo(tile.gameObject);
         __instance.OnCopy?.Invoke(tile.gameObject, __instance.Type is ObjectSettings.ElementType.Brush);
         tile.gameObject.BroadcastMessage(
@@ -333,9 +333,9 @@ internal static class DebugPatch
     [HarmonyPatch(typeof(Framework.Events.SignalReceiver), "GetType")]
     public static Type GetType(Type __result, string typeName)
     {
-        if (__result != null) return __result;
+        if (__result is not null) return __result;
         __result = AccessTools.TypeByName(typeName);
-        if (__result == null) return null;
+        if (__result is null) return null;
         var cached = Traverse.Create<Framework.Events.SignalReceiver>()
             .Field<Dictionary<string, Type>>("cachedType").Value;
         return cached[typeName] = __result;

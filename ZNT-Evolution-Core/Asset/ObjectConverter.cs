@@ -60,7 +60,7 @@ internal class ObjectConverter : CustomCreationConverter<UnityEngine.Object>
 
     public override object ReadJson(JsonReader reader, Type type, object _, JsonSerializer serializer)
     {
-        if (reader.TokenType != JsonToken.String)
+        if (reader.TokenType is not JsonToken.String)
         {
             var result = base.ReadJson(reader, type, _, serializer) as UnityEngine.Object;
             if (result is ISerializationCallbackReceiver receiver) receiver.OnAfterDeserialize();
@@ -70,7 +70,7 @@ internal class ObjectConverter : CustomCreationConverter<UnityEngine.Object>
         }
 
         var key = serializer.Deserialize<string>(reader);
-        if (key == null) return null;
+        if (key is null) return null;
 
         if (type == typeof(Shader))
         {

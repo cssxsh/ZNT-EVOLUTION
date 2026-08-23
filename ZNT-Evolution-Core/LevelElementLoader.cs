@@ -221,7 +221,7 @@ public static class LevelElementLoader
             case var _ when asset.EndsWith("DecorAsset"):
                 var decor = DeserializeObject<DecorAsset>(folder: path, file: "asset.json");
                 Logger.LogDebug($"asset.json -> {decor} from {decor.Animation}");
-                if (decor.Animation.GetClipByName(decor.ActivateAnimation) == null)
+                if (decor.Animation.GetClipByName(decor.ActivateAnimation) is null)
                 {
                     var source = DeserializeObject<LevelElement>(folder: path, file: "element.json");
                     Logger.LogDebug($"element.json -> {source} to {source.Title}");
@@ -230,13 +230,13 @@ public static class LevelElementLoader
                         var clone = UnityEngine.Object.Instantiate(decor);
                         clone.name = string.Format(decor.name, index + 1);
                         clone.ActivateAnimation = string.Format(decor.ActivateAnimation, index + 1);
-                        if (decor.Animation.GetClipByName(clone.ActivateAnimation) == null) break;
+                        if (decor.Animation.GetClipByName(clone.ActivateAnimation) is null) break;
                         clone.DeactivateAnimation = string.Format(decor.DeactivateAnimation, index + 1);
-                        if (decor.Animation.GetClipByName(clone.DeactivateAnimation) == null) break;
+                        if (decor.Animation.GetClipByName(clone.DeactivateAnimation) is null) break;
                         clone.ActiveAnimation = string.Format(decor.ActiveAnimation, index + 1);
-                        if (decor.Animation.GetClipByName(clone.ActiveAnimation) == null) break;
+                        if (decor.Animation.GetClipByName(clone.ActiveAnimation) is null) break;
                         clone.InactiveAnimation = string.Format(decor.InactiveAnimation, index + 1);
-                        if (decor.Animation.GetClipByName(clone.InactiveAnimation) == null) break;
+                        if (decor.Animation.GetClipByName(clone.InactiveAnimation) is null) break;
 
                         var impl = UnityEngine.Object.Instantiate(source);
                         impl.name = string.Format(source.name, index + 1);

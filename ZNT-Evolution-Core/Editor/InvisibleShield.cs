@@ -67,7 +67,7 @@ public class InvisibleShield : Editor, IActivable, IDeserializable
     // ReSharper disable Unity.PerformanceAnalysis
     public static PoolSettingsAsset.PoolPrefab PoolPrefab()
     {
-        if (_prefab != null) return _prefab;
+        if (_prefab is not null) return _prefab;
         var prefab = new GameObject(name: nameof(InvisibleShield));
         DontDestroyOnLoad(prefab);
         prefab.SetActive(false);

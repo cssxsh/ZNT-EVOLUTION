@@ -73,7 +73,7 @@ internal class AnimationCurveConverter : CustomCreationConverter<AnimationCurve>
 
     public override object ReadJson(JsonReader reader, Type type, object _, JsonSerializer serializer)
     {
-        if (reader.TokenType != JsonToken.String) return base.ReadJson(reader, type, _, serializer);
+        if (reader.TokenType is not JsonToken.String) return base.ReadJson(reader, type, _, serializer);
         var sample = serializer.Deserialize<string>(reader);
 
         // ReSharper disable once InvertIf

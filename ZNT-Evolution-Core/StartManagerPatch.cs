@@ -26,10 +26,8 @@ internal static class StartManagerPatch
     private static IEnumerator ToCoroutine(this Task task, YieldInstruction instruction = null)
     {
         while (!task.IsCompleted) yield return instruction;
-        if (task.Exception == null) yield break;
-        Logger.LogError(task.Exception.InnerExceptions.Count == 1
-            ? task.Exception.GetBaseException()
-            : task.Exception);
+        if (task.Exception is null) yield break;
+        Logger.LogError(task.Exception.GetBaseException());
     }
 
     [HarmonyPostfix]
@@ -98,7 +96,7 @@ internal static class StartManagerPatch
                 moving.HierarchyName = moving.name.SplitCamelCase();
                 Logger.LogDebug($"Fix HierarchyName for {moving}");
                 break;
-            case MovingObjectAsset { name: "Elevator 1"or "Elevator 2" } moving:
+            case MovingObjectAsset { name: "Elevator 1" or "Elevator 2" } moving:
                 moving.HierarchyName = moving.name;
                 Logger.LogDebug($"Fix HierarchyName for {moving}");
                 break;

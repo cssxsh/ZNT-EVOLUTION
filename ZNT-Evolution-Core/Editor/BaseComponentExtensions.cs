@@ -35,7 +35,7 @@ public static class BaseComponentExtensions
     }
 
     [UsedImplicitly]
-    public static T CreateDelegate<T>(this BaseComponent component, string method) where T : System.Delegate
+    public static T Delegate<T>(this BaseComponent component, string method) where T : System.Delegate
     {
         return System.Delegate.CreateDelegate(typeof(T), component, method) as T;
     }

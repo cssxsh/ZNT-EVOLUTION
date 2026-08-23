@@ -32,8 +32,8 @@ public class LayerConverter : CustomCreationConverter<int>
 
     public override object ReadJson(JsonReader reader, Type type, object _, JsonSerializer serializer)
     {
-        if (reader.TokenType == JsonToken.Integer) return serializer.Deserialize<int>(reader);
-        if (reader.TokenType != JsonToken.String) return serializer.Deserialize<LayerMask>(reader).value;
+        if (reader.TokenType is JsonToken.Integer) return serializer.Deserialize<int>(reader);
+        if (reader.TokenType is not JsonToken.String) return serializer.Deserialize<LayerMask>(reader).value;
         var text = serializer.Deserialize<string>(reader);
         return TextToLayer(text);
     }

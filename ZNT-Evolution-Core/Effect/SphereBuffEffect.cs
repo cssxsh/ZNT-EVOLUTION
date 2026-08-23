@@ -145,7 +145,7 @@ public class SphereBuffEffect : TriggerEffect
     private static void MaxHpApply(Character target, CustomAsset asset)
     {
         if (asset is not CharacterBuff buff) return;
-        if (buff.Diff == 0.0f) return;
+        if (buff.Diff is 0.0f) return;
         Logger.LogDebug($"{target} MaxHp += {buff.Diff}");
         target.Behaviour.Health.MaxHp += buff.Diff;
     }
@@ -153,7 +153,7 @@ public class SphereBuffEffect : TriggerEffect
     private static void MaxHpRemove(Character target, CustomAsset asset)
     {
         if (asset is not CharacterBuff buff) return;
-        if (buff.Diff == 0.0f) return;
+        if (buff.Diff is 0.0f) return;
         Logger.LogDebug($"{target} MaxHp -= {buff.Diff}");
         target.Behaviour.Health.MaxHp -= buff.Diff;
     }
@@ -161,7 +161,7 @@ public class SphereBuffEffect : TriggerEffect
     private static void HpTick(Character target, CustomAsset asset)
     {
         if (asset is not CharacterBuff buff) return;
-        if (buff.Diff == 0.0f || target.Behaviour.Health.Hp >= target.Behaviour.Health.MaxHp) return;
+        if (buff.Diff is 0.0f || target.Behaviour.Health.Hp >= target.Behaviour.Health.MaxHp) return;
         Logger.LogDebug($"{target} Hp += {buff.Diff}");
         target.Behaviour.Health.Hp += buff.Diff;
     }
@@ -169,7 +169,7 @@ public class SphereBuffEffect : TriggerEffect
     private static void DamageApply(Character target, CustomAsset asset)
     {
         if (asset is not CharacterBuff buff) return;
-        if (buff.Diff == 0.0f) return;
+        if (buff.Diff is 0.0f) return;
         Logger.LogDebug($"{target} Damage += {buff.Diff}");
         target.Behaviour.Attacker.Damage += buff.Diff;
     }
@@ -177,7 +177,7 @@ public class SphereBuffEffect : TriggerEffect
     private static void DamageRemove(Character target, CustomAsset asset)
     {
         if (asset is not CharacterBuff buff) return;
-        if (buff.Diff == 0.0f) return;
+        if (buff.Diff is 0.0f) return;
         Logger.LogDebug($"{target} Damage -= {buff.Diff}");
         target.Behaviour.Attacker.Damage -= buff.Diff;
     }
@@ -187,7 +187,7 @@ public class SphereBuffEffect : TriggerEffect
     // ReSharper disable Unity.PerformanceAnalysis
     public static PoolSettingsAsset.PoolPrefab PoolPrefab()
     {
-        if (_prefab != null) return _prefab;
+        if (_prefab is not null) return _prefab;
         var prefab = new GameObject(name: nameof(SphereBuffEffect));
         DontDestroyOnLoad(prefab);
         prefab.SetActive(false);

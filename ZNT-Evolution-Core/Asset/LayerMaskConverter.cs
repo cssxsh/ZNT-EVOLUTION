@@ -18,7 +18,7 @@ public class LayerMaskConverter : CustomCreationConverter<LayerMask>
     public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
     {
         var mask = (LayerMask)value;
-        if (mask.value == 0x00000000)
+        if (mask.value is 0x00000000)
         {
             writer.WriteValue(0x00000000);
             return;
@@ -39,8 +39,8 @@ public class LayerMaskConverter : CustomCreationConverter<LayerMask>
 
     public override object ReadJson(JsonReader reader, Type type, object _, JsonSerializer serializer)
     {
-        if (reader.TokenType == JsonToken.Integer) return (LayerMask)serializer.Deserialize<int>(reader);
-        if (reader.TokenType != JsonToken.String) return JToken.Load(reader).ToObject<LayerMask>();
+        if (reader.TokenType is JsonToken.Integer) return (LayerMask)serializer.Deserialize<int>(reader);
+        if (reader.TokenType is not JsonToken.String) return JToken.Load(reader).ToObject<LayerMask>();
         var value = serializer.Deserialize<string>(reader);
         var mask = FlagRegex.Matches(value).Cast<Match>()
             .Select(match => LayerConverter.TextToLayer(match.Value))

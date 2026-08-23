@@ -7,7 +7,7 @@ public abstract class Editor : BaseComponent
     protected Editor()
     {
         var attribute = GetType().GetCustomAttribute<SerializeInEditorAttribute>();
-        if (attribute == null) return;
+        if (attribute is null) return;
         EditorVisibility = new Visibility(attribute.VisibleInEditor)
         {
             CustomName = attribute.Name

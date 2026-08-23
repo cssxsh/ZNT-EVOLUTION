@@ -35,7 +35,7 @@ internal class AnimationAddition : EvolutionAddition<tk2dSpriteAnimation, tk2dSp
             if (animation is null || clip is null) continue;
             if (animation.clips.Contains(clip)) continue;
             var id = animation.GetClipIdByName(clip.name);
-            if (id != -1) Logger.LogWarning($"{animation.name} already exists clip {clip.name} at {id}");
+            if (id is not -1) Logger.LogWarning($"{animation.name} already exists clip {clip.name} at {id}");
             animation.clips = animation.clips.AddToArray(clip);
             Traverse.Create(animation).Field<Dictionary<string, int>>("clipNameCache").Value = null;
         }

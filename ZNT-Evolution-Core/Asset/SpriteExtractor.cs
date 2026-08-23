@@ -109,7 +109,7 @@ internal class SpriteExtractor
         _names.Add(definition.name);
         _regions.Add(region);
         _anchors.Add(anchor);
-        if (definition.attachPoints.Length != 0) _points[index] = definition.attachPoints;
+        if (definition.attachPoints is { Length: > 0 }) _points[index] = definition.attachPoints;
         NewCol();
     }
 

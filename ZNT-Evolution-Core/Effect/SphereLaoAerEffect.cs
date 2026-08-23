@@ -70,7 +70,7 @@ public class SphereLaoAerEffect : TriggerEffect
     {
         if (_nearest is null) return;
         _human ??= GetComponentInParent<HumanBehaviour>();
-        if (_human.State != BehaviourState.Idle) return;
+        if (_human.State is not BehaviourState.Idle) return;
         Traverse.Create(_human).Method("MoveToTarget", _nearest.transform).GetValue();
     }
 
@@ -96,7 +96,7 @@ public class SphereLaoAerEffect : TriggerEffect
     // ReSharper disable Unity.PerformanceAnalysis
     public static PoolSettingsAsset.PoolPrefab PoolPrefab()
     {
-        if (_prefab != null) return _prefab;
+        if (_prefab is not null) return _prefab;
         var prefab = new GameObject(name: nameof(SphereLaoAerEffect));
         DontDestroyOnLoad(prefab);
         prefab.SetActive(false);
