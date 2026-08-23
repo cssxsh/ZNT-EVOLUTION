@@ -14,6 +14,40 @@ public class ExplosionEditor : Editor
 
     private ExplosionAsset Asset => field ??= GetComponent<AssetComponent>().Asset as ExplosionAsset;
 
+    [SerializeInEditor(name: "Detected Radius")]
+    public float DetectedRadius
+    {
+        get => Detection.Radius;
+        set => Detection.Radius = value;
+    }
+
+    private LayerMask Layers
+    {
+        get => Effect.Trigger.Layers;
+        set => Effect.Trigger.Layers = value;
+    }
+
+    [SerializeInEditor(name: "Detected Human")]
+    public bool DetectedHuman
+    {
+        get => Layers.ContainsLayer("Human");
+        set => Layers = value ? Layers.AddLayer("Human") : Layers.RemoveLayer("Human");
+    }
+
+    [SerializeInEditor(name: "Damage Zombie")]
+    public bool DetectedZombie
+    {
+        get => Layers.ContainsLayer("Zombie");
+        set => Layers = value ? Layers.AddLayer("Human") : Layers.RemoveLayer("Zombie");
+    }
+
+    [SerializeInEditor(name: "Damage World Enemy")]
+    public bool DetectedWorldEnemy
+    {
+        get => Layers.ContainsLayer("World Enemy");
+        set => Layers = value ? Layers.AddLayer("World Enemy") : Layers.RemoveLayer("World Enemy");
+    }
+
     [SerializeInEditor(name: "Damage")]
     public float Damage
     {
@@ -28,24 +62,10 @@ public class ExplosionEditor : Editor
         set => Effect.DamageType = value;
     }
 
-    [SerializeInEditor(name: "Damage Radius")]
-    public float DamageRadius
-    {
-        get => Detection.Radius;
-        set => Detection.Radius = value;
-    }
-
     private Tag ApplyDamageOn
     {
         get => Effect.ApplyDamageOn;
         set => Effect.ApplyDamageOn = value;
-    }
-
-    [SerializeInEditor(name: "Damage Breakable")]
-    public bool DamageBreakable
-    {
-        get => ApplyDamageOn.HasFlag(Tag.Breakable);
-        set => ApplyDamageOn = value ? ApplyDamageOn.Add(Tag.Breakable) : ApplyDamageOn.Remove(Tag.Breakable);
     }
 
     [SerializeInEditor(name: "Damage Human")]
@@ -62,11 +82,25 @@ public class ExplosionEditor : Editor
         set => ApplyDamageOn = value ? ApplyDamageOn.Add(Tag.Zombie) : ApplyDamageOn.Remove(Tag.Zombie);
     }
 
+    [SerializeInEditor(name: "Damage World Enemy")]
+    public bool DamageWorldEnemy
+    {
+        get => ApplyDamageOn.HasFlag(Tag.WorldEnemy);
+        set => ApplyDamageOn = value ? ApplyDamageOn.Add(Tag.WorldEnemy) : ApplyDamageOn.Remove(Tag.WorldEnemy);
+    }
+
     [SerializeInEditor(name: "Force")]
     public float Force
     {
         get => Effect.Force;
         set => Effect.Force = value;
+    }
+
+    [SerializeInEditor(name: "Force Mode")]
+    public ForceMode2D ForceMode
+    {
+        get => Effect.ForceMode;
+        set => Effect.ForceMode = value;
     }
 
     private Tag ApplyForceOn
@@ -87,6 +121,13 @@ public class ExplosionEditor : Editor
     {
         get => ApplyForceOn.HasFlag(Tag.Zombie);
         set => ApplyForceOn = value ? ApplyForceOn.Add(Tag.Zombie) : ApplyForceOn.Remove(Tag.Zombie);
+    }
+
+    [SerializeInEditor(name: "Force World Enemy")]
+    public bool ForceWorldEnemy
+    {
+        get => ApplyForceOn.HasFlag(Tag.WorldEnemy);
+        set => ApplyForceOn = value ? ApplyForceOn.Add(Tag.WorldEnemy) : ApplyForceOn.Remove(Tag.WorldEnemy);
     }
 
     [SerializeInEditor(name: "Shake Camera")]
