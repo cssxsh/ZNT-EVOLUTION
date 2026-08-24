@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Text.RegularExpressions;
+using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
@@ -77,6 +78,7 @@ internal class AnimationCurveConverter : CustomCreationConverter<AnimationCurve>
         return TextToAnimationCurve(serializer.Deserialize<string>(reader));
     }
 
+    [UsedImplicitly]
     internal static AnimationCurve TextToAnimationCurve(string text)
     {
         // ReSharper disable once InvertIf

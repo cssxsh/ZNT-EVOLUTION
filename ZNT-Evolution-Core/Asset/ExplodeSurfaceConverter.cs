@@ -5,13 +5,12 @@ using System.Text.RegularExpressions;
 using BepInEx.Logging;
 using HarmonyLib;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 using ExplodeSurface = PhysicObjectBehaviour.ExplodeSurface;
 using BepInExLogger = BepInEx.Logging.Logger;
 
 namespace ZNT.Evolution.Core.Asset;
 
-internal class ExplodeSurfaceConverter : CustomCreationConverter<ExplodeSurface>
+internal class ExplodeSurfaceConverter : JsonConverter
 {
     private static readonly ManualLogSource Logger = BepInExLogger.CreateLogSource(nameof(ExplodeSurface));
 
@@ -39,6 +38,8 @@ internal class ExplodeSurfaceConverter : CustomCreationConverter<ExplodeSurface>
 
     public const ExplodeSurface IgnoreHuman = Zombie | Climber | Blocker | Tank | WorldEnemy;
 
+    public override bool CanConvert(Type type) => type == typeof(ExplodeSurface);
+
     public override bool CanWrite => true;
 
     public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
@@ -64,8 +65,6 @@ internal class ExplodeSurfaceConverter : CustomCreationConverter<ExplodeSurface>
     }
 
     public override bool CanRead => true;
-
-    public override ExplodeSurface Create(Type type) => 0x00000000;
 
     public override object ReadJson(JsonReader reader, Type type, object _, JsonSerializer serializer)
     {

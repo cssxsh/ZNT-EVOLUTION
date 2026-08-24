@@ -2,19 +2,20 @@ using System;
 using System.Text.RegularExpressions;
 using BepInEx.Logging;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 using UnityEngine;
 using BepInExLogger = BepInEx.Logging.Logger;
 
 namespace ZNT.Evolution.Core.Asset;
 
-public class LayerConverter : CustomCreationConverter<int>
+public class LayerConverter : JsonConverter
 {
     private static readonly ManualLogSource Logger = BepInExLogger.CreateLogSource(nameof(LayerMask));
 
     private static readonly Regex SpaceRegex = new(@"[\s_]+", RegexOptions.Compiled);
 
     public static readonly LayerConverter Instance = new();
+
+    public override bool CanConvert(Type type) => type == typeof(int) || type == typeof(LayerMask);
 
     public override bool CanWrite => true;
 
@@ -28,13 +29,12 @@ public class LayerConverter : CustomCreationConverter<int>
 
     public override bool CanRead => true;
 
-    public override int Create(Type type) => LayerMask.NameToLayer("Default");
-
     public override object ReadJson(JsonReader reader, Type type, object _, JsonSerializer serializer)
     {
         if (reader.TokenType is JsonToken.Integer) return serializer.Deserialize<int>(reader);
         if (reader.TokenType is not JsonToken.String) return serializer.Deserialize<LayerMask>(reader).value;
         var text = serializer.Deserialize<string>(reader);
+        if (type == typeof(LayerMask)) return (LayerMask)TextToLayer(text);
         return TextToLayer(text);
     }
 

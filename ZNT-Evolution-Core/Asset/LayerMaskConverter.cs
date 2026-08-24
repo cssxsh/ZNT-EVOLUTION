@@ -3,15 +3,16 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using HarmonyLib;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
 
 namespace ZNT.Evolution.Core.Asset;
 
-public class LayerMaskConverter : CustomCreationConverter<LayerMask>
+public class LayerMaskConverter : JsonConverter
 {
     private static readonly Regex FlagRegex = new(@"(\w(?:[\s\w]*\w)?)", RegexOptions.Compiled);
+
+    public override bool CanConvert(Type type) => type == typeof(LayerMask) || type == typeof(Layer);
 
     public override bool CanWrite => true;
 
@@ -35,8 +36,6 @@ public class LayerMaskConverter : CustomCreationConverter<LayerMask>
 
     public override bool CanRead => true;
 
-    public override LayerMask Create(Type type) => 0x00000000;
-
     public override object ReadJson(JsonReader reader, Type type, object _, JsonSerializer serializer)
     {
         if (reader.TokenType is JsonToken.Integer) return (LayerMask)serializer.Deserialize<int>(reader);
@@ -46,6 +45,7 @@ public class LayerMaskConverter : CustomCreationConverter<LayerMask>
             .Select(match => LayerConverter.TextToLayer(match.Value))
             .Where(layer => layer is not -1)
             .Aggregate(0x00000000, (current, layer) => current | 0x01 << layer);
+        if (type == typeof(Layer)) return (Layer)mask;
         return (LayerMask)mask;
     }
 }

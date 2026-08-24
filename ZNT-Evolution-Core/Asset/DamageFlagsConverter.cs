@@ -1,10 +1,9 @@
 using System;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 
 namespace ZNT.Evolution.Core.Asset;
 
-internal class DamageFlagsConverter : CustomCreationConverter<DamageType>
+internal class DamageFlagsConverter : JsonConverter
 {
     public static readonly DamageFlagsConverter Instance = new();
 
@@ -16,6 +15,8 @@ internal class DamageFlagsConverter : CustomCreationConverter<DamageType>
             : (Flags)(value & int.MaxValue);
     }
 
+    public override bool CanConvert(Type type) => type == typeof(DamageType);
+
     public override bool CanWrite => true;
 
     public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
@@ -24,8 +25,6 @@ internal class DamageFlagsConverter : CustomCreationConverter<DamageType>
     }
 
     public override bool CanRead => true;
-
-    public override DamageType Create(Type objectType) => DamageType.None;
 
     public override object ReadJson(JsonReader reader, Type type, object _, JsonSerializer serializer)
     {

@@ -1,11 +1,10 @@
 using System;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 using UnityEngine;
 
 namespace ZNT.Evolution.Core.Asset;
 
-public class RectConverter : CustomCreationConverter<Rect>
+public class RectConverter : JsonConverter
 {
     public override bool CanWrite => true;
 
@@ -26,7 +25,12 @@ public class RectConverter : CustomCreationConverter<Rect>
         writer.WriteEndObject();
     }
 
+    public override object ReadJson(JsonReader reader, Type type, object _, JsonSerializer serializer)
+    {
+        throw new NotImplementedException();
+    }
+
     public override bool CanRead => false;
 
-    public override Rect Create(Type objectType) => Rect.zero;
+    public override bool CanConvert(Type type) => type == typeof(Rect);
 }

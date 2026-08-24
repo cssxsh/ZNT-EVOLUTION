@@ -44,9 +44,7 @@ internal class ObjectContractResolver() : DefaultContractResolver(shareCache: tr
                 break;
             case not null
                 when member.IsDefined(typeof(LayerAttribute)):
-                property.PropertyType = typeof(int);
                 property.Converter = property.MemberConverter = LayerConverter.Instance;
-                property.ValueProvider = new LayerProvider(origin: property.ValueProvider);
                 break;
             case { Name: nameof(UnityEngine.Object.name) }:
             case { Name: nameof(UnityEngine.Object.hideFlags) }:
@@ -62,29 +60,5 @@ internal class ObjectContractResolver() : DefaultContractResolver(shareCache: tr
     private static bool IsSerializable(Type type)
     {
         return type.IsDefined(typeof(SerializableAttribute)) || typeof(UnityEngine.Object).IsAssignableFrom(type);
-    }
-
-    private class LayerProvider(IValueProvider origin) : IValueProvider
-    {
-        public void SetValue(object target, object value)
-        {
-            var layer = (int)value;
-            origin.SetValue(target, origin.GetValue(target) switch
-            {
-                LayerMask => (LayerMask)layer,
-                int => layer,
-                _ => throw new FormatException("Invalid value")
-            });
-        }
-
-        public object GetValue(object target)
-        {
-            return origin.GetValue(target) switch
-            {
-                LayerMask mask => mask.value,
-                int index => index,
-                _ => throw new FormatException("Invalid value")
-            };
-        }
     }
 }
