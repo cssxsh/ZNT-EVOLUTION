@@ -9,6 +9,7 @@ using JetBrains.Annotations;
 using Newtonsoft.Json;
 using UIWidgets;
 using UnityEngine;
+using UnityEngine.UI;
 using ZNT.Evolution.Core.Asset;
 using BepInExLogger = BepInEx.Logging.Logger;
 
@@ -34,8 +35,52 @@ public class EvolutionSettings : Editor
 
     private void SetExplosionProof(float value) => ExplosionProof = value;
 
+    internal static Button AssetOverrideImport;
+
+    internal static Button AssetOverrideExport;
+
     [SerializeInEditor(name: "Asset Override Data")]
-    public List<AssetOverrideRecord> AssetOverrideData = [];
+    public List<AssetOverrideRecord> AssetOverrideData { get; set; } = [];
+
+    private void ImportAssetOverride()
+    {
+        try
+        {
+            AssetOverrideData =
+                CustomAssetUtility.DeserializeObjectFromPath<List<AssetOverrideRecord>>("AssetOverride.json");
+            Logger.LogInfo("ImportAssetOverride from AssetOverride.json");
+        }
+        catch (System.Exception e)
+        {
+            Logger.LogError(e);
+        }
+    }
+
+    private void ExportAssetOverride()
+    {
+        try
+        {
+            if (AssetOverrideData is { Count: 0 })
+            {
+                AssetOverrideData.Add(new AssetOverrideRecord
+                {
+                    Type = nameof(HumanAsset),
+                    Pattern = "This is pattern for name",
+                    Handles = new Dictionary<string, string>
+                    {
+                        [nameof(HumanAsset.RiseAsset)] = "SwordWomen : HumanAsset"
+                    }
+                });
+            }
+
+            CustomAssetUtility.SerializeObjectToPath("AssetOverride.json", AssetOverrideData);
+            Logger.LogInfo("ExportAssetOverride to AssetOverride.json");
+        }
+        catch (System.Exception e)
+        {
+            Logger.LogError(e);
+        }
+    }
 
     [SerializeInEditor(name: "Unix Time Seconds")]
     private long UnixTimeSeconds
@@ -58,8 +103,13 @@ public class EvolutionSettings : Editor
     {
         ExplosionProofSpinner.Min = 0;
         ExplosionProofSpinner.Max = 1748;
+        ExplosionProofSpinner.onEndEditFloat = new SubmitEventFloat();
         ExplosionProofSpinner.onEndEditFloat.AddListener(SetExplosionProof);
         ExplosionProofSpinner.Value = ExplosionProof;
+        AssetOverrideImport.onClick = new Button.ButtonClickedEvent();
+        AssetOverrideImport.onClick.AddListener(ImportAssetOverride);
+        AssetOverrideExport.onClick = new Button.ButtonClickedEvent();
+        AssetOverrideExport.onClick.AddListener(ExportAssetOverride);
     }
 
     public void Reset()
@@ -70,6 +120,7 @@ public class EvolutionSettings : Editor
 
     public void OnDestroy()
     {
+        Reset();
         SceneLoader.BeforeLoadScene -= Reset;
         inst = null;
         ExplosionProofSpinner = null;

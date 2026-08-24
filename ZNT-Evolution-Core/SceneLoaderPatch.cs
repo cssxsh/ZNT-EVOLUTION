@@ -855,18 +855,30 @@ internal static class SceneLoaderPatch
         var accordion = (RectTransform)__instance.transform.Find("Background/Container/Container/Accordion ");
         var Challenge_Header = (RectTransform)accordion.transform.Find("Challenge Header");
         var Challenge_Content = (RectTransform)accordion.transform.Find("Challenge Content");
-        var Max_Zoom = (RectTransform)accordion.transform.Find("Camera Content/Max Zoom/");
+        var Camera_Max_Zoom = (RectTransform)accordion.transform.Find("Camera Content/Max Zoom/");
+        var Camera_Placement = (RectTransform)accordion.transform.Find("Camera Content/Camera placement/");
         var Evolution_Header = Object.Instantiate(original: Challenge_Header, parent: accordion);
         Evolution_Header.name = "Evolution Header";
         Evolution_Header.Find("Text").GetComponent<Text>().text = "Evolution";
         var Evolution_Content = Object.Instantiate(original: Challenge_Content, parent: accordion);
         Evolution_Content.name = "Evolution Content";
         Evolution_Content.DestroyChildren();
-        var Explosion_Proof = Object.Instantiate(original: Max_Zoom, parent: Evolution_Content);
+        var Explosion_Proof = Object.Instantiate(original: Camera_Max_Zoom, parent: Evolution_Content);
         Explosion_Proof.name = "Explosion Proof";
         Explosion_Proof.Find("Text").GetComponent<Text>().text = "Explosion Proof";
-        EvolutionSettings.ExplosionProofSpinner = Explosion_Proof
-            .Find("Spinner/SpinnerInput").GetComponent<SpinnerFloat>();
+        EvolutionSettings.ExplosionProofSpinner =
+            Explosion_Proof.Find("Spinner/SpinnerInput").GetComponent<SpinnerFloat>();
+        var Asset_Override = Object.Instantiate(original: Camera_Placement, parent: Evolution_Content);
+        Asset_Override.name = "Asset Override";
+        Asset_Override.Find("Text").GetComponent<Text>().text = "Asset Override";
+        Asset_Override.Find("Container/Place Camera").name = "Import";
+        Asset_Override.Find("Container/Import/Text").GetComponent<Text>().text = "Import";
+        Asset_Override.Find("Container/Bounds/").name = "Export";
+        Asset_Override.Find("Container/Export/Text").GetComponent<Text>().text = "Export";
+        EvolutionSettings.AssetOverrideImport =
+            Asset_Override.Find("Container/Import").GetComponent<Button>();
+        EvolutionSettings.AssetOverrideExport =
+            Asset_Override.Find("Container/Export").GetComponent<Button>();
         accordion.GetComponent<Accordion>().DataSource.Add(new AccordionItem
         {
             Id = nameof(EvolutionSettings),
