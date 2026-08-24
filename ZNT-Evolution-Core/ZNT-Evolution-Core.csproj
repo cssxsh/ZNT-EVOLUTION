@@ -446,6 +446,7 @@
         <Compile Include="Editor\MovingObjectEditor.cs"/>
         <Compile Include="Editor\MovingObjectSpawnPointEditor.cs"/>
         <Compile Include="Editor\OneWayEditor.cs"/>
+        <Compile Include="Editor\SentryGunEditor.cs"/>
         <Compile Include="Editor\SpriteEditor.cs"/>
         <Compile Include="Editor\StairEditor.cs"/>
         <Compile Include="Editor\TutorialBreakingNews.cs"/>

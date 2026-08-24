@@ -335,6 +335,7 @@ internal static class StartManagerPatch
                 Traverse.Create(physic).Field<Health>("health").Value ??= physic.GetComponentInChildren<Health>();
                 break;
             case SentryGunBehaviour sentry:
+                _ = prefab.GetComponentSafe<SentryGunEditor>();
                 _ = prefab.GetComponentSafe<LayerEditor>();
                 _ = prefab.GetComponentSafe<SpriteEditor>();
                 sentry.Vision.Detection.SetVisible(true);
