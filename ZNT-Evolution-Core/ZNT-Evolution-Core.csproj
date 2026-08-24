@@ -409,6 +409,7 @@
         <Compile Include="Asset\BrushMerge.cs"/>
         <Compile Include="Asset\BsonDataReader.cs"/>
         <Compile Include="Asset\BsonDataWriter.cs"/>
+        <Compile Include="Asset\CustomAssetOverrider.cs"/>
         <Compile Include="Asset\CustomAssetUtility.cs"/>
         <Compile Include="Asset\CustomVisualEffect.cs"/>
         <Compile Include="Asset\DamageDictionary.cs"/>

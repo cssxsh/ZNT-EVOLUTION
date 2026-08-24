@@ -74,10 +74,13 @@ internal class AnimationCurveConverter : CustomCreationConverter<AnimationCurve>
     public override object ReadJson(JsonReader reader, Type type, object _, JsonSerializer serializer)
     {
         if (reader.TokenType is not JsonToken.String) return base.ReadJson(reader, type, _, serializer);
-        var sample = serializer.Deserialize<string>(reader);
+        return TextToAnimationCurve(serializer.Deserialize<string>(reader));
+    }
 
+    internal static AnimationCurve TextToAnimationCurve(string text)
+    {
         // ReSharper disable once InvertIf
-        if (LinearRegex.Match(sample) is { Success: true } a)
+        if (LinearRegex.Match(text) is { Success: true } a)
         {
             var x1 = float.Parse(a.Groups[1].Value);
             var y1 = float.Parse(a.Groups[2].Value);
@@ -88,7 +91,7 @@ internal class AnimationCurveConverter : CustomCreationConverter<AnimationCurve>
         }
 
         // ReSharper disable once InvertIf
-        if (CurveRegex.Match(sample) is { Success: true } b)
+        if (CurveRegex.Match(text) is { Success: true } b)
         {
             var x1 = float.Parse(b.Groups[1].Value);
             var y1 = float.Parse(b.Groups[2].Value);
@@ -102,6 +105,6 @@ internal class AnimationCurveConverter : CustomCreationConverter<AnimationCurve>
             return curve;
         }
 
-        throw new FormatException(sample);
+        throw new FormatException(text);
     }
 }

@@ -20,7 +20,7 @@ public static class CustomAssetUtility
 {
     internal static readonly Dictionary<string, Object> Cache = new();
 
-    private static readonly JsonSerializer Serializer = JsonSerializer.Create(new JsonSerializerSettings
+    internal static readonly JsonSerializer Serializer = JsonSerializer.Create(new JsonSerializerSettings
     {
         ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
         TypeNameHandling = TypeNameHandling.Auto,
