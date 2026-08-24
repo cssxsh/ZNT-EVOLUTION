@@ -9,7 +9,11 @@ public class ExplosionEditor : Editor
 {
     private ExplosionEffect Effect => field ??= GetComponent<ExplosionEffect>();
 
-    private SphereDetection Detection => field ??= GetComponent<SphereDetection>();
+    private SphereDetection Detection => field ??= Effect.GetComponent<SphereDetection>();
+
+    private ExplosionEffect TilesEffect => field ??= transform.Find("DetectTiles").GetComponent<ExplosionEffect>();
+
+    private SphereDetection TilesDetection => field ??= TilesEffect.GetComponent<SphereDetection>();
 
     [SerializeInEditor(name: "Detected Radius")]
     public float DetectedRadius
@@ -134,10 +138,14 @@ public class ExplosionEditor : Editor
         set => Effect.ShakeCamera = value;
     }
 
+    [SerializeInEditor(name: "Delay")]
+    public float Delay;
+
     [SignalReceiver]
     public void StartExplosion()
     {
         if (Effect.Started) return;
-        Effect.StartExplosion(0);
+        TilesEffect?.StartExplosion(Delay);
+        Effect.StartExplosion(Delay);
     }
 }

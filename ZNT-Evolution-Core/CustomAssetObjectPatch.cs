@@ -62,7 +62,8 @@ internal static class CustomAssetObjectPatch
     public static void LoadFromAsset(ExplosionAsset __instance, GameObject gameObject)
     {
         if (Traverse.Create(__instance).Field<bool>("autoExplode").Value) return;
-        _ = gameObject.GetComponentSafe<ExplosionEditor>();
+        var editor = gameObject.GetComponentSafe<ExplosionEditor>();
+        editor.Delay = __instance.Delay;
         var linker = gameObject.GetComponentInParent<SignalReceiverLinker>()
                      ?? gameObject.GetComponentSafe<SignalReceiverLinker>();
         linker.ExcludedComponents ??= [];
