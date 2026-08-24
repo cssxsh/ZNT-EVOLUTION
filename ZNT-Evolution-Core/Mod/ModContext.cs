@@ -101,7 +101,7 @@ public class ModContext
         };
     }
 
-    private static readonly Regex InfoRegex = new("""^(?:.+\/)?([^.]+)(?:\.(.*))?\.(\w+)$""", RegexOptions.Compiled);
+    private static readonly Regex InfoRegex = new(@"^(?:.+\/)?([^.]+)(?:\.(.*))?\.(\w+)$", RegexOptions.Compiled);
 
     public bool IsLoadReady()
     {

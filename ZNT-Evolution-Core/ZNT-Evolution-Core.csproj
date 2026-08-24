@@ -10,7 +10,7 @@
         <AppDesignerFolder>Properties</AppDesignerFolder>
         <RootNamespace>ZNT.Evolution.Core</RootNamespace>
         <AssemblyName>ZNT-Evolution-Core</AssemblyName>
-        <Version>1.1.0</Version>
+        <Version>1.2.0</Version>
         <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
         <FileAlignment>512</FileAlignment>
         <LangVersion>preview</LangVersion>
@@ -61,10 +61,6 @@
         </Reference>
         <Reference Include="DOTween">
             <HintPath>$(ZNTGamePath)\znt_Data\Managed\DOTween.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="GalaxyCSharp">
-            <HintPath>$(ZNTGamePath)\znt_Data\Managed\GalaxyCSharp.dll</HintPath>
             <Private>False</Private>
         </Reference>
         <Reference Include="HarmonyXInterop">

@@ -11,7 +11,7 @@ namespace ZNT.Evolution.Core.Asset;
 
 public class LayerMaskConverter : CustomCreationConverter<LayerMask>
 {
-    private static readonly Regex FlagRegex = new("""(\w(?:[\s\w]*\w)?)""", RegexOptions.Compiled);
+    private static readonly Regex FlagRegex = new(@"(\w(?:[\s\w]*\w)?)", RegexOptions.Compiled);
 
     public override bool CanWrite => true;
 

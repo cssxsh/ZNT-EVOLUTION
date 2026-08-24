@@ -15,7 +15,7 @@ internal class ExplodeSurfaceConverter : CustomCreationConverter<ExplodeSurface>
 {
     private static readonly ManualLogSource Logger = BepInExLogger.CreateLogSource(nameof(ExplodeSurface));
 
-    private static readonly Regex FlagRegex = new("""(\w(?:[\s\w]*\w)?)""", RegexOptions.Compiled);
+    private static readonly Regex FlagRegex = new(@"(\w(?:[\s\w]*\w)?)", RegexOptions.Compiled);
 
     public const ExplodeSurface None = 0x00000000;
 

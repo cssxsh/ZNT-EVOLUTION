@@ -12,7 +12,7 @@ public class LayerConverter : CustomCreationConverter<int>
 {
     private static readonly ManualLogSource Logger = BepInExLogger.CreateLogSource(nameof(LayerMask));
 
-    private static readonly Regex SpaceRegex = new("""[\s_]+""", RegexOptions.Compiled);
+    private static readonly Regex SpaceRegex = new(@"[\s_]+", RegexOptions.Compiled);
 
     public static readonly LayerConverter Instance = new();
 

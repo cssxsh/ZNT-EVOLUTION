@@ -143,11 +143,15 @@ internal static class StartManagerPatch
             case LevelElement { name: "chopter" } chopper:
                 chopper.Title = "Chopper";
                 if (chopper.AssetId is "2ffed9d7ca4fcd3479073a4189277809") chopper.name = "chopper";
-                Logger.LogDebug($"Fix Title for {chopper.AssetId}");
+                Logger.LogDebug($"Fix Title for {chopper}");
                 break;
             case LevelElement { name: "sewer_ladder", AssetId: "818b6793cae9cca49b49bfb01e4f45aa" } ladder:
                 ladder.name = "city_" + ladder.name;
-                Logger.LogDebug($"Fix Name for {ladder.AssetId}");
+                Logger.LogDebug($"Fix Name for {ladder}");
+                break;
+            case LevelElement { CustomAsset: MovingObjectAsset { Speed: 50.0f } moving }:
+                moving.Speed = 15.0f;
+                Logger.LogDebug($"Fix Speed for {moving}");
                 break;
             case LevelElement { CustomAsset: HumanAsset human } element:
                 if (human.HierarchyName is "Rick") break;

@@ -90,7 +90,7 @@ internal class AssetAddition : EvolutionAddition<CustomAsset, UnityEngine.Object
 
     public override void Clear()
     {
-        // TODO Reset AssetAddition
+        Logger.LogError("TODO Reset AssetAddition");
     }
 
     public override IEnumerator<KeyValuePair<CustomAsset, UnityEngine.Object>> GetEnumerator()

@@ -384,8 +384,7 @@ internal static class SceneLoaderPatch
         {
             var prefabs = Traverse.Create(menu).Field<SupportedTypePrefabs>("typePrefabs").Value;
             var binder = prefabs[EditorComponent.SupportedType.Vector4];
-            var fields = binder.GetComponentsInChildren<InputField>();
-            // ReSharper disable once CoVariantArrayConversion
+            var fields = binder.GetComponentsInChildren<InputField>().ToArray<UIBehaviour>();
             Traverse.Create(binder).Field<UIBehaviour[]>("uiComponents").Value = fields;
         }
         {
@@ -912,11 +911,11 @@ internal static class SceneLoaderPatch
         {
             if (instruction.OperandIs(5f))
             {
-                yield return instruction.Clone(1f);
+                yield return instruction.Clone(0.5f);
             }
             else if (instruction.OperandIs(50f))
             {
-                yield return instruction.Clone(1000f);
+                yield return instruction.Clone(200f);
             }
             else
             {

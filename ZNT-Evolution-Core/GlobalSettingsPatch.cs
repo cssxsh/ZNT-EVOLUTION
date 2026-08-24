@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using BepInEx;
 using BepInEx.Configuration;
 using HarmonyLib;
 using JetBrains.Annotations;
@@ -15,22 +16,24 @@ namespace ZNT.Evolution.Core;
 
 internal static class GlobalSettingsPatch
 {
-    private static ConfigFile Config => EvolutionCorePlugin.Instance.Config;
+    private static BaseUnityPlugin Plugin;
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(InitManager), "Start")]
     public static IEnumerator Start(IEnumerator __result, InitManager __instance)
     {
         yield return __result;
-        Config.SettingChanged += OnSettingChanged;
-        CorpsesCountMax = Config.Bind("config", nameof(CorpsesCountMax), GameConf.MaxAliveCorpses, "尸体数量上限");
-        VisionMaterialization = Config.Bind("config", nameof(VisionMaterialization), false, "视觉射线渲染");
-        NoEraseElement = Config.Bind("config", nameof(NoEraseElement), false, "禁止擦除元件");
-        DialogueRichText = Config.Bind("config", nameof(DialogueRichText), true, "对话框富文本");
-        ShowAllElement = Config.Bind("config", nameof(ShowAllElement), false, "显示所有元件");
-        ShowAllAnimationClip = Config.Bind("config", nameof(ShowAllAnimationClip), false, "显示所有动画");
-        ShowDevComponent = Config.Bind("config", nameof(ShowDevComponent), false, "显示实验组件");
-        BepInExToUnityLog = Config.Bind("config", nameof(BepInExToUnityLog), false, "写入内部日志");
+        if (Plugin is not null) yield break;
+        Plugin = EvolutionCorePlugin.Instance;
+        Plugin.Config.SettingChanged += OnSettingChanged;
+        CorpsesCountMax = Plugin.Config.Bind("config", nameof(CorpsesCountMax), GameConf.MaxAliveCorpses, "尸体数量上限");
+        VisionMaterialization = Plugin.Config.Bind("config", nameof(VisionMaterialization), false, "视觉射线渲染");
+        NoEraseElement = Plugin.Config.Bind("config", nameof(NoEraseElement), false, "禁止擦除元件");
+        DialogueRichText = Plugin.Config.Bind("config", nameof(DialogueRichText), true, "对话框富文本");
+        ShowAllElement = Plugin.Config.Bind("config", nameof(ShowAllElement), false, "显示所有元件");
+        ShowAllAnimationClip = Plugin.Config.Bind("config", nameof(ShowAllAnimationClip), false, "显示所有动画");
+        ShowDevComponent = Plugin.Config.Bind("config", nameof(ShowDevComponent), false, "显示实验组件");
+        BepInExToUnityLog = Plugin.Config.Bind("config", nameof(BepInExToUnityLog), false, "写入内部日志");
     }
 
     private static void OnSettingChanged(object sender, SettingChangedEventArgs e)
@@ -208,7 +211,7 @@ internal static class GlobalSettingsPatch
 
     internal static ConfigEntry<bool> DialogueRichText;
 
-    private static readonly Regex EmoteRegex = new("""\[[^]]+\]""", RegexOptions.Compiled);
+    private static readonly Regex EmoteRegex = new(@"\[[^]]+\]", RegexOptions.Compiled);
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(Dialogue), "SetText")]
@@ -260,14 +263,33 @@ internal static class GlobalSettingsPatch
     [HarmonyPatch(typeof(NewLevelMenu), "Start")]
     public static void OnCreate(BaseComponent __instance)
     {
+        // Custom Levels
         var dropdown = __instance switch
         {
             EditChapterMenu => Traverse.Create(__instance).Field<Dropdown>("sourceDropdown").Value,
             LoadLevelMenu => Traverse.Create(__instance).Field<Dropdown>("sourceDropdown").Value,
             NewLevelMenu => Traverse.Create(__instance).Field<Dropdown>("levelSource").Value,
-            _ => null
+            _ => throw new System.ArgumentException(__instance?.name, nameof(__instance))
         };
-        dropdown?.value = 1;
+        dropdown.value = 1;
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(LocalizableString), MethodType.Constructor)]
+    public static void LocalizableString(LocalizableString __instance)
+    {
+        __instance.Localize = false;
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(LocalizableStringMenu), "UpdateMenu")]
+    public static void UpdateMenu(LocalizableStringMenu __instance)
+    {
+        var dev = UserManager.IsUserDev;
+        if (dev) return;
+        Traverse.Create(__instance).Field<Toggle>("localizeToggle").Value.isOn = false;
+        Traverse.Create(__instance).Field<CanvasGroup>("toggleGroup").Value.interactable = false;
+        Traverse.Create(__instance).Field<CanvasGroup>("toggleGroup").Value.alpha = 0.0f;
     }
 
     #endregion

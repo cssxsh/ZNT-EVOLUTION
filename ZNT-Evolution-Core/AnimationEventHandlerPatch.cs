@@ -90,9 +90,9 @@ internal static class AnimationEventHandlerPatch
                 switch (description.Description.Substring(0, index))
                 {
                     case nameof(AnimationEventHandler.RegisterTriggerEvent)
-                        when infos[1].ParameterType.IsAssignableFrom(typeof(tk2dSpriteAnimationFrame)):
+                        when infos[1].ParameterType == typeof(tk2dSpriteAnimationFrame):
                     case nameof(AnimationEventHandler.RegisterEndEvent)
-                        when infos[1].ParameterType.IsAssignableFrom(typeof(tk2dSpriteAnimationClip)):
+                        when infos[1].ParameterType == typeof(tk2dSpriteAnimationClip):
                         if (EventHandles.Add(method)) Logger.LogInfo($"Cached {method.FullDescription()}");
                         break;
                 }

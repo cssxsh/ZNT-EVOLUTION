@@ -52,10 +52,10 @@ internal class ObjectConverter : CustomCreationConverter<UnityEngine.Object>
     {
         if (reader.TokenType is not JsonToken.String)
         {
-            var result = base.ReadJson(reader, type, _, serializer) as UnityEngine.Object;
+            if (base.ReadJson(reader, type, _, serializer) is not UnityEngine.Object result) return null;
             if (result is ISerializationCallbackReceiver receiver) receiver.OnAfterDeserialize();
-            if (result) CustomAssetUtility.Cache[result.NameAndType()] = result;
-            if (result) UnityEngine.Object.DontDestroyOnLoad(result);
+            CustomAssetUtility.Cache[result.NameAndType()] = result;
+            UnityEngine.Object.DontDestroyOnLoad(result);
             return result;
         }
 
