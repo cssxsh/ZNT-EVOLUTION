@@ -7,6 +7,7 @@ using BepInEx.Logging;
 using HarmonyLib;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using UIWidgets;
 using UnityEngine;
 using UnityEngine.UI;
@@ -66,7 +67,7 @@ public class EvolutionSettings : Editor
                 {
                     Type = nameof(HumanAsset),
                     Pattern = "This is pattern for name",
-                    Handles = new Dictionary<string, string>
+                    Handles = new JObject
                     {
                         [nameof(HumanAsset.RiseAsset)] = "SwordWomen : HumanAsset"
                     }
@@ -141,7 +142,7 @@ public class EvolutionSettings : Editor
 
         [JsonProperty]
         [UsedImplicitly]
-        public Dictionary<string, string> Handles;
+        public JObject Handles;
 
         private static readonly Regex FieldRegex = new(@"(\w+)(?:\[(\w+)\])?([=|+|-|*|/])?", RegexOptions.Compiled);
 
@@ -152,13 +153,16 @@ public class EvolutionSettings : Editor
             foreach (var asset in CustomAssetUtility.Cache.Values.Where(type.IsInstanceOfType).Cast<CustomAsset>())
             {
                 if (!Regex.IsMatch(asset.name, Pattern)) continue;
-                foreach (var (path, value) in Handles)
+                foreach (var (path, token) in Handles)
                 {
+                    if (path is null or "") continue;
+                    if (path[0] is '#' or '$') continue;
                     var match = FieldRegex.Match(path);
                     if (!match.Success) continue;
                     var field = type.GetField(
                         name: match.Groups[1].Value,
-                        bindingAttr: BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)!;
+                        bindingAttr: BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                    if (field is null) continue;
                     var index = match.Groups[2].Value;
                     var action = match.Groups[3].Value;
                     var id = $"{Type}[{asset.name}].{path}".ReplaceLast(action, "");
@@ -169,7 +173,7 @@ public class EvolutionSettings : Editor
                         Field = field,
                         Index = index,
                         Action = action,
-                        Value = value
+                        Token = token
                     };
                 }
             }

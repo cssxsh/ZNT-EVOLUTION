@@ -1,5 +1,4 @@
 using System.Reflection;
-using System.Text.RegularExpressions;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
 using ExplodeSurface = PhysicObjectBehaviour.ExplodeSurface;
@@ -18,7 +17,7 @@ public class CustomAssetOverrider
 
     public string Action;
 
-    public string Value;
+    public JToken Token;
 
     private object _original;
 
@@ -33,31 +32,17 @@ public class CustomAssetOverrider
             {
                 _original = Field.GetValue(Asset);
                 _saved = true;
-                var input = LayerConverter.TextToLayer(Value);
-                Field.SetValue(Asset, _original switch
-                {
-                    LayerMask => (LayerMask)input,
-                    _ => input
-                });
-            }
-            else if (Field.FieldType == typeof(string))
-            {
-                _original = Field.GetValue(Asset);
-                _saved = true;
-                Field.SetValue(Asset, Value);
-            }
-            else if (Field.FieldType == typeof(bool))
-            {
-                _original = Field.GetValue(Asset);
-                _saved = true;
-                Field.SetValue(Asset, bool.Parse(Value));
+                using var json = new JTokenReader(Token);
+                var input = LayerConverter.Instance.
+                    ReadJson(json, Field.FieldType, null, CustomAssetUtility.Serializer);
+                Field.SetValue(Asset, input);
             }
             else if (Field.FieldType == typeof(int))
             {
                 _original = Field.GetValue(Asset);
                 _saved = true;
                 var value = (int)_original;
-                var input = double.Parse(Value);
+                var input = Token.Value<double>();
                 Field.SetValue(Asset, Action switch
                 {
                     null or "" or "=" => (int)input,
@@ -73,7 +58,7 @@ public class CustomAssetOverrider
                 _original = Field.GetValue(Asset);
                 _saved = true;
                 var value = (float)_original;
-                var input = float.Parse(Value);
+                var input = Token.Value<float>();
                 Field.SetValue(Asset, Action switch
                 {
                     null or "" or "=" => input,
@@ -89,7 +74,7 @@ public class CustomAssetOverrider
                 _original = Field.GetValue(Asset);
                 _saved = true;
                 var value = (int)(LayerMask)_original;
-                var input = (int)CustomAssetUtility.DeserializeObject<LayerMask>(Value);
+                var input = (int)CustomAssetUtility.DeserializeObject<LayerMask>(Token);
                 Field.SetValue(Asset, Action switch
                 {
                     null or "" or "=" => (LayerMask)input,
@@ -103,7 +88,7 @@ public class CustomAssetOverrider
                 _original = Field.GetValue(Asset);
                 _saved = true;
                 var value = (Color)_original;
-                ColorUtility.TryParseHtmlString(Value, out var input);
+                var input = CustomAssetUtility.DeserializeObject<Color>(Token);
                 Field.SetValue(Asset, Action switch
                 {
                     null or "" or "=" => input,
@@ -118,11 +103,7 @@ public class CustomAssetOverrider
                 _original = Field.GetValue(Asset);
                 _saved = true;
                 var value = (Vector2)_original;
-                var match = Vector2Regex.Match(Value);
-                if (!match.Success) throw new System.FormatException($"{Id} - {Value}");
-                var input = new Vector2(
-                    x: float.Parse(match.Groups[1].Value),
-                    y: float.Parse(match.Groups[2].Value));
+                var input = CustomAssetUtility.DeserializeObject<Vector2>(Token);
                 Field.SetValue(Asset, Action switch
                 {
                     null or "" or "=" => input,
@@ -138,12 +119,7 @@ public class CustomAssetOverrider
                 _original = Field.GetValue(Asset);
                 _saved = true;
                 var value = (Vector3)_original;
-                var match = Vector3Regex.Match(Value);
-                if (!match.Success) throw new System.FormatException($"{Id} - {Value}");
-                var input = new Vector3(
-                    x: float.Parse(match.Groups[1].Value),
-                    y: float.Parse(match.Groups[2].Value),
-                    z: float.Parse(match.Groups[3].Value));
+                var input = CustomAssetUtility.DeserializeObject<Vector3>(Token);
                 Field.SetValue(Asset, Action switch
                 {
                     null or "" or "=" => input,
@@ -152,32 +128,14 @@ public class CustomAssetOverrider
                     _ => throw new System.ArgumentException($"{Id} - {Action}")
                 });
             }
-            else if (Field.FieldType == typeof(AnimationCurve))
-            {
-                _original = Field.GetValue(Asset);
-                _saved = true;
-                var input = AnimationCurveConverter.TextToAnimationCurve(Value);
-                Field.SetValue(Asset, input);
-            }
-            else if (Field.FieldType == typeof(Range))
-            {
-                _original = Field.GetValue(Asset);
-                _saved = true;
-                var match = Vector2Regex.Match(Value);
-                if (!match.Success) throw new System.FormatException($"{Id} - {Value}");
-                var input = new Range(
-                    minValue: float.Parse(match.Groups[1].Value),
-                    maxValue: float.Parse(match.Groups[2].Value));
-                Field.SetValue(Asset, input);
-            }
-            else if (Field.FieldType == typeof(DamageMultiplierDictionary))
+            else if (Field.FieldType == typeof(DamageMultiplierDictionary) && Index is not (null or ""))
             {
                 var dictionary = (DamageMultiplierDictionary)Field.GetValue(Asset);
                 var key = CustomAssetUtility.DeserializeObject<DamageType>(Index);
                 _original = dictionary.TryGetValue(key, out var v) ? v : 1;
                 _saved = true;
                 var value = (float)_original;
-                var input = float.Parse(Value);
+                var input = Token.Value<float>();
                 dictionary[key] = Action switch
                 {
                     null or "" or "=" => input,
@@ -188,22 +146,22 @@ public class CustomAssetOverrider
                     _ => throw new System.ArgumentException($"{Id} - {Action}")
                 };
             }
-            else if (Field.FieldType == typeof(StringGameObjectDictionary))
+            else if (Field.FieldType == typeof(StringGameObjectDictionary) && Index is not (null or ""))
             {
                 var dictionary = (StringGameObjectDictionary)Field.GetValue(Asset);
                 _original = dictionary.TryGetValue(Index, out var v) ? v : null;
                 _saved = true;
-                var input = CustomAssetUtility.DeserializeObject<GameObject>(Value);
+                var input = CustomAssetUtility.DeserializeObject<GameObject>(Token);
                 dictionary[Index] = input;
             }
-            else if (Field.FieldType == typeof(ForceMultipliers))
+            else if (Field.FieldType == typeof(ForceMultipliers) && Index is not (null or ""))
             {
                 var dictionary = (ForceMultipliers)Field.GetValue(Asset);
                 var key = CustomAssetUtility.DeserializeObject<Layer>(Index);
                 _original = dictionary.TryGetValue(key, out var v) ? v : 1;
                 _saved = true;
                 var value = (float)_original;
-                var input = float.Parse(Value);
+                var input = Token.Value<float>();
                 dictionary[key] = Action switch
                 {
                     null or "" or "=" => input,
@@ -214,7 +172,7 @@ public class CustomAssetOverrider
                     _ => throw new System.ArgumentException($"{Id} - {Action}")
                 };
             }
-            else if (Field.FieldType == typeof(ExplosionAsset[]))
+            else if (Field.FieldType == typeof(ExplosionAsset[]) && Index is not (null or ""))
             {
                 var array = (ExplosionAsset[])Field.GetValue(Asset);
                 var index = int.Parse(Index);
@@ -222,10 +180,10 @@ public class CustomAssetOverrider
                 Field.SetValue(Asset, array);
                 _original = array[index];
                 _saved = true;
-                var input = CustomAssetUtility.DeserializeObject<ExplosionAsset>(Value);
+                var input = CustomAssetUtility.DeserializeObject<ExplosionAsset>(Token);
                 array[index] = input;
             }
-            else if (Field.FieldType == typeof(PhysicObjectAsset[]))
+            else if (Field.FieldType == typeof(PhysicObjectAsset[]) && Index is not (null or ""))
             {
                 var array = (PhysicObjectAsset[])Field.GetValue(Asset);
                 var index = int.Parse(Index);
@@ -233,7 +191,7 @@ public class CustomAssetOverrider
                 Field.SetValue(Asset, array);
                 _original = array[index];
                 _saved = true;
-                var input = CustomAssetUtility.DeserializeObject<PhysicObjectAsset>(Value);
+                var input = CustomAssetUtility.DeserializeObject<PhysicObjectAsset>(Token);
                 array[index] = input;
             }
             else if (Field.FieldType == typeof(Tag))
@@ -241,7 +199,7 @@ public class CustomAssetOverrider
                 _original = Field.GetValue(Asset);
                 _saved = true;
                 var value = (Tag)_original;
-                var input = CustomAssetUtility.DeserializeObject<Tag>(Value);
+                var input = CustomAssetUtility.DeserializeObject<Tag>(Token);
                 Field.SetValue(Asset, Action switch
                 {
                     null or "" or "=" => input,
@@ -255,7 +213,7 @@ public class CustomAssetOverrider
                 _original = Field.GetValue(Asset);
                 _saved = true;
                 var value = (ExplodeSurface)_original;
-                var input = CustomAssetUtility.DeserializeObject<ExplodeSurface>(Value);
+                var input = CustomAssetUtility.DeserializeObject<ExplodeSurface>(Token);
                 Field.SetValue(Asset, Action switch
                 {
                     null or "" or "=" => input,
@@ -269,7 +227,7 @@ public class CustomAssetOverrider
                 _original = Field.GetValue(Asset);
                 _saved = true;
                 var value = (int)DamageFlagsConverter.GetDamageFlags((DamageType)_original);
-                var input = (int)CustomAssetUtility.DeserializeObject<DamageFlagsConverter.Flags>(Value);
+                var input = (int)CustomAssetUtility.DeserializeObject<DamageFlagsConverter.Flags>(Token);
                 Field.SetValue(Asset, Action switch
                 {
                     null or "" or "=" => (DamageType)(int.MinValue | input),
@@ -282,7 +240,7 @@ public class CustomAssetOverrider
             {
                 _original = Field.GetValue(Asset);
                 _saved = true;
-                using var json = new JTokenReader(Value);
+                using var json = new JTokenReader(Token);
                 var input = CustomAssetUtility.Serializer.Deserialize(json, Field.FieldType);
                 Field.SetValue(Asset, input);
             }
@@ -334,12 +292,4 @@ public class CustomAssetOverrider
             _saved = false;
         }
     }
-
-    private static readonly Regex Vector2Regex = new(
-        @"^[\(\[]([+-]?\d*\.?\d+), ([+-]?\d*\.?\d+)[\)\]]$",
-        RegexOptions.Compiled);
-
-    private static readonly Regex Vector3Regex = new(
-        @"^[\(\[]([+-]?\d*\.?\d+), ([+-]?\d*\.?\d+), ([+-]?\d*\.?\d+)[\)\]]",
-        RegexOptions.Compiled);
 }
