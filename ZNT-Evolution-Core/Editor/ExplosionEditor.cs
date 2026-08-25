@@ -11,9 +11,9 @@ public class ExplosionEditor : Editor
 
     private SphereDetection Detection => field ??= Effect.GetComponent<SphereDetection>();
 
-    private ExplosionEffect TilesEffect => field ??= transform.Find("DetectTiles").GetComponent<ExplosionEffect>();
+    private ExplosionEffect TilesEffect => field ??= transform.Find("DetectTiles")?.GetComponent<ExplosionEffect>();
 
-    private SphereDetection TilesDetection => field ??= TilesEffect.GetComponent<SphereDetection>();
+    private SphereDetection TilesDetection => field ??= TilesEffect?.GetComponent<SphereDetection>();
 
     [SerializeInEditor(name: "Detected Radius")]
     public float DetectedRadius

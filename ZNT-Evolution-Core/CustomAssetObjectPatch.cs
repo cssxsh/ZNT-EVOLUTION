@@ -52,7 +52,10 @@ internal static class CustomAssetObjectPatch
     [HarmonyPatch(typeof(CustomAssetObject), "LoadFromAsset")]
     public static void LoadFromAsset(CustomAssetObject __instance, GameObject gameObject)
     {
-        Logger.LogDebug($"LoadFromAsset: {gameObject} {gameObject.transform.position} for {__instance}");
+        if (UserManager.IsUserDev)
+        {
+            Logger.LogDebug($"LoadFromAsset: {gameObject.name} {gameObject.transform.position} for {__instance}");
+        }
     }
 
     #region ExplosionAsset
