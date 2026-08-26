@@ -74,8 +74,13 @@ internal class AnimationCurveConverter : CustomCreationConverter<AnimationCurve>
 
     public override object ReadJson(JsonReader reader, Type type, object _, JsonSerializer serializer)
     {
-        if (reader.TokenType is not JsonToken.String) return base.ReadJson(reader, type, _, serializer);
-        return TextToAnimationCurve(serializer.Deserialize<string>(reader));
+        return reader.TokenType switch
+        {
+            JsonToken.String => TextToAnimationCurve(serializer.Deserialize<string>(reader)),
+            JsonToken.Integer => AnimationCurve.Constant(0, 1, serializer.Deserialize<int>(reader)),
+            JsonToken.Float => AnimationCurve.Constant(0, 1, serializer.Deserialize<float>(reader)),
+            _ => base.ReadJson(reader, type, _, serializer)
+        };
     }
 
     [UsedImplicitly]

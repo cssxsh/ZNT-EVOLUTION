@@ -32,6 +32,6 @@ public class RectConverter : JsonConverter
 
     public override object ReadJson(JsonReader reader, Type type, object _, JsonSerializer serializer)
     {
-        return serializer.Deserialize<JToken>(reader).ToObject<Rect>();
+        return JToken.Load(reader).ToObject<Rect>();
     }
 }

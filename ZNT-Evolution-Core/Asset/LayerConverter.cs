@@ -2,6 +2,7 @@ using System;
 using System.Text.RegularExpressions;
 using BepInEx.Logging;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using UnityEngine;
 using BepInExLogger = BepInEx.Logging.Logger;
 
@@ -31,11 +32,14 @@ public class LayerConverter : JsonConverter
 
     public override object ReadJson(JsonReader reader, Type type, object _, JsonSerializer serializer)
     {
-        if (reader.TokenType is JsonToken.Integer) return serializer.Deserialize<int>(reader);
-        if (reader.TokenType is not JsonToken.String) return serializer.Deserialize<LayerMask>(reader).value;
-        var text = serializer.Deserialize<string>(reader);
-        if (type == typeof(LayerMask)) return (LayerMask)TextToLayer(text);
-        return TextToLayer(text);
+        var layer = reader.TokenType switch
+        {
+            JsonToken.Integer => serializer.Deserialize<int>(reader),
+            JsonToken.String => TextToLayer(serializer.Deserialize<string>(reader)),
+            _ => (int)JToken.Load(reader).ToObject<LayerMask>()
+        };
+        if (type == typeof(LayerMask)) return (LayerMask)layer;
+        return layer;
     }
 
     internal static int TextToLayer(string text)
