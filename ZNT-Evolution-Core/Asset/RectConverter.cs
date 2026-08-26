@@ -1,11 +1,14 @@
 using System;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using UnityEngine;
 
 namespace ZNT.Evolution.Core.Asset;
 
 public class RectConverter : JsonConverter
 {
+    public override bool CanConvert(Type type) => type == typeof(Rect);
+
     public override bool CanWrite => true;
 
     public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
@@ -25,12 +28,10 @@ public class RectConverter : JsonConverter
         writer.WriteEndObject();
     }
 
-    public override object ReadJson(JsonReader reader, Type type, object _, JsonSerializer serializer)
-    {
-        throw new NotImplementedException();
-    }
-
     public override bool CanRead => false;
 
-    public override bool CanConvert(Type type) => type == typeof(Rect);
+    public override object ReadJson(JsonReader reader, Type type, object _, JsonSerializer serializer)
+    {
+        return serializer.Deserialize<JToken>(reader).ToObject<Rect>();
+    }
 }

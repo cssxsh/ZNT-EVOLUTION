@@ -154,13 +154,13 @@ public static class CustomAssetUtility
             if (pool.prefabs.TryGetValue(name, out prefab)) return true;
         }
 
-        foreach (var pool in Resources.LoadAll<PoolSettingsAsset>(""))
+        foreach (var info in
+                 from pool in Resources.LoadAll<PoolSettingsAsset>("")
+                 from info in pool.Prefabs
+                 select info)
         {
-            foreach (var info in pool.Prefabs)
-            {
-                prefab = info.Prefab;
-                if (info.Prefab.name == name) return true;
-            }
+            prefab = info.Prefab;
+            if (info.Prefab.name == name) return true;
         }
 
         {
