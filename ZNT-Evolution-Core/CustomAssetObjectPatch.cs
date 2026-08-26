@@ -181,9 +181,9 @@ internal static class CustomAssetObjectPatch
     public static void LoadFromAsset(TriggerAsset __instance, GameObject gameObject)
     {
         // ReSharper disable once InvertIf
-        if (__instance.Name is "Human" or "Zombie" or "Character")
+        if (__instance.Prefab.GetComponent<Trigger>() is { name: "InvisibleTrigger" } trigger)
         {
-            var dialogue = gameObject.GetComponent<Trigger>().GetEffect<DialogueEffect>();
+            var dialogue = trigger.GetEffect<DialogueEffect>();
             dialogue.EditorVisibility.CustomName = __instance.Name + " Dialogue Effect";
             dialogue.SetVisible(true);
             dialogue.Mode = DialogueEffect.DetectionMode.SignalOnEnter;
