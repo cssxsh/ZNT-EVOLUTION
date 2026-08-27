@@ -21,8 +21,6 @@ internal static class StartManagerPatch
 
     private static AnimationAddition AnimationPatch;
 
-    private static AssetAddition AssetPatch;
-
     private static IEnumerator ToCoroutine(this Task task, YieldInstruction instruction = null)
     {
         while (!task.IsCompleted) yield return instruction;
@@ -58,9 +56,6 @@ internal static class StartManagerPatch
         AnimationPatch ??= ScriptableObject.CreateInstance<AnimationAddition>();
         AnimationPatch.name = "animation_patch";
         Object.DontDestroyOnLoad(AnimationPatch);
-        AssetPatch ??= ScriptableObject.CreateInstance<AssetAddition>();
-        AssetPatch.name = "asset_patch";
-        Object.DontDestroyOnLoad(AssetPatch);
         yield return CustomAssetUtility.LoadBuildIn<CustomAsset>(HandleAsset);
         yield return CustomAssetUtility.LoadBuildIn<tk2dSpriteCollectionData>(HandleAsset);
         yield return CustomAssetUtility.LoadBuildIn<tk2dSpriteAnimation>(HandleAsset);
@@ -69,7 +64,6 @@ internal static class StartManagerPatch
         yield return CustomAssetUtility.LoadPatch<Shader>(HandlePatch);
         yield return CustomAssetUtility.LoadPatch<TMPro.TMP_Asset>(HandlePatch);
         AnimationPatch.Apply();
-        AssetPatch.Apply();
         InvisibleShield.PoolPrefab();
         SphereBuffEffect.PoolPrefab();
         SphereLaoAerEffect.PoolPrefab();

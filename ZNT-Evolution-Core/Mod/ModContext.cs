@@ -447,13 +447,6 @@ public class ModContext
                 Logger.LogDebug($"{resource.Path} -> {spawn}");
             }
                 break;
-            // ZNT.Evolution.Core.Asset.AnimationAddition
-            case { Type: "asset.addition", Format: "json" or "bson" }:
-            {
-                var addition = ReadAssetAddition(buffer, resource.Format);
-                Logger.LogDebug($"{resource.Path} -> {addition}");
-            }
-                break;
             // Rotorz.Tile.OrientedBrush
             case { Type: "brush.info", Format: "json" or "bson" }:
             {
@@ -679,13 +672,6 @@ public class ModContext
         return spawn;
     }
 
-    private AssetAddition ReadAssetAddition(Stream input, string format)
-    {
-        var addition = CustomAssetUtility.DeserializeObject<AssetAddition>(input, format is "bson");
-        Acquire(addition);
-        return addition;
-    }
-
     #endregion
 
     #region LevelElement
@@ -803,9 +789,6 @@ public class ModContext
             case AnimationAddition addition:
                 addition.Apply();
                 break;
-            case AssetAddition addition:
-                addition.Apply();
-                break;
         }
 
         CustomAssetUtility.Cache[key] = obj;
@@ -839,9 +822,6 @@ public class ModContext
                 Logger.LogInfo($"Unbind TMPro.TMP_Asset 0x{tmp.hashCode:x08} - {tmp.name}");
                 break;
             case AnimationAddition addition:
-                addition.Clear();
-                break;
-            case AssetAddition addition:
                 addition.Clear();
                 break;
         }
