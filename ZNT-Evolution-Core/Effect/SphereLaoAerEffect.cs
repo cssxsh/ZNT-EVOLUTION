@@ -3,6 +3,7 @@ using BepInEx.Logging;
 using HarmonyLib;
 using Newtonsoft.Json;
 using UnityEngine;
+using ZNT.Evolution.Core.Editor;
 using BepInExLogger = BepInEx.Logging.Logger;
 
 namespace ZNT.Evolution.Core.Effect;
@@ -113,7 +114,8 @@ public class SphereLaoAerEffect : TriggerEffect
         trigger.Frequency = 10;
         trigger.Layers = LayerMask.GetMask("Ignore Characters");
         trigger.WithTags = Tag.Corpse;
-        Traverse.Create(trigger).Field<TriggerType>("Type").Value = TriggerType.ManualActivation;
+        trigger.Detection = sphere;
+        trigger.SetTriggerType(TriggerType.ManualActivation);
         prefab.SetActive(true);
         // ReSharper disable once Unity.UnknownResource
         var pool = Resources.Load<PoolSettingsAsset>("Assets/GamePoolSettings");

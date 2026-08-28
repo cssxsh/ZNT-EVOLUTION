@@ -1,5 +1,4 @@
 using BepInEx.Logging;
-using HarmonyLib;
 using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.Events;
@@ -203,7 +202,8 @@ public class SphereBuffEffect : TriggerEffect
         trigger.PoolIndex = 0x1748_0003;
         trigger.Frequency = 10;
         trigger.Layers = LayerMask.GetMask("Human");
-        Traverse.Create(trigger).Field<TriggerType>("Type").Value = TriggerType.ManualActivation;
+        trigger.Detection = sphere;
+        trigger.SetTriggerType(TriggerType.ManualActivation);
         prefab.SetActive(true);
         // ReSharper disable once Unity.UnknownResource
         var pool = Resources.Load<PoolSettingsAsset>("Assets/GamePoolSettings");

@@ -53,6 +53,18 @@ public static class BaseComponentExtensions
     }
 
     [UsedImplicitly]
+    public static TriggerType GetTriggerType(this Trigger trigger)
+    {
+        return Traverse.Create(trigger).Field<TriggerType>("Type").Value;
+    }
+
+    [UsedImplicitly]
+    public static void SetTriggerType(this Trigger trigger, TriggerType value)
+    {
+        Traverse.Create(trigger).Field<TriggerType>("Type").Value = value;
+    }
+
+    [UsedImplicitly]
     public static T GetEffect<T>(this Trigger trigger) where T : TriggerEffect
     {
         var effect = trigger.gameObject.GetComponentSafe<T>();
