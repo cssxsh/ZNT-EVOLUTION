@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Text.RegularExpressions;
 using HarmonyLib;
+using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
@@ -38,14 +39,22 @@ public class LayerMaskConverter : JsonConverter
 
     public override object ReadJson(JsonReader reader, Type type, object _, JsonSerializer serializer)
     {
-        if (reader.TokenType is JsonToken.Integer) return (LayerMask)serializer.Deserialize<int>(reader);
-        if (reader.TokenType is not JsonToken.String) return JToken.Load(reader).ToObject<LayerMask>();
-        var value = serializer.Deserialize<string>(reader);
-        var mask = FlagRegex.Matches(value).Cast<Match>()
+        var mask = reader.TokenType switch
+        {
+            JsonToken.Integer => serializer.Deserialize<int>(reader),
+            JsonToken.String => TextToLayerMask(serializer.Deserialize<string>(reader)),
+            _ => (int)JToken.Load(reader).ToObject<LayerMask>()
+        };
+        if (type == typeof(Layer)) return (Layer)mask;
+        return (LayerMask)mask;
+    }
+
+    [UsedImplicitly]
+    public static int TextToLayerMask(string text)
+    {
+        return FlagRegex.Matches(text).Cast<Match>()
             .Select(match => LayerConverter.TextToLayer(match.Value))
             .Where(layer => layer is not -1)
             .Aggregate(0x00000000, (current, layer) => current | 0x01 << layer);
-        if (type == typeof(Layer)) return (Layer)mask;
-        return (LayerMask)mask;
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Text.RegularExpressions;
 using BepInEx.Logging;
+using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
@@ -42,7 +43,8 @@ public class LayerConverter : JsonConverter
         return layer;
     }
 
-    internal static int TextToLayer(string text)
+    [UsedImplicitly]
+    public static int TextToLayer(string text)
     {
         var layer = LayerMask.NameToLayer(text);
         if (layer is not -1) return layer;

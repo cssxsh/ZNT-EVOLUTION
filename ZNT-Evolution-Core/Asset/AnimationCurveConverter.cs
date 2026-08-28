@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace ZNT.Evolution.Core.Asset;
 
-internal class AnimationCurveConverter : CustomCreationConverter<AnimationCurve>
+public class AnimationCurveConverter : CustomCreationConverter<AnimationCurve>
 {
     private static readonly Regex LinearRegex = new(
         @"^\(([+-]?\d*\.?\d+), ([+-]?\d*\.?\d+)\) - \(([+-]?\d*\.?\d+), ([+-]?\d*\.?\d+)\)$",
@@ -84,7 +84,7 @@ internal class AnimationCurveConverter : CustomCreationConverter<AnimationCurve>
     }
 
     [UsedImplicitly]
-    internal static AnimationCurve TextToAnimationCurve(string text)
+    public static AnimationCurve TextToAnimationCurve(string text)
     {
         // ReSharper disable once InvertIf
         if (LinearRegex.Match(text) is { Success: true } a)
