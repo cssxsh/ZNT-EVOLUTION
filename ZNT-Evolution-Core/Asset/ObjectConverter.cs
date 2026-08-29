@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using BepInEx.Logging;
 using HarmonyLib;
 using Newtonsoft.Json;
@@ -54,6 +55,7 @@ internal class ObjectConverter : CustomCreationConverter<UnityEngine.Object>
         {
             if (base.ReadJson(reader, type, _, serializer) is not UnityEngine.Object result) return null;
             if (result is ISerializationCallbackReceiver receiver) receiver.OnAfterDeserialize();
+            if (result is tk2dSpriteAnimation animation) CheckAttachPoints(animation);
             CustomAssetUtility.Cache[result.NameAndType()] = result;
             UnityEngine.Object.DontDestroyOnLoad(result);
             return result;
@@ -102,5 +104,36 @@ internal class ObjectConverter : CustomCreationConverter<UnityEngine.Object>
 
         Logger.LogError($"NotFound {t.FullName} {{ name: \"{name}\" }}");
         return null;
+    }
+
+    private static void CheckAttachPoints(tk2dSpriteAnimation animation)
+    {
+        if (animation.clips is null) return;
+        var attached = new Dictionary<string, tk2dSpriteDefinition.AttachPoint>();
+        foreach (var clip in animation.clips)
+        {
+            if (clip is null || clip.Empty) continue;
+            attached.Clear();
+            foreach (var frame in clip.frames)
+            {
+                if (frame.spriteCollection is not null)
+                {
+                    var definition = frame.spriteCollection.spriteDefinitions[frame.spriteId];
+                    foreach (var point in definition.attachPoints)
+                    {
+                        if (point is null) continue;
+                        attached[point.name] = point;
+                    }
+                }
+
+                switch (frame.eventInfo)
+                {
+                    case "throw":
+                        if (attached.ContainsKey("throw")) break;
+                        Logger.LogWarning($"{animation} Clip {clip.name} Need AttachPoint {{ name: \"throw\" }}");
+                        break;
+                }
+            }
+        }
     }
 }
