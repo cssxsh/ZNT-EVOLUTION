@@ -252,33 +252,33 @@ public class CustomAssetOverrider
         lock (Asset)
         {
             if (!_saved) return;
-            if (Field.FieldType == typeof(DamageMultiplierDictionary))
+            if (Field.FieldType == typeof(DamageMultiplierDictionary) && Index is not (null or ""))
             {
                 var dictionary = (DamageMultiplierDictionary)Field.GetValue(Asset);
                 var key = CustomAssetUtility.DeserializeObject<DamageType>(Index);
                 if ((float)_original is 1) dictionary.Remove(key);
                 else dictionary[key] = (float)_original;
             }
-            else if (Field.FieldType == typeof(StringGameObjectDictionary))
+            else if (Field.FieldType == typeof(StringGameObjectDictionary) && Index is not (null or ""))
             {
                 var dictionary = (StringGameObjectDictionary)Field.GetValue(Asset);
                 if ((GameObject)_original is null) dictionary.Remove(Index);
                 else dictionary[Index] = (GameObject)_original;
             }
-            else if (Field.FieldType == typeof(ForceMultipliers))
+            else if (Field.FieldType == typeof(ForceMultipliers) && Index is not (null or ""))
             {
                 var dictionary = (ForceMultipliers)Field.GetValue(Asset);
                 var key = CustomAssetUtility.DeserializeObject<Layer>(Index);
                 if ((float)_original is 1) dictionary.Remove(key);
                 else dictionary[key] = (float)_original;
             }
-            else if (Field.FieldType == typeof(ExplosionAsset[]))
+            else if (Field.FieldType == typeof(ExplosionAsset[]) && Index is not (null or ""))
             {
                 var array = (ExplosionAsset[])Field.GetValue(Asset);
                 var index = int.Parse(Index);
                 array[index] = (ExplosionAsset)_original;
             }
-            else if (Field.FieldType == typeof(PhysicObjectAsset[]))
+            else if (Field.FieldType == typeof(PhysicObjectAsset[]) && Index is not (null or ""))
             {
                 var array = (PhysicObjectAsset[])Field.GetValue(Asset);
                 var index = int.Parse(Index);
