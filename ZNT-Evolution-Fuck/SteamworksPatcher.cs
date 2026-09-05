@@ -18,8 +18,8 @@ public static class SteamworksPatcher
     {
         var T_CCallbackBaseVTable = assembly.MainModule.GetType("Steamworks.CCallbackBaseVTable");
         PatchVTable(T_CCallbackBaseVTable);
-        var T_CCallback = assembly.MainModule.GetType("Steamworks.Callback`1");
-        PatchCall(T_CCallback);
+        var T_Callback = assembly.MainModule.GetType("Steamworks.Callback`1");
+        PatchCall(T_Callback);
         var T_CallResult = assembly.MainModule.GetType("Steamworks.CallResult`1");
         PatchCall(T_CallResult);
     }
@@ -35,7 +35,7 @@ public static class SteamworksPatcher
             // [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
             var A_UnmanagedFunctionPointer =
                 @delegate.GetCustomAttribute(typeof(UnmanagedFunctionPointerAttribute).FullName);
-            if (A_UnmanagedFunctionPointer == null) continue;
+            if (A_UnmanagedFunctionPointer is null) continue;
             A_UnmanagedFunctionPointer.ConstructorArguments[0] =
                 new CustomAttributeArgument(A_UnmanagedFunctionPointer.ConstructorArguments[0].Type, 4);
             // Invoke
