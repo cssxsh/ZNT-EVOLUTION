@@ -361,6 +361,13 @@ public class ModContext
                 Logger.LogDebug($"{resource.Path} -> {addition}");
             }
                 break;
+            // tk2dSpriteAnimation
+            case { Type: "animations", Format: "json" or "bson" }:
+            {
+                var animations = ReadAnimations(buffer, resource.Format);
+                Logger.LogDebug($"{resource.Path} -> {animations}");
+            }
+                break;
             // ZNT.Evolution.Core.Asset.CustomVisualEffect
             case { Type: "visual", Format: "json" or "bson" }:
             {
@@ -582,6 +589,13 @@ public class ModContext
         var addition = CustomAssetUtility.DeserializeObject<AnimationAddition>(input, format is "bson");
         Acquire(addition);
         return addition;
+    }
+
+    private CharacterAnimationAsset ReadAnimations(Stream input, string format)
+    {
+        var animations = CustomAssetUtility.DeserializeObject<CharacterAnimationAsset>(input, format is "bson");
+        Acquire(animations);
+        return animations;
     }
 
     private CustomVisualEffect ReadVisualEffect(Stream input, string format)
