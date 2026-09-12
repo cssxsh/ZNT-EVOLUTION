@@ -120,20 +120,6 @@ public class HumanEditor : CharacterEditor
         set => Behaviour.Attacker.NextTargetsDamageMultiplier = value;
     }
 
-    [SerializeInEditor(name: "Vision Cast All", devOnly: true)]
-    public bool VisionCastAll
-    {
-        get => ((RayConeDetection)Behaviour.Vision.Detection).CastAll;
-        set => ((RayConeDetection)Behaviour.Vision.Detection).CastAll = value;
-    }
-
-    [SerializeInEditor(name: "Vision Keep Lost Track", devOnly: true)]
-    public bool VisionKeepLostTrack
-    {
-        get => ((SignalEffect)Behaviour.Vision.Effects[0]).KeepLostTrack;
-        set => ((SignalEffect)Behaviour.Vision.Effects[0]).KeepLostTrack = value;
-    }
-
     [SerializeInEditor(name: "Block Opponents")]
     public bool BlockOpponents
     {
@@ -152,9 +138,5 @@ public class HumanEditor : CharacterEditor
     {
         foreach (var (_, buff) in Buffs) buff.Remove(Character);
         Buffs.Clear();
-        var prefab = GetComponent<PoolRetriever>()?.Prefab?.GetComponent<HumanEditor>();
-        if (prefab is null) return;
-        VisionCastAll = prefab.VisionCastAll;
-        VisionKeepLostTrack = prefab.VisionKeepLostTrack;
     }
 }
