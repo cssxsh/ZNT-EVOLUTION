@@ -29,8 +29,8 @@ internal class SnakeFeetPatch
     public static void FindGameObjects(RayConeDetection __instance, C5.HashedArrayList<GameObject> __result)
     {
         if (__instance.CastAll) return;
-        var rays = Traverse.Create(__instance).Field<Vector2[]>("rays").Value;
-        var inverted = Traverse.Create(__instance).Field<int>("inverted").Value;
+        var rays = __instance.Rays;
+        var inverted = __instance.Inverted;
         __result.Clear();
         foreach (var ray in rays)
         {

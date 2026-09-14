@@ -79,10 +79,10 @@ internal static class GlobalSettingsPatch
     public static IEnumerator AddAliveCorpse(IEnumerator __result, CorpseBehaviour __instance)
     {
         if (CorpsesCountMax.Value < 0) yield break;
-        var parameters = Traverse.Create(__instance).Field<CorpseParameter>("parameters").Value;
+        var parameters = __instance.Parameters;
         if (parameters.Rise) yield break;
         yield return Wait.ForFiveSeconds;
-        var corpses = Traverse.Create<CorpseBehaviour>().Field<Queue<CorpseBehaviour>>("aliveCorpses").Value;
+        var corpses = CorpseBehaviour.AliveCorpses;
         corpses.Enqueue(__instance);
         if (corpses.Count <= CorpsesCountMax.Value) yield break;
         corpses.Dequeue().Dissolve();
@@ -99,8 +99,8 @@ internal static class GlobalSettingsPatch
     public static void UpdateAngles(RayConeDetection __instance, out bool __state, bool force)
     {
         __state = force
-                  || Traverse.Create(__instance).Field<bool>("needUpdate").Value
-                  || Traverse.Create(__instance).Field<Vector3>("previousFoward").Value != __instance.transform.forward;
+                  || __instance.NeedUpdate
+                  || __instance.PreviousForward != __instance.transform.forward;
     }
 
     [HarmonyPostfix]
@@ -129,15 +129,15 @@ internal static class GlobalSettingsPatch
         }
 
         if (!__instance.Trigger.enabled) return;
-        var rays = Traverse.Create(__instance).Field<Vector2[]>("rays").Value;
-        var inverted = Traverse.Create(__instance).Field<int>("inverted").Value;
+        var rays = __instance.Rays;
+        var inverted = __instance.Inverted;
         for (var i = 0; i < __instance.RayCount; i++)
         {
             var laser = __instance.Origin.GetChild(i);
             laser.right = rays[i] * inverted;
             var attachment = laser.GetComponent<LaserAttachment>();
             attachment.MaxDistance = __instance.Distance;
-            Traverse.Create(attachment).Field<LayerMask>("obstacleLayers").Value = __instance.Trigger.Layers;
+            attachment.ObstacleLayers = __instance.Trigger.Layers;
             laser.gameObject.SetActive(true);
             laser.BroadcastMessage(methodName: "Update");
         }
@@ -150,7 +150,7 @@ internal static class GlobalSettingsPatch
         var mask = (LayerMask)LayerMask.GetMask("Stairs Top", "Gameplay", "Crate");
         foreach (var attachment in __instance.Origin.GetComponentsInChildren<LaserAttachment>())
         {
-            Traverse.Create(attachment).Field<LayerMask>("obstacleLayers").Value = mask;
+            attachment.ObstacleLayers = mask;
             ComponentSingleton<GamePoolManager>.Instance.Despawn(attachment);
         }
     }
@@ -287,9 +287,9 @@ internal static class GlobalSettingsPatch
     {
         var dev = UserManager.IsUserDev;
         if (dev) return;
-        Traverse.Create(__instance).Field<Toggle>("localizeToggle").Value.isOn = false;
-        Traverse.Create(__instance).Field<CanvasGroup>("toggleGroup").Value.interactable = false;
-        Traverse.Create(__instance).Field<CanvasGroup>("toggleGroup").Value.alpha = 0.0f;
+        __instance.LocalizeToggle.isOn = false;
+        __instance.ToggleGroup.interactable = false;
+        __instance.ToggleGroup.alpha = 0.0f;
     }
 
     #endregion

@@ -2,9 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using DG.Tweening;
-using HarmonyLib;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using ZNT.Evolution.Core.Asset;
 using ZNT.LevelEditor;
@@ -17,8 +15,6 @@ namespace ZNT.Evolution.Core.Editor;
 public class MovingObjectSpawnPointEditor : Editor, IEditorOverride
 {
     private SpawnPoint Spawn => field ??= GetComponent<SpawnPoint>();
-
-    private Parameters SendParams => Traverse.Create(Spawn).Field<Parameters>("sendParams").Value;
 
     private static SortedDictionary<string, MovingObjectAsset> MovementAssets = new();
 
@@ -43,7 +39,7 @@ public class MovingObjectSpawnPointEditor : Editor, IEditorOverride
                 var binder = menu.ListBinder();
                 binder.BindStringListField(component, member, list);
                 if (list[0] is "") return true;
-                var components = Traverse.Create(binder).Field<UIBehaviour[]>("uiComponents").Value;
+                var components = binder.UiComponents;
                 var dropdown = (Dropdown)components[0];
                 var normal = dropdown.colors.normalColor;
                 dropdown.onValueChanged.AddListener(index =>
@@ -128,7 +124,7 @@ public class MovingObjectSpawnPointEditor : Editor, IEditorOverride
         // ReSharper disable once InvertIf
         if (!(SpeedEaseDuration <= 0 || SpeedEase is Ease.Unset))
         {
-            SendParams.Update(
+            Spawn.SendParams.Update(
                 "speed_ease", SpeedEase,
                 "speed_ease_duration", SpeedEaseDuration);
         }

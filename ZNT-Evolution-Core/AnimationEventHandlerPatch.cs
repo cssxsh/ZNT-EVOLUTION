@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
@@ -17,25 +16,6 @@ internal static class AnimationEventHandlerPatch
     private static readonly ManualLogSource Logger = BepInExLogger.CreateLogSource(nameof(AnimationEventHandler));
 
     private static readonly C5.HashedArrayList<MethodInfo> EventHandles = new();
-
-    [UsedImplicitly]
-    internal static bool ExistsTriggerEvent(this AnimationEventHandler handler, string name)
-    {
-        return Traverse.Create(handler)
-                   .Field<Dictionary<string, System.Action>>("triggerEvents").Value
-                   .ContainsKey(name)
-               || Traverse.Create(handler)
-                   .Field<Dictionary<string, AnimationEventHandler.EventAction>>("triggerEventsParams").Value
-                   .ContainsKey(name);
-    }
-
-    [UsedImplicitly]
-    internal static bool ExistsEndEvent(this AnimationEventHandler handler, tk2dSpriteAnimationClip clip)
-    {
-        return Traverse.Create(handler)
-            .Field<Dictionary<tk2dSpriteAnimationClip, System.Action>>("endEvents").Value
-            .ContainsKey(clip);
-    }
 
     [UsedImplicitly]
     internal static T GetAsset<T>(this tk2dSpriteAnimationFrame frame) where T : CustomAsset
@@ -104,13 +84,13 @@ internal static class AnimationEventHandlerPatch
     [Description("RegisterTriggerEvent:throw")]
     public static void Throw(CorpseBehaviour controller, tk2dSpriteAnimationFrame frame)
     {
-        var parameters = Traverse.Create(controller).Field<CorpseParameter>("parameters").Value;
+        var parameters = controller.Parameters;
         if (parameters.Character.Behaviour is not HumanBehaviour human) return;
         var definition = frame.spriteCollection.spriteDefinitions[frame.spriteId];
         var point = definition.attachPoints.FirstOrDefault(point => point.name is "throw")
                     ?? new tk2dSpriteDefinition.AttachPoint();
         human.PhysicObjectThrower.Throw(
-            Traverse.Create(controller).Field<UnityEngine.BoxCollider2D>("boxCollider").Value,
+            controller.BoxCollider,
             null,
             null,
             parameters.Position + point.position,
@@ -144,16 +124,16 @@ internal static class AnimationEventHandlerPatch
         physic.Physic.Throw();
     }
 
+    private static readonly C5.HashedArrayList<UnityEngine.GameObject> Detected = new();
+
     [UsedImplicitly]
     [Description("RegisterTriggerEvent:weapon_fire")]
     public static void Fire(CorpseBehaviour controller, tk2dSpriteAnimationFrame frame)
     {
-        var parameters = Traverse.Create(controller).Field<CorpseParameter>("parameters").Value;
+        var parameters = controller.Parameters;
         if (parameters.Character.Behaviour is not HumanBehaviour human) return;
-        var detected = Traverse.Create(typeof(DetectionHelper))
-            .Field<C5.HashedArrayList<UnityEngine.GameObject>>("Covered").Value;
         DetectionHelper.RayCastAll(
-            detected,
+            Detected,
             DetectionHelper.DistanceCheck,
             parameters.Position,
             controller.transform.right,
@@ -169,7 +149,7 @@ internal static class AnimationEventHandlerPatch
             human.Attacker.AttackTrigger.InvertTagsMatch);
         var count = parameters.CharacterAsset.HitMultipleTargets ? parameters.CharacterAsset.MaxTargets : 1;
         var damage = parameters.CharacterAsset.Damage;
-        foreach (var target in detected)
+        foreach (var target in Detected)
         {
             if (count is 0) break;
             if (!DetectionHelper.ObjectInRange(
@@ -195,8 +175,7 @@ internal static class AnimationEventHandlerPatch
     [Description("RegisterTriggerEvent:repulse")]
     public static void Repulse(HumanAnimationController controller, tk2dSpriteAnimationFrame frame)
     {
-        var human = Traverse.Create(controller).Field<HumanBehaviour>("Behaviour").Value;
-        var repulse = Traverse.Create(human.Rage).Field<UnityEngine.GameObject>("repulse").Value;
+        var repulse = controller.Behaviour.Rage.Repulse;
         if (repulse) repulse.GetComponent<ExplosionEditor>().StartExplosion();
     }
 
@@ -208,7 +187,7 @@ internal static class AnimationEventHandlerPatch
         if (asset is null) return;
         var human = asset.CreateGameObject(position: controller.transform.position).GetComponent<HumanBehaviour>();
         human.Character.OnSpawn(new Parameters(id: frame.eventInfo)
-            .Update("spawn_animations", human.HumanAnimation.AnimationExists("rise_2") ? new[] { "rise_2" } : null)
+            .Update("spawn_animations", controller.AnimationExists("rise_2") ? new[] { "rise_2" } : null)
             .Update("move_on_start", frame.eventInt is not 0)
             .Update("orientation", controller.transform.forward));
     }

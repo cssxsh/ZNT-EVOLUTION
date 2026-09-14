@@ -1,4 +1,3 @@
-using HarmonyLib;
 using UnityEngine;
 
 namespace ZNT.Evolution.Core.Editor;
@@ -123,15 +122,15 @@ public class HumanEditor : CharacterEditor
     [SerializeInEditor(name: "Block Opponents")]
     public bool BlockOpponents
     {
-        get => Traverse.Create(Behaviour.Stopper).Field<bool>("blockOpponents").Value;
-        set => Behaviour.Stopper.Initialize(value, MaxOpponentsBlock, Behaviour.OnStopperBreak);
+        get => Behaviour.Stopper.BlockOpponents;
+        set => Behaviour.Stopper.Initialize(value, Behaviour.Stopper.MaxOpponents, Behaviour.OnStopperBreak);
     }
 
     [SerializeInEditor(name: "Max Opponents Block")]
     public int MaxOpponentsBlock
     {
-        get => Traverse.Create(Behaviour.Stopper).Field<int>("MaxOpponents").Value;
-        set => Behaviour.Stopper.Initialize(BlockOpponents, value, Behaviour.OnStopperBreak);
+        get => Behaviour.Stopper.MaxOpponents;
+        set => Behaviour.Stopper.Initialize(Behaviour.Stopper.BlockOpponents, value, Behaviour.OnStopperBreak);
     }
 
     private void OnDespawned()

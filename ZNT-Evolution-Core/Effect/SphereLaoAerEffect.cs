@@ -1,9 +1,7 @@
-using System.Collections.Generic;
 using BepInEx.Logging;
 using HarmonyLib;
 using Newtonsoft.Json;
 using UnityEngine;
-using ZNT.Evolution.Core.Editor;
 using BepInExLogger = BepInEx.Logging.Logger;
 
 namespace ZNT.Evolution.Core.Effect;
@@ -44,7 +42,7 @@ public class SphereLaoAerEffect : TriggerEffect
         if (corpse is null) return;
         // var parameters = Traverse.Create(corpse).Field<CorpseParameter>("parameters").Value;
         // if (parameters.Rise) return;
-        var corpses = Traverse.Create<CorpseBehaviour>().Field<Queue<CorpseBehaviour>>("aliveCorpses").Value;
+        var corpses = CorpseBehaviour.AliveCorpses;
         if (corpses.Contains(corpse)) return;
         if (_human.Attacker.IsInAttackRange(target.transform))
         {
@@ -115,7 +113,7 @@ public class SphereLaoAerEffect : TriggerEffect
         trigger.Layers = LayerMask.GetMask("Ignore Characters");
         trigger.WithTags = Tag.Corpse;
         trigger.Detection = sphere;
-        trigger.SetTriggerType(TriggerType.ManualActivation);
+        trigger.Type = TriggerType.ManualActivation;
         prefab.SetActive(true);
         // ReSharper disable once Unity.UnknownResource
         var pool = Resources.Load<PoolSettingsAsset>("Assets/GamePoolSettings");

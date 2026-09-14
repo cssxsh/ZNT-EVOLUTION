@@ -1,6 +1,5 @@
 using System.Collections;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using BepInEx.Logging;
 using HarmonyLib;
@@ -314,13 +313,13 @@ internal static class StartManagerPatch
             case SceneVisualEffect prop:
                 prop.Tk2dAnimator ??= prop.GetComponentInChildren<tk2dSpriteAnimator>();
                 break;
-            case CharacterSpawnPoint spawn when spawn.GetSpawnType() is CorpseType.Human:
+            case SpawnPoint { SpawnType: "Human" }:
                 _ = prefab.GetComponentSafe<HumanSpawnPointEditor>();
                 break;
-            case CharacterSpawnPoint spawn when spawn.GetSpawnType() is CorpseType.Zombie:
+            case SpawnPoint { SpawnType: "Zombie" }:
                 _ = prefab.GetComponentSafe<ZombieSpawnPointEditor>();
                 break;
-            case SpawnPoint spawn when spawn.SpawnableObjects.Any(asset => asset is MovingObjectAsset):
+            case SpawnPoint { SpawnType: "Movement" } spawn:
                 _ = prefab.GetComponentSafe<MovingObjectSpawnPointEditor>();
                 spawn.ShowDamages(true);
                 break;

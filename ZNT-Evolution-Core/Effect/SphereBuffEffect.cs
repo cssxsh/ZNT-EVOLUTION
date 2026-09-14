@@ -203,7 +203,7 @@ public class SphereBuffEffect : TriggerEffect
         trigger.Frequency = 10;
         trigger.Layers = LayerMask.GetMask("Human");
         trigger.Detection = sphere;
-        trigger.SetTriggerType(TriggerType.ManualActivation);
+        trigger.Type = TriggerType.ManualActivation;
         prefab.SetActive(true);
         // ReSharper disable once Unity.UnknownResource
         var pool = Resources.Load<PoolSettingsAsset>("Assets/GamePoolSettings");

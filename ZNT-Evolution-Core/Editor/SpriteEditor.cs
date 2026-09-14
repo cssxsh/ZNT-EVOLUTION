@@ -2,7 +2,6 @@ using System.Linq;
 using System.Reflection;
 using HarmonyLib;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using ZNT.LevelEditor;
 
@@ -91,7 +90,8 @@ public class SpriteEditor : Editor, IEditorOverride, IEditorUpdate
                     let definition = frame.spriteCollection.spriteDefinitions[frame.spriteId]
                     select definition.name;
                 binder.BindStringListField(component, member, names.ToArray());
-                _dropdown = (Dropdown)Traverse.Create(binder).Field<UIBehaviour[]>("uiComponents").Value[0];
+                var components = binder.UiComponents;
+                _dropdown = (Dropdown)components[0];
             }
                 return true;
             case nameof(SpriteLayer):

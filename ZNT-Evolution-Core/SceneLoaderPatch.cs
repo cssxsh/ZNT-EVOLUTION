@@ -9,7 +9,6 @@ using HarmonyLib;
 using UIWidgets;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using ZNT.Evolution.Core.Editor;
 using ZNT.Evolution.Core.Mod;
@@ -357,76 +356,78 @@ internal static class SceneLoaderPatch
         __instance.AddEmpty();
     }
 
-    private static void AddCopy(this SelectionMenu menu)
+    extension(SelectionMenu menu)
     {
-        var move = Traverse.Create(menu).Field<Toggle>("moveButton").Value;
-        var plus = Traverse.Create(menu).Field<Button>("decorPlusButton").Value;
-        var icon = plus.transform.Find("Icon").GetComponent<Image>().sprite;
-        var copy = Object.Instantiate(original: move, parent: move.transform.parent);
-        copy.name = "Copy Button";
-        copy.transform.SetSiblingIndex(3);
-        copy.transform.Find("Icon").GetComponent<Image>().sprite = icon;
-        // copy.transform.Find("Selected").GetComponent<Image>().sprite = icon;
-        copy.OnValueChanged(menu.CopyObject);
-    }
+        private List<IEditorUpdate> ComponentsUpdate =>
+            Traverse.Create(menu).Field<List<IEditorUpdate>>("componentsUpdate").Value;
 
-    private static void AddEmpty(this SelectionMenu menu)
-    {
-        if (menu.transform.Find("Empty")) return;
-        var container = Traverse.Create(menu).Field<RectTransform>("mainContainer").Value;
-        var empty = Object.Instantiate(original: container, parent: menu.transform);
-        empty.name = "Empty";
-        empty.gameObject.SetActive(false);
-    }
-
-    private static void FixBinder(this SelectionMenu menu)
-    {
+        private void AddCopy()
         {
-            var prefabs = Traverse.Create(menu).Field<SupportedTypePrefabs>("typePrefabs").Value;
-            var binder = prefabs[EditorComponent.SupportedType.Vector4];
-            var fields = binder.GetComponentsInChildren<InputField>().ToArray<UIBehaviour>();
-            Traverse.Create(binder).Field<UIBehaviour[]>("uiComponents").Value = fields;
+            var move = Traverse.Create(menu).Field<Toggle>("moveButton").Value;
+            var plus = Traverse.Create(menu).Field<Button>("decorPlusButton").Value;
+            var icon = plus.transform.Find("Icon").GetComponent<Image>().sprite;
+            var copy = Object.Instantiate(original: move, parent: move.transform.parent);
+            copy.name = "Copy Button";
+            copy.transform.SetSiblingIndex(3);
+            copy.transform.Find("Icon").GetComponent<Image>().sprite = icon;
+            // copy.transform.Find("Selected").GetComponent<Image>().sprite = icon;
+            copy.OnValueChanged(menu.CopyObject);
         }
-        {
-            var prefabs = Traverse.Create(menu).Field<SupportedTypePrefabs>("typePrefabs").Value;
-            var binder = prefabs[EditorComponent.SupportedType.LocalizableString];
-            var components = Traverse.Create(binder).Field<UIBehaviour[]>("uiComponents").Value;
-            var localizable = (LocalizableStringMenu)components[0];
-            var placeholder = (Text)Traverse.Create(localizable).Field<InputField>("contentField").Value.placeholder;
-            placeholder.text = "Enter text...";
-        }
-        {
-            var prefabs = Traverse.Create(menu).Field<SupportedTypePrefabs>("typePrefabs").Value;
-            var binder = prefabs[EditorComponent.SupportedType.TutorialPageList];
-            var components = Traverse.Create(binder).Field<UIBehaviour[]>("uiComponents").Value;
-            var tutorial = (TutorialPageMenu)components[0];
-            var title = Traverse.Create(tutorial).Field<LocalizableStringMenu>("titleMenu").Value;
-            var title_placeholder = (Text)Traverse.Create(title).Field<InputField>("contentField").Value.placeholder;
-            title_placeholder.text = "Enter title...";
-            var text = Traverse.Create(tutorial).Field<LocalizableStringMenu>("textMenu").Value;
-            var text_placeholder = (Text)Traverse.Create(text).Field<InputField>("contentField").Value.placeholder;
-            text_placeholder.text = "Enter text...";
-        }
-    }
 
-    private static void CopyObject(this SelectionMenu menu, bool active)
-    {
-        var target = Traverse.Create(menu).Field<EditorGameObject>("serializeGameObject").Value;
-        target?.ObjectSettings.Activate(active, active ? ObjectSettings.Control.Copy : ObjectSettings.Control.None);
-    }
+        private void AddEmpty()
+        {
+            if (menu.transform.Find("Empty")) return;
+            var container = menu.MainContainer;
+            var empty = Object.Instantiate(original: container, parent: menu.transform);
+            empty.name = "Empty";
+            empty.gameObject.SetActive(false);
+        }
 
-    private static void OnObjectMoved(this SelectionMenu menu, GameObject go, bool isBrush)
-    {
-        var move = Traverse.Create(menu).Field<Toggle>("moveButton").Value;
-        var copy = move.transform.parent.Find("Copy Button").GetComponent<Toggle>();
-        copy.isOn = false;
+        private void FixBinder()
+        {
+            {
+                var prefab = menu.TypePrefabs[EditorComponent.SupportedType.Vector4];
+                prefab.UiComponents = [.. prefab.GetComponentsInChildren<InputField>()];
+            }
+            {
+                var prefab = menu.TypePrefabs[EditorComponent.SupportedType.LocalizableString];
+                var components = prefab.UiComponents;
+                var localizable = (LocalizableStringMenu)components[0];
+                var placeholder = (Text)localizable.ContentField.placeholder;
+                placeholder.text = "Enter text...";
+            }
+            {
+                var prefab = menu.TypePrefabs[EditorComponent.SupportedType.TutorialPageList];
+                var components = prefab.UiComponents;
+                var tutorial = (TutorialPageMenu)components[0];
+                var title = Traverse.Create(tutorial).Field<LocalizableStringMenu>("titleMenu").Value;
+                var title_placeholder = (Text)title.ContentField.placeholder;
+                title_placeholder.text = "Enter title...";
+                var text = Traverse.Create(tutorial).Field<LocalizableStringMenu>("textMenu").Value;
+                var text_placeholder = (Text)text.ContentField.placeholder;
+                text_placeholder.text = "Enter text...";
+            }
+        }
+
+        private void CopyObject(bool active)
+        {
+            var target = menu.SerializeGameObject;
+            target?.ObjectSettings.Activate(active, active ? ObjectSettings.Control.Copy : ObjectSettings.Control.None);
+        }
+
+        private void OnObjectMoved(GameObject go, bool isBrush)
+        {
+            var move = Traverse.Create(menu).Field<Toggle>("moveButton").Value;
+            var copy = move.transform.parent.Find("Copy Button").GetComponent<Toggle>();
+            copy.isOn = false;
+        }
     }
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(SelectionMenu), "SelectObject")]
     public static void SelectObject(SelectionMenu __instance)
     {
-        var target = Traverse.Create(__instance).Field<EditorGameObject>("serializeGameObject").Value;
+        var target = __instance.SerializeGameObject;
         target?.ObjectSettings.OnCopy -= __instance.OnObjectMoved;
     }
 
@@ -434,7 +435,7 @@ internal static class SceneLoaderPatch
     [HarmonyPatch(typeof(SelectionMenu), "UpdateCommonMenu")]
     public static void UpdateCommonMenu(SelectionMenu __instance)
     {
-        var target = Traverse.Create(__instance).Field<EditorGameObject>("serializeGameObject").Value;
+        var target = __instance.SerializeGameObject;
         target?.ObjectSettings.OnCopy += __instance.OnObjectMoved;
         var move = Traverse.Create(__instance).Field<Toggle>("moveButton").Value;
         var copy = move.transform.parent.Find("Copy Button").GetComponent<Toggle>();
@@ -447,9 +448,9 @@ internal static class SceneLoaderPatch
     [HarmonyPatch(typeof(SelectionMenu), "UpdateComponentMenu")]
     public static bool UpdateComponentMenu(SelectionMenu __instance)
     {
-        var container = Traverse.Create(__instance).Field<RectTransform>("mainContainer").Value;
-        var target = Traverse.Create(__instance).Field<EditorGameObject>("serializeGameObject").Value;
-        var updaters = Traverse.Create(__instance).Field<List<IEditorUpdate>>("componentsUpdate").Value;
+        var container = __instance.MainContainer;
+        var target = __instance.SerializeGameObject;
+        var updaters = __instance.ComponentsUpdate;
         var scroll = Traverse.Create(__instance).Field<ScrollRect>("scrollRect").Value;
         var empty = __instance.transform.Find("Empty") as RectTransform;
 
@@ -472,7 +473,7 @@ internal static class SceneLoaderPatch
             header.name = $"{component.Name} Header";
             var panel = Object.Instantiate(original: empty, parent: container);
             panel.name = $"{component.Name} Panel";
-            Traverse.Create(__instance).Field<RectTransform>("mainContainer").Value = panel;
+            __instance.MainContainer = panel;
             try
             {
                 foreach (var (member, _) in component.Fields)
@@ -483,7 +484,7 @@ internal static class SceneLoaderPatch
             }
             finally
             {
-                Traverse.Create(__instance).Field<RectTransform>("mainContainer").Value = container;
+                __instance.MainContainer = container;
                 header.AddComponent<Button>().onClick.AddListener(panel.ToggleActivation);
                 header.SetActive(panel.childCount is not 0);
                 panel.gameObject.SetActive(panel.childCount is not 0 && Activated.Contains(panel.name));
@@ -628,7 +629,7 @@ internal static class SceneLoaderPatch
     {
         var attribute = member.GetCustomAttribute<SerializeInEditorAttribute>();
         var name = attribute?.Name is null or "" ? member.Name.SplitCamelCase() : attribute.Name;
-        var text = Traverse.Create(__instance).Field<Text>("text").Value;
+        var text = __instance.Text;
         text.text = name;
         text.transform.parent.name = $"{name} Input";
         return false;
@@ -640,7 +641,7 @@ internal static class SceneLoaderPatch
     {
         if (member.GetMemberType() != typeof(Color)) return true;
         __instance.SetName(member);
-        var components = Traverse.Create(__instance).Field<UIBehaviour[]>("uiComponents").Value;
+        var components = __instance.UiComponents;
         var input = (InputField)components[0];
         var normal = input.colors.normalColor;
         input.onEndEdit.RemoveAllListeners();
@@ -667,18 +668,18 @@ internal static class SceneLoaderPatch
     public static void BindLocalizableString(
         SupportedTypeBinder __instance, EditorComponent component, MemberInfo member)
     {
-        var components = Traverse.Create(__instance).Field<UIBehaviour[]>("uiComponents").Value;
+        var components = __instance.UiComponents;
         var value = member.GetMemberValue<LocalizableString>(component.Data);
         var localizable = (LocalizableStringMenu)components[0];
         if (member.DeclaringType == typeof(TutorialSettings)) value.Category ??= "Tutorials";
         if (value.Category is null or "")
         {
-            Traverse.Create(localizable).Field<CanvasGroup>("toggleGroup").Value.interactable = false;
+            localizable.ToggleGroup.interactable = false;
         }
         else
         {
-            Traverse.Create(localizable).Field<bool>("useStringCategory").Value = false;
-            Traverse.Create(localizable).Field<string>("category").Value = value.Category;
+            localizable.UseStringCategory = false;
+            localizable.Category = value.Category;
         }
     }
 
@@ -687,7 +688,7 @@ internal static class SceneLoaderPatch
     public static void BindVector4Field(SupportedTypeBinder __instance, EditorComponent component, MemberInfo member)
     {
         var value = member.GetMemberValue<Vector4>(component.Data);
-        var components = Traverse.Create(__instance).Field<UIBehaviour[]>("uiComponents").Value;
+        var components = __instance.UiComponents;
         ((InputField)components[2]).text = $"{value.z}";
         ((InputField)components[3]).text = $"{value.w}";
     }
@@ -700,7 +701,7 @@ internal static class SceneLoaderPatch
         if (member.DeclaringType == typeof(RayConeDetection) &&
             member.Name is nameof(RayConeDetection.GeneralDirection))
         {
-            var input = Traverse.Create(__instance).Field<Text>("text").Value.transform.parent;
+            var input = __instance.Text.transform.parent;
             // Hide UnityEngine.Vector3.z
             input.Find("Container/Z Text").gameObject.SetActive(false);
             input.Find("Container/Z Input").gameObject.SetActive(false);
@@ -713,7 +714,7 @@ internal static class SceneLoaderPatch
     {
         if (member.GetMemberType() == typeof(Vector3)) return true;
         __instance.SetName(member);
-        var components = Traverse.Create(__instance).Field<UIBehaviour[]>("uiComponents").Value;
+        var components = __instance.UiComponents;
         var l = (Toggle)components[0];
         var r = (Toggle)components[1];
         l.onValueChanged.RemoveAllListeners();

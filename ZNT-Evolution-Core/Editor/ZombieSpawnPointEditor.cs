@@ -1,10 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using HarmonyLib;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using ZNT.Evolution.Core.Asset;
 using ZNT.LevelEditor;
@@ -39,7 +37,7 @@ public class ZombieSpawnPointEditor : CharacterSpawnPointEditor, IEditorOverride
                 var binder = menu.ListBinder();
                 binder.BindStringListField(component, member, list);
                 if (list[0] is "") return true;
-                var components = Traverse.Create(binder).Field<UIBehaviour[]>("uiComponents").Value;
+                var components = binder.UiComponents;
                 var dropdown = (Dropdown)components[0];
                 var normal = dropdown.colors.normalColor;
                 dropdown.onValueChanged.AddListener(index =>
@@ -107,7 +105,7 @@ public class ZombieSpawnPointEditor : CharacterSpawnPointEditor, IEditorOverride
     private void RandomMutation()
     {
         Spawn.SpawnMutation = mutations?.GetRandom();
-        SendParams.Update("mutation", Spawn.SpawnMutation);
+        Spawn.SendParams.Update("mutation", Spawn.SpawnMutation);
     }
 
     protected override void OnCreate()

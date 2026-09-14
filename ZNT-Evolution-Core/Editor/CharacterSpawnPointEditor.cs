@@ -1,4 +1,3 @@
-using HarmonyLib;
 using UnityEngine;
 
 // ReSharper disable InconsistentNaming
@@ -9,8 +8,6 @@ namespace ZNT.Evolution.Core.Editor;
 public class CharacterSpawnPointEditor : Editor
 {
     protected CharacterSpawnPoint Spawn => field ??= GetComponent<CharacterSpawnPoint>();
-
-    protected Parameters SendParams => Traverse.Create(Spawn).Field<Parameters>("sendParams").Value;
 
     [SerializeInEditor(name: "Dialogue Text")]
     public LocalizableString DialogueText = new() { Localize = false, Category = "Dialogues" };
@@ -26,7 +23,7 @@ public class CharacterSpawnPointEditor : Editor
         // ReSharper disable once InvertIf
         if (!(DialogueDuration <= 0 || DialogueText.Content is null or ""))
         {
-            SendParams.Update(
+            Spawn.SendParams.Update(
                 "dialogue_text", DialogueText,
                 "dialogue_duration", DialogueDuration,
                 "dialogue_voice", DialogueVoice);

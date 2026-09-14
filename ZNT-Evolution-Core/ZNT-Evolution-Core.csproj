@@ -386,6 +386,7 @@
     <ItemGroup>
         <Compile Include="Properties\AssemblyInfo.cs"/>
         <Compile Include="AnimationEventHandlerPatch.cs"/>
+        <Compile Include="BaseComponentExtensions.cs"/>
         <Compile Include="CustomAssetObjectPatch.cs"/>
         <Compile Include="DebugPatch.cs"/>
         <Compile Include="EvolutionCorePlugin.cs"/>
@@ -427,7 +428,6 @@
         <Compile Include="Asset\SpriteExtractor.cs"/>
         <Compile Include="Asset\SpriteInfo.cs"/>
         <Compile Include="Asset\SpriteMerge.cs"/>
-        <Compile Include="Editor\BaseComponentExtensions.cs"/>
         <Compile Include="Editor\CharacterEditor.cs"/>
         <Compile Include="Editor\CharacterSpawnPointEditor.cs"/>
         <Compile Include="Editor\Editor.cs"/>

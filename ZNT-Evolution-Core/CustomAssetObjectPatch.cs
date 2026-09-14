@@ -82,22 +82,20 @@ internal static class CustomAssetObjectPatch
     [HarmonyPatch(typeof(MineBehaviour), "OnCreate")]
     public static void OnCreate(MineBehaviour __instance)
     {
-        var prefab = Traverse.Create(__instance).Field<Transform>("explosionPrefab").Value;
+        var prefab = __instance.ExplosionPrefab;
         if (prefab is not null && prefab.IsChildOf(__instance.transform)) return;
-        var explosion = Traverse.Create(__instance).Field<ExplosionAsset>("explosion").Value;
-        var explode = explosion.CreatePrefab(parent: __instance.transform);
-        Traverse.Create(__instance).Field<Transform>("explosionPrefab").Value = explode;
+        __instance.ExplosionPrefab = __instance.Explosion.CreatePrefab(parent: __instance.transform);
     }
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(MineBehaviour), "Explode")]
     public static bool Explode(MineBehaviour __instance)
     {
-        var prefab = Traverse.Create(__instance).Field<Transform>("explosionPrefab").Value;
+        var prefab = __instance.ExplosionPrefab;
         if (!(prefab is not null && prefab.IsChildOf(__instance.transform))) return true;
-        Traverse.Create(__instance).Field<Trigger>("trigger").Value.enabled = false;
+        __instance.Trigger.enabled = false;
         prefab.GetComponent<ExplosionEditor>().StartExplosion();
-        Traverse.Create(__instance).Field<MineAnimationController>("animation").Value.PlayExplosion();
+        __instance.Animation.PlayExplosion();
         return false;
     }
 
@@ -105,7 +103,7 @@ internal static class CustomAssetObjectPatch
     [HarmonyPatch(typeof(MineBehaviour), "Destroy")]
     public static void Destroy(MineBehaviour __instance)
     {
-        var prefab = Traverse.Create(__instance).Field<Transform>("explosionPrefab").Value;
+        var prefab = __instance.ExplosionPrefab;
         ComponentSingleton<GamePoolManager>.Instance.Despawn(prefab);
     }
 
@@ -428,7 +426,7 @@ internal static class CustomAssetObjectPatch
     [HarmonyPatch(typeof(Rage), "Repulsion", MethodType.Setter)]
     public static void SetRepulsion(Rage __instance, ExplosionAsset value)
     {
-        var repulse = Traverse.Create(__instance).Field<GameObject>("repulse").Value;
+        var repulse = __instance.Repulse;
         if (repulse)
         {
             repulse.GetComponent<ExplosionEditor>().EditorVisibility.CustomName = null;
@@ -441,7 +439,7 @@ internal static class CustomAssetObjectPatch
         explode.name = "Repulse";
         explode.GetComponent<ExplosionEditor>().EditorVisibility.CustomName = nameof(Rage.Repulsion);
         explode.GetComponent<ExplosionEffect>().DespawnOnEnd = false;
-        Traverse.Create(__instance).Field<GameObject>("repulse").Value = explode.gameObject;
+        __instance.Repulse = explode.gameObject;
     }
 
     [HarmonyPrefix]
@@ -449,25 +447,25 @@ internal static class CustomAssetObjectPatch
     public static bool OnHit(Rage __instance, Parameters param)
     {
         if (!__instance.enabled) return false;
-        var repulse = Traverse.Create(__instance).Field<GameObject>("repulse").Value;
+        var repulse = __instance.Repulse;
         if (repulse is null) return false;
         var flags = DamageFlagsConverter.GetDamageFlags(__instance.DamageType);
         var damage = DamageFlagsConverter.GetDamageFlags(param.GetDamageType());
         if (!(flags is 0 || flags.HasFlag(damage))) return false;
-        var timer = Traverse.Create(__instance).Field<Timer>("refillTimer").Value;
-        var hits = Traverse.Create(__instance).Field<int>("currentHitCount").Value;
+        var timer = __instance.Timer;
+        var hits = __instance.Hits;
         if (--hits > 0)
         {
             timer.Start();
-            Traverse.Create(__instance).Field<Timer>("refillTimer").Value = timer;
-            Traverse.Create(__instance).Field<int>("currentHitCount").Value = hits;
+            __instance.Timer = timer;
+            __instance.Hits = hits;
             return false;
         }
 
         hits = __instance.RefillOnEnraged ? __instance.TargetHitCount : 0;
         timer.Stop();
-        Traverse.Create(__instance).Field<Timer>("refillTimer").Value = timer;
-        Traverse.Create(__instance).Field<int>("currentHitCount").Value = hits;
+        __instance.Timer = timer;
+        __instance.Hits = hits;
         repulse.GetComponent<ExplosionEditor>().StartExplosion();
         __instance.Event<BoolEvent>("OnRage").Invoke(__instance.FreezeOnRage);
         return false;
@@ -484,7 +482,7 @@ internal static class CustomAssetObjectPatch
     [HarmonyPatch(typeof(Stopper), "Initialize")]
     public static void Initialize(Stopper __instance, bool block, int maxOpponents)
     {
-        var detector = Traverse.Create(__instance).Field<BoxDetection>("detector").Value;
+        var detector = __instance.Detector;
         var collider = detector.GetComponent<Collider2D>();
         Opponents[collider] = block ? maxOpponents : 0;
         var effect = detector.GetComponent<Trigger>().GetEffect<CharacterAllocationEffect>();
@@ -507,7 +505,7 @@ internal static class CustomAssetObjectPatch
     [HarmonyPatch(typeof(Stopper), "OnDespawned")]
     public static void OnDespawned(Stopper __instance)
     {
-        var detector = Traverse.Create(__instance).Field<BoxDetection>("detector").Value;
+        var detector = __instance.Detector;
         var collider = detector.GetComponent<Collider2D>();
         Opponents.Remove(collider);
         var effect = detector.GetComponent<CharacterAllocationEffect>();

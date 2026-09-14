@@ -1,7 +1,6 @@
 using System;
 using System.Reflection;
 using DG.Tweening;
-using HarmonyLib;
 using UnityEngine;
 using UnityEngine.Events;
 using ZNT.LevelEditor;
@@ -20,7 +19,7 @@ public class MovingObjectEditor : Editor, IEditorOverride
     public float CurrentSpeed
     {
         get => Moveable.CurrentSpeed;
-        set => Traverse.Create(Moveable).Field<float>("currentSpeed").Value = value;
+        set => Moveable.SetCurrentSpeed(value);
     }
 
     [SerializeInEditor(name: "Speed Ease")]
@@ -31,13 +30,13 @@ public class MovingObjectEditor : Editor, IEditorOverride
 
     public bool OverrideMemberUi(SelectionMenu menu, EditorComponent component, MemberInfo member)
     {
-        var panel = Traverse.Create(menu).Field<RectTransform>("mainContainer").Value;
+        var panel = menu.MainContainer;
         var container = panel.parent;
-        var target = Traverse.Create(menu).Field<EditorGameObject>("serializeGameObject").Value;
+        var target = menu.SerializeGameObject;
         var moveable = target.Components.Find(t => t.Data is PropMoveable);
         if (moveable is null) return false;
         var prev = (RectTransform)container.Find($"{moveable.Name} Panel");
-        Traverse.Create(menu).Field<RectTransform>("mainContainer").Value = prev;
+        menu.MainContainer = prev;
         try
         {
             menu.SetDefaultUi(component, member);
@@ -52,7 +51,7 @@ public class MovingObjectEditor : Editor, IEditorOverride
         }
         finally
         {
-            Traverse.Create(menu).Field<RectTransform>("mainContainer").Value = panel;
+            menu.MainContainer = panel;
         }
     }
 
