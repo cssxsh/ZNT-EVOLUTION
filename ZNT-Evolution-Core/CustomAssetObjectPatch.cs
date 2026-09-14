@@ -27,17 +27,16 @@ internal static class CustomAssetObjectPatch
     private static Transform CreatePrefab(this ExplosionAsset explosion, Transform parent)
     {
         var prefab = ComponentSingleton<GamePoolManager>.Instance.Spawn(explosion.Prefab, parent);
-        var explode = Traverse.Create(explosion).Field<bool>("autoExplode");
-        var auto = explode.Value;
+        var auto = explosion.AutoExplode;
         try
         {
-            explode.Value = false;
+            explosion.AutoExplode = false;
             explosion.LoadFromAsset(prefab.gameObject);
             return prefab;
         }
         finally
         {
-            explode.Value = auto;
+            explosion.AutoExplode = auto;
         }
     }
 
@@ -64,7 +63,7 @@ internal static class CustomAssetObjectPatch
     [HarmonyPatch(typeof(ExplosionAsset), "LoadFromAsset")]
     public static void LoadFromAsset(ExplosionAsset __instance, GameObject gameObject)
     {
-        if (Traverse.Create(__instance).Field<bool>("autoExplode").Value) return;
+        if (__instance.AutoExplode) return;
         var editor = gameObject.GetComponentSafe<ExplosionEditor>();
         editor.Delay = __instance.Delay;
         var linker = gameObject.GetComponentInParent<SignalReceiverLinker>()

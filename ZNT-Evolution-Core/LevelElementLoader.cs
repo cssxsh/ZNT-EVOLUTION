@@ -265,7 +265,7 @@ public static class LevelElementLoader
                 break;
             case var _ when asset.EndsWith("MovingObjectAsset"):
                 var moving = DeserializeObject<MovingObjectAsset>(folder: path, file: "asset.json");
-                Traverse.Create(moving).Field<tk2dSpriteAnimation>("library").Value ??= animation;
+                moving.Animation ??= animation;
                 Logger.LogDebug($"asset.json -> {moving}");
                 break;
             case var _ when asset.EndsWith("PhysicObjectAsset"):
@@ -282,7 +282,7 @@ public static class LevelElementLoader
                 break;
             case var _ when asset.EndsWith("ExplosionAsset"):
                 var explosion = DeserializeObject<ExplosionAsset>(folder: path, file: "asset.json");
-                Traverse.Create(explosion).Field<bool>("autoExplode").Value = false;
+                explosion.AutoExplode = false;
                 Logger.LogDebug($"asset.json -> {explosion}");
                 break;
             case var _ when asset.EndsWith("ScreamAsset"):

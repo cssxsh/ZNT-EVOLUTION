@@ -1,4 +1,3 @@
-using HarmonyLib;
 using UnityEngine.Events;
 
 namespace ZNT.Evolution.Core.Effect;
@@ -25,7 +24,7 @@ public class CharacterBuff : CustomAsset
 
     public virtual void Load(Parameters parameters)
     {
-        Traverse.Create(this).Field<string>("assetId").Value = parameters.Id;
+        this.SetAssetId(parameters.Id);
         Repeat = parameters.GetValue<Timer>("repeat");
         Expire = parameters.GetValue<Timer>("expire");
         Diff = parameters.GetValue<float>("diff");

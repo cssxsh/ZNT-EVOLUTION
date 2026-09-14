@@ -7,7 +7,6 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using BepInEx.Logging;
-using HarmonyLib;
 using UnityEngine;
 using ZNT.Evolution.Core.Asset;
 using BepInExLogger = BepInEx.Logging.Logger;
@@ -421,8 +420,7 @@ public class ModContext
             case { Type: "moving", Format: "json" or "bson" }:
             {
                 var moving = ReadMovingObjectAsset(buffer, resource.Format);
-                var animation = Traverse.Create(moving).Field<tk2dSpriteAnimation>("library").Value;
-                Logger.LogDebug($"{resource.Path} -> {moving} from {animation}");
+                Logger.LogDebug($"{resource.Path} -> {moving} from {moving.Animation}");
             }
                 break;
             // SentryGunAsset
@@ -436,8 +434,7 @@ public class ModContext
             case { Type: "physic", Format: "json" or "bson" }:
             {
                 var physic = ReadPhysicObjectAsset(buffer, resource.Format);
-                var animation = Traverse.Create(physic).Field<tk2dSpriteAnimation>("library").Value;
-                Logger.LogDebug($"{resource.Path} -> {physic} from {animation}");
+                Logger.LogDebug($"{resource.Path} -> {physic} from {physic.Animation}");
             }
                 break;
             // HumanAsset
