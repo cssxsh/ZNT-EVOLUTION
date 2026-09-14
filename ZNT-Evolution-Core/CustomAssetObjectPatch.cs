@@ -196,7 +196,7 @@ internal static class CustomAssetObjectPatch
     public static void LoadFromAsset(MovingObjectAsset __instance, GameObject gameObject)
     {
         var behaviour = gameObject.GetComponent<MovingObjectBehaviour>();
-        Traverse.Create(behaviour).Method("ActivateColliders", false).GetValue();
+        behaviour.ActivateColliders(false);
         var controller = (MovingObjectAnimationController)behaviour.AnimationController;
         if (__instance.StandAnimation.Contains('{') ||
             __instance.DisableAnimation.Contains('{') ||
@@ -308,7 +308,7 @@ internal static class CustomAssetObjectPatch
     {
         var flag = __instance.DamageCharacterOnTrigger
                    && __instance.TargetLayers.ContainsLayer(other.gameObject.layer);
-        if (flag) Traverse.Create(__instance).Method("SendTargetDamage", other.gameObject).GetValue();
+        if (flag) __instance.SendTargetDamage(other.gameObject);
         // TODO param by EvolutionSettings
         if (flag && __instance.Physic.GravityScale is 0.0f)
         {
@@ -546,14 +546,14 @@ internal static class CustomAssetObjectPatch
     [HarmonyPatch(typeof(TutorialScreen), "SetNews")]
     public static bool SetNews(TutorialScreen __instance)
     {
-        var settings = Traverse.Create(__instance).Field<TutorialSettings>("tutorialSettings").Value;
+        var settings = __instance.TutorialSettings;
         if (!settings.ShowBreakingNews) return true;
         var news = settings.GetComponent<TutorialBreakingNews>();
         if (news is null) return true;
-        var current = Traverse.Create(__instance).Field<Dictionary<string, TMPro.TextMeshProUGUI>>("currentNews").Value;
-        var count = Traverse.Create(__instance).Field<int>("newsCount").Value;
-        var prefab = Traverse.Create(__instance).Field<RectTransform>("newsPrefab").Value;
-        var container = Traverse.Create(__instance).Field<RectTransform>("newsContainer").Value;
+        var current = __instance.CurrentNews;
+        var count = __instance.NewsCount;
+        var prefab = __instance.NewsPrefab;
+        var container = __instance.NewsContainer;
         current.Clear();
         foreach (var line in news.OrderBy(_ => UnityEngine.Random.value))
         {
@@ -563,7 +563,7 @@ internal static class CustomAssetObjectPatch
             target.localScale = Vector3.one;
             var tm = target.GetComponent<TMPro.TextMeshProUGUI>();
             tm.text = line.Content;
-            Traverse.Create(__instance).Method("AddScrollRecycler", target).GetValue();
+            __instance.AddScrollRecycler(target);
             current.Add(line.Content, tm);
             if (current.Count >= count) break;
         }

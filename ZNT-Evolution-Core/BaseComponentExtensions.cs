@@ -110,6 +110,13 @@ public static class BaseComponentExtensions
         public Parameters SendParams => Traverse.Create(spawn).Field<Parameters>("sendParams").Value;
 
         [UsedImplicitly]
+        public int RandomSeed
+        {
+            get => Traverse.Create(spawn).Field<int>("randomSeed").Value;
+            set => Traverse.Create(spawn).Field<int>("randomSeed").Value = value;
+        }
+
+        [UsedImplicitly]
         public string SpawnType => spawn switch
         {
             CharacterSpawnPoint => Traverse.Create(spawn).Field<System.Enum>("spawnType").Value.ToString(),
@@ -197,10 +204,28 @@ public static class BaseComponentExtensions
         }
     }
 
+    extension(Moveable mover)
+    {
+        [UsedImplicitly]
+        public void SetGroundLayers(LayerMask value)
+        {
+            Traverse.Create(mover).Field<LayerMask>("groundLayers").Value = value;
+        }
+
+        [UsedImplicitly]
+        public void HitGround(float velocity)
+        {
+            Traverse.Create(mover).Method("HitGround", [typeof(float)], [velocity]).GetValue();
+        }
+    }
+
     extension(PropMoveable mover)
     {
         [UsedImplicitly]
-        public void SetCurrentSpeed(float value) => Traverse.Create(mover).Field<float>("currentSpeed").Value = value;
+        public void SetCurrentSpeed(float value)
+        {
+            Traverse.Create(mover).Field<float>("currentSpeed").Value = value;
+        }
     }
 
     extension<T>(BehaviourAnimationController<T> controller) where T : BaseBehaviour
@@ -226,6 +251,46 @@ public static class BaseComponentExtensions
             var patroller = behaviour.Character.Components.Patroller;
             dialogue.SetText(text, duration);
             dialogue.Show(patroller, patroller.DialogueOffset, voice);
+        }
+    }
+
+    extension(HumanBehaviour behaviour)
+    {
+        [UsedImplicitly]
+        public void MoveToTarget(Transform target)
+        {
+            Traverse.Create(behaviour).Method("MoveToTarget", [typeof(Transform)], [target]).GetValue();
+        }
+
+        [UsedImplicitly]
+        public void SetTarget(Transform target)
+        {
+            Traverse.Create(behaviour).Method("SetTarget", [typeof(Transform)], [target]).GetValue();
+        }
+    }
+
+    extension(MovingObjectBehaviour behaviour)
+    {
+        [UsedImplicitly]
+        public void ActivateColliders(bool active)
+        {
+            Traverse.Create(behaviour).Method("ActivateColliders", [typeof(bool)], [active]).GetValue();
+        }
+    }
+
+    extension(PhysicObjectBehaviour behaviour)
+    {
+        [UsedImplicitly]
+        public bool Exploded
+        {
+            get => Traverse.Create(behaviour).Field<bool>("exploded").Value;
+            set => Traverse.Create(behaviour).Field<bool>("exploded").Value = value;
+        }
+
+        [UsedImplicitly]
+        public void SendTargetDamage(GameObject target)
+        {
+            Traverse.Create(behaviour).Method("SendTargetDamage", [typeof(GameObject)], [target]).GetValue();
         }
     }
 
@@ -285,6 +350,50 @@ public static class BaseComponentExtensions
         }
 
         [UsedImplicitly]
+        public ScrollRect ScrollRect =>
+            Traverse.Create(menu).Field<ScrollRect>("scrollRect").Value;
+
+        [UsedImplicitly]
+        public InputField IdInputField =>
+            Traverse.Create(menu).Field<InputField>("idInputField").Value;
+
+        [UsedImplicitly]
+        public Button ResetButton =>
+            Traverse.Create(menu).Field<Button>("resetButton").Value;
+
+        [UsedImplicitly]
+        public Toggle MoveButton =>
+            Traverse.Create(menu).Field<Toggle>("moveButton").Value;
+
+        [UsedImplicitly]
+        public Toggle CopyButton =>
+            menu.MoveButton.transform.parent.Find("Copy Button")?.GetComponent<Toggle>();
+
+        [UsedImplicitly]
+        public Button DeleteButton =>
+            Traverse.Create(menu).Field<Button>("deleteButton").Value;
+
+        [UsedImplicitly]
+        public Button DecorToBackButton =>
+            Traverse.Create(menu).Field<Button>("decorToBackButton").Value;
+
+        [UsedImplicitly]
+        public InputField DecorIndexInputField =>
+            Traverse.Create(menu).Field<InputField>("decorIndexInputField").Value;
+
+        [UsedImplicitly]
+        public Button DecorMinusButton =>
+            Traverse.Create(menu).Field<Button>("decorMinusButton").Value;
+
+        [UsedImplicitly]
+        public Button DecorPlusButton =>
+            Traverse.Create(menu).Field<Button>("decorPlusButton").Value;
+
+        [UsedImplicitly]
+        private Button DecorToFrontButton =>
+            Traverse.Create(menu).Field<Button>("decorToFrontButton").Value;
+
+        [UsedImplicitly]
         public SupportedTypeBinder TextBinder()
         {
             var prefab = menu.TypePrefabs[EditorComponent.SupportedType.String];
@@ -342,5 +451,98 @@ public static class BaseComponentExtensions
 
         [UsedImplicitly]
         public InputField ContentField => Traverse.Create(localizable).Field<InputField>("contentField").Value;
+    }
+
+    extension(WeatherRain weather)
+    {
+        [UsedImplicitly]
+        public float Intensity
+        {
+            get => Traverse.Create(weather).Field<float>("intensity").Value;
+            set => Traverse.Create(weather).Field<float>("intensity").Value = value;
+        }
+
+        [UsedImplicitly]
+        public float Angle
+        {
+            get => Traverse.Create(weather).Field<float>("angle").Value;
+            set => Traverse.Create(weather).Field<float>("angle").Value = value;
+        }
+
+        [UsedImplicitly]
+        public Vector2 Speed
+        {
+            get => Traverse.Create(weather).Field<Vector2>("speed").Value;
+            set => Traverse.Create(weather).Field<Vector2>("speed").Value = value;
+        }
+
+        [UsedImplicitly]
+        public Vector4 Density
+        {
+            get => Traverse.Create(weather).Field<Vector4>("density").Value;
+            set => Traverse.Create(weather).Field<Vector4>("density").Value = value;
+        }
+
+        [UsedImplicitly]
+        public float Length
+        {
+            get => Traverse.Create(weather).Field<float>("length").Value;
+            set => Traverse.Create(weather).Field<float>("length").Value = value;
+        }
+
+        [UsedImplicitly]
+        public RainEffect RainEffect
+        {
+            get => Traverse.Create(weather).Field<RainEffect>("rainEffect").Value;
+            set => Traverse.Create(weather).Field<RainEffect>("rainEffect").Value = value;
+        }
+    }
+
+    extension(TutorialScreen screen)
+    {
+        [UsedImplicitly]
+        public int NewsCount
+        {
+            get => Traverse.Create(screen).Field<int>("newsCount").Value;
+            set => Traverse.Create(screen).Field<int>("newsCount").Value = value;
+        }
+
+        [UsedImplicitly]
+        public RectTransform NewsContainer =>
+            Traverse.Create(screen).Field<RectTransform>("newsContainer").Value;
+
+        [UsedImplicitly]
+        public RectTransform NewsPrefab =>
+            Traverse.Create(screen).Field<RectTransform>("newsPrefab").Value;
+
+        [UsedImplicitly]
+        public TutorialSettings TutorialSettings =>
+            Traverse.Create(screen).Field<TutorialSettings>("tutorialSettings").Value;
+
+        [UsedImplicitly]
+        public Dictionary<string, TMPro.TextMeshProUGUI> CurrentNews =>
+            Traverse.Create(screen).Field<Dictionary<string, TMPro.TextMeshProUGUI>>("currentNews").Value;
+
+
+        [UsedImplicitly]
+        public void AddScrollRecycler(RectTransform target)
+        {
+            Traverse.Create(screen).Method("AddScrollRecycler", [typeof(RectTransform)], [target]).GetValue();
+        }
+    }
+
+    extension(ObjectSettings settings)
+    {
+        [UsedImplicitly]
+        public LevelElement Element =>
+            Traverse.Create(settings).Field<LevelElement>("element").Value;
+
+        [UsedImplicitly]
+        public LevelLoaderManager LevelManager =>
+            Traverse.Create(settings).Field<LevelLoaderManager>("levelManager").Value;
+
+        [UsedImplicitly]
+        public Rotorz.Tile.TileSystem TileSystem =>
+            Traverse.Create(settings).Field<Rotorz.Tile.TileSystem>("tileSystem").Value;
     }
 }

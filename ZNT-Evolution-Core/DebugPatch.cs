@@ -81,7 +81,7 @@ internal static class DebugPatch
     [HarmonyPatch(typeof(SpawnPoint), "Start")]
     public static void Start(SpawnPoint __instance)
     {
-        Traverse.Create(__instance).Field<int>("randomSeed").Value = __instance.GetInstanceID();
+        __instance.RandomSeed = __instance.GetInstanceID();
     }
 
     [HarmonyPrefix]
@@ -108,14 +108,14 @@ internal static class DebugPatch
             distance: 0.9f,
             layerMask: mask) > 0;
         if (!hit || DetectionHelper.CastCheck[0].collider.CheckOneWay(__instance)) return;
-        Traverse.Create(__instance).Field<LayerMask>("groundLayers").Value = __state & ~mask;
+        __instance.SetGroundLayers(__state & ~mask);
     }
 
     [HarmonyFinalizer]
     [HarmonyPatch(typeof(Moveable), "UpdateIsGrounded")]
     public static void UpdateIsGrounded(Moveable __instance, LayerMask __state)
     {
-        Traverse.Create(__instance).Field<LayerMask>("groundLayers").Value = __state;
+        __instance.SetGroundLayers(__state);
     }
 
     [HarmonyPrefix]
@@ -133,7 +133,7 @@ internal static class DebugPatch
             distance: __instance is TankBehaviour ? 1.5f : 1.0f,
             layerMask: mask) > 0;
         if (!hit || DetectionHelper.CastCheck[0].collider.CheckOneWay(__instance.Mover)) return;
-        Traverse.Create(__instance.Mover).Field<LayerMask>("groundLayers").Value = __state & ~mask;
+        __instance.Mover.SetGroundLayers(__state & ~mask);
     }
 
     [HarmonyFinalizer]
@@ -141,7 +141,7 @@ internal static class DebugPatch
     [HarmonyPatch(typeof(CharacterBehaviour), "AfterStepping")]
     public static void AfterStepping(CharacterBehaviour __instance, LayerMask __state)
     {
-        Traverse.Create(__instance.Mover).Field<LayerMask>("groundLayers").Value = __state;
+        __instance.Mover.SetGroundLayers(__state);
     }
 
     [HarmonyPrefix]
@@ -157,7 +157,7 @@ internal static class DebugPatch
             case MoveableState.JumpFalling:
             case MoveableState.Falling:
             case MoveableState.Pushed:
-                Traverse.Create(__instance).Method("HitGround", 0.0f).GetValue();
+                __instance.HitGround(0.0f);
                 break;
             default:
                 return;
@@ -202,7 +202,7 @@ internal static class DebugPatch
     {
         __instance.Mover.UpdateIsGrounded();
         if (moveToTarget || !__instance.CanAttack()) return true;
-        Traverse.Create(__instance).Method("SetTarget", target).GetValue();
+        __instance.SetTarget(target);
         return false;
     }
 
@@ -234,37 +234,33 @@ internal static class DebugPatch
     [HarmonyPatch("PhysicObjectBehaviour+ResetPhysicBarrelBehaviour, Assembly-CSharp", "Reset")]
     public static void Reset(PhysicObjectBehaviour component)
     {
-        Traverse.Create(component).Field<bool>("exploded").Value = true;
+        component.Exploded = true;
     }
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(WeatherRain), "CreateEffect")]
-    public static bool CreateEffect(WeatherRain __instance)
-    {
-        var rain = Traverse.Create(__instance).Field<RainEffect>("rainEffect").Value;
-        return rain is null;
-    }
+    public static bool CreateEffect(WeatherRain __instance) => __instance.RainEffect is null;
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(WeatherRain), "OnEditorClose")]
     public static void OnEditorClose(WeatherRain __instance)
     {
-        var rain = Traverse.Create(__instance).Field<RainEffect>("rainEffect").Value;
-        var intensity = Traverse.Create(__instance).Field<float>("intensity").Value;
-        var length = Traverse.Create(__instance).Field<float>("length").Value;
-        var angle = Traverse.Create(__instance).Field<float>("angle").Value;
-        var speed = Traverse.Create(__instance).Field<Vector2>("speed").Value;
-        var density = Traverse.Create(__instance).Field<Vector4>("density").Value;
-        rain?.UpdateSettings(intensity, length, angle, speed, density);
+        var rain = __instance.RainEffect;
+        rain?.UpdateSettings(
+            __instance.Intensity,
+            __instance.Length,
+            __instance.Angle,
+            __instance.Speed,
+            __instance.Density);
     }
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(WeatherRain), "OnDestroy")]
     public static void OnDestroy(WeatherRain __instance)
     {
-        var rain = Traverse.Create(__instance).Field<RainEffect>("rainEffect").Value;
+        var rain = __instance.RainEffect;
         rain?.gameObject.SetActive(false);
-        Traverse.Create(__instance).Field<RainEffect>("rainEffect").Value = null;
+        __instance.RainEffect = null;
     }
 
     [HarmonyPostfix]
@@ -307,9 +303,9 @@ internal static class DebugPatch
     {
         var position = __instance.transform.position;
         if (__instance.Type is not ObjectSettings.ElementType.Brush) return true;
-        var element = Traverse.Create(__instance).Field<LevelElement>("element").Value;
-        var level = Traverse.Create(__instance).Field<LevelLoaderManager>("levelManager").Value;
-        var system = Traverse.Create(__instance).Field<Rotorz.Tile.TileSystem>("tileSystem").Value;
+        var element = __instance.Element;
+        var level = __instance.LevelManager;
+        var system = __instance.TileSystem;
         if (system.GetTileOrNull(ti)?.gameObject == __instance.gameObject) return false;
         level.PaintTile(
             system: system,
@@ -329,16 +325,25 @@ internal static class DebugPatch
         return false;
     }
 
-    [HarmonyPostfix]
+    [HarmonyTranspiler]
     [HarmonyPatch(typeof(Framework.Events.SignalReceiver), "GetType")]
-    public static Type GetType(Type __result, string typeName)
+    public static IEnumerable<CodeInstruction> GetType(IEnumerable<CodeInstruction> instructions)
     {
-        if (__result is not null) return __result;
-        __result = AccessTools.TypeByName(typeName);
-        if (__result is null) return null;
-        var cached = Traverse.Create<Framework.Events.SignalReceiver>()
-            .Field<Dictionary<string, Type>>("cachedType").Value;
-        return cached[typeName] = __result;
+        var Type_GetType = AccessTools.Method(
+            typeof(Type), nameof(Type.GetType), [typeof(string)]);
+        var AccessTools_TypeByName = AccessTools.Method(
+            typeof(AccessTools), nameof(AccessTools.TypeByName), [typeof(string)]);
+        foreach (var instruction in instructions)
+        {
+            if (instruction.OperandIs(Type_GetType))
+            {
+                yield return instruction.Clone(AccessTools_TypeByName);
+            }
+            else
+            {
+                yield return instruction;
+            }
+        }
     }
 
     [HarmonyPrefix]

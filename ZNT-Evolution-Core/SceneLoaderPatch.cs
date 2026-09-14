@@ -363,8 +363,8 @@ internal static class SceneLoaderPatch
 
         private void AddCopy()
         {
-            var move = Traverse.Create(menu).Field<Toggle>("moveButton").Value;
-            var plus = Traverse.Create(menu).Field<Button>("decorPlusButton").Value;
+            var move = menu.MoveButton;
+            var plus = menu.DecorPlusButton;
             var icon = plus.transform.Find("Icon").GetComponent<Image>().sprite;
             var copy = Object.Instantiate(original: move, parent: move.transform.parent);
             copy.name = "Copy Button";
@@ -417,8 +417,7 @@ internal static class SceneLoaderPatch
 
         private void OnObjectMoved(GameObject go, bool isBrush)
         {
-            var move = Traverse.Create(menu).Field<Toggle>("moveButton").Value;
-            var copy = move.transform.parent.Find("Copy Button").GetComponent<Toggle>();
+            var copy = menu.CopyButton;
             copy.isOn = false;
         }
     }
@@ -437,8 +436,7 @@ internal static class SceneLoaderPatch
     {
         var target = __instance.SerializeGameObject;
         target?.ObjectSettings.OnCopy += __instance.OnObjectMoved;
-        var move = Traverse.Create(__instance).Field<Toggle>("moveButton").Value;
-        var copy = move.transform.parent.Find("Copy Button").GetComponent<Toggle>();
+        var copy = __instance.CopyButton;
         copy.isOn = false;
     }
 
@@ -451,7 +449,7 @@ internal static class SceneLoaderPatch
         var container = __instance.MainContainer;
         var target = __instance.SerializeGameObject;
         var updaters = __instance.ComponentsUpdate;
-        var scroll = Traverse.Create(__instance).Field<ScrollRect>("scrollRect").Value;
+        var scroll = __instance.ScrollRect;
         var empty = __instance.transform.Find("Empty") as RectTransform;
 
         foreach (var transform in container.Cast<RectTransform>())
@@ -580,13 +578,12 @@ internal static class SceneLoaderPatch
     {
         if (Input.GetKey(KeyCode.Escape))
         {
-            var move = Traverse.Create(__instance).Field<Toggle>("moveButton").Value;
-            var panel = move.transform.parent;
+            var panel = __instance.MoveButton.transform.parent;
             foreach (var trigger in panel.GetComponentsInChildren<Toggle>()) trigger.isOn = false;
         }
         else if (Input.GetKey(KeyCode.Delete))
         {
-            var delete = Traverse.Create(__instance).Field<Button>("deleteButton").Value;
+            var delete = __instance.DeleteButton;
             delete.onClick.Invoke();
         }
     }

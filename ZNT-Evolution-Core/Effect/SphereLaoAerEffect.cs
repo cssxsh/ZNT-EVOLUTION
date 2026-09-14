@@ -1,5 +1,4 @@
 using BepInEx.Logging;
-using HarmonyLib;
 using Newtonsoft.Json;
 using UnityEngine;
 using BepInExLogger = BepInEx.Logging.Logger;
@@ -40,16 +39,10 @@ public class SphereLaoAerEffect : TriggerEffect
         if (_human is null) return;
         var corpse = target.GetComponent<CorpseBehaviour>();
         if (corpse is null) return;
-        // var parameters = Traverse.Create(corpse).Field<CorpseParameter>("parameters").Value;
-        // if (parameters.Rise) return;
         var corpses = CorpseBehaviour.AliveCorpses;
         if (corpses.Contains(corpse)) return;
         if (_human.Attacker.IsInAttackRange(target.transform))
         {
-            // var dialogue = ComponentSingleton<GamePoolManager>.Instance
-            //     .Spawn(nameof(Dialogue)).GetComponent<Dialogue>();
-            // dialogue.SetText(new LocalizableString { Localize = false, Content = $"高达 {_nearest.transform.position}" }, 5.0f);
-            // dialogue.Show(_human.Patroller, _human.Patroller.DialogueOffset, Voice.None);
             // TODO Handle Corpse
             corpse.StopAllCoroutines();
             corpse.Dissolve();
@@ -70,7 +63,7 @@ public class SphereLaoAerEffect : TriggerEffect
         if (_nearest is null) return;
         _human ??= GetComponentInParent<HumanBehaviour>();
         if (_human.State is not BehaviourState.Idle) return;
-        Traverse.Create(_human).Method("MoveToTarget", _nearest.transform).GetValue();
+        _human.MoveToTarget(_nearest.transform);
     }
 
     protected override bool OverrideExecutionMode(out Execution.Mode mode)
