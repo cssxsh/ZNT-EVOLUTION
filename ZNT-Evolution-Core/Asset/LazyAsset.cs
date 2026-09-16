@@ -49,6 +49,7 @@ internal class LazyAsset : CustomAssetObject
         public override object ReadJson(JsonReader reader, Type type, object _, JsonSerializer serializer)
         {
             var key = serializer.Deserialize<string>(reader);
+            if (key is null) return null;
             if (CustomAssetUtility.Cache.TryGetValue(key, out var value)) return value;
             var lazy = CreateInstance<LazyAsset>();
             lazy.name = member.Name;
