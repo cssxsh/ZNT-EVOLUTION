@@ -45,13 +45,13 @@ public class LayerEditor : Editor, IEditorOverride
         switch (member.Name)
         {
             case nameof(Main):
-                menu.ListBinder().BindIndexListField(component, member, names.ToArray());
+                menu.ListBinder().BindIndexListField(component, member, [.. names]);
                 return true;
             case nameof(Top):
-                if (TopCollider) menu.ListBinder().BindIndexListField(component, member, names.ToArray());
+                if (TopCollider) menu.ListBinder().BindIndexListField(component, member, [.. names]);
                 return true;
             case nameof(Bottom):
-                if (BottomCollider) menu.ListBinder().BindIndexListField(component, member, names.ToArray());
+                if (BottomCollider) menu.ListBinder().BindIndexListField(component, member, [.. names]);
                 return true;
             default:
                 return false;

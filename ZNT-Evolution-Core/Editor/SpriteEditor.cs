@@ -57,7 +57,7 @@ public class SpriteEditor : Editor, IEditorOverride, IEditorUpdate
 
     [SerializeInEditor(name: "Edit Sprite Collection")]
     [LevelEditorButton(nameof(EditSpriteCollection))]
-    public bool Editing { private set; get; }
+    public bool Editing { get; private set; }
 
     public bool OverrideMemberUi(SelectionMenu menu, EditorComponent component, MemberInfo member)
     {
@@ -76,7 +76,7 @@ public class SpriteEditor : Editor, IEditorOverride, IEditorUpdate
                     from clip in Animator.Library.clips
                     where !clip.Empty
                     select clip.name;
-                binder.BindStringListField(component, member, names.ToArray());
+                binder.BindStringListField(component, member, [.. names]);
             }
                 return true;
             case nameof(SpriteDefinition):
@@ -89,7 +89,7 @@ public class SpriteEditor : Editor, IEditorOverride, IEditorUpdate
                     : from frame in Animator.CurrentClip.frames
                     let definition = frame.spriteCollection.spriteDefinitions[frame.spriteId]
                     select definition.name;
-                binder.BindStringListField(component, member, names.ToArray());
+                binder.BindStringListField(component, member, [.. names]);
                 var components = binder.UiComponents;
                 _dropdown = (Dropdown)components[0];
             }
@@ -100,7 +100,7 @@ public class SpriteEditor : Editor, IEditorOverride, IEditorUpdate
                 var names =
                     from layer in SortingLayer.layers
                     select layer.name;
-                binder.BindStringListField(component, member, names.ToArray());
+                binder.BindStringListField(component, member, [.. names]);
             }
                 return true;
         }

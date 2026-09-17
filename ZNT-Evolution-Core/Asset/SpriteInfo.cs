@@ -55,7 +55,7 @@ internal class SpriteInfo : EvolutionInfo<tk2dSpriteCollectionData>
         TargetHeight = targetHeight;
         Names = names;
         Regions = regions;
-        Anchors = anchors ?? Regions.Select(region => anchor ?? (region.size / 2)).ToArray();
+        Anchors = anchors ?? [.. Regions.Select(region => anchor ?? region.size / 2)];
         AttachPoints = points ?? new Dictionary<int, tk2dSpriteDefinition.AttachPoint[]>();
         Material = material;
         Transformed = transformed;

@@ -52,7 +52,7 @@ internal class AnimationAddition : EvolutionAddition<tk2dSpriteAnimation, tk2dSp
         {
             if (animation is null || clip is null) continue;
             if (!animation.clips.Contains(clip)) continue;
-            animation.clips = animation.clips.Where(item => item != clip).ToArray();
+            animation.clips = [.. animation.clips.Where(item => item != clip)];
             Traverse.Create(animation).Field<Dictionary<string, int>>("clipNameCache").Value = null;
         }
 
