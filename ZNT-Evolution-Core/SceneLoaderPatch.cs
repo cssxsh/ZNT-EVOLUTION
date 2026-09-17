@@ -137,196 +137,204 @@ internal static class SceneLoaderPatch
         __instance.AddPluginPanel();
     }
 
-    private static void AddModPanel(this SettingsMenu menu)
+    extension(SettingsMenu menu)
     {
-        var panel = menu.AddPanel("Mod");
-        var reset = panel.Find("Reset Entry/Container/ResetButton").GetComponent<Button>();
-        reset.OnClick(() =>
+        private GameObject[] SettingsContainer
         {
-            Logger.LogInfo("Reloading Mods Folder");
-            HasModChanged = true;
-            reset.StartCoroutine(ModManager.ReloadAll().ToCoroutine(_ => menu.FlushModPanel()));
-        });
-
-        menu.FlushModPanel();
-    }
-
-    private static void FlushModPanel(this SettingsMenu menu)
-    {
-        var fullscreen = (RectTransform)menu.transform
-            .Find("Option Panels/Video/Scroll Area/ScrollView/Content/FullScreen Entry");
-        var content = (RectTransform)menu.transform
-            .Find("Option Panels/Mod/Scroll Area/ScrollView/Content");
-        content.DestroyChildren();
-        foreach (var context in ModContext.Allocated())
-        {
-            var item = Object.Instantiate(original: fullscreen, parent: content);
-            item.name = $"{context.Metadata.Name} Entry";
-            item.gameObject.SetActive(false);
-            var localize = item.Find("Text").GetComponent<I2.Loc.Localize>();
-            localize.Term = context.GetTermData().Term;
-            localize.gameObject.AddComponent<Button>().onClick.AddListener(() =>
-            {
-                switch (context.Metadata.Link)
-                {
-                    case null or "":
-                        break;
-                    case not null when context.Metadata.Link.StartsWith("steam://"):
-                        Steamworks.SteamFriends.ActivateGameOverlayToWebPage(context.Metadata.Link);
-                        break;
-                    default:
-                        Application.OpenURL(context.Metadata.Link);
-                        break;
-                }
-            });
-            var toggle = item.Find("Toggle").GetComponent<Toggle>();
-            toggle.SetIsOnWithoutNotify(context.State is ModState.Loaded);
-            toggle.OnValueChanged(value =>
-            {
-                switch (value)
-                {
-                    case true when context.IsLoadReady():
-                        toggle.StartCoroutine(context.Load().ToCoroutine(_ =>
-                        {
-                            HasModChanged = true;
-                            toggle.SetIsOnWithoutNotify(context.State is ModState.Loaded);
-                        }));
-                        break;
-                    case false when context.IsUnloadReady():
-                        toggle.StartCoroutine(context.Unload().ToCoroutine(_ =>
-                        {
-                            HasModChanged = true;
-                            toggle.SetIsOnWithoutNotify(context.State is ModState.Loaded);
-                        }));
-                        break;
-                    default:
-                        toggle.SetIsOnWithoutNotify(context.State is ModState.Loaded);
-                        break;
-                }
-            });
-            item.gameObject.SetActive(true);
+            get => Traverse.Create(menu).Field<GameObject[]>("settingsContainer").Value;
+            set => Traverse.Create(menu).Field<GameObject[]>("settingsContainer").Value = value;
         }
-    }
 
-    private static void AddPluginPanel(this SettingsMenu menu)
-    {
-        var panel = menu.AddPanel("Plugin");
-        var reset = (RectTransform)panel.Find("Reset Entry/Container/ResetButton");
-        reset.GetComponent<Button>().OnClick(menu.ResetPluginPanel);
-
-        var content = (RectTransform)menu.transform
-            .Find("Option Panels/Plugin/Scroll Area/ScrollView/Content");
-        var fullscreen = (RectTransform)menu.transform
-            .Find("Option Panels/Video/Scroll Area/ScrollView/Content/FullScreen Entry");
-        var fps = (RectTransform)menu.transform
-            .Find("Option Panels/Video/Scroll Area/ScrollView/Content/Max FPS Entry");
-        foreach (var (_, info) in BepInEx.Bootstrap.Chainloader.PluginInfos)
+        private void AddModPanel()
         {
-            if (!info.Metadata.GUID.Contains("znt")) continue;
-            foreach (var (_, entry) in info.Instance.Config)
+            var panel = menu.AddPanel("Mod");
+            var reset = panel.Find("Reset Entry/Container/ResetButton").GetComponent<Button>();
+            reset.OnClick(() =>
             {
-                var term = _localization.AddTerm($"{info.Metadata.Name}/{entry.Definition}");
-                term.SetTranslation(0, $"[{info.Metadata.Name}] {entry.Description.Description}");
-                if (entry.SettingType == typeof(bool))
+                Logger.LogInfo("Reloading Mods Folder");
+                HasModChanged = true;
+                reset.StartCoroutine(ModManager.ReloadAll().ToCoroutine(_ => menu.FlushModPanel()));
+            });
+
+            menu.FlushModPanel();
+        }
+
+        private void FlushModPanel()
+        {
+            var fullscreen = (RectTransform)menu.transform
+                .Find("Option Panels/Video/Scroll Area/ScrollView/Content/FullScreen Entry");
+            var content = (RectTransform)menu.transform
+                .Find("Option Panels/Mod/Scroll Area/ScrollView/Content");
+            content.DestroyChildren();
+            foreach (var context in ModContext.Allocated())
+            {
+                var item = Object.Instantiate(original: fullscreen, parent: content);
+                item.name = $"{context.Metadata.Name} Entry";
+                item.gameObject.SetActive(false);
+                var localize = item.Find("Text").GetComponent<I2.Loc.Localize>();
+                localize.Term = context.GetTermData().Term;
+                localize.gameObject.AddComponent<Button>().onClick.AddListener(() =>
                 {
-                    var item = Object.Instantiate(original: fullscreen, parent: content);
-                    item.name = $"{info.Metadata.Name} {entry.Definition} Entry";
-                    item.gameObject.SetActive(false);
-                    var localize = item.Find("Text").GetComponent<I2.Loc.Localize>();
-                    localize.Term = term.Term;
-                    var toggle = item.Find("Toggle").GetComponent<Toggle>();
-                    toggle.OnValueChanged(value => entry.BoxedValue = value);
-                    toggle.SetIsOnWithoutNotify((bool)entry.BoxedValue);
-                    item.gameObject.SetActive(true);
-                }
-                else if (entry.SettingType == typeof(int))
+                    switch (context.Metadata.Link)
+                    {
+                        case null or "":
+                            break;
+                        case not null when context.Metadata.Link.StartsWith("steam://"):
+                            Steamworks.SteamFriends.ActivateGameOverlayToWebPage(context.Metadata.Link);
+                            break;
+                        default:
+                            Application.OpenURL(context.Metadata.Link);
+                            break;
+                    }
+                });
+                var toggle = item.Find("Toggle").GetComponent<Toggle>();
+                toggle.SetIsOnWithoutNotify(context.State is ModState.Loaded);
+                toggle.OnValueChanged(value =>
                 {
-                    var item = Object.Instantiate(original: fps, parent: content);
-                    item.name = $"{info.Metadata.Name} {entry.Definition} Entry";
-                    item.gameObject.SetActive(false);
-                    var localize = item.Find("Text").GetComponent<I2.Loc.Localize>();
-                    localize.Term = term.Term;
-                    var canvas = item.Find("Container").GetComponent<CanvasGroup>();
-                    var toggle = item.Find("Container/Toggle").GetComponent<Toggle>();
-                    var input = item.Find("Container/InputField").GetComponent<InputField>();
-                    canvas.interactable = true;
-                    toggle.OnValueChanged(value =>
+                    switch (value)
                     {
-                        entry.BoxedValue = (value ? 0 : int.MinValue) | ((int)entry.BoxedValue & int.MaxValue);
-                        input.interactable = value;
-                    });
-                    toggle.SetIsOnWithoutNotify((int)entry.BoxedValue >= 0);
-                    input.OnEndEdit(value =>
-                    {
-                        if (value is null or "") entry.BoxedValue = entry.DefaultValue;
-                        else entry.SetSerializedValue(value);
-                    });
-                    input.SetTextWithoutNotify(((int)entry.BoxedValue & int.MaxValue).ToString());
-                    input.interactable = toggle.isOn;
-                    item.gameObject.SetActive(true);
-                }
+                        case true when context.IsLoadReady():
+                            toggle.StartCoroutine(context.Load().ToCoroutine(_ =>
+                            {
+                                HasModChanged = true;
+                                toggle.SetIsOnWithoutNotify(context.State is ModState.Loaded);
+                            }));
+                            break;
+                        case false when context.IsUnloadReady():
+                            toggle.StartCoroutine(context.Unload().ToCoroutine(_ =>
+                            {
+                                HasModChanged = true;
+                                toggle.SetIsOnWithoutNotify(context.State is ModState.Loaded);
+                            }));
+                            break;
+                        default:
+                            toggle.SetIsOnWithoutNotify(context.State is ModState.Loaded);
+                            break;
+                    }
+                });
+                item.gameObject.SetActive(true);
             }
         }
-    }
 
-    private static void ResetPluginPanel(this SettingsMenu menu)
-    {
-        var content = (RectTransform)menu.transform
-            .Find("Option Panels/Plugin/Scroll Area/ScrollView/Content");
-        foreach (var (_, info) in BepInEx.Bootstrap.Chainloader.PluginInfos)
+        private void AddPluginPanel()
         {
-            if (!info.Metadata.GUID.Contains("znt")) continue;
-            foreach (var (definition, entry) in info.Instance.Config)
+            var panel = menu.AddPanel("Plugin");
+            var reset = (RectTransform)panel.Find("Reset Entry/Container/ResetButton");
+            reset.GetComponent<Button>().OnClick(menu.ResetPluginPanel);
+
+            var content = (RectTransform)menu.transform
+                .Find("Option Panels/Plugin/Scroll Area/ScrollView/Content");
+            var fullscreen = (RectTransform)menu.transform
+                .Find("Option Panels/Video/Scroll Area/ScrollView/Content/FullScreen Entry");
+            var fps = (RectTransform)menu.transform
+                .Find("Option Panels/Video/Scroll Area/ScrollView/Content/Max FPS Entry");
+            foreach (var (_, info) in BepInEx.Bootstrap.Chainloader.PluginInfos)
             {
-                entry.BoxedValue = entry.DefaultValue;
-                var item = content.Find($"{info.Metadata.Name} {definition} Entry");
-                switch (entry.BoxedValue)
+                if (!info.Metadata.GUID.Contains("znt")) continue;
+                foreach (var (_, entry) in info.Instance.Config)
                 {
-                    case bool value:
+                    var term = _localization.AddTerm($"{info.Metadata.Name}/{entry.Definition}");
+                    term.SetTranslation(0, $"[{info.Metadata.Name}] {entry.Description.Description}");
+                    if (entry.SettingType == typeof(bool))
                     {
+                        var item = Object.Instantiate(original: fullscreen, parent: content);
+                        item.name = $"{info.Metadata.Name} {entry.Definition} Entry";
+                        item.gameObject.SetActive(false);
+                        var localize = item.Find("Text").GetComponent<I2.Loc.Localize>();
+                        localize.Term = term.Term;
                         var toggle = item.Find("Toggle").GetComponent<Toggle>();
-                        toggle.SetIsOnWithoutNotify(value);
+                        toggle.OnValueChanged(value => entry.BoxedValue = value);
+                        toggle.SetIsOnWithoutNotify((bool)entry.BoxedValue);
+                        item.gameObject.SetActive(true);
                     }
-                        break;
-                    case int value:
+                    else if (entry.SettingType == typeof(int))
                     {
+                        var item = Object.Instantiate(original: fps, parent: content);
+                        item.name = $"{info.Metadata.Name} {entry.Definition} Entry";
+                        item.gameObject.SetActive(false);
+                        var localize = item.Find("Text").GetComponent<I2.Loc.Localize>();
+                        localize.Term = term.Term;
+                        var canvas = item.Find("Container").GetComponent<CanvasGroup>();
                         var toggle = item.Find("Container/Toggle").GetComponent<Toggle>();
-                        toggle.SetIsOnWithoutNotify(value >= 0);
                         var input = item.Find("Container/InputField").GetComponent<InputField>();
-                        input.SetTextWithoutNotify((value & int.MaxValue).ToString());
+                        canvas.interactable = true;
+                        toggle.OnValueChanged(value =>
+                        {
+                            entry.BoxedValue = (value ? 0 : int.MinValue) | ((int)entry.BoxedValue & int.MaxValue);
+                            input.interactable = value;
+                        });
+                        toggle.SetIsOnWithoutNotify((int)entry.BoxedValue >= 0);
+                        input.OnEndEdit(value =>
+                        {
+                            if (value is null or "") entry.BoxedValue = entry.DefaultValue;
+                            else entry.SetSerializedValue(value);
+                        });
+                        input.SetTextWithoutNotify(((int)entry.BoxedValue & int.MaxValue).ToString());
                         input.interactable = toggle.isOn;
+                        item.gameObject.SetActive(true);
                     }
-                        break;
                 }
             }
         }
-    }
 
-    private static RectTransform AddPanel(this SettingsMenu menu, string name)
-    {
-        var panels = (RectTransform)menu.transform.Find("Option Panels");
-        var panel = (RectTransform)Object.Instantiate(original: panels.GetChild(0), parent: panels);
-        panel.name = name;
-        panel.gameObject.SetActive(false);
-        panel.Find("Scroll Area/ScrollView/Content").DestroyChildren();
+        private void ResetPluginPanel()
+        {
+            var content = (RectTransform)menu.transform
+                .Find("Option Panels/Plugin/Scroll Area/ScrollView/Content");
+            foreach (var (_, info) in BepInEx.Bootstrap.Chainloader.PluginInfos)
+            {
+                if (!info.Metadata.GUID.Contains("znt")) continue;
+                foreach (var (definition, entry) in info.Instance.Config)
+                {
+                    entry.BoxedValue = entry.DefaultValue;
+                    var item = content.Find($"{info.Metadata.Name} {definition} Entry");
+                    switch (entry.BoxedValue)
+                    {
+                        case bool value:
+                        {
+                            var toggle = item.Find("Toggle").GetComponent<Toggle>();
+                            toggle.SetIsOnWithoutNotify(value);
+                        }
+                            break;
+                        case int value:
+                        {
+                            var toggle = item.Find("Container/Toggle").GetComponent<Toggle>();
+                            toggle.SetIsOnWithoutNotify(value >= 0);
+                            var input = item.Find("Container/InputField").GetComponent<InputField>();
+                            input.SetTextWithoutNotify((value & int.MaxValue).ToString());
+                            input.interactable = toggle.isOn;
+                        }
+                            break;
+                    }
+                }
+            }
+        }
 
-        var container = Traverse.Create(menu).Field<GameObject[]>("settingsContainer");
-        var index = container.Value.Length;
-        container.Value = container.Value.AddToArray(panel.gameObject);
+        private RectTransform AddPanel(string name)
+        {
+            var panels = (RectTransform)menu.transform.Find("Option Panels");
+            var panel = (RectTransform)Object.Instantiate(original: panels.GetChild(0), parent: panels);
+            panel.name = name;
+            panel.gameObject.SetActive(false);
+            panel.Find("Scroll Area/ScrollView/Content").DestroyChildren();
 
-        var tabs = (RectTransform)menu.transform.Find("Option Menu/Tabs");
-        var tab = (RectTransform)Object.Instantiate(original: tabs.GetChild(0), parent: tabs);
-        tab.name = name;
-        tab.GetComponent<Toggle>().OnValueChanged(value => menu.ShowSettings(value ? index : -1));
-        tab.Find("Label").GetComponent<I2.Loc.Localize>().Term = $"Evolution/{name}_Tab";
+            var index = menu.SettingsContainer.Length;
+            menu.SettingsContainer = menu.SettingsContainer.AddToArray(panel.gameObject);
 
-        var reset = (RectTransform)panel.Find("Reset Entry/Container/ResetButton");
-        reset.GetComponent<Button>().OnClick(() => Logger.LogWarning($"{name} reset no define"));
-        reset.Find("Text Hilight").GetComponent<I2.Loc.Localize>().Term = $"Evolution/{name}_Reset";
-        reset.Find("Text Pressed").GetComponent<I2.Loc.Localize>().Term = $"Evolution/{name}_Reset";
-        reset.Find("Text Default").GetComponent<I2.Loc.Localize>().Term = $"Evolution/{name}_Reset";
+            var tabs = (RectTransform)menu.transform.Find("Option Menu/Tabs");
+            var tab = (RectTransform)Object.Instantiate(original: tabs.GetChild(0), parent: tabs);
+            tab.name = name;
+            tab.GetComponent<Toggle>().OnValueChanged(value => menu.ShowSettings(value ? index : -1));
+            tab.Find("Label").GetComponent<I2.Loc.Localize>().Term = $"Evolution/{name}_Tab";
 
-        return panel;
+            var reset = (RectTransform)panel.Find("Reset Entry/Container/ResetButton");
+            reset.GetComponent<Button>().OnClick(() => Logger.LogWarning($"{name} reset no define"));
+            reset.Find("Text Hilight").GetComponent<I2.Loc.Localize>().Term = $"Evolution/{name}_Reset";
+            reset.Find("Text Pressed").GetComponent<I2.Loc.Localize>().Term = $"Evolution/{name}_Reset";
+            reset.Find("Text Default").GetComponent<I2.Loc.Localize>().Term = $"Evolution/{name}_Reset";
+
+            return panel;
+        }
     }
 
     #endregion
@@ -337,9 +345,9 @@ internal static class SceneLoaderPatch
     [HarmonyPatch(typeof(PublishChapterMenu), "SelectDestination")]
     public static void SelectDestination(PublishChapterMenu __instance, int value)
     {
-        Traverse.Create(__instance)
-            .Field<CanvasGroup>("chapterGroup").Value
-            .transform.Find("Visible").gameObject.SetActive(value is 0);
+        __instance
+            .transform.Find("Background/Container/Container/Right/Visible")
+            .gameObject.SetActive(value is 0);
     }
 
     #endregion
@@ -393,19 +401,14 @@ internal static class SceneLoaderPatch
                 var prefab = menu.TypePrefabs[EditorComponent.SupportedType.LocalizableString];
                 var components = prefab.UiComponents;
                 var localizable = (LocalizableStringMenu)components[0];
-                var placeholder = (Text)localizable.ContentField.placeholder;
-                placeholder.text = "Enter text...";
+                localizable.Placeholder.text = "Enter text...";
             }
             {
                 var prefab = menu.TypePrefabs[EditorComponent.SupportedType.TutorialPageList];
                 var components = prefab.UiComponents;
                 var tutorial = (TutorialPageMenu)components[0];
-                var title = Traverse.Create(tutorial).Field<LocalizableStringMenu>("titleMenu").Value;
-                var title_placeholder = (Text)title.ContentField.placeholder;
-                title_placeholder.text = "Enter title...";
-                var text = Traverse.Create(tutorial).Field<LocalizableStringMenu>("textMenu").Value;
-                var text_placeholder = (Text)text.ContentField.placeholder;
-                text_placeholder.text = "Enter text...";
+                tutorial.TitleMenu.Placeholder.text = "Enter title...";
+                tutorial.TextMenu.Placeholder.text = "Enter text...";
             }
         }
 
@@ -597,7 +600,8 @@ internal static class SceneLoaderPatch
             member.Name is nameof(MovingObjectBehaviour.Orientation))
         {
             // Hide for ObjectOrientation.Orientation
-            // __instance.DirectionBinder().BindDirection(component, member);
+            if (component.Data.GetComponent<ObjectOrientation>()) return false;
+            __instance.DirectionBinder().BindDirection(component, member);
             return false;
         }
 
@@ -813,29 +817,28 @@ internal static class SceneLoaderPatch
         }
     }
 
-    private static void AddReceiver(this SignalReceiverLinker linker, ReceiverLink link)
-    {
-        Traverse.Create(linker).Method("AddReceiver", link.Component, link).GetValue();
-    }
-
-    private static void AddSender(this SignalSenderLinker linker, SenderLink link)
-    {
-        Traverse.Create(linker).Method("AddSender", link.Component, link).GetValue();
-    }
-
     [HarmonyPrefix]
     [HarmonyPatch(typeof(PaintMenu), "FilterOnFirstLoad")]
     public static void FilterOnFirstLoad(PaintMenu __instance)
     {
         if (!__instance.gameObject.activeInHierarchy || !HasModChanged) return;
         __instance.StopAllCoroutines();
-        Traverse.Create(__instance)
-            .Field<Dictionary<int, List<ListViewIconsItemDescription>>>("elements").Value.Clear();
-        Traverse.Create(__instance)
-            .Method("FillAccordion").GetValue();
+        __instance.Elements.Clear();
+        __instance.FillAccordion();
         var input = __instance.GetComponentInChildren<InputField>();
         __instance.FilterList(input.text);
         HasModChanged = false;
+    }
+
+    extension(PaintMenu menu)
+    {
+        private Dictionary<int, List<ListViewIconsItemDescription>> Elements =>
+            Traverse.Create(menu).Field<Dictionary<int, List<ListViewIconsItemDescription>>>("elements").Value;
+
+        private void FillAccordion()
+        {
+            Traverse.Create(menu).Method("FillAccordion").GetValue();
+        }
     }
 
     [HarmonyPrefix]
@@ -893,12 +896,19 @@ internal static class SceneLoaderPatch
         EvolutionSettings.Instance.Bind();
     }
 
+    extension(LevelSettingsMenu menu)
+    {
+        private Spinner MaxZombieSpinner => Traverse.Create(menu).Field<Spinner>("maxZombieSpinner").Value;
+
+        private Spinner MaxEnemySpinner => Traverse.Create(menu).Field<Spinner>("maxEnemySpinner").Value;
+    }
+
     [HarmonyPrefix]
     [HarmonyPatch(typeof(LevelSettingsMenu), "InitGeneralSettings")]
     public static void InitGeneralSettings(LevelSettingsMenu __instance)
     {
-        Traverse.Create(__instance).Field<Spinner>("maxZombieSpinner").Value.Max = short.MaxValue;
-        Traverse.Create(__instance).Field<Spinner>("maxEnemySpinner").Value.Max = short.MaxValue;
+        __instance.MaxZombieSpinner.Max = short.MaxValue;
+        __instance.MaxEnemySpinner.Max = short.MaxValue;
     }
 
     [HarmonyTranspiler]
@@ -907,11 +917,11 @@ internal static class SceneLoaderPatch
     {
         foreach (var instruction in instructions)
         {
-            if (instruction.OperandIs(5f))
+            if (instruction.OperandIs(GameConf.MinZoom))
             {
                 yield return instruction.Clone(0.5f);
             }
-            else if (instruction.OperandIs(50f))
+            else if (instruction.OperandIs(GameConf.MaxZoom))
             {
                 yield return instruction.Clone(200f);
             }

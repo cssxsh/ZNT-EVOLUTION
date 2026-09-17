@@ -390,7 +390,7 @@ public static class BaseComponentExtensions
             Traverse.Create(menu).Field<Button>("decorPlusButton").Value;
 
         [UsedImplicitly]
-        private Button DecorToFrontButton =>
+        public Button DecorToFrontButton =>
             Traverse.Create(menu).Field<Button>("decorToFrontButton").Value;
 
         [UsedImplicitly]
@@ -451,6 +451,36 @@ public static class BaseComponentExtensions
 
         [UsedImplicitly]
         public InputField ContentField => Traverse.Create(localizable).Field<InputField>("contentField").Value;
+
+        [UsedImplicitly]
+        public Text Placeholder => (Text)localizable.ContentField.placeholder;
+    }
+
+    extension(TutorialPageMenu page)
+    {
+        [UsedImplicitly]
+        public LocalizableStringMenu TitleMenu =>
+            Traverse.Create(page).Field<LocalizableStringMenu>("titleMenu").Value;
+
+        [UsedImplicitly]
+        public LocalizableStringMenu TextMenu =>
+            Traverse.Create(page).Field<LocalizableStringMenu>("textMenu").Value;
+    }
+
+    extension(SignalReceiverLinker linker)
+    {
+        public void AddReceiver(ReceiverLink link)
+        {
+            Traverse.Create(linker).Method("AddReceiver", link.Component, link).GetValue();
+        }
+    }
+
+    extension(SignalSenderLinker linker)
+    {
+        public void AddSender(SenderLink link)
+        {
+            Traverse.Create(linker).Method("AddSender", link.Component, link).GetValue();
+        }
     }
 
     extension(WeatherRain weather)
@@ -501,11 +531,8 @@ public static class BaseComponentExtensions
     extension(TutorialScreen screen)
     {
         [UsedImplicitly]
-        public int NewsCount
-        {
-            get => Traverse.Create(screen).Field<int>("newsCount").Value;
-            set => Traverse.Create(screen).Field<int>("newsCount").Value = value;
-        }
+        public int NewsCount =>
+            Traverse.Create(screen).Field<int>("newsCount").Value;
 
         [UsedImplicitly]
         public RectTransform NewsContainer =>
@@ -522,7 +549,6 @@ public static class BaseComponentExtensions
         [UsedImplicitly]
         public Dictionary<string, TMPro.TextMeshProUGUI> CurrentNews =>
             Traverse.Create(screen).Field<Dictionary<string, TMPro.TextMeshProUGUI>>("currentNews").Value;
-
 
         [UsedImplicitly]
         public void AddScrollRecycler(RectTransform target)
