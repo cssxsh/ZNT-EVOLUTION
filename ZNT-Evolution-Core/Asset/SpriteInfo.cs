@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using BepInEx.Logging;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
@@ -86,7 +87,7 @@ internal class SpriteInfo : EvolutionInfo<tk2dSpriteCollectionData>
             anchors: anchors
         );
 
-        impl.name = Name ?? Material.name.Replace("_mat", "");
+        impl.name = Name ?? Regex.Replace(Material.name, "_mat$", "");
         impl.material = Material;
         impl.materials[0] = Material;
         foreach (var definition in impl.spriteDefinitions) definition.material = Material;

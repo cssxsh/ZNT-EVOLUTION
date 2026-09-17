@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using BepInEx.Logging;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
@@ -36,7 +37,7 @@ internal class SpriteMerge : EvolutionMerge<tk2dSpriteCollectionData>
     {
         var clone = Object.Instantiate(Source);
 
-        clone.name = Name ?? Material.name.Replace("_mat", "");
+        clone.name = Name ?? Regex.Replace(Material.name, "_mat$", "");
         clone.material = Material;
         clone.materials[0] = Material;
         clone.textures[0] = Material.mainTexture;
