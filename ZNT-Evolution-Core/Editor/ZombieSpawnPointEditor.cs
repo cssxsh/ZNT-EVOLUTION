@@ -125,7 +125,7 @@ public class ZombieSpawnPointEditor : CharacterSpawnPointEditor, IEditorOverride
         // ReSharper disable once InvertIf
         if (SelectedMutations().Any())
         {
-            mutations = SelectedMutations().ToArray();
+            mutations = [.. SelectedMutations()];
             Spawn.Event<UnityEvent>("OnSpawn").AddListener(RandomMutation);
             RandomMutation();
         }
