@@ -162,7 +162,7 @@ public static class LevelElementLoader
             var filename = Path.GetFileName(file);
             var visual = DeserializeObject<CustomVisualEffect>(folder: path, file: file);
             Logger.LogDebug($"{filename} -> {visual}");
-            visual.Bind();
+            _ = visual.Bind();
         }
 
         var brush = bundle.LoadAsset<Rotorz.Tile.OrientedBrush>("brush")
@@ -245,8 +245,7 @@ public static class LevelElementLoader
                         impl.Brush.name = $"brush_{impl.name}";
                         impl.CustomAsset = clone;
 
-                        var i = impl.Bind();
-                        Logger.LogInfo($"LevelElement {i} - {impl.Title} Loaded");
+                        if (impl.Bind()) Logger.LogInfo($"LevelElement {impl.AssetId} - {impl.Title} Loaded");
                     }
 
                     UnityEngine.Object.Destroy(decor);
@@ -324,8 +323,7 @@ public static class LevelElementLoader
             Logger.LogWarning($"Prefab {prefab.gameObject} != {variation}");
         }
 
-        var id = element.Bind();
-        Logger.LogInfo($"LevelElement {id} - {element.Title} Loaded");
+        if (element.Bind()) Logger.LogInfo($"LevelElement {element.AssetId} - {element.Title} Loaded");
     }
 
     private static void LoadDecorFromFolder(this AssetBundle bundle, string path)
@@ -349,15 +347,13 @@ public static class LevelElementLoader
             if (element.Brush)
             {
                 var brush = element.DecorToBrush();
-                var id = brush.Bind();
-                Logger.LogInfo($"LevelElement {id} - {brush} Loaded");
+                if (brush.Bind()) Logger.LogInfo($"LevelElement {brush.AssetId} - {brush} Loaded");
             }
 
             // ReSharper disable once ConvertIfStatementToSwitchStatement
             if (element is { DecorType: LevelElement.DecorStyle.Animated })
             {
-                var id = element.Bind();
-                Logger.LogInfo($"LevelElement {id} - {element} Loaded");
+                if (element.Bind()) Logger.LogInfo($"LevelElement {element.AssetId} - {element} Loaded");
                 return;
             }
 
@@ -375,8 +371,7 @@ public static class LevelElementLoader
                     Logger.LogWarning($"WrapMode Of {material.mainTexture} Is {material.mainTexture.wrapMode}");
                 }
 
-                var id = element.Bind();
-                Logger.LogInfo($"LevelElement {id} - {element} Loaded");
+                if (element.Bind()) Logger.LogInfo($"LevelElement {element.AssetId} - {element} Loaded");
                 return;
             }
 
@@ -387,8 +382,7 @@ public static class LevelElementLoader
                 impl.name = string.Format(element.name, index + 1, sprites.name);
                 impl.Title = string.Format(element.Title, index + 1, sprites.spriteDefinitions[index].name);
 
-                var id = impl.Bind();
-                Logger.LogInfo($"LevelElement {id} - {impl.Title} Loaded");
+                if (impl.Bind()) Logger.LogInfo($"LevelElement {impl.AssetId} - {impl.Title} Loaded");
             }
 
             UnityEngine.Object.Destroy(element);
@@ -401,8 +395,7 @@ public static class LevelElementLoader
             var element = DeserializeObject<LevelElement>(folder: path, file: "element.json");
             Logger.LogDebug($"element.json -> {element} to {element.Title}");
 
-            var id = element.Bind();
-            Logger.LogInfo($"LevelElement {id} - {element.Title} Loaded");
+            if (element.Bind()) Logger.LogInfo($"LevelElement {element.AssetId} - {element.Title} Loaded");
         }
     }
 

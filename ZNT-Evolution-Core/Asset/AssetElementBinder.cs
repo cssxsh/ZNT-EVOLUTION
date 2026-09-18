@@ -54,7 +54,7 @@ public static class AssetElementBinder
         }
     }
 
-    public static string Bind(this AssetElement asset)
+    public static bool Bind(this AssetElement asset)
     {
         if (asset.AssetId is null or "") asset.SetAssetId(asset.name);
         lock (AssetElementIndex.IndexPath)
@@ -62,27 +62,29 @@ public static class AssetElementBinder
             switch (asset)
             {
                 case LevelElement element:
+                    if (LevelElementIndex.Index.Elements.ContainsKey(element.AssetId)) return false;
                     LevelElementIndex.Index.AddAssetElement(element);
-                    break;
+                    return true;
                 case FMODAsset fmod:
+                    if (FmodAssetIndex.Index.Elements.ContainsKey(fmod.AssetId)) return false;
                     FmodAssetIndex.Index.AddAssetElement(fmod);
                     FmodAssetIndex.PathIndex.TryAdd(fmod.path, fmod);
-                    break;
+                    return true;
                 case VisualEffect effect:
+                    if (VisualEffectIndex.Index.Elements.ContainsKey(effect.AssetId)) return false;
                     VisualEffectIndex.Index.AddAssetElement(effect);
-                    break;
+                    return true;
                 case ShaderAnimator animator:
+                    if (ShaderAnimatorIndex.Index.Elements.ContainsKey(animator.AssetId)) return false;
                     ShaderAnimatorIndex.Index.AddAssetElement(animator);
-                    break;
+                    return true;
                 default:
                     throw new NotSupportedException($"Bind: {asset}");
             }
         }
-
-        return asset.AssetId;
     }
 
-    public static int Bind(this TMPro.TMP_Asset asset)
+    public static bool Bind(this TMPro.TMP_Asset asset)
     {
         if (asset.hashCode is 0) asset.hashCode = TMPro.TMP_TextUtilities.GetSimpleHashCode(asset.name);
         lock (TMPro.MaterialReferenceManager.instance)
@@ -90,19 +92,21 @@ public static class AssetElementBinder
             switch (asset)
             {
                 case TMPro.TMP_FontAsset font:
+                    if (TMPro.MaterialReferenceManager.instance.Contains(font)) return false;
                     TMPro.MaterialReferenceManager.AddFontAsset(font);
                     TMPro.TMP_Settings.fallbackFontAssets.RemoveAll(f => f is null);
                     TMPro.TMP_Settings.fallbackFontAssets.Add(font);
-                    break;
+                    return true;
                 case TMPro.TMP_SpriteAsset emoji:
+                    if (TMPro.MaterialReferenceManager.instance.Contains(emoji)) return false;
                     TMPro.MaterialReferenceManager.AddSpriteAsset(emoji);
-                    if (emoji.hashCode is not 160120832) break;
-                    TMPro.TMP_Settings.SetDefaultSpriteAsset(emoji);
-                    break;
+                    // bilibili
+                    if (emoji.hashCode is 160120832) TMPro.TMP_Settings.SetDefaultSpriteAsset(emoji);
+                    return true;
+                default:
+                    throw new NotSupportedException($"Bind: {asset}");
             }
         }
-
-        return asset.hashCode;
     }
 
     public static void Unbind(this AssetElement asset)
