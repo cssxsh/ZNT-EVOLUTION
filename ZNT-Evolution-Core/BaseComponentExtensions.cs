@@ -207,6 +207,27 @@ public static class BaseComponentExtensions
     extension(Moveable mover)
     {
         [UsedImplicitly]
+        public float WalkSpeed
+        {
+            get => Traverse.Create(mover).Field<float>("walkSpeed").Value;
+            set => Traverse.Create(mover).Field<float>("walkSpeed").Value = value;
+        }
+
+        [UsedImplicitly]
+        public float RunSpeed
+        {
+            get => Traverse.Create(mover).Field<float>("runSpeed").Value;
+            set => Traverse.Create(mover).Field<float>("runSpeed").Value = value;
+        }
+
+        [UsedImplicitly]
+        public float SprintSpeed
+        {
+            get => Traverse.Create(mover).Field<float>("sprintSpeed").Value;
+            set => Traverse.Create(mover).Field<float>("sprintSpeed").Value = value;
+        }
+
+        [UsedImplicitly]
         public void SetGroundLayers(LayerMask value)
         {
             Traverse.Create(mover).Field<LayerMask>("groundLayers").Value = value;

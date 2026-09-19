@@ -133,6 +133,27 @@ public class HumanEditor : CharacterEditor
         set => Behaviour.Stopper.Initialize(Behaviour.Stopper.BlockOpponents, value, Behaviour.OnStopperBreak);
     }
 
+    [SerializeInEditor(name: "Walk Speed")]
+    public float WalkSpeed
+    {
+        get => Behaviour.Mover.WalkSpeed;
+        set => Behaviour.Mover.WalkSpeed = value;
+    }
+
+    [SerializeInEditor(name: "Run Speed")]
+    public float RunSpeed
+    {
+        get => Behaviour.Mover.RunSpeed;
+        set => Behaviour.Mover.RunSpeed = value;
+    }
+
+    [SerializeInEditor(name: "Sprint Speed")]
+    public float SprintSpeed
+    {
+        get => Behaviour.Mover.SprintSpeed;
+        set => Behaviour.Mover.SprintSpeed = value;
+    }
+
     private void OnDespawned()
     {
         foreach (var (_, buff) in Buffs) buff.Remove(Character);
