@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -38,13 +37,6 @@ internal static class CustomAssetObjectPatch
         {
             explosion.AutoExplode = auto;
         }
-    }
-
-    private static void DespawnBy(this AnimationDespawner despawn, AnimationSettings animation)
-    {
-        if (animation is null) return;
-        Traverse.Create(despawn).Field<AnimationEventHandler>("eventHandler").Value?
-            .RegisterEndEvent(animation, despawn.Delegate<Action>("Despawn"));
     }
 
     [HarmonyPrefix]
@@ -205,7 +197,7 @@ internal static class CustomAssetObjectPatch
             __instance.HitAnimation.Contains('{') ||
             __instance.DestroyAnimation.Contains('{'))
         {
-            controller.Asset = UnityEngine.Object.Instantiate(__instance);
+            controller.Asset = Object.Instantiate(__instance);
         }
 
         behaviour.Orientation = behaviour.Orientation;
@@ -279,7 +271,7 @@ internal static class CustomAssetObjectPatch
     public static void OnDespawned(MovingObjectBehaviour __instance)
     {
         var controller = (MovingObjectAnimationController)__instance.AnimationController;
-        if (controller.Asset.name.EndsWith("(Clone)")) UnityEngine.Object.Destroy(controller.Asset);
+        if (controller.Asset.name.EndsWith("(Clone)")) Object.Destroy(controller.Asset);
     }
 
     #endregion
@@ -523,11 +515,7 @@ internal static class CustomAssetObjectPatch
     [HarmonyPatch(typeof(EffectManager), "GetEffect")]
     public static void GetEffect(EffectManager __instance, VisualEffect effect, Transform __result)
     {
-        if (effect is not CustomVisualEffect custom) return;
-        var despawn = __result.GetComponent<AnimationDespawner>();
-        if (despawn) despawn.DespawnBy(custom.animation);
-        var animator = __result.GetComponent<SpriteAnimator>();
-        if (animator) animator.ForcePlay(custom.animation);
+        if (effect is CustomVisualEffect custom) custom.Populate(__result);
     }
 
     #endregion
@@ -555,7 +543,7 @@ internal static class CustomAssetObjectPatch
         var prefab = __instance.NewsPrefab;
         var container = __instance.NewsContainer;
         current.Clear();
-        foreach (var line in news.OrderBy(_ => UnityEngine.Random.value))
+        foreach (var line in news.OrderBy(_ => Random.value))
         {
             if (current.ContainsKey(line.Content)) continue;
             var target = ComponentSingleton<GamePoolManager>.Instance.Spawn(prefab);

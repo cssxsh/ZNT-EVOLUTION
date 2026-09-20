@@ -449,6 +449,7 @@
         <Compile Include="Editor\StairEditor.cs"/>
         <Compile Include="Editor\TutorialBreakingNews.cs"/>
         <Compile Include="Effect\CharacterAllocationEffect.cs"/>
+        <Compile Include="Editor\VisualEffectAnimationController.cs" />
         <Compile Include="Editor\ZombieSpawnPointEditor.cs"/>
         <Compile Include="Effect\CharacterBuff.cs"/>
         <Compile Include="Effect\DialogueEffect.cs"/>
