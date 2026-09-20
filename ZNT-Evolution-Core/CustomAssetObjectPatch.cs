@@ -147,20 +147,6 @@ internal static class CustomAssetObjectPatch
         }
     }
 
-    private static void PlayActivate(this SceneVisualEffect behaviour)
-    {
-        if (behaviour.GetComponent<AssetComponent>() is not { Asset: DecorAsset asset }) return;
-        if (asset.ActivateAnimation is null or "") return;
-        behaviour.Tk2dAnimator.Play(asset.ActivateAnimation);
-    }
-
-    private static void PlayDeactivate(this SceneVisualEffect behaviour)
-    {
-        if (behaviour.GetComponent<AssetComponent>() is not { Asset: DecorAsset asset }) return;
-        if (asset.DeactivateAnimation is null or "") return;
-        behaviour.Tk2dAnimator.Play(asset.DeactivateAnimation);
-    }
-
     #endregion
 
     #region TriggerAsset

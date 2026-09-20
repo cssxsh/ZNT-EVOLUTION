@@ -348,6 +348,17 @@ public static class BaseComponentExtensions
         public CorpseParameter Parameters => Traverse.Create(behaviour).Field<CorpseParameter>("parameters").Value;
     }
 
+    extension(SceneVisualEffect behaviour)
+    {
+        private DecorAsset Asset => behaviour.GetComponent<AssetComponent>()?.Asset as DecorAsset;
+
+        [UsedImplicitly]
+        public void PlayActivate() => behaviour.Tk2dAnimator.Play(behaviour.Asset?.ActivateAnimation);
+
+        [UsedImplicitly]
+        public void PlayDeactivate() => behaviour.Tk2dAnimator.Play(behaviour.Asset?.DeactivateAnimation);
+    }
+
     extension(SelectionMenu menu)
     {
         [UsedImplicitly]
