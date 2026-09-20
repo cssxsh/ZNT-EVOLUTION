@@ -62,6 +62,7 @@ internal static class StartManagerPatch
         yield return CustomAssetUtility.LoadBuildIn<GameObject>(HandleAsset);
         yield return CustomAssetUtility.LoadPatch<Shader>(HandlePatch);
         yield return CustomAssetUtility.LoadPatch<TMPro.TMP_Asset>(HandlePatch);
+        yield return CustomAssetUtility.LoadPatch<TextAsset>(HandlePatch);
         AnimationPatch.Apply();
         InvisibleShield.PoolPrefab();
         SphereBuffEffect.PoolPrefab();
@@ -419,6 +420,12 @@ internal static class StartManagerPatch
                 Logger.LogInfo($"Loaded Patch {emoji}");
                 break;
         }
+    }
+
+    private static void HandlePatch(TextAsset asset)
+    {
+        FMODUnity.RuntimeManager.LoadBank(asset);
+        Logger.LogInfo($"Loaded Patch {asset}");
     }
 
     private static IEnumerator LoadBank()

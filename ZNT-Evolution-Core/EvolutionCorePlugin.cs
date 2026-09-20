@@ -26,5 +26,6 @@ public class EvolutionCorePlugin : BaseUnityPlugin
         Harmony.PatchAll(typeof(SnakeFeetPatch));
         Harmony.PatchAll(typeof(TextAssetPatch));
         Harmony.PatchAll(typeof(PublishManagerPatch));
+        Harmony.PatchAll(typeof(SoundManagerPatch));
     }
 }

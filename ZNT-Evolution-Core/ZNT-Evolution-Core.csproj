@@ -396,6 +396,7 @@
         <Compile Include="PublishManagerPatch.cs"/>
         <Compile Include="SceneLoaderPatch.cs"/>
         <Compile Include="SnakeFeetPatch.cs"/>
+        <Compile Include="SoundManagerPatch.cs"/>
         <Compile Include="StartManagerPatch.cs"/>
         <Compile Include="TextAssetPatch.cs"/>
         <Compile Include="Asset\AnimationAddition.cs"/>
@@ -425,6 +426,7 @@
         <Compile Include="Asset\ObjectConverter.cs"/>
         <Compile Include="Asset\PreviewInfo.cs"/>
         <Compile Include="Asset\RectConverter.cs"/>
+        <Compile Include="Asset\SoundAsset.cs"/>
         <Compile Include="Asset\SpawnPointAsset.cs"/>
         <Compile Include="Asset\SpriteExtractor.cs"/>
         <Compile Include="Asset\SpriteInfo.cs"/>

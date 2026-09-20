@@ -79,7 +79,7 @@ public class ModContext
 
     public readonly ManualLogSource Logger;
 
-    public ModState State { private set; get; }
+    public ModState State { get; private set; }
 
     public readonly I2.Loc.LanguageSourceData Localization;
 
@@ -318,6 +318,13 @@ public class ModContext
                 Logger.LogDebug($"{resource.Path} -> bank:/{bank.name}");
             }
                 break;
+            // Sound File
+            case { Format: "wav" or "mp3" or "ogg" or "fsb" }:
+            {
+                var sound = ReadSound(resource.Name, resource.Path, buffer.ToArray());
+                Logger.LogDebug($"{resource.Path} -> {sound.path}");
+            }
+                break;
             // UnityEngine.Texture2D
             case { Format: "tga" or "png" or "exr", Type: "" }:
             {
@@ -517,6 +524,16 @@ public class ModContext
         Acquire(bank);
         bank.data = null;
         return bank;
+    }
+
+    private SoundAsset ReadSound(string name, string path, byte[] input)
+    {
+        var asset = ScriptableObject.CreateInstance<SoundAsset>();
+        asset.name = name;
+        asset.id = asset.path = $"file://{Metadata.Id}/{path}";
+        asset.CreateSound(input);
+        Acquire(asset);
+        return asset;
     }
 
     #endregion
@@ -785,6 +802,10 @@ public class ModContext
                 bank.Load();
                 Logger.LogInfo($"Fetch FMODAsset from {bank.Path}");
                 break;
+            case FMODAsset fmod:
+                _ = fmod.Bind();
+                Logger.LogInfo($"Bind FMODAsset {fmod.path}");
+                break;
             case VisualEffect visual:
                 _ = visual.Bind();
                 Logger.LogInfo($"Bind VisualEffect {visual.AssetId} - {visual.name}");
@@ -819,6 +840,10 @@ public class ModContext
             case BankAsset bank:
                 bank.UnLoad();
                 Logger.LogInfo($"Clear FMODAsset from {bank.Path}");
+                break;
+            case FMODAsset fmod:
+                fmod.Unbind();
+                Logger.LogInfo($"Unbind FMODAsset {fmod.path}");
                 break;
             case VisualEffect visual:
                 visual.Unbind();
