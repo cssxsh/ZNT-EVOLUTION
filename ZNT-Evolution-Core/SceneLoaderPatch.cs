@@ -819,24 +819,67 @@ internal static class SceneLoaderPatch
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(PaintMenu), "FilterOnFirstLoad")]
-    public static void FilterOnFirstLoad(PaintMenu __instance)
+    public static bool FilterOnFirstLoad(PaintMenu __instance)
     {
-        if (!__instance.gameObject.activeInHierarchy || !HasModChanged) return;
-        __instance.StopAllCoroutines();
-        __instance.Elements.Clear();
-        __instance.FillAccordion();
-        var input = __instance.GetComponentInChildren<InputField>();
+        if (!HasModChanged ||
+            !__instance.gameObject.activeInHierarchy ||
+            !ComponentSingleton<LevelEditorUi>.Instance.LevelEditor) return true;
+        var input = __instance.transform.Find("Filter").GetComponent<InputField>();
+        __instance.FlushAccordion();
         __instance.FilterList(input.text);
+        __instance.FirstLoad = false;
         HasModChanged = false;
+        return false;
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(PaintMenu), "FilterList", typeof(KeyValuePair<int, ListViewIcons>), typeof(string))]
+    public static IEnumerator FilterList(
+        IEnumerator __result,
+        PaintMenu __instance,
+        KeyValuePair<int, ListViewIcons> listView,
+        string formattedFilter)
+    {
+        var descriptions = __instance.Elements[listView.Key];
+        var item = __instance.AccordionItems[listView.Key];
+        var opened = false;
+        var list = listView.Value;
+        // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
+        foreach (var description in descriptions)
+        {
+            // ReSharper disable once InvertIf
+            if (description.Name.IndexOf(formattedFilter, System.StringComparison.InvariantCultureIgnoreCase) >= 0)
+            {
+                list.Add(description);
+                item.SetActive(true);
+                opened |= __instance.AccordionItems.Values.Any(i => i.Open);
+                if (!opened) __instance.BrushList.Open(item);
+                opened = true;
+                yield return null;
+            }
+        }
     }
 
     extension(PaintMenu menu)
     {
+        private Accordion BrushList =>
+            Traverse.Create(menu).Field<Accordion>("brushList").Value;
+
+        private bool FirstLoad
+        {
+            set => Traverse.Create(menu).Field<bool>("firstLoad").Value = value;
+        }
+
         private Dictionary<int, List<ListViewIconsItemDescription>> Elements =>
             Traverse.Create(menu).Field<Dictionary<int, List<ListViewIconsItemDescription>>>("elements").Value;
 
-        private void FillAccordion()
+        private Dictionary<int, AccordionItem> AccordionItems =>
+            Traverse.Create(menu).Field<Dictionary<int, AccordionItem>>("accordionItems").Value;
+
+        private void FlushAccordion()
         {
+            menu.StopAllCoroutines();
+            menu.Elements.Clear();
             Traverse.Create(menu).Method("FillAccordion").GetValue();
         }
     }
