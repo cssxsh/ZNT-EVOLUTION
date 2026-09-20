@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using HarmonyLib;
 using UnityEngine;
 
 namespace ZNT.Evolution.Core.Editor;
@@ -14,50 +13,46 @@ public class OneWayEditor : Editor, IActivable, IDeserializable
 
     private OneWayCollider Wall => field ??= GetComponent<OneWayCollider>();
 
-    private BoxCollider2D Collider => field ??= Traverse.Create(Wall).Field<BoxCollider2D>("collider").Value;
-
-    private PlatformEffector2D Effector => field ??= Traverse.Create(Wall).Field<PlatformEffector2D>("effector").Value;
-
     [SerializeInEditor(name: "Type")]
     public WallType Type
     {
-        get => Traverse.Create(Wall).Property<WallType>("Type").Value;
-        set => Traverse.Create(Wall).Property<WallType>("Type").Value = value;
+        get => Wall.Type;
+        set => Wall.Type = value;
     }
 
     [SerializeInEditor(name: "Block From")]
     public Orientation Orientation
     {
-        get => Traverse.Create(Wall).Field<Orientation>("orientation").Value;
+        get => Wall.Orientation;
         set
         {
             switch (value)
             {
                 case Orientation.Left:
-                    Effector.gameObject.layer = LayerMask.NameToLayer("One Way");
-                    Effector.rotationalOffset = Vector2.SignedAngle(Vector2.up, Vector2.left);
-                    Traverse.Create(Wall).Field<Vector2>("direction").Value = Vector2.left;
+                    Wall.Effector.gameObject.layer = LayerMask.NameToLayer("One Way");
+                    Wall.Effector.rotationalOffset = Vector2.SignedAngle(Vector2.up, Vector2.left);
+                    Wall.SetDirection(Vector2.left);
                     break;
                 case Orientation.Right:
-                    Effector.gameObject.layer = LayerMask.NameToLayer("One Way");
-                    Effector.rotationalOffset = Vector2.SignedAngle(Vector2.up, Vector2.right);
-                    Traverse.Create(Wall).Field<Vector2>("direction").Value = Vector2.right;
+                    Wall.Effector.gameObject.layer = LayerMask.NameToLayer("One Way");
+                    Wall.Effector.rotationalOffset = Vector2.SignedAngle(Vector2.up, Vector2.right);
+                    Wall.SetDirection(Vector2.right);
                     break;
                 case Orientation.Up:
-                    Effector.gameObject.layer = LayerMask.NameToLayer("Stairs Top");
-                    Effector.rotationalOffset = Vector2.SignedAngle(Vector2.up, Vector2.up);
-                    Traverse.Create(Wall).Field<Vector2>("direction").Value = Vector2.up;
+                    Wall.Effector.gameObject.layer = LayerMask.NameToLayer("Stairs Top");
+                    Wall.Effector.rotationalOffset = Vector2.SignedAngle(Vector2.up, Vector2.up);
+                    Wall.SetDirection(Vector2.up);
                     break;
                 case Orientation.Down:
-                    Effector.gameObject.layer = LayerMask.NameToLayer("One Way");
-                    Effector.rotationalOffset = Vector2.SignedAngle(Vector2.up, Vector2.down);
-                    Traverse.Create(Wall).Field<Vector2>("direction").Value = Vector2.down;
+                    Wall.Effector.gameObject.layer = LayerMask.NameToLayer("One Way");
+                    Wall.Effector.rotationalOffset = Vector2.SignedAngle(Vector2.up, Vector2.down);
+                    Wall.SetDirection(Vector2.down);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(Orientation), value, null);
             }
 
-            Traverse.Create(Wall).Field<Orientation>("orientation").Value = value;
+            Wall.Orientation = value;
         }
     }
 
@@ -71,12 +66,12 @@ public class OneWayEditor : Editor, IActivable, IDeserializable
 
     private void OnEnable()
     {
-        Cache[Collider] = Wall;
+        Cache[Wall.Collider] = Wall;
     }
 
     private void OnDisable()
     {
-        Cache.Remove(Collider);
+        Cache.Remove(Wall.Collider);
     }
 
     private IEnumerator Start()
@@ -99,7 +94,7 @@ public class OneWayEditor : Editor, IActivable, IDeserializable
 
     public void SetActive(bool state)
     {
-        Collider.enabled = IsActive = state;
+        Wall.Collider.enabled = IsActive = state;
     }
 
     [SignalReceiver]

@@ -318,6 +318,17 @@ public static class BaseComponentExtensions
     extension(MineBehaviour behaviour)
     {
         [UsedImplicitly]
+        public float Delay
+        {
+            get => Traverse.Create(behaviour).Field<float>("Delay").Value;
+            set
+            {
+                Traverse.Create(behaviour).Field<float>("Delay").Value = value;
+                Traverse.Create(behaviour).Field<WaitForSeconds>("waitForDelay").Value = new WaitForSeconds(value);
+            }
+        }
+
+        [UsedImplicitly]
         public ExplosionAsset Explosion => Traverse.Create(behaviour).Field<ExplosionAsset>("explosion").Value;
 
         [UsedImplicitly]
@@ -357,6 +368,35 @@ public static class BaseComponentExtensions
 
         [UsedImplicitly]
         public void PlayDeactivate() => behaviour.Tk2dAnimator.Play(behaviour.Asset?.DeactivateAnimation);
+    }
+
+    extension(OneWayCollider wall)
+    {
+        [UsedImplicitly]
+        public Orientation Orientation
+        {
+            get => Traverse.Create(wall).Field<Orientation>("orientation").Value;
+            set => Traverse.Create(wall).Field<Orientation>("orientation").Value = value;
+        }
+
+        [UsedImplicitly]
+        public BoxCollider2D Collider => Traverse.Create(wall).Field<BoxCollider2D>("collider").Value;
+
+        [UsedImplicitly]
+        public PlatformEffector2D Effector => Traverse.Create(wall).Field<PlatformEffector2D>("effector").Value;
+
+        [UsedImplicitly]
+        public void SetDirection(Vector2 value)
+        {
+            Traverse.Create(wall).Field<Vector2>("direction").Value = value;
+        }
+
+        [UsedImplicitly]
+        public WallType Type
+        {
+            get => Traverse.Create(wall).Property<WallType>("Type").Value;
+            set => Traverse.Create(wall).Property<WallType>("Type").Value = value;
+        }
     }
 
     extension(SelectionMenu menu)

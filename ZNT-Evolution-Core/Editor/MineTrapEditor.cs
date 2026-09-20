@@ -1,4 +1,3 @@
-using HarmonyLib;
 using UnityEngine;
 
 namespace ZNT.Evolution.Core.Editor;
@@ -9,12 +8,10 @@ public class MineTrapEditor : Editor
 {
     private MineBehaviour Behaviour => field ??= GetComponent<MineBehaviour>();
 
-    private Trigger Trigger => field ??= GetComponent<Trigger>();
-
     private Tag DetectedTags
     {
-        get => Trigger.WithTags;
-        set => Trigger.WithTags = value;
+        get => Behaviour.Trigger.WithTags;
+        set => Behaviour.Trigger.WithTags = value;
     }
 
     [SerializeInEditor(name: "Detected Human")]
@@ -41,7 +38,7 @@ public class MineTrapEditor : Editor
     [SerializeInEditor(name: "Delay")]
     public float Delay
     {
-        get => Traverse.Create(Behaviour).Field<float>("Delay").Value;
-        set => Traverse.Create(Behaviour).Field<float>("Delay").Value = value;
+        get => Behaviour.Delay;
+        set => Behaviour.Delay = value;
     }
 }
