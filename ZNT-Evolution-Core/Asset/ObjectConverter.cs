@@ -79,6 +79,11 @@ internal class ObjectConverter : CustomCreationConverter<UnityEngine.Object>
             return null;
         }
 
+        if (type == typeof(LevelElement))
+        {
+            if (LevelElementIndex.Index.Elements.TryGetValue(key, out var element)) return element;
+        }
+
         if (typeof(CustomAssetObject).IsAssignableFrom(type))
         {
             if (LevelElementIndex.Index.Elements.TryGetValue(key, out var element) &&
@@ -97,6 +102,7 @@ internal class ObjectConverter : CustomCreationConverter<UnityEngine.Object>
         {
             if (asset.name != name) continue;
             CustomAssetUtility.Cache[key] = asset;
+            CustomAssetUtility.Cache[asset.NameAndType()] = asset;
             return asset;
         }
 
@@ -116,7 +122,8 @@ internal class ObjectConverter : CustomCreationConverter<UnityEngine.Object>
             attached.Clear();
             foreach (var frame in clip.frames)
             {
-                if (frame.spriteCollection is not null)
+                if (frame.spriteCollection is not null &&
+                    frame.spriteCollection.spriteDefinitions.IsIndexValid(frame.spriteId))
                 {
                     var definition = frame.spriteCollection.spriteDefinitions[frame.spriteId];
                     foreach (var point in definition.attachPoints)
@@ -131,6 +138,10 @@ internal class ObjectConverter : CustomCreationConverter<UnityEngine.Object>
                     case "throw":
                         if (attached.ContainsKey("throw")) break;
                         Logger.LogWarning($"{animation} Clip {clip.name} Need AttachPoint {{ name: \"throw\" }}");
+                        break;
+                    case "summon_human":
+                        if (frame.soundParamName is { Length: > 0 }) break;
+                        Logger.LogWarning($"{animation} Clip {clip.name} Need AssetName");
                         break;
                 }
             }

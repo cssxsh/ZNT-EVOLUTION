@@ -33,8 +33,8 @@ public class CustomAssetOverrider
                 _original = Field.GetValue(Asset);
                 _saved = true;
                 using var json = new JTokenReader(Token);
-                var input = LayerConverter.Instance.
-                    ReadJson(json, Field.FieldType, null, CustomAssetUtility.Serializer);
+                var input =
+                    LayerConverter.Instance.ReadJson(json, Field.FieldType, _original, CustomAssetUtility.Serializer);
                 Field.SetValue(Asset, input);
             }
             else if (Field.FieldType == typeof(int))

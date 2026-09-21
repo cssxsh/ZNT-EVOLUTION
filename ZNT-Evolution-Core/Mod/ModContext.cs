@@ -862,7 +862,14 @@ public class ModContext
                 break;
         }
 
-        CustomAssetUtility.Cache.Remove(key);
+        foreach (var k in CustomAssetUtility.Cache.Keys.ToArray())
+        {
+            if (CustomAssetUtility.Cache.TryGetValue(k, out var obj) && obj == o)
+            {
+                CustomAssetUtility.Cache.Remove(k);
+            }
+        }
+
         Object.Destroy(o);
     }
 }
