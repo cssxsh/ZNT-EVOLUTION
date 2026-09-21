@@ -115,7 +115,7 @@ internal static class SceneLoaderPatch
         var image = mod.GetComponent<Image>();
         image.enabled = false;
         var tooltip = mod.GetComponent<TooltipReceiver>();
-        Traverse.Create(tooltip).Field<string>("text").Value = "Evolution/Mod_Folder";
+        tooltip.Term = "Evolution/Mod_Folder";
         var button = mod.GetComponent<Button>();
         button.OnClick(() => System.Diagnostics.Process.Start(ModManager.ModsPath));
     }

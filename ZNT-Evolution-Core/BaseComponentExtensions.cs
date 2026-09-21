@@ -60,6 +60,16 @@ public static class BaseComponentExtensions
         }
     }
 
+    extension(TooltipReceiver tooltip)
+    {
+        [UsedImplicitly]
+        public string Term
+        {
+            get => Traverse.Create(tooltip).Field<string>("text").Value;
+            set => Traverse.Create(tooltip).Field<string>("text").Value = value;
+        }
+    }
+
     extension(Trigger trigger)
     {
         [UsedImplicitly]
