@@ -321,7 +321,7 @@ public class ModContext
             // Sound File
             case { Format: "wav" or "mp3" or "ogg" or "fsb" }:
             {
-                var sound = ReadSound(resource.Name, resource.Path, buffer.ToArray());
+                var sound = ReadSound(resource.Name, resource.Type, resource.Path, buffer.ToArray());
                 Logger.LogDebug($"{resource.Path} -> {sound.path}");
             }
                 break;
@@ -526,11 +526,13 @@ public class ModContext
         return bank;
     }
 
-    private SoundAsset ReadSound(string name, string path, byte[] input)
+    private SoundAsset ReadSound(string name, string type, string path, byte[] input)
     {
         var asset = ScriptableObject.CreateInstance<SoundAsset>();
         asset.name = name;
-        asset.id = asset.path = $"file://{Metadata.Id}/{path}";
+        asset.path = $"file://{Metadata.Id}/{path}";
+        asset.id = asset.path;
+        asset.FetchEvent(type);
         asset.CreateSound(input);
         Acquire(asset);
         return asset;

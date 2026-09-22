@@ -14,6 +14,40 @@
 | `bank:/IntroBank`   | `af81573e-1a43-42f4-87de-eb697c826bc9` |
 | `bank:/Musicbank`   | `3c3bcf61-b415-4b63-ad99-e359ac1e95fa` |
 
+### Bus
+
+| PATH                                                           | GUID                                   | TYPE     |
+|:---------------------------------------------------------------|:---------------------------------------|:---------|
+| `bus:/`                                                        | `d09bf6f4-00a6-4bc5-95d3-9c5886ec31cd` | `Master` |
+| `bus:/A`                                                       | `83fb4cf3-7f75-4add-8150-1e05851e3ba7` | `Return` |
+| `bus:/Global Mix`                                              | `74b52f35-f01d-42aa-be14-6de6a43e4c60` | `Group`  |
+| `bus:/Global Mix/InGame`                                       | `09f9e080-da54-4739-b8d5-2576f91fcac0` | `Group`  |
+| `bus:/Global Mix/InGame/CreditsHit`                            | `86c984c7-1e68-4d6a-ad51-55b9cc5690ca` | `Group`  |
+| `bus:/Global Mix/InGame/MUSIC`                                 | `961af704-3650-4a2f-8b07-0c654edb7226` | `Group`  |
+| `bus:/Global Mix/InGame/MUSIC pause`                           | `1a9c735b-061f-41ea-9a22-8d7d7e917fb4` | `Group`  |
+| `bus:/Global Mix/InGame/SFX`                                   | `e222ae02-83f3-434d-8938-f2eda4bd19f2` | `Group`  |
+| `bus:/Global Mix/InGame/SFX/ZoomNo`                            | `bbec166b-6f58-4c38-abd6-850372cbacc6` | `Group`  |
+| `bus:/Global Mix/InGame/SFX/ZoomYes`                           | `ee819ccb-b0c0-4d47-806c-f6a10361940b` | `Group`  |
+| `bus:/Global Mix/InGame/SFX/ZoomYes/Loud`                      | `6cfd4744-cd9c-4178-9b16-7915f6e093ec` | `Group`  |
+| `bus:/Global Mix/InGame/SFX/ZoomYes/Normal`                    | `edaf9816-a418-4acb-a103-f7d3e8ae7edf` | `Group`  |
+| `bus:/Global Mix/InGame/SFX/ZoomYes/Normal/DirectorTalkReverb` | `c2e5e4e5-bd43-4809-ae35-157bce3361ef` | `Return` |
+| `bus:/Global Mix/InGame/SFX/ZoomYes/Normal/ReverbGeneric`      | `921080d7-7f16-4b5f-9cf4-283b310739c6` | `Return` |
+| `bus:/Global Mix/InGame/Reverb`                                | `0df9e9aa-d155-4316-99da-d96e3195fd82` | `Return` |
+| `bus:/Global Mix/InGame/SpeedUp`                               | `cdab36d6-84cf-4875-8d32-5e97076a5118` | `Return` |
+| `bus:/Global Mix/InGame/TV`                                    | `d28f2385-dde9-47c5-a099-0d462b80f069` | `Group`  |
+| `bus:/Global Mix/Menu`                                         | `730b6709-ab68-4ca0-a267-d3049f2de179` | `Group`  |
+| `bus:/Global Mix/Menu/MainMenu`                                | `37a165a6-9878-43d9-ad6f-08882145442a` | `Group`  |
+| `bus:/Global Mix/Menu/MenuReverb`                              | `b49aba98-04a7-4195-9e5e-b2ea6b3dfae1` | `Return` |
+
+### VCA
+
+| PATH                     | GUID                                   |
+|:-------------------------|:---------------------------------------|
+| `vca:/GLOBAL Mix`        | `8e07235c-a53c-4adf-bb21-f3cb2407e0b6` |
+| `vca:/MENU SFX settings` | `484934bc-dcb2-460f-badc-f4bf33e4a85a` |
+| `vca:/MUSIC settings`    | `8680b907-ca7a-4766-8505-151d3ca69c5b` |
+| `vca:/SFX settings`      | `07bf1e3b-7bd4-4d65-b7e7-a57614f13c76` |
+
 ### Event
 
 | PATH                                                       | GUID                                   | BANK          |
@@ -453,3 +487,21 @@
 | `snapshot:/PauseMenu`                                      | `5f9cc2f7-c5e6-4b79-905c-f5b74c909dbe` | `Master Bank` |
 | `snapshot:/TV_Snapshot`                                    | `eb197366-80a7-4b8b-a5be-920366b815bd` | `Master Bank` |
 | `snapshot:/Zoom`                                           | `399211e4-bf2f-4ffc-8cc0-16d226a5c1e3` | `Master Bank` |
+
+## Patch
+
+### Bank
+
+| PATH                  | GUID                                   |
+|:----------------------|:---------------------------------------|
+| `bank:/EvolutionBank` | `959777e4-e50b-4cad-8883-0c2117a99f93` |
+
+### Event
+
+| PATH                                        | GUID                                   | BANK        | BUS                                         |
+|:--------------------------------------------|:---------------------------------------|:------------|:--------------------------------------------|
+| `event:/Evolution/ProgrammerSound/Loud`     | `9c68394b-4154-46a3-8704-ca824fd3ef14` | `Evolution` | `bus:/Global Mix/InGame/SFX/ZoomYes/Loud`   |
+| `event:/Evolution/ProgrammerSound/Normal`   | `5f73b29a-1623-45c0-b159-ec782527b487` | `Evolution` | `bus:/Global Mix/InGame/SFX/ZoomYes/Normal` |
+| `event:/Evolution/ProgrammerSound/Menu`     | `f8b3dbc2-c93c-494f-8fc5-d340ccd6d42d` | `Evolution` | `bus:/Global Mix/Menu`                      |
+| `event:/Evolution/ProgrammerSound/Music`    | `e84b188b-6199-4128-9671-e41d1c058094` | `Evolution` | `bus:/Global Mix/InGame/MUSIC`              |
+| `event:/Evolution/ProgrammerSound/Unzoomed` | `32547367-1926-4e56-ab72-fda63ff41fa2` | `Evolution` | `bus:/Global Mix/InGame/SFX/ZoomNo`         |

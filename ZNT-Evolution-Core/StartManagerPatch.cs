@@ -424,8 +424,13 @@ internal static class StartManagerPatch
 
     private static void HandlePatch(TextAsset asset)
     {
-        FMODUnity.RuntimeManager.LoadBank(asset);
-        Logger.LogInfo($"Loaded Patch {asset}");
+        switch (asset)
+        {
+            case { name: "PatchBank.strings" or "EvolutionBank" }:
+                FMODUnity.RuntimeManager.LoadBank(asset);
+                Logger.LogInfo($"Loaded Patch {asset.name} (UnityEngine.TextAsset)");
+                break;
+        }
     }
 
     private static IEnumerator LoadBank()
