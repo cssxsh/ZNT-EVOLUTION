@@ -6,7 +6,6 @@ using MonoMod.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
-using ZNT.Evolution.Core.Editor;
 using ZNT.LevelEditor;
 
 // ReSharper disable InconsistentNaming
@@ -88,12 +87,6 @@ internal static class DebugPatch
     [HarmonyPatch(typeof(Character), "OnVisionLost")]
     public static bool OnVisionLost(GameObject target) => target is not null;
 
-    private static bool CheckOneWay(this Collider2D collider, Moveable mover)
-    {
-        if (!OneWayEditor.TryGetOneWay(collider, out var wall)) return true;
-        return wall.Direction == Vector2.up && wall.BlockLayer(mover.Body.gameObject.layer);
-    }
-
     [HarmonyPrefix]
     [HarmonyPatch(typeof(Moveable), "UpdateIsGrounded")]
     public static void UpdateIsGrounded(Moveable __instance, out LayerMask __state)
@@ -107,7 +100,7 @@ internal static class DebugPatch
             results: DetectionHelper.CastCheck,
             distance: 0.9f,
             layerMask: mask) > 0;
-        if (!hit || DetectionHelper.CastCheck[0].collider.CheckOneWay(__instance)) return;
+        if (!hit || __instance.MatchOneWay(DetectionHelper.CastCheck[0].collider, Vector2.up)) return;
         __instance.SetGroundLayers(__state & ~mask);
     }
 
@@ -132,7 +125,7 @@ internal static class DebugPatch
             results: DetectionHelper.CastCheck,
             distance: __instance is TankBehaviour ? 1.5f : 1.0f,
             layerMask: mask) > 0;
-        if (!hit || DetectionHelper.CastCheck[0].collider.CheckOneWay(__instance.Mover)) return;
+        if (!hit || __instance.Mover.MatchOneWay(DetectionHelper.CastCheck[0].collider, Vector2.up)) return;
         __instance.Mover.SetGroundLayers(__state & ~mask);
     }
 

@@ -6,6 +6,7 @@ using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using ZNT.Evolution.Core.Editor;
 using ZNT.LevelEditor;
 
 namespace ZNT.Evolution.Core;
@@ -247,6 +248,13 @@ public static class BaseComponentExtensions
         public void HitGround(float velocity)
         {
             Traverse.Create(mover).Method("HitGround", [typeof(float)], [velocity]).GetValue();
+        }
+
+        [UsedImplicitly]
+        public bool MatchOneWay(Collider2D collider, Vector2 direction)
+        {
+            if (!OneWayEditor.TryGetOneWay(collider, out var wall)) return true;
+            return wall.Direction == direction && wall.BlockLayer(mover.Body.gameObject.layer);
         }
     }
 
