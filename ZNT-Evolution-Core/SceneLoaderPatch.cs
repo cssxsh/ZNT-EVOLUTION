@@ -153,7 +153,12 @@ internal static class SceneLoaderPatch
             {
                 Logger.LogInfo("Reloading Mods Folder");
                 HasModChanged = true;
-                reset.StartCoroutine(ModManager.ReloadAll().ToCoroutine(_ => menu.FlushModPanel()));
+                reset.interactable = false;
+                reset.StartCoroutine(ModManager.ReloadAll().ToCoroutine(_ =>
+                {
+                    reset.interactable = true;
+                    menu.FlushModPanel();
+                }));
             });
 
             menu.FlushModPanel();
@@ -194,16 +199,20 @@ internal static class SceneLoaderPatch
                     switch (value)
                     {
                         case true when context.IsLoadReady():
+                            toggle.interactable = false;
                             toggle.StartCoroutine(context.Load().ToCoroutine(_ =>
                             {
                                 HasModChanged = true;
+                                toggle.interactable = true;
                                 toggle.SetIsOnWithoutNotify(context.State is ModState.Loaded);
                             }));
                             break;
                         case false when context.IsUnloadReady():
+                            toggle.interactable = false;
                             toggle.StartCoroutine(context.Unload().ToCoroutine(_ =>
                             {
                                 HasModChanged = true;
+                                toggle.interactable = true;
                                 toggle.SetIsOnWithoutNotify(context.State is ModState.Loaded);
                             }));
                             break;
@@ -470,7 +479,7 @@ internal static class SceneLoaderPatch
             if (component.Data is IEditorUpdate updater) updaters.Add(updater);
             var overrider = component.Data as IEditorOverride;
 
-            var header = __instance.SetComponentHeader(component).gameObject;
+            var header = __instance.SetComponentHeader(component);
             header.name = $"{component.Name} Header";
             var panel = Object.Instantiate(original: empty, parent: container);
             panel.name = $"{component.Name} Panel";
@@ -486,9 +495,10 @@ internal static class SceneLoaderPatch
             finally
             {
                 __instance.MainContainer = container;
-                header.AddComponent<Button>().onClick.AddListener(panel.ToggleActivation);
-                header.SetActive(panel.childCount is not 0);
-                panel.gameObject.SetActive(panel.childCount is not 0 && Activated.Contains(panel.name));
+                var hasUI = panel.childCount is not 0;
+                header.gameObject.SetActive(hasUI);
+                header.gameObject.AddComponent<Button>().onClick.AddListener(panel.ToggleActivation);
+                panel.gameObject.SetActive(hasUI && Activated.Contains(panel.name));
             }
         }
 
@@ -629,7 +639,12 @@ internal static class SceneLoaderPatch
     public static bool SetName(this SupportedTypeBinder __instance, MemberInfo member)
     {
         var attribute = member.GetCustomAttribute<SerializeInEditorAttribute>();
-        var name = attribute?.Name is null or "" ? member.Name.SplitCamelCase() : attribute.Name;
+        var name = attribute?.Name switch
+        {
+            null or "" => member.Name.SplitCamelCase(),
+            "Loop Patrol" => member.Name is "loopMode" ? "Loop Mode" : attribute.Name,
+            _ => attribute.Name
+        };
         var text = __instance.Text;
         text.text = name;
         text.transform.parent.name = $"{name} Input";

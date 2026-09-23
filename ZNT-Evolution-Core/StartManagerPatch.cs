@@ -299,6 +299,9 @@ internal static class StartManagerPatch
             case DoorBehaviour:
                 _ = prefab.GetComponentSafe<SignalSenderLinker>();
                 _ = prefab.GetComponentSafe<LayerEditor>();
+            {
+                if (prefab.TryGetComponent<Breakable>(out var breakable)) breakable.SetVisible(true);
+            }
                 break;
             case MineBehaviour:
                 _ = prefab.GetComponentSafe<MineTrapEditor>();
@@ -339,7 +342,7 @@ internal static class StartManagerPatch
                 sentry.Vision.Detection.SetVisible(true);
                 sentry.Vision.Detection.SetIgnoreSerialization(false);
                 sentry.Vision.Detection.GetComponent<SerialIdentifier>().SetSerialize(true);
-                sentry.Health.EditorVisibility.CustomName ??= nameof(Health);
+                sentry.Health.EditorVisibility.CustomName = nameof(Health);
                 sentry.Health.SetVisible(true);
             {
                 var components = sentry.Health.gameObject;
@@ -354,7 +357,7 @@ internal static class StartManagerPatch
                 zombie.Vision.Detection.SetVisible(true);
                 zombie.Vision.Detection.SetIgnoreSerialization(false);
                 zombie.Vision.Detection.GetComponent<SerialIdentifier>().SetSerialize(true);
-                zombie.Health.EditorVisibility.CustomName ??= nameof(Health);
+                zombie.Health.EditorVisibility.CustomName = nameof(Health);
                 zombie.Health.SetVisible(true);
             {
                 var components = zombie.Health.gameObject;
@@ -379,7 +382,7 @@ internal static class StartManagerPatch
                 human.Vision.Detection.SetVisible(true);
                 human.Vision.Detection.SetIgnoreSerialization(false);
                 human.Vision.Detection.GetComponent<SerialIdentifier>().SetSerialize(true);
-                human.Health.EditorVisibility.CustomName ??= nameof(Health);
+                human.Health.EditorVisibility.CustomName = nameof(Health);
                 human.Health.SetVisible(true);
             {
                 var components = human.Health.gameObject;
