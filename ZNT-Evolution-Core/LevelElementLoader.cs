@@ -103,7 +103,7 @@ public static class LevelElementLoader
     {
         if (bundle.LoadAsset("bank_") is TextAsset bank)
         {
-            foreach (var (_, fmod) in AssetElementBinder.FetchFMODAsset(path: $"bank:/{bank.name}"))
+            foreach (var (_, fmod) in FMODAsset.FetchFMODAsset(path: $"bank:/{bank.name}"))
             {
                 Logger.LogDebug($"[{bank.name}] fetch {fmod.path}");
             }
@@ -705,7 +705,7 @@ public static class LevelElementLoader
             Logger.LogInfo($"load Bank {bank}");
             FMODUnity.RuntimeManager.LoadBank(bankName: bank, loadSamples: loadSamples);
             yield return new WaitWhile(FMODUnity.RuntimeManager.AnyBankLoading);
-            foreach (var (_, asset) in AssetElementBinder.FetchFMODAsset(path: $"bank:/{bank}"))
+            foreach (var (_, asset) in FMODAsset.FetchFMODAsset(path: $"bank:/{bank}"))
             {
                 Logger.LogInfo($"[{bank}] fetch {asset.path}");
             }

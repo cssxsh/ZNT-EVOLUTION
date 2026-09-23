@@ -18,7 +18,7 @@ public class BankAsset : TextAsset
         if (data is null) throw new NullReferenceException();
         FMODUnity.RuntimeManager.LoadBank(this);
         FMODUnity.RuntimeManager.WaitForAllLoads();
-        foreach (var (_, asset) in AssetElementBinder.FetchFMODAsset(Path))
+        foreach (var (_, asset) in FMODAsset.FetchFMODAsset(Path))
         {
             Logger.LogDebug($"Bind FMODAsset {asset.path} from {Path}");
         }
@@ -26,7 +26,7 @@ public class BankAsset : TextAsset
 
     public void UnLoad()
     {
-        AssetElementBinder.ClearFMODAsset(Path);
+        FMODAsset.ClearFMODAsset(Path);
         FMODUnity.RuntimeManager.UnloadBank(name);
     }
 }
