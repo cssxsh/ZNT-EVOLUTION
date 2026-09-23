@@ -264,6 +264,11 @@ public static class BaseComponentExtensions
         public T Behaviour => Traverse.Create(controller).Field<T>("Behaviour").Value;
     }
 
+    extension<T>(PatrolActionUi<T> ui) where T : PatrolAction
+    {
+        public T Action => Traverse.Create(ui).Field<T>("Action").Value;
+    }
+
     extension(CharacterBehaviour behaviour)
     {
         [UsedImplicitly]
@@ -422,7 +427,6 @@ public static class BaseComponentExtensions
         [UsedImplicitly]
         public SupportedTypePrefabs CustomDrawerPrefabs =>
             Traverse.Create(menu).Field<SupportedTypePrefabs>("customDrawerPrefabs").Value;
-
 
         [UsedImplicitly]
         public RectTransform MainContainer

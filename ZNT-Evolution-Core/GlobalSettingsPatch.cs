@@ -1,9 +1,12 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using BepInEx;
 using BepInEx.Configuration;
+using BepInEx.Logging;
 using HarmonyLib;
 using JetBrains.Annotations;
 using Rotorz.Tile;
@@ -41,10 +44,10 @@ internal static class GlobalSettingsPatch
         switch (e.ChangedSetting)
         {
             case ConfigEntry<bool> { Definition.Key: nameof(BepInExToUnityLog) } log:
-                UnityLog = log.Value;
+                BepInEx.Logging.Logger.UnityLog = log.Value;
                 break;
             case ConfigEntry<bool> { Definition.Key: nameof(ShowDevComponent) } dev:
-                IsUserDev = dev.Value;
+                UserManager.UserDev = dev.Value;
                 break;
         }
     }
@@ -53,18 +56,35 @@ internal static class GlobalSettingsPatch
 
     internal static ConfigEntry<bool> BepInExToUnityLog;
 
-    private static BepInEx.Logging.UnityLogListener UnityLogListener =>
-        field ??= BepInEx.Logging.Logger.Listeners.OfType<BepInEx.Logging.UnityLogListener>().Single();
-
-    [UsedImplicitly]
-    internal static bool UnityLog
+    extension(BepInEx.Logging.Logger)
     {
-        get => BepInEx.Logging.Logger.Listeners.Contains(UnityLogListener);
-        set
+        private static Action<string> WriteStringToUnityLog
         {
-            if (value == BepInEx.Logging.Logger.Listeners.Contains(UnityLogListener)) return;
-            if (value) BepInEx.Logging.Logger.Listeners.Add(UnityLogListener);
-            else BepInEx.Logging.Logger.Listeners.Remove(UnityLogListener);
+            get => Traverse.Create(typeof(UnityLogListener))
+                .Field<Action<string>>("WriteStringToUnityLog").Value;
+            set => Traverse.Create(typeof(UnityLogListener))
+                .Field<Action<string>>("WriteStringToUnityLog").Value = value;
+        }
+
+        [UsedImplicitly]
+        internal static bool UnityLog
+        {
+            get => BepInEx.Logging.Logger.WriteStringToUnityLog is not null;
+            set
+            {
+                if (value)
+                {
+                    var WriteStringToUnityLogImpl = Type
+                        .GetType("UnityEngine.UnityLogWriter, UnityEngine.CoreModule").GetTypeInfo()
+                        .GetDeclaredMethod("WriteStringToUnityLogImpl");
+                    BepInEx.Logging.Logger.WriteStringToUnityLog =
+                        (Action<string>)Delegate.CreateDelegate(typeof(Action<string>), WriteStringToUnityLogImpl);
+                }
+                else
+                {
+                    BepInEx.Logging.Logger.WriteStringToUnityLog = null;
+                }
+            }
         }
     }
 
@@ -213,11 +233,17 @@ internal static class GlobalSettingsPatch
 
     private static readonly Regex EmoteRegex = new(@"\[[^]]+\]", RegexOptions.Compiled);
 
+    extension(Dialogue dialogue)
+    {
+        private TMPro.TextMeshProUGUI Text =>
+            Traverse.Create(dialogue).Field<TMPro.TextMeshProUGUI>("text").Value;
+    }
+
     [HarmonyPostfix]
     [HarmonyPatch(typeof(Dialogue), "SetText")]
     private static void SetText(Dialogue __instance)
     {
-        var tm = Traverse.Create(__instance).Field<TMPro.TextMeshProUGUI>("text").Value;
+        var tm = __instance.Text;
         tm.richText = DialogueRichText.Value;
         if (!tm.richText) return;
         tm.text = EmoteRegex.Replace(tm.text, EmoteEvaluator);
@@ -248,13 +274,29 @@ internal static class GlobalSettingsPatch
 
     internal static ConfigEntry<bool> ShowDevComponent;
 
-    private static HashSet<ulong> DevIds => Traverse.Create(typeof(UserManager)).Field<HashSet<ulong>>("DevIds").Value;
-
-    [UsedImplicitly]
-    internal static bool IsUserDev
+    extension(UserManager)
     {
-        get => DevIds.Contains(ComponentSingleton<SteamManager>.Instance.GetUserIdentifier().m_SteamID);
-        set => Traverse.Create(typeof(UserManager)).Field<bool>(nameof(UserManager.IsUserDev)).Value = value;
+        [UsedImplicitly]
+        internal static bool UserDev
+        {
+            get => UserManager.IsUserDev;
+            set => Traverse.Create(typeof(UserManager)).Field<bool>(nameof(UserManager.IsUserDev)).Value = value;
+        }
+    }
+
+    extension(EditChapterMenu menu)
+    {
+        private Dropdown SourceDropdown => Traverse.Create(menu).Field<Dropdown>("sourceDropdown").Value;
+    }
+
+    extension(LoadLevelMenu menu)
+    {
+        private Dropdown SourceDropdown => Traverse.Create(menu).Field<Dropdown>("sourceDropdown").Value;
+    }
+
+    extension(NewLevelMenu menu)
+    {
+        private Dropdown LevelSource => Traverse.Create(menu).Field<Dropdown>("levelSource").Value;
     }
 
     [HarmonyPostfix]
@@ -266,10 +308,10 @@ internal static class GlobalSettingsPatch
         // Custom Levels
         var dropdown = __instance switch
         {
-            EditChapterMenu => Traverse.Create(__instance).Field<Dropdown>("sourceDropdown").Value,
-            LoadLevelMenu => Traverse.Create(__instance).Field<Dropdown>("sourceDropdown").Value,
-            NewLevelMenu => Traverse.Create(__instance).Field<Dropdown>("levelSource").Value,
-            _ => throw new System.ArgumentException(__instance?.name, nameof(__instance))
+            EditChapterMenu menu => menu.SourceDropdown,
+            LoadLevelMenu menu => menu.SourceDropdown,
+            NewLevelMenu menu => menu.LevelSource,
+            _ => throw new ArgumentException(__instance?.name, nameof(__instance))
         };
         dropdown.value = 1;
     }
@@ -285,8 +327,7 @@ internal static class GlobalSettingsPatch
     [HarmonyPatch(typeof(LocalizableStringMenu), "UpdateMenu")]
     public static void UpdateMenu(LocalizableStringMenu __instance)
     {
-        var dev = UserManager.IsUserDev;
-        if (dev) return;
+        if (UserManager.UserDev) return;
         __instance.LocalizeToggle.isOn = false;
         __instance.ToggleGroup.interactable = false;
         __instance.ToggleGroup.alpha = 0.0f;
@@ -303,15 +344,12 @@ internal static class GlobalSettingsPatch
     public static void GetClips(PatrolAnimationUi __instance, List<Dropdown.OptionData> __result)
     {
         if (!ShowAllAnimationClip.Value) return;
-        var action = Traverse.Create(__instance).Field<PatrolAction>("Action").Value;
-        var animation = action.Patroller.Animator.AnimationLibrary;
-        if (__result.Count == animation.clips.Count(clip => !clip.Empty)) return;
         __result.Clear();
-        __result.AddRange(animation.clips
+        var options = __instance.Action.Patroller.Animator.AnimationLibrary.clips
             .Where(clip => !clip.Empty)
             .OrderBy(clip => clip.name)
-            .Select(clip => new Dropdown.OptionData(text: clip.name))
-        );
+            .Select(clip => new Dropdown.OptionData(text: clip.name));
+        __result.AddRange(options);
     }
 
     #endregion
