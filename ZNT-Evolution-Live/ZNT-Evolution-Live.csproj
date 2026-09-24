@@ -13,7 +13,7 @@
         <Version>0.1.0</Version>
         <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
         <FileAlignment>512</FileAlignment>
-        <LangVersion>10</LangVersion>
+        <LangVersion>14</LangVersion>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
         <PlatformTarget>AnyCPU</PlatformTarget>
@@ -61,10 +61,6 @@
         </Reference>
         <Reference Include="DOTween">
             <HintPath>$(ZNTGamePath)\znt_Data\Managed\DOTween.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="GalaxyCSharp">
-            <HintPath>$(ZNTGamePath)\znt_Data\Managed\GalaxyCSharp.dll</HintPath>
             <Private>False</Private>
         </Reference>
         <Reference Include="HarmonyXInterop">
