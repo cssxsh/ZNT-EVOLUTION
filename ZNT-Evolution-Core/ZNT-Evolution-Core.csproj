@@ -427,7 +427,6 @@
         <Compile Include="Asset\RectConverter.cs"/>
         <Compile Include="Asset\SoundAsset.cs"/>
         <Compile Include="Asset\SpawnPointAsset.cs"/>
-        <Compile Include="Asset\SpriteExtractor.cs"/>
         <Compile Include="Asset\SpriteInfo.cs"/>
         <Compile Include="Asset\SpriteMerge.cs"/>
         <Compile Include="Editor\CharacterEditor.cs"/>

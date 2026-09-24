@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using HarmonyLib;
@@ -123,6 +124,33 @@ public class SpriteEditor : Editor, IEditorOverride, IEditorUpdate
         Animator?.AnimationPlayed -= OnAnimationChanged;
     }
 
+    private static readonly Dictionary<Texture, Texture2D> Cache = new();
+
+    public static Texture2D MarkReadable(Texture texture)
+    {
+        if (Cache.TryGetValue(texture, out var cached)) return cached;
+        var source = new Texture2D(width: texture.width, height: texture.height)
+        {
+            name = texture.name,
+            filterMode = texture.filterMode,
+            wrapMode = texture.wrapMode
+        };
+        var render = RenderTexture.GetTemporary(
+            texture.width,
+            texture.height,
+            0,
+            RenderTextureFormat.ARGB32,
+            RenderTextureReadWrite.Linear);
+        Graphics.Blit(texture, render);
+        var previous = RenderTexture.active;
+        RenderTexture.active = render;
+        source.ReadPixels(new Rect(0, 0, texture.width, texture.height), 0, 0);
+        source.Apply();
+        RenderTexture.active = previous;
+        RenderTexture.ReleaseTemporary(render);
+        return Cache[texture] = source;
+    }
+
     private void EditSpriteCollection()
     {
         var material = Sprite.Collection.materials[0];
@@ -131,7 +159,7 @@ public class SpriteEditor : Editor, IEditorOverride, IEditorUpdate
         if (Editing)
         {
             if (!System.IO.File.Exists(path)) return;
-            var readable = Asset.SpriteExtractor.MarkReadable(texture);
+            var readable = MarkReadable(texture);
             readable.LoadImage(System.IO.File.ReadAllBytes(path));
             material.mainTexture = readable;
             Editing = false;
@@ -140,7 +168,7 @@ public class SpriteEditor : Editor, IEditorOverride, IEditorUpdate
         {
             Editing = true;
             if (System.IO.File.Exists(path)) return;
-            var readable = Asset.SpriteExtractor.MarkReadable(texture);
+            var readable = MarkReadable(texture);
             System.IO.File.WriteAllBytes(path, readable.EncodeToPNG());
         }
     }
