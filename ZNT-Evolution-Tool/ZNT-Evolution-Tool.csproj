@@ -1,100 +1,19 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-    <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props"
-            Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')"/>
+<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-        <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-        <ProjectGuid>{41433190-8728-4B42-86B3-2889E0ECD1BA}</ProjectGuid>
         <OutputType>Exe</OutputType>
-        <AppDesignerFolder>Properties</AppDesignerFolder>
         <RootNamespace>ZNT.Evolution.Tool</RootNamespace>
-        <AssemblyName>ZNT-Evolution-Tool</AssemblyName>
-        <Version>0.8.0</Version>
-        <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-        <FileAlignment>512</FileAlignment>
-        <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-        <LangVersion>10</LangVersion>
-    </PropertyGroup>
-    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-        <PlatformTarget>AnyCPU</PlatformTarget>
-        <DebugSymbols>true</DebugSymbols>
-        <DebugType>full</DebugType>
-        <Optimize>false</Optimize>
-        <OutputPath>bin\Debug\</OutputPath>
-        <DefineConstants>DEBUG;TRACE</DefineConstants>
-        <ErrorReport>prompt</ErrorReport>
-        <WarningLevel>4</WarningLevel>
-    </PropertyGroup>
-    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-        <PlatformTarget>AnyCPU</PlatformTarget>
-        <DebugType>pdbonly</DebugType>
-        <Optimize>true</Optimize>
-        <OutputPath>bin\Release\</OutputPath>
-        <DefineConstants>TRACE</DefineConstants>
-        <ErrorReport>prompt</ErrorReport>
-        <WarningLevel>4</WarningLevel>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
     </PropertyGroup>
     <ItemGroup>
-        <Reference Include="AssetRipper.TextureDecoder, Version=1.3.0.0, Culture=neutral, processorArchitecture=MSIL">
-            <HintPath>..\packages\AssetRipper.TextureDecoder.1.3.0\lib\netstandard2.0\AssetRipper.TextureDecoder.dll</HintPath>
-        </Reference>
-        <Reference Include="AssetsTools.NET, Version=3.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-            <HintPath>..\packages\AssetsTools.NET.3.0.5\lib\net40\AssetsTools.NET.dll</HintPath>
-        </Reference>
-        <Reference Include="AssetsTools.NET.MonoCecil, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-            <HintPath>..\packages\AssetsTools.NET.MonoCecil.3.0.4\lib\net40\AssetsTools.NET.MonoCecil.dll</HintPath>
-        </Reference>
-        <Reference Include="AssetsTools.NET.Texture, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-            <HintPath>..\packages\AssetsTools.NET.Texture.3.0.2\lib\netstandard2.0\AssetsTools.NET.Texture.dll</HintPath>
-        </Reference>
-        <Reference Include="Mono.Cecil, Version=0.11.6.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e, processorArchitecture=MSIL">
-            <HintPath>..\packages\Mono.Cecil.0.11.6\lib\net40\Mono.Cecil.dll</HintPath>
-        </Reference>
-        <Reference Include="Mono.Cecil.Mdb, Version=0.11.6.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e, processorArchitecture=MSIL">
-            <HintPath>..\packages\Mono.Cecil.0.11.6\lib\net40\Mono.Cecil.Mdb.dll</HintPath>
-        </Reference>
-        <Reference Include="Mono.Cecil.Pdb, Version=0.11.6.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e, processorArchitecture=MSIL">
-            <HintPath>..\packages\Mono.Cecil.0.11.6\lib\net40\Mono.Cecil.Pdb.dll</HintPath>
-        </Reference>
-        <Reference Include="Mono.Cecil.Rocks, Version=0.11.6.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e, processorArchitecture=MSIL">
-            <HintPath>..\packages\Mono.Cecil.0.11.6\lib\net40\Mono.Cecil.Rocks.dll</HintPath>
-        </Reference>
-        <Reference Include="mscorlib"/>
-        <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-            <HintPath>..\packages\Newtonsoft.Json.13.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
-        </Reference>
-        <Reference Include="System"/>
-        <Reference Include="System.Buffers, Version=4.0.5.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-            <HintPath>..\packages\System.Buffers.4.6.1\lib\net462\System.Buffers.dll</HintPath>
-        </Reference>
-        <Reference Include="System.Core"/>
-        <Reference Include="System.Data"/>
-        <Reference Include="System.Half, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-            <HintPath>..\packages\Half.1.0.0\lib\netstandard2.0\System.Half.dll</HintPath>
-        </Reference>
-        <Reference Include="System.Memory, Version=4.0.5.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-            <HintPath>..\packages\System.Memory.4.6.3\lib\net462\System.Memory.dll</HintPath>
-        </Reference>
-        <Reference Include="System.Numerics"/>
-        <Reference Include="System.Numerics.Vectors, Version=4.1.6.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-            <HintPath>..\packages\System.Numerics.Vectors.4.6.1\lib\net462\System.Numerics.Vectors.dll</HintPath>
-        </Reference>
-        <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=6.0.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-            <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.6.1.2\lib\net462\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
-        </Reference>
-        <Reference Include="System.Xml"/>
-    </ItemGroup>
-    <ItemGroup>
-        <Compile Include="Program.cs"/>
-        <Compile Include="Properties\AssemblyInfo.cs"/>
+        <PackageReference Include="AsepriteDotNet" Version="1.9.1"/>
+        <PackageReference Include="AssetsTools.NET" Version="3.0.5"/>
+        <PackageReference Include="AssetsTools.NET.MonoCecil" Version="3.0.4"/>
+        <PackageReference Include="AssetsTools.NET.Texture" Version="3.0.2"/>
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.4"/>
     </ItemGroup>
     <ItemGroup>
         <EmbeddedResource Include="Resources\**"/>
     </ItemGroup>
-    <ItemGroup>
-        <None Include="App.config"/>
-        <None Include="packages.config"/>
-    </ItemGroup>
-    <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets"/>
 </Project>
