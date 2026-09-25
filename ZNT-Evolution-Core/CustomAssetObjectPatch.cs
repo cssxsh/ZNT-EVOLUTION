@@ -220,8 +220,7 @@ internal static class CustomAssetObjectPatch
     {
         if (__instance.TryGetComponent(out MovingObjectBehaviour moving))
         {
-            Traverse.Create(moving).Field<Vector3>("orientation").Value =
-                value is ObjectOrientation.Orientation.Right ? Vector3.forward : Vector3.back;
+            moving.SetOrientation(value);
             var controller = (MovingObjectAnimationController)moving.AnimationController;
             if (controller.Asset.name.EndsWith("(Clone)"))
             {
