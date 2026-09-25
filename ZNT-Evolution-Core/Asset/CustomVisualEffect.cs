@@ -1,5 +1,4 @@
 using System;
-using HarmonyLib;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
 using ZNT.Evolution.Core.Editor;
@@ -32,8 +31,7 @@ public class CustomVisualEffect : VisualEffect, ISerializationCallbackReceiver
     public void OnAfterDeserialize()
     {
         if (Prefab is null || OriginPrefab is not null) return;
-        OriginPrefab = Prefab;
-        Traverse.Create(this).Field<Transform>("prefab").Value = Instantiate(OriginPrefab);
+        this.SetPrefab(Instantiate(OriginPrefab = Prefab));
         DontDestroyOnLoad(Prefab.gameObject);
         Prefab.name = name;
         Prefab.gameObject.SetActive(false);
@@ -55,7 +53,7 @@ public class CustomVisualEffect : VisualEffect, ISerializationCallbackReceiver
         {
             animator.Animator.playAutomatically = false;
             var controller = animator.gameObject.GetComponentSafe<VisualEffectAnimationController>();
-            Traverse.Create(this).Field<SpriteAnimator>("animator").Value = animator;
+            controller.SetAnimator(animator);
             controller.animation = animation;
         }
 

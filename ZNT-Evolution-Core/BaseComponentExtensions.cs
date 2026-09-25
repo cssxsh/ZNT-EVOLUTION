@@ -267,6 +267,15 @@ public static class BaseComponentExtensions
         }
     }
 
+    extension(BaseAnimationController controller)
+    {
+        [UsedImplicitly]
+        public void SetAnimator(SpriteAnimator value)
+        {
+            Traverse.Create(controller).Field<SpriteAnimator>("animator").Value = value;
+        }
+    }
+
     extension<T>(BehaviourAnimationController<T> controller) where T : BaseBehaviour
     {
         public T Behaviour => Traverse.Create(controller).Field<T>("Behaviour").Value;
