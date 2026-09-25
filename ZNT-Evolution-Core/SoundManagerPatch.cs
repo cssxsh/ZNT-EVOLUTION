@@ -16,6 +16,7 @@ internal static class SoundManagerPatch
     [HarmonyPatch(typeof(SoundManager), "PlayOneShot", typeof(string), typeof(Vector3))]
     public static bool PlayOneShot(string eventName, Vector3 position)
     {
+        if (eventName is null) return true;
         // ReSharper disable once InvertIf
         if (eventName.StartsWith("file://"))
         {
@@ -37,6 +38,7 @@ internal static class SoundManagerPatch
     [HarmonyPatch(typeof(SoundManager), "GetEvent")]
     public static bool GetEvent(string eventId, ref EventInstance __result)
     {
+        if (eventId is null) return true;
         // ReSharper disable once InvertIf
         if (eventId.StartsWith("file://"))
         {
@@ -63,5 +65,19 @@ internal static class SoundManagerPatch
         properties.subsoundIndex = -1;
         Marshal.StructureToPtr(properties, parameters, false);
         return FMOD.RESULT.OK;
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(SoundEventPlayer), "PlayWithParam")]
+    public static bool PlayWithParam(string param, float value)
+    {
+        // ReSharper disable once InvertIf
+        if (param is "TalkSelect" && VoiceAsset.Elements.TryGetValue((int)value, out var asset))
+        {
+            SoundManager.PlayOneShot(asset.path);
+            return false;
+        }
+
+        return true;
     }
 }

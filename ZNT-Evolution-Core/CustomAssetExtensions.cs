@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using HarmonyLib;
 using JetBrains.Annotations;
 using UnityEngine;
+using ZNT.Evolution.Core.Asset;
 
 namespace ZNT.Evolution.Core;
 
@@ -39,6 +40,9 @@ public static class CustomAssetExtensions
                         if (ShaderAnimatorIndex.Index.Elements.ContainsKey(animator.AssetId)) return false;
                         ShaderAnimatorIndex.Index.AddAssetElement(animator);
                         return true;
+                    case VoiceAsset voice:
+                        return voice.index is >= 0 and <= byte.MaxValue &&
+                               VoiceAsset.Elements.TryAdd(voice.index, voice);
                     default:
                         throw new System.NotSupportedException($"Bind: {asset}");
                 }
@@ -63,6 +67,9 @@ public static class CustomAssetExtensions
                         break;
                     case ShaderAnimator animator:
                         ShaderAnimatorIndex.Index.RemoveAssetElement(animator);
+                        break;
+                    case VoiceAsset voice:
+                        VoiceAsset.Elements.Remove(voice.index);
                         break;
                     default:
                         throw new System.NotSupportedException($"Unbind: {asset}");

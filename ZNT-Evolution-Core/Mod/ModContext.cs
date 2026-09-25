@@ -325,6 +325,13 @@ public class ModContext
                 Logger.LogDebug($"{resource.Path} -> {sound.path}");
             }
                 break;
+            // ZNT.Evolution.Core.Asset.VoiceAsset
+            case { Type: "voice", Format: "json" or "bson" }:
+            {
+                var voice = ReadVoice(buffer, resource.Format);
+                Logger.LogDebug($"{resource.Path} -> {voice.name}({voice.index}) with {voice.path}");
+            }
+                break;
             // UnityEngine.Texture2D
             case { Format: "tga" or "png" or "exr", Type: "" }:
             {
@@ -536,6 +543,13 @@ public class ModContext
         asset.CreateSound(input);
         Acquire(asset);
         return asset;
+    }
+
+    private VoiceAsset ReadVoice(Stream input, string format)
+    {
+        var voice = CustomAssetUtility.DeserializeObject<VoiceAsset>(input, format is "bson");
+        Acquire(voice);
+        return voice;
     }
 
     #endregion
@@ -812,6 +826,10 @@ public class ModContext
                 _ = visual.Bind();
                 Logger.LogInfo($"Bind VisualEffect {visual.AssetId} - {visual.name}");
                 break;
+            case VoiceAsset voice:
+                _ = voice.Bind();
+                Logger.LogInfo($"Bind VoiceAsset {voice.name}({voice.index}) - {voice.path}");
+                break;
             case LevelElement element:
                 _ = element.Bind();
                 Logger.LogInfo($"Bind LevelElement {element.AssetId} - {element.Title}");
@@ -850,6 +868,10 @@ public class ModContext
             case VisualEffect visual:
                 visual.Unbind();
                 Logger.LogInfo($"Unbind VisualEffect {visual.AssetId} - {visual.name}");
+                break;
+            case VoiceAsset voice:
+                voice.Unbind();
+                Logger.LogInfo($"Unbind VoiceAsset {voice.name}({voice.index}) - {voice.path}");
                 break;
             case LevelElement element:
                 element.Unbind();

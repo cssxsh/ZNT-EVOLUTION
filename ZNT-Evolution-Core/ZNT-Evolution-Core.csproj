@@ -429,6 +429,7 @@
         <Compile Include="Asset\SpawnPointAsset.cs"/>
         <Compile Include="Asset\SpriteInfo.cs"/>
         <Compile Include="Asset\SpriteMerge.cs"/>
+        <Compile Include="Asset\VoiceAsset.cs"/>
         <Compile Include="Editor\CharacterEditor.cs"/>
         <Compile Include="Editor\CharacterSpawnPointEditor.cs"/>
         <Compile Include="Editor\Editor.cs"/>

@@ -10,6 +10,7 @@ using UIWidgets;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
+using ZNT.Evolution.Core.Asset;
 using ZNT.Evolution.Core.Editor;
 using ZNT.Evolution.Core.Mod;
 using ZNT.LevelEditor;
@@ -751,6 +752,36 @@ internal static class SceneLoaderPatch
 
         l.onValueChanged.AddListener(value => member.SetMemberValue(component.Data, value ? a : b));
         (member.GetMemberValue<object>(component.Data).Equals(a) ? l : r).isOn = true;
+        return false;
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(SupportedTypeBinder), "BindEnumField")]
+    public static bool BindEnumField(SupportedTypeBinder __instance, EditorComponent component, MemberInfo member)
+    {
+        if (member.GetMemberType() != typeof(Voice)) return true;
+        __instance.SetName(member);
+        var dropdown = (Dropdown)__instance.UiComponents[0];
+        dropdown.onValueChanged.RemoveAllListeners();
+        dropdown.onValueChanged.AddListener(value => member.SetMemberValue(component.Data, (Voice)value));
+
+        foreach (var text in System.Enum.GetNames(typeof(Voice)))
+        {
+            dropdown.options.Add(new Dropdown.OptionData(text));
+        }
+
+        foreach (var (index, asset) in VoiceAsset.Elements)
+        {
+            while (index >= dropdown.options.Count)
+            {
+                dropdown.options.Add(new Dropdown.OptionData(index.ToString()));
+            }
+
+            dropdown.options[index].text = asset.name;
+        }
+
+        dropdown.value = (int)member.GetMemberValue<Voice>(component.Data);
+        dropdown.RefreshShownValue();
         return false;
     }
 
