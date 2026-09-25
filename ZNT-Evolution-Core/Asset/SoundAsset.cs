@@ -14,7 +14,7 @@ internal class SoundAsset : FMODAsset
         Sound.clearHandle();
         var info = new FMOD.CREATESOUNDEXINFO
         {
-            cbsize = Marshal.SizeOf(typeof(FMOD.CREATESOUNDEXINFO)),
+            cbsize = Marshal.SizeOf<FMOD.CREATESOUNDEXINFO>(),
             length = (uint)input.Length
         };
         var result = FMODUnity.RuntimeManager.LowlevelSystem
@@ -25,13 +25,13 @@ internal class SoundAsset : FMODAsset
 
     public void FetchEvent(string type)
     {
-        var programmer = type.ToUpper() switch
+        var programmer = type switch
         {
-            "LOUD" => "event:/Evolution/ProgrammerSound/Loud",
-            "NORMAL" => "event:/Evolution/ProgrammerSound/Normal",
-            "MENU" => "event:/Evolution/ProgrammerSound/Menu",
-            "MUSIC" => "event:/Evolution/ProgrammerSound/Music",
-            "UNZOOMED" => "event:/Evolution/ProgrammerSound/Unzoomed",
+            "loud" => "event:/Evolution/ProgrammerSound/Loud",
+            "normal" => "event:/Evolution/ProgrammerSound/Normal",
+            "menu" => "event:/Evolution/ProgrammerSound/Menu",
+            "music" => "event:/Evolution/ProgrammerSound/Music",
+            "unzoomed" => "event:/Evolution/ProgrammerSound/Unzoomed",
             _ => "event:/Evolution/ProgrammerSound/Normal"
         };
         var result = FMODUnity.RuntimeManager.StudioSystem.getEvent(programmer, out var description);

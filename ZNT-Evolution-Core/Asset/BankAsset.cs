@@ -3,6 +3,7 @@ using BepInEx.Logging;
 using UnityEngine;
 using BepInExLogger = BepInEx.Logging.Logger;
 
+// ReSharper disable InconsistentNaming
 namespace ZNT.Evolution.Core.Asset;
 
 public class BankAsset : TextAsset
@@ -11,22 +12,22 @@ public class BankAsset : TextAsset
 
     public byte[] data;
 
-    public string Path => $"bank:/{name}";
+    public string path => $"bank:/{name}";
 
     public void Load()
     {
         if (data is null) throw new NullReferenceException();
         FMODUnity.RuntimeManager.LoadBank(this);
         FMODUnity.RuntimeManager.WaitForAllLoads();
-        foreach (var (_, asset) in FMODAsset.FetchFMODAsset(Path))
+        foreach (var (_, asset) in FMODAsset.FetchFMODAsset(path))
         {
-            Logger.LogDebug($"Bind FMODAsset {asset.path} from {Path}");
+            Logger.LogDebug($"Bind FMODAsset {asset.path} from {path}");
         }
     }
 
     public void UnLoad()
     {
-        FMODAsset.ClearFMODAsset(Path);
+        FMODAsset.ClearFMODAsset(path);
         FMODUnity.RuntimeManager.UnloadBank(name);
     }
 }

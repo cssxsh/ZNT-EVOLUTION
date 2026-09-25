@@ -816,7 +816,7 @@ public class ModContext
         {
             case BankAsset bank:
                 bank.Load();
-                Logger.LogInfo($"Fetch FMODAsset from {bank.Path}");
+                Logger.LogInfo($"Fetch FMODAsset from {bank.path}");
                 break;
             case FMODAsset fmod:
                 _ = fmod.Bind();
@@ -859,7 +859,7 @@ public class ModContext
         {
             case BankAsset bank:
                 bank.UnLoad();
-                Logger.LogInfo($"Clear FMODAsset from {bank.Path}");
+                Logger.LogInfo($"Clear FMODAsset from {bank.path}");
                 break;
             case FMODAsset fmod:
                 fmod.Unbind();
