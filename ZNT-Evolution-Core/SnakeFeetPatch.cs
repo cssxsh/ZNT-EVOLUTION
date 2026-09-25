@@ -10,17 +10,24 @@ internal class SnakeFeetPatch
     [HarmonyPatch(typeof(HumanBehaviour), "OnAttackHit")]
     public static void OnAttackHit(HumanBehaviour __instance)
     {
-        if (__instance.Frozen || !__instance.Vision.enabled) return;
-        if (__instance.Weapon.Attack.HasTarget()) return;
-        var frequency = __instance.Vision.Frequency;
-        try
+        if (__instance.Frozen) return;
+        if (__instance.Vision.enabled)
         {
-            __instance.Vision.Frequency = 1748;
-            __instance.Vision.Update();
+            if (__instance.Attacker.HasTarget()) return;
+            var frequency = __instance.Vision.Frequency;
+            try
+            {
+                __instance.Vision.Frequency = 1748;
+                __instance.Vision.Update();
+            }
+            finally
+            {
+                __instance.Vision.Frequency = frequency;
+            }
         }
-        finally
+        else if (__instance.Patroller.State is not Patroller.PatrolState.Disabled)
         {
-            __instance.Vision.Frequency = frequency;
+            __instance.Attacker.AttackHit();
         }
     }
 
