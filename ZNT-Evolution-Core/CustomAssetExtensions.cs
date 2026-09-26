@@ -141,6 +141,16 @@ public static class CustomAssetExtensions
         }
     }
 
+    extension(TriggerAsset trigger)
+    {
+        [UsedImplicitly]
+        public TriggerAsset.TrapType TriggerType
+        {
+            get => Traverse.Create(trigger).Field<TriggerAsset.TrapType>("type").Value;
+            set => Traverse.Create(trigger).Field<TriggerAsset.TrapType>("type").Value = value;
+        }
+    }
+
     extension(MovingObjectAsset moving)
     {
         [UsedImplicitly]
