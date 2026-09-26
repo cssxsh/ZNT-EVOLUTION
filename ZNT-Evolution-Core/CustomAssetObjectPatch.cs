@@ -498,10 +498,19 @@ internal static class CustomAssetObjectPatch
     #region VisualEffect
 
     [HarmonyPostfix]
-    [HarmonyPatch(typeof(EffectManager), "GetEffect")]
-    public static void GetEffect(EffectManager __instance, VisualEffect effect, Transform __result)
+    [HarmonyPatch(typeof(VisualEffect), "Prefab", MethodType.Getter)]
+    public static Transform GetPrefab(Transform __result, VisualEffect __instance)
     {
-        if (effect is CustomVisualEffect custom) custom.Populate(__result);
+        if (__instance is not CustomVisualEffect custom) return __result;
+        custom.RuntimePrefab = Object.Instantiate(__result);
+        Object.DontDestroyOnLoad(custom.RuntimePrefab);
+        custom.RuntimePrefab.name = __instance.name;
+        custom.RuntimePrefab.gameObject.SetActive(false);
+        if (custom.RuntimePrefab.TryGetComponent(out PoolRetriever retriever)) Object.Destroy(retriever);
+        if (custom.RuntimePrefab.TryGetComponent(out AnimationDespawner despawn)) Object.Destroy(despawn);
+        custom.Populate(custom.RuntimePrefab);
+        custom.RuntimePrefab.gameObject.SetActive(true);
+        return custom.RuntimePrefab;
     }
 
     #endregion
