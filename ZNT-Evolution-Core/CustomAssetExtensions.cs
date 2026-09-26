@@ -122,15 +122,6 @@ public static class CustomAssetExtensions
         }
     }
 
-    extension(VisualEffect visual)
-    {
-        [UsedImplicitly]
-        public void SetPrefab(Transform value)
-        {
-            Traverse.Create(visual).Field<Transform>("prefab").Value = value;
-        }
-    }
-
     extension(ExplosionAsset explosion)
     {
         [UsedImplicitly]

@@ -506,8 +506,6 @@ internal static class CustomAssetObjectPatch
         Object.DontDestroyOnLoad(custom.RuntimePrefab);
         custom.RuntimePrefab.name = __instance.name;
         custom.RuntimePrefab.gameObject.SetActive(false);
-        if (custom.RuntimePrefab.TryGetComponent(out PoolRetriever retriever)) Object.Destroy(retriever);
-        if (custom.RuntimePrefab.TryGetComponent(out AnimationDespawner despawn)) Object.Destroy(despawn);
         custom.Populate(custom.RuntimePrefab);
         custom.RuntimePrefab.gameObject.SetActive(true);
         return custom.RuntimePrefab;

@@ -27,7 +27,9 @@ public class CustomVisualEffect : VisualEffect
 
     public void Populate(Transform prefab)
     {
-        if (Prefab.TryGetComponent(out SpriteAnimator animator))
+        if (prefab.TryGetComponent(out PoolRetriever retriever)) Destroy(retriever);
+        if (prefab.TryGetComponent(out AnimationDespawner despawn)) Destroy(despawn);
+        if (prefab.TryGetComponent(out SpriteAnimator animator))
         {
             animator.Animator.playAutomatically = false;
             var controller = animator.gameObject.GetComponentSafe<VisualEffectAnimationController>();
