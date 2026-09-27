@@ -141,19 +141,17 @@ internal static class DebugPatch
     [HarmonyPatch(typeof(Moveable), "SetSpeed")]
     public static void SetSpeed(Moveable __instance)
     {
-        __instance.UpdateIsGrounded();
-        if (!__instance.IsGrounded) return;
-        // ReSharper disable once SwitchStatementHandlesSomeKnownEnumValuesWithDefault
+        // ReSharper disable once SwitchStatementMissingSomeEnumCasesNoDefault
         switch (__instance.State)
         {
             case MoveableState.Jumping:
             case MoveableState.JumpFalling:
             case MoveableState.Falling:
             case MoveableState.Pushed:
+                __instance.UpdateIsGrounded();
+                if (!__instance.IsGrounded) break;
                 __instance.HitGround(0.0f);
                 break;
-            default:
-                return;
         }
     }
 

@@ -253,8 +253,9 @@ public static class BaseComponentExtensions
         [UsedImplicitly]
         public bool MatchOneWay(Collider2D collider, Vector2 direction)
         {
-            if (!OneWayEditor.TryGetOneWay(collider, out var wall)) return true;
-            return wall.Direction == direction && wall.BlockLayer(mover.Body.gameObject.layer);
+            return OneWayEditor.TryGetOneWay(collider, out var wall)
+                ? wall.Direction == direction && wall.BlockLayer(mover.Body.gameObject.layer)
+                : LayerMask.LayerToName(collider.gameObject.layer) is "Stairs" or "Stairs Top";
         }
     }
 
