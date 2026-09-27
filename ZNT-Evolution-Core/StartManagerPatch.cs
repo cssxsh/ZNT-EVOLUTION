@@ -82,9 +82,9 @@ internal static class StartManagerPatch
         CustomAssetUtility.Cache[asset.NameAndType()] = asset;
         switch (asset)
         {
-            case PhysicObjectAsset { DamageCharacterOnTrigger: true, DamageRadius: 0 } physic:
-                physic.DamageCharacterOnTrigger = false;
-                Logger.LogDebug($"Fix DamageCharacterOnTrigger for {physic}");
+            case TriggerAsset { Name: "radioactivity" } trigger:
+                trigger.Name = "Radioactivity";
+                Logger.LogDebug($"Fix Name for {trigger}");
                 break;
             case MovingObjectAsset { name: "CarBoss" or "CircularSaw" or "InvisibleMovingTrap" } moving:
                 moving.HierarchyName = moving.name.SplitCamelCase();
@@ -93,6 +93,10 @@ internal static class StartManagerPatch
             case MovingObjectAsset { name: "Elevator 1" or "Elevator 2" } moving:
                 moving.HierarchyName = moving.name;
                 Logger.LogDebug($"Fix HierarchyName for {moving}");
+                break;
+            case PhysicObjectAsset { DamageCharacterOnTrigger: true, DamageRadius: 0 } physic:
+                physic.DamageCharacterOnTrigger = false;
+                Logger.LogDebug($"Fix DamageCharacterOnTrigger for {physic}");
                 break;
             case HumanAsset { BlockOpponents: true, MaxOpponentsBlock: 0 } human:
                 human.BlockOpponents = false;
@@ -316,6 +320,25 @@ internal static class StartManagerPatch
                     prefab.transform.GetChild(0).GetChild(0).name += "_01";
                     prefab.transform.GetChild(0).GetChild(1).name += "_02";
                     prefab.transform.GetChild(0).GetChild(2).name += "_03";
+                    break;
+            }
+        }
+
+        if (prefab.TryGetComponent(out SignalEffect signal))
+        {
+            // ReSharper disable once ConvertSwitchStatementToSwitchExpression
+            switch (signal.name)
+            {
+                case "AcidTrap":
+                case "BaseTrap":
+                case "InvisibleTrap":
+                case "InvisibleTrigger":
+                case "JumpTrigger":
+                case "MineTrap":
+                case "RadioactivityTrap":
+                case "SteamDown":
+                case "SteamUp":
+                    _ = prefab.GetComponent<Trigger>().GetEffect<DialogueEffect>();
                     break;
             }
         }

@@ -1,6 +1,5 @@
 using Newtonsoft.Json;
 using UnityEngine;
-using ZNT.Evolution.Core.Editor;
 
 // ReSharper disable InconsistentNaming
 namespace ZNT.Evolution.Core.Effect;

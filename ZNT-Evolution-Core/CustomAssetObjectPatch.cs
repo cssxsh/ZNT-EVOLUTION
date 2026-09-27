@@ -155,11 +155,9 @@ internal static class CustomAssetObjectPatch
     [HarmonyPatch(typeof(TriggerAsset), "LoadFromAsset")]
     public static void LoadFromAsset(TriggerAsset __instance, GameObject gameObject)
     {
-        var trigger = gameObject.GetComponent<Trigger>();
         // ReSharper disable once InvertIf
-        if (__instance.TriggerType is TriggerAsset.TrapType.Trigger)
+        if (gameObject.TryGetComponent<DialogueEffect>(out var dialogue))
         {
-            var dialogue = trigger.GetEffect<DialogueEffect>();
             dialogue.EditorVisibility.CustomName = __instance.Name + " Dialogue Effect";
             dialogue.SetVisible(true);
             dialogue.Mode = DialogueEffect.DetectionMode.SignalOnEnter;
