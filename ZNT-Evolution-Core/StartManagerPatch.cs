@@ -290,6 +290,36 @@ internal static class StartManagerPatch
             }
         }
 
+        if (prefab.TryGetComponent(out VisualEffectController _))
+        {
+            switch (prefab.name)
+            {
+                case "BloodRippedTank":
+                    prefab.transform.GetChild(10).name += "_01";
+                    prefab.transform.GetChild(11).name += "_02";
+                    prefab.transform.GetChild(12).name += "_03";
+                    break;
+                case "BoomerBloodBase":
+                case "BoomerBloodTank":
+                case "BreakFloor":
+                case "Vomit_1":
+                case "Vomit_2":
+                case "Vomit_3":
+                    prefab.transform.GetChild(0).GetChild(0).name += "_01";
+                    prefab.transform.GetChild(0).GetChild(1).name += "_02";
+                    break;
+                case "KamikazeDeath":
+                    prefab.transform.GetChild(0).GetChild(1).name += "_01";
+                    prefab.transform.GetChild(0).GetChild(2).name += "_02";
+                    break;
+                case "Vomit_Blood":
+                    prefab.transform.GetChild(0).GetChild(0).name += "_01";
+                    prefab.transform.GetChild(0).GetChild(1).name += "_02";
+                    prefab.transform.GetChild(0).GetChild(2).name += "_03";
+                    break;
+            }
+        }
+
         switch (prefab.GetComponent<BaseBehaviour>() ??
                 prefab.transform.Find("Behaviour")?.GetComponent<BaseBehaviour>())
         {

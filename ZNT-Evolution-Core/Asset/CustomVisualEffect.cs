@@ -39,7 +39,9 @@ public class CustomVisualEffect : VisualEffect
 
         foreach (var (key, value) in particles ??= new ParticleConfig())
         {
-            var system = prefab.Find(key)?.GetComponent<ParticleSystem>();
+            var system = key is "."
+                ? prefab.GetComponent<ParticleSystem>()
+                : prefab.Find(key)?.GetComponent<ParticleSystem>();
             if (system is null) continue;
             using var reader = new JTokenReader(value);
             CustomAssetUtility.Serializer.Populate(reader, system);
