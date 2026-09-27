@@ -37,7 +37,9 @@ public class CustomVisualEffect : VisualEffect
             controller.animation = animation;
         }
 
-        foreach (var (key, value) in particles ??= new ParticleConfig())
+        // Fix Bug of UnityDictionary.GetEnumerator
+        _ = (particles ??= new ParticleConfig()).Keys;
+        foreach (var (key, value) in particles)
         {
             var system = key is "."
                 ? prefab.GetComponent<ParticleSystem>()
