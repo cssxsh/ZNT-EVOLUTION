@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using BepInEx.Logging;
 using HarmonyLib;
 using Newtonsoft.Json;
@@ -12,6 +13,8 @@ namespace ZNT.Evolution.Core.Asset;
 internal class ObjectConverter : CustomCreationConverter<UnityEngine.Object>
 {
     private static readonly ManualLogSource Logger = BepInExLogger.CreateLogSource(nameof(ObjectConverter));
+
+    private static readonly Regex NameAndTypeRegex = new(@"^\s*([^:]+?)\s*:\s*([^:]+?)\s*$", RegexOptions.Compiled);
 
     public override bool CanWrite => true;
 
@@ -92,12 +95,11 @@ internal class ObjectConverter : CustomCreationConverter<UnityEngine.Object>
         }
 
         if (CustomAssetUtility.Cache.TryGetValue(key, out var value)) return value;
-        var name = key.Split(':')[0].Trim();
-        var t = key.IndexOf(':') >= 0 ? AccessTools.TypeByName(key.Split(':')[1].Trim()) ?? type : type;
-        if (t == typeof(Transform)
-            && CustomAssetUtility.TryGetPrefab(name, out var prefab)) return prefab;
-        if (t == typeof(GameObject)
-            && CustomAssetUtility.TryGetPrefab(name, out var transform)) return transform.gameObject;
+        var match = NameAndTypeRegex.Match(key);
+        var name = match.Success ? match.Groups[1].Value : key;
+        var t = match.Success ? AccessTools.TypeByName(match.Groups[2].Value) ?? type : type;
+        if (t == typeof(Transform) && CustomAssetUtility.TryGetPrefab(name, out var prefab)) return prefab;
+        if (t == typeof(GameObject) && CustomAssetUtility.TryGetPrefab(name, out var p)) return p.gameObject;
         foreach (var asset in Resources.FindObjectsOfTypeAll(t))
         {
             if (asset.name != name) continue;
