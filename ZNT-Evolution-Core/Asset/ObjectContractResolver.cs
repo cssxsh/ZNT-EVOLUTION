@@ -92,6 +92,11 @@ internal class ObjectContractResolver() : DefaultContractResolver(shareCache: tr
             case { Name: nameof(HumanAsset.RiseAsset) } when typeof(HumanAsset) == member.DeclaringType:
                 property.Converter = property.MemberConverter = new LazyAsset.MemberConverter(member);
                 break;
+            case { Name: nameof(tk2dSpriteAnimationFrame.spriteId) } when typeof(int) == member.GetMemberType():
+            case { Name: nameof(LevelElement.SpriteIndex) } when typeof(LevelElement) == member.DeclaringType:
+            case { Name: nameof(CharacterAsset.SpriteIndex) } when typeof(CharacterAsset) == member.DeclaringType:
+                property.Converter = property.MemberConverter = SpriteIdConverter.Instance;
+                break;
             case not null when member.IsDefined(typeof(LayerAttribute)):
                 property.Converter = property.MemberConverter = LayerConverter.Instance;
                 break;

@@ -32,7 +32,7 @@ internal class SpriteInfo : EvolutionInfo<tk2dSpriteCollectionData>
     public readonly Vector2[] Anchors;
 
     [JsonProperty("AttachPoints")]
-    public readonly Dictionary<int, tk2dSpriteDefinition.AttachPoint[]> AttachPoints;
+    public readonly Dictionary<string, tk2dSpriteDefinition.AttachPoint[]> AttachPoints;
 
     [JsonProperty("Material")]
     public readonly Material Material;
@@ -47,7 +47,7 @@ internal class SpriteInfo : EvolutionInfo<tk2dSpriteCollectionData>
         string[] names,
         Rect[] regions,
         Vector2[] anchors = null, Vector2? anchor = null,
-        Dictionary<int, tk2dSpriteDefinition.AttachPoint[]> points = null,
+        Dictionary<string, tk2dSpriteDefinition.AttachPoint[]> points = null,
         string name = null,
         Material material = null,
         bool transformed = false) : base(name)
@@ -57,7 +57,7 @@ internal class SpriteInfo : EvolutionInfo<tk2dSpriteCollectionData>
         Names = names;
         Regions = regions;
         Anchors = anchors ?? [.. Regions.Select(region => anchor ?? region.size / 2)];
-        AttachPoints = points ?? new Dictionary<int, tk2dSpriteDefinition.AttachPoint[]>();
+        AttachPoints = points ?? new Dictionary<string, tk2dSpriteDefinition.AttachPoint[]>();
         Material = material;
         Transformed = transformed;
         if (Names.Length != Regions.Length) Logger.LogWarning("Names.Length != Regions.Length");
@@ -90,8 +90,16 @@ internal class SpriteInfo : EvolutionInfo<tk2dSpriteCollectionData>
         impl.name = Name ?? Regex.Replace(Material.name, "_mat$", "");
         impl.material = Material;
         impl.materials[0] = Material;
-        foreach (var definition in impl.spriteDefinitions) definition.material = Material;
-        foreach (var (index, points) in AttachPoints) impl.spriteDefinitions[index].attachPoints = points;
+        for (var index = 0; index < impl.spriteDefinitions.Length; index++)
+        {
+            var definition = impl.spriteDefinitions[index];
+            definition.material = Material;
+            if (AttachPoints.TryGetValue(index.ToString(), out var points) ||
+                AttachPoints.TryGetValue(definition.name, out points))
+            {
+                definition.attachPoints = points;
+            }
+        }
 
         Object.DontDestroyOnLoad(impl);
         return impl;

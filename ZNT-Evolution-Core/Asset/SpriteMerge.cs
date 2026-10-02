@@ -16,7 +16,7 @@ internal class SpriteMerge : EvolutionMerge<tk2dSpriteCollectionData>
     private static readonly ManualLogSource Logger = BepInExLogger.CreateLogSource(nameof(SpriteMerge));
 
     [JsonProperty("AttachPoints")]
-    public readonly Dictionary<int, tk2dSpriteDefinition.AttachPoint[]> AttachPoints;
+    public readonly Dictionary<string, tk2dSpriteDefinition.AttachPoint[]> AttachPoints;
 
     [JsonProperty("Material")]
     public readonly Material Material;
@@ -25,10 +25,10 @@ internal class SpriteMerge : EvolutionMerge<tk2dSpriteCollectionData>
     public SpriteMerge(
         tk2dSpriteCollectionData source,
         string name = null,
-        Dictionary<int, tk2dSpriteDefinition.AttachPoint[]> points = null,
+        Dictionary<string, tk2dSpriteDefinition.AttachPoint[]> points = null,
         Material material = null) : base(name, source)
     {
-        AttachPoints = points ?? new Dictionary<int, tk2dSpriteDefinition.AttachPoint[]>();
+        AttachPoints = points ?? new Dictionary<string, tk2dSpriteDefinition.AttachPoint[]>();
         Material = material;
         if (Source is null) Logger.LogWarning("Source is null");
     }
@@ -42,7 +42,16 @@ internal class SpriteMerge : EvolutionMerge<tk2dSpriteCollectionData>
         clone.materials[0] = Material;
         clone.textures[0] = Material.mainTexture;
         foreach (var definition in clone.spriteDefinitions) definition.material = Material;
-        foreach (var (index, points) in AttachPoints) clone.spriteDefinitions[index].attachPoints = points;
+        for (var index = 0; index < clone.spriteDefinitions.Length; index++)
+        {
+            var definition = clone.spriteDefinitions[index];
+            definition.material = Material;
+            if (AttachPoints.TryGetValue(index.ToString(), out var points) ||
+                AttachPoints.TryGetValue(definition.name, out points))
+            {
+                definition.attachPoints = points;
+            }
+        }
 
         Object.DontDestroyOnLoad(clone);
         return clone;

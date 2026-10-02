@@ -57,6 +57,7 @@ internal class ObjectConverter : CustomCreationConverter<UnityEngine.Object>
         if (reader.TokenType is not JsonToken.String)
         {
             if (base.ReadJson(reader, type, _, serializer) is not UnityEngine.Object result) return null;
+            SpriteIdConverter.Apply(result);
             if (result is ISerializationCallbackReceiver receiver) receiver.OnAfterDeserialize();
             if (result is tk2dSpriteAnimation animation) CheckAttachPoints(animation);
             CustomAssetUtility.Cache[result.NameAndType()] = result;
