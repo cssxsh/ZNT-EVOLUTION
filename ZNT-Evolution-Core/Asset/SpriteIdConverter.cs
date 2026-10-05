@@ -27,7 +27,7 @@ internal class SpriteIdConverter : JsonConverter
                         if (frame.spriteId >= 0 || frame.spriteCollection is null) continue;
                         if (Map.TryGetValue(frame.spriteId, out var name))
                         {
-                            frame.spriteId = frame.spriteCollection.GetSpriteIdByName(name);
+                            frame.spriteId = frame.spriteCollection.GetSpriteIdByName(name, frame.spriteId);
                         }
                     }
                 }
@@ -38,7 +38,7 @@ internal class SpriteIdConverter : JsonConverter
                 if (element.SpriteIndex >= 0 || element.SpriteCollection is null) break;
                 if (Map.TryGetValue(element.SpriteIndex, out var name))
                 {
-                    element.SpriteIndex = element.SpriteCollection.GetSpriteIdByName(name);
+                    element.SpriteIndex = element.SpriteCollection.GetSpriteIdByName(name, element.SpriteIndex);
                 }
             }
                 break;
@@ -47,7 +47,7 @@ internal class SpriteIdConverter : JsonConverter
                 if (human.SpriteIndex >= 0 || human.SpriteCollection is null) break;
                 if (Map.TryGetValue(human.SpriteIndex, out var name))
                 {
-                    human.SpriteIndex = human.SpriteCollection.GetSpriteIdByName(name);
+                    human.SpriteIndex = human.SpriteCollection.GetSpriteIdByName(name, human.SpriteIndex);
                 }
             }
                 break;

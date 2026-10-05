@@ -93,16 +93,38 @@ internal class SpriteInfo : EvolutionInfo<tk2dSpriteCollectionData>
         for (var index = 0; index < impl.spriteDefinitions.Length; index++)
         {
             var definition = impl.spriteDefinitions[index];
-            definition.material = Material;
-            if (AttachPoints.TryGetValue(index.ToString(), out var points) ||
-                AttachPoints.TryGetValue(definition.name, out points))
-            {
-                definition.attachPoints = points;
-            }
+            definition.material = Fetch(definition.name);
+            definition.attachPoints = Attach(definition.name, index);
         }
 
         Object.DontDestroyOnLoad(impl);
         return impl;
+    }
+
+    private Material Fetch(string name)
+    {
+        // ReSharper disable once InvertIf
+        if (Material.shader.name is "ZNT/Characters/Characters Base" &&
+            Regex.IsMatch(name, @"^(blood_\w+|\w+_blood)_(\d{2,})"))
+        {
+            var key = Regex.Replace(Material.name, "_mat$", "_blood_mat : UnityEngine.Material");
+            var blood = CustomAssetUtility.DeserializeObject<Material>(key);
+            if (blood) return blood;
+        }
+
+        return Material;
+    }
+
+    private tk2dSpriteDefinition.AttachPoint[] Attach(string name, int index)
+    {
+        _ = AttachPoints.TryGetValue(name, out var points) ||
+            AttachPoints.TryGetValue(index.ToString(), out points);
+        return System.Array.ConvertAll(points ?? [], point => new tk2dSpriteDefinition.AttachPoint
+        {
+            name = point.name,
+            position = Transformed ? point.position / TargetHeight : point.position,
+            angle = point.angle
+        });
     }
 
     public SpriteInfo WithMaterial(Material material)

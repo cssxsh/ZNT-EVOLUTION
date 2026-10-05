@@ -21,15 +21,20 @@ internal class SpriteMerge : EvolutionMerge<tk2dSpriteCollectionData>
     [JsonProperty("Material")]
     public readonly Material Material;
 
+    [JsonProperty("Transformed")]
+    public readonly bool Transformed;
+
     [JsonConstructor]
     public SpriteMerge(
         tk2dSpriteCollectionData source,
         string name = null,
         Dictionary<string, tk2dSpriteDefinition.AttachPoint[]> points = null,
-        Material material = null) : base(name, source)
+        Material material = null,
+        bool transformed = false) : base(name, source)
     {
         AttachPoints = points ?? new Dictionary<string, tk2dSpriteDefinition.AttachPoint[]>();
         Material = material;
+        Transformed = transformed;
         if (Source is null) Logger.LogWarning("Source is null");
     }
 
@@ -41,20 +46,27 @@ internal class SpriteMerge : EvolutionMerge<tk2dSpriteCollectionData>
         clone.material = Material;
         clone.materials[0] = Material;
         clone.textures[0] = Material.mainTexture;
-        foreach (var definition in clone.spriteDefinitions) definition.material = Material;
         for (var index = 0; index < clone.spriteDefinitions.Length; index++)
         {
             var definition = clone.spriteDefinitions[index];
             definition.material = Material;
-            if (AttachPoints.TryGetValue(index.ToString(), out var points) ||
-                AttachPoints.TryGetValue(definition.name, out points))
-            {
-                definition.attachPoints = points;
-            }
+            definition.attachPoints = Attach(definition.name, index);
         }
 
         Object.DontDestroyOnLoad(clone);
         return clone;
+    }
+
+    private tk2dSpriteDefinition.AttachPoint[] Attach(string name, int index)
+    {
+        _ = AttachPoints.TryGetValue(name, out var points) ||
+            AttachPoints.TryGetValue(index.ToString(), out points);
+        return System.Array.ConvertAll(points ?? [], point => new tk2dSpriteDefinition.AttachPoint
+        {
+            name = point.name,
+            position = Transformed ? point.position / 2 / Source.halfTargetHeight : point.position,
+            angle = point.angle
+        });
     }
 
     public SpriteMerge WithMaterial(Material material)
