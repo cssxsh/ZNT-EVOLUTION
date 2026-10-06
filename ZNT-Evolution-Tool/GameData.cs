@@ -16,6 +16,9 @@ namespace ZNT.Evolution.Tool;
 [UsedImplicitly]
 public class GameData : IDisposable
 {
+    [UsedImplicitly]
+    public static string GamePath => Environment.GetEnvironmentVariable("ZNTGamePath") ?? "..";
+
     // ReSharper disable once MemberCanBePrivate.Global
     public AssetsManager Manager { get; }
 
@@ -42,12 +45,16 @@ public class GameData : IDisposable
         Manager.LoadClassDatabaseFromPackage(GameBundle.file.Header.EngineVersion);
     }
 
+    public GameData() : this(GamePath)
+    {
+        Console.WriteLine($"GamePath: {GamePath}");
+    }
+
     public void Dispose()
     {
+        ClearImage();
         Manager.UnloadBundleFile(GameBundle);
         Manager.UnloadAssetsFile(GameRes);
-        foreach (var image in Images.Values) image.Dispose();
-        Images.Clear();
         GC.SuppressFinalize(this);
     }
 
@@ -161,197 +168,20 @@ public class GameData : IDisposable
     }
 
     [UsedImplicitly]
-    [SuppressMessage("Performance", "SYSLIB1045")]
-    public JObject? LevelElementToPixelStudio(AssetExternal element)
+    public void ClearImage()
     {
-        var asset = Manager.GetExtAsset(element.file, element.baseField["CustomAsset"]);
-        if (asset.info is null) return null;
-        var script = Manager.GetExtAsset(asset.file, asset.baseField["m_Script"]);
-        if (script.baseField["m_ClassName"].AsString is not "HumanAsset") return null;
-        var uuid = element.baseField["assetId"].AsString;
-        var sprites = Manager.GetExtAsset(asset.file, asset.baseField["SpriteCollection"]);
-        var animation = Manager.GetExtAsset(asset.file, asset.baseField["AnimationLibrary"]);
+        foreach (var image in Images.Values) image.Dispose();
+        Images.Clear();
+    }
 
-        var sorted = new SortedDictionary<string, AssetTypeValueField>(IdComparer.Instance);
-        var name = element.baseField["m_Name"].AsString switch
-        {
-            "human_crs" => "human_cop_crs",
-            "human_daftpunk_1" => "human_daft_punk_1",
-            "human_daftpunk_2" => "human_daft_punk_2",
-            "human_gunner_survivor" => "human_survivor_gunner",
-            "human_perchman" => "human_soundman",
-            "human_rifleman_survivor" => "human_survivor_rifleman",
-            "human_shotgunner_survivor" => "human_survivor_shotgunner",
-            "human_sniper" => "human_sniper_1",
-            _ => element.baseField["m_Name"].AsString
-        };
-        var prefix = name switch
-        {
-            "drone" or "drone_exterminator" or "drone_invincible" or "drone_invisible" =>
-                new Regex(@"^(drone_\w+)_\d{2,}", RegexOptions.Compiled),
-            "human_astrogoliath" =>
-                new Regex(@"^(astrogoliath_\w+)_\d{2,}", RegexOptions.Compiled),
-            "human_astronaut" =>
-                new Regex(@"^(moonsuit_\w+)_\d{2,}", RegexOptions.Compiled),
-            "human_bishop" =>
-                new Regex(@"^(ash_\w+)_\d{2,}", RegexOptions.Compiled),
-            "human_boss_chemist" or "human_boss_chemist_invincible" =>
-                new Regex(@"^(chemist_boss_\w+)_\d{2,}", RegexOptions.Compiled),
-            "human_boss_drug_lord" =>
-                new Regex(@"^(boss1_\w+)_\d{2,}", RegexOptions.Compiled),
-            "human_boss_gertrude" or "human_boss_gertrude_cinematic" =>
-                new Regex(@"^(gertrude_\w+)_\d{2,}", RegexOptions.Compiled),
-            "human_bouncer" =>
-                new Regex(@"^(videur_\w+)_\d{2,}", RegexOptions.Compiled),
-            "human_cheerleader" =>
-                new Regex(@"^(cheerleader_\w+)_\d{2,}", RegexOptions.Compiled),
-            "human_chemist" or "human_chemist_chair" or "human_chemist_plier" =>
-                new Regex(@"^(chemist_\w+)_\d{2,}", RegexOptions.Compiled),
-            "human_civilian" or "human_civilian_hostage" or "human_civilian_survivor" =>
-                new Regex(@"^((?:civil_1|cicil_1)_\w+)_\d{2,}", RegexOptions.Compiled),
-            "human_civilian_black" or "human_civilian_black_explosive" =>
-                new Regex(@"^(civil_3_\w+)_\d{2,}", RegexOptions.Compiled),
-            "human_civilian_dsk" =>
-                new Regex(@"^(dsk_\w+)_\d{2,}", RegexOptions.Compiled),
-            "human_civilian_nude" =>
-                new Regex(@"^(nudeguy_\w+)_\d{2,}", RegexOptions.Compiled),
-            "human_civilian_young" or "human_survivor_molotov" or "human_survivor_torch" =>
-                new Regex(@"^((?:civil_2|civil2)_\w+)_\d{2,}", RegexOptions.Compiled),
-            "human_clown" =>
-                new Regex(@"^(clown_\w+)_\d{2,}", RegexOptions.Compiled),
-            "human_cop_crs" =>
-                new Regex(@"^(crs_\w+)_\d{2,}", RegexOptions.Compiled),
-            "human_cop_rifleman" or "human_cop_weak" =>
-                new Regex(@"^(assault_1_\w+)_\d{2,}", RegexOptions.Compiled),
-            "human_daft_punk_1" =>
-                new Regex(@"^(DP1_\w+)_\d{2,}", RegexOptions.Compiled),
-            "human_daft_punk_2" =>
-                new Regex(@"^(DP2_\w+)_\d{2,}", RegexOptions.Compiled),
-            "human_director" =>
-                new Regex(@"^(director_\w+)_\d{2,}|^(soundman_\w+)_\d{2}", RegexOptions.Compiled),
-            "human_driver" =>
-                new Regex(@"^(driver_\w+)_\d{2,}", RegexOptions.Compiled),
-            "human_football_player" =>
-                new Regex(@"^football_\w+_\d{2,}|^videur_\w+_\d{2}", RegexOptions.Compiled),
-            "human_girl" or "human_girl_hostage" =>
-                new Regex(@"^(girl_1_\w+)_\d{2,}", RegexOptions.Compiled),
-            "human_girl_black" =>
-                new Regex(@"^(girl_2_\w+)_\d{2,}", RegexOptions.Compiled),
-            "human_girl_blonde" or "human_girl_blonde_garbage" =>
-                new Regex(@"^(girl_3_\w+)_\d{2,}", RegexOptions.Compiled),
-            "human_girl_nude" =>
-                new Regex(@"^(nudegirl_\w+)_\d{2,}", RegexOptions.Compiled),
-            "human_girl_survivor" or "human_girl_blonde_survivor" =>
-                new Regex(@"^(girl_survivor_\w+)_\d{2,}|^girl_1_spawn_\d{2}", RegexOptions.Compiled),
-            "human_granny" =>
-                new Regex(@"^(granny_\w+)_\d{2,}", RegexOptions.Compiled),
-            "human_gunner" or "human_gunner_tutorial" =>
-                new Regex(@"^((?:gunner|H_gunner)_\w+)_\d{2,}|^gunner_fall_landing_small\d{2}", RegexOptions.Compiled),
-            "human_homeless" =>
-                new Regex(@"^(tramp_\w+)_\d{2,}|^((?:civil_1|cicil_1)_\w+)_\d{2}", RegexOptions.Compiled),
-            "human_kamikaze" =>
-                new Regex(@"^(kamikaze_\w+)_\d{2,}", RegexOptions.Compiled),
-            "human_lumberjack" =>
-                new Regex(@"^(chainsaw_\w+)_\d{2,}", RegexOptions.Compiled),
-            "human_machine_gunner" =>
-                new Regex(@"^(minigun_\w+)_\d{2,}", RegexOptions.Compiled),
-            "human_melee" =>
-                new Regex(@"^((?:batteur_1|batteur1)_\w+)_\d{2,}", RegexOptions.Compiled),
-            "human_mib_brawler" =>
-                new Regex(@"^(mib2_\w+)_\d{2,}", RegexOptions.Compiled),
-            "human_mib_gunner" =>
-                new Regex(@"^(mib_[a-z]\w*)_\d{2,}", RegexOptions.Compiled),
-            "human_mib_rifleman" =>
-                new Regex(@"^(mib3_\w+)_\d{2,}", RegexOptions.Compiled),
-            "human_mib_shotgunner" =>
-                new Regex(@"^(mib_4_\w+)_\d{2,}", RegexOptions.Compiled),
-            "human_ninja" =>
-                new Regex(@"^(ninja_\w+)_\d{2,}", RegexOptions.Compiled),
-            "human_preacher" =>
-                new Regex(@"^(preacher_\w+)_\d{2,}|^((?:civil_1|cicil_1)_\w+)_\d{2}", RegexOptions.Compiled),
-            "human_priest" =>
-                new Regex(@"^(priest_\w+)_\d{2,}", RegexOptions.Compiled),
-            "human_scientist_female_1" or "human_scientist_female_2" =>
-                new Regex(@"(scientist_girl1_\w+)_\d{2,}", RegexOptions.Compiled),
-            "human_scientist_hazmat" =>
-                new Regex(@"(hazmat_\w+)_\d{2,}", RegexOptions.Compiled),
-            "human_scientist_male_1" =>
-                new Regex(@"(scientist_\w+)_\d{2,}", RegexOptions.Compiled),
-            "human_scientist_male_2" =>
-                new Regex(@"(scientist2_\w+)_\d{2,}", RegexOptions.Compiled),
-            "human_scientist_male_3" =>
-                new Regex(@"(scientist3_\w+)_\d{2,}", RegexOptions.Compiled),
-            "human_shotgunner" =>
-                new Regex(@"^((?:shotgun_1|Shotgun_1)_\w+)_\d{2,}", RegexOptions.Compiled),
-            "human_sniper_1" =>
-                new Regex(@"^(sniper_\w+)_\d{2,}", RegexOptions.Compiled),
-            "human_sniper_2" =>
-                new Regex(@"^(sniper2_\w+)_\d{2,}", RegexOptions.Compiled),
-            "human_soundman" =>
-                new Regex(@"^(soundman_\w+)_\d{2,}", RegexOptions.Compiled),
-            "human_spacegirl_1" or "human_spacegirl_2" =>
-                new Regex(@"^(cultist_girl_\w+)_\d{2,}", RegexOptions.Compiled),
-            "human_spaceman_1" =>
-                new Regex(@"^(cultist1_\w+)_\d{2,}", RegexOptions.Compiled),
-            "human_spaceman_2" =>
-                new Regex(@"^(cultist2_\w+)_\d{2,}", RegexOptions.Compiled),
-            "human_survivor_rifleman" =>
-                new Regex(@"^(assault_survivor_\w+)_\d{2,}", RegexOptions.Compiled),
-            "human_survivor_gunner" =>
-                new Regex(@"^(rick_\w+)_\d{2,}", RegexOptions.Compiled),
-            "human_survivor_shotgunner" =>
-                new Regex(@"^(shotgun_survivor_\w+)_\d{2,}", RegexOptions.Compiled),
-            "human_sword_women" =>
-                new Regex(@"^(sword_\w+)_\d{2,}", RegexOptions.Compiled),
-            "human_toilet_guy" =>
-                new Regex(@"^(toilet_guy_\w+)_\d{2,}|^((?:civil_1|cicil_1)_\w+)_\d{2}", RegexOptions.Compiled),
-            "human_virgin" =>
-                new Regex(@"^(virgin_\w+)_\d{2,}", RegexOptions.Compiled),
-            "human_worker_1" =>
-                new Regex(@"^(worker1_\w+)_\d{2,}", RegexOptions.Compiled),
-            "human_worker_2" =>
-                new Regex(@"^(worker2_\w+)_\d{2,}", RegexOptions.Compiled),
-            "human_worker_3" =>
-                new Regex(@"^(worker3_\w+)_\d{2,}", RegexOptions.Compiled),
-            "human_worker_4" =>
-                new Regex(@"^(worker4_\w+)_\d{2,}", RegexOptions.Compiled),
-            "terminator" =>
-                new Regex(@"^(terminator_\w+)_\d{2,}", RegexOptions.Compiled),
-            "fake_zombie_basic" => null,
-            "fake_zombie_crawler" => null,
-            "fake_zombie_overlord" => null,
-            "fake_zombie_tank" => null,
-            "human_doctor_female" => null,
-            "human_scientist_male_2_old" => null,
-            _ => throw new FormatException(name)
-        };
-        if (prefix is null) return null;
-        foreach (var definition in sprites.baseField["spriteDefinitions"]["Array"])
-        {
-            var id = definition["name"].AsString;
-            if (prefix.IsMatch(id)) sorted[id] = definition;
-        }
-
-        foreach (var c in animation.baseField["clips"]["Array"])
-        {
-            if (c["name"].AsString is null or "") continue;
-            foreach (var frame in c["frames"]["Array"])
-            {
-                if (sprites.info.PathId != frame["spriteCollection"]["m_PathID"].AsLong) continue;
-                var index = frame["spriteId"].AsInt;
-                var definition = sprites.baseField["spriteDefinitions"]["Array"][index];
-                var id = definition["name"].AsString;
-                if (prefix.IsMatch(id)) continue;
-                if (id is "DP2_alert_start_03" or "sniper_aim_00") continue;
-                throw new FormatException($"{name} - {c["name"].AsString} - {id}({index})");
-            }
-        }
-
+    [UsedImplicitly]
+    private JObject BuildPixelStudio(AssetsFileInstance assets, IDictionary<string, AssetTypeValueField> definitions)
+    {
         var psp = new JObject
         {
             ["Version"] = 2,
-            ["Id"] = uuid,
-            ["Name"] = name,
+            ["Id"] = Guid.NewGuid(),
+            ["Name"] = "temp",
             ["Width"] = 144,
             ["Height"] = 144,
             ["Type"] = 2,
@@ -364,7 +194,7 @@ public class GameData : IDisposable
         };
 
         var clip = new JObject();
-        foreach (var (_, definition) in sorted)
+        foreach (var (_, definition) in definitions)
         {
             var id = definition["name"].AsString;
             var group = IdComparer.IdRegex.Match(id).Groups[1].Value;
@@ -391,7 +221,7 @@ public class GameData : IDisposable
             };
             clip.Value<JArray>("Frames")!.Add(frame);
 
-            var material = Manager.GetExtAsset(sprites.file, sprites.baseField["materials"]["Array"][0]);
+            var material = Manager.GetExtAsset(assets, definition["material"]);
             // ReSharper disable InconsistentNaming
             var m_TexEnvs = material.baseField["m_SavedProperties"]["m_TexEnvs"]["Array"];
             var _MainTex = Manager.GetExtAsset(material.file, m_TexEnvs[0][1]["m_Texture"]);
@@ -461,37 +291,274 @@ public class GameData : IDisposable
                 frame.Value<JArray>("Layers")!.Add(layer);
             }
 
+            using var empty = new MagickImage(MagickColors.Transparent, 1, 1);
+            foreach (var point in definition["attachPoints"]["Array"])
             {
-                using var empty = new MagickImage(MagickColors.Transparent, 1, 1);
-                foreach (var point in definition["attachPoints"]["Array"])
+                var key = point["name"].AsString;
+                var x = (int)Math.Round(point["position"]["x"].AsFloat * 12);
+                var y = (int)Math.Round(point["position"]["y"].AsFloat * 12);
+                var angle = (point["angle"].AsFloat + 360) % 360;
+                var attach = new JObject
                 {
-                    var key = point["name"].AsString;
-                    var x = (int)Math.Round(point["position"]["x"].AsFloat * 12);
-                    var y = (int)Math.Round(point["position"]["y"].AsFloat * 12);
-                    var angle = (point["angle"].AsFloat + 360) % 360;
-                    var attach = new JObject
+                    ["Id"] = id + "_AttachPoints(" + key + ")",
+                    ["Name"] = key,
+                    ["Transparency"] = angle / 360,
+                    ["Hidden"] = true,
+                    ["Linked"] = false,
+                    ["Outline"] = 0,
+                    ["Lock"] = 1,
+                    ["Sx"] = x + offset_x,
+                    ["Sy"] = y + 144 - offset_y,
+                    ["Version"] = 1,
+                    ["_historyJson"] = new JObject
                     {
-                        ["Id"] = id + "_AttachPoints(" + key + ")",
-                        ["Name"] = key,
-                        ["Transparency"] = angle / 360,
-                        ["Hidden"] = true,
-                        ["Linked"] = false,
-                        ["Outline"] = 0,
-                        ["Lock"] = 1,
-                        ["Sx"] = x + offset_x,
-                        ["Sy"] = y + 144 - offset_y,
-                        ["Version"] = 1,
-                        ["_historyJson"] = new JObject
-                        {
-                            ["Actions"] = new JArray(),
-                            ["Index"] = 0,
-                            ["_source"] = empty.ToBase64(MagickFormat.Png8)
-                        }.ToString(Formatting.None)
-                    };
-                    frame.Value<JArray>("Layers")!.Add(attach);
+                        ["Actions"] = new JArray(),
+                        ["Index"] = 0,
+                        ["_source"] = empty.ToBase64(MagickFormat.Png8)
+                    }.ToString(Formatting.None)
+                };
+                frame.Value<JArray>("Layers")!.Add(attach);
+            }
+        }
+
+        return psp;
+    }
+
+    [UsedImplicitly]
+    [SuppressMessage("Performance", "SYSLIB1045")]
+    public JObject SpriteCollectionToPixelStudio(AssetExternal sprites)
+    {
+        var uuid = GetGameObject(sprites).baseField["m_Name"].AsString;
+        var name = Regex.Replace(uuid, "^sprites?_", "");
+        var sorted = new SortedDictionary<string, AssetTypeValueField>(IdComparer.Instance);
+        foreach (var definition in sprites.baseField["spriteDefinitions"]["Array"])
+        {
+            var id = definition["name"].AsString;
+            if (sorted.TryAdd(id, definition)) continue;
+            throw new FormatException($"{name} - {id}");
+        }
+
+        var psp = BuildPixelStudio(sprites.file, sorted);
+        psp["Id"] = uuid;
+        psp["Name"] = name;
+
+        return psp;
+    }
+
+    [UsedImplicitly]
+    [SuppressMessage("Performance", "SYSLIB1045")]
+    public JObject? LevelElementToPixelStudio(AssetExternal element)
+    {
+        var asset = Manager.GetExtAsset(element.file, element.baseField["CustomAsset"]);
+        if (asset.info is null) return null;
+        var script = Manager.GetExtAsset(asset.file, asset.baseField["m_Script"]);
+        if (script.baseField["m_ClassName"].AsString is not "HumanAsset") return null;
+        var uuid = element.baseField["assetId"].AsString;
+        var blood = Manager.GetExtAsset(asset.file, 0, 13925);
+        var sprites = Manager.GetExtAsset(asset.file, asset.baseField["SpriteCollection"]);
+        var animation = Manager.GetExtAsset(asset.file, asset.baseField["AnimationLibrary"]);
+
+        var sorted = new SortedDictionary<string, AssetTypeValueField>(IdComparer.Instance);
+        var name = element.baseField["m_Name"].AsString switch
+        {
+            "human_crs" => "human_cop_crs",
+            "human_daftpunk_1" => "human_daft_punk_1",
+            "human_daftpunk_2" => "human_daft_punk_2",
+            "human_gunner_survivor" => "human_survivor_gunner",
+            "human_perchman" => "human_soundman",
+            "human_rifleman_survivor" => "human_survivor_rifleman",
+            "human_shotgunner_survivor" => "human_survivor_shotgunner",
+            "human_sniper" => "human_sniper_1",
+            "human_toilet_guy" => "human_civilian_toilet_guy",
+            _ => element.baseField["m_Name"].AsString
+        };
+        var prefix = name switch
+        {
+            "drone" or "drone_exterminator" or "drone_invincible" or "drone_invisible" =>
+                new Regex(@"^(drone_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_astrogoliath" =>
+                new Regex(@"^(astrogoliath_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_astronaut" =>
+                new Regex(@"^(moonsuit_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_bishop" =>
+                new Regex(@"^(ash_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_boss_chemist" or "human_boss_chemist_invincible" =>
+                new Regex(@"^(chemist_boss_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_boss_drug_lord" =>
+                new Regex(@"^(boss1_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_boss_gertrude" or "human_boss_gertrude_cinematic" =>
+                new Regex(@"^(gertrude_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_bouncer" =>
+                new Regex(@"^(videur_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_cheerleader" =>
+                new Regex(@"^(cheerleader_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_chemist" or "human_chemist_chair" or "human_chemist_plier" =>
+                new Regex(@"^(chemist_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_civilian" or "human_civilian_hostage" or "human_civilian_survivor" =>
+                new Regex(@"^(civil_1_\w+|cicil_1_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_civilian_black" or "human_civilian_black_explosive" =>
+                new Regex(@"^(civil_3_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_civilian_dsk" =>
+                new Regex(@"^(dsk_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_civilian_nude" =>
+                new Regex(@"^(nudeguy_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_civilian_toilet_guy" =>
+                new Regex(@"^(toilet_guy_\w+|civil_1_\w+|cicil_1_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_civilian_young" or "human_survivor_molotov" or "human_survivor_torch" =>
+                new Regex(@"^(civil_2_\w+|civil2_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_clown" =>
+                new Regex(@"^(clown_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_cop_crs" =>
+                new Regex(@"^(crs_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_cop_rifleman" or "human_cop_weak" =>
+                new Regex(@"^(assault_1_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_daft_punk_1" =>
+                new Regex(@"^(DP1_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_daft_punk_2" =>
+                new Regex(@"^(DP2_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_director" =>
+                new Regex(@"^(director_\w+|soundman_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_driver" =>
+                new Regex(@"^(driver_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_football_player" =>
+                new Regex(@"^(football_\w+|videur_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_girl" or "human_girl_hostage" =>
+                new Regex(@"^(girl_1_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_girl_black" =>
+                new Regex(@"^(girl_2_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_girl_blonde" or "human_girl_blonde_garbage" =>
+                new Regex(@"^(girl_3_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_girl_nude" =>
+                new Regex(@"^(nudegirl_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_girl_survivor" or "human_girl_blonde_survivor" =>
+                new Regex(@"^(girl_survivor_\w+|girl_1_spawn)_\d{2,}", RegexOptions.Compiled),
+            "human_granny" =>
+                new Regex(@"^(granny_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_gunner" or "human_gunner_tutorial" =>
+                new Regex(@"^(gunner_\w+|H_gunner_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_homeless" =>
+                new Regex(@"^(tramp_\w+|civil_1_\w+|cicil_1_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_kamikaze" =>
+                new Regex(@"^(kamikaze_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_lumberjack" =>
+                new Regex(@"^(chainsaw_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_machine_gunner" =>
+                new Regex(@"^(minigun_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_melee" =>
+                new Regex(@"^(batteur_1_\w+|batteur1_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_mib_brawler" =>
+                new Regex(@"^(mib2_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_mib_gunner" =>
+                new Regex(@"^(mib_[^\d]\w*)_\d{2,}", RegexOptions.Compiled),
+            "human_mib_rifleman" =>
+                new Regex(@"^(mib3_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_mib_shotgunner" =>
+                new Regex(@"^(mib_4_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_ninja" =>
+                new Regex(@"^(ninja_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_preacher" =>
+                new Regex(@"^(preacher_\w+|civil_1_\w+|cicil_1_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_priest" =>
+                new Regex(@"^(priest_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_scientist_female_1" or "human_scientist_female_2" =>
+                new Regex(@"(scientist_girl1_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_scientist_hazmat" =>
+                new Regex(@"(hazmat_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_scientist_male_1" =>
+                new Regex(@"(scientist_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_scientist_male_2" =>
+                new Regex(@"(scientist2_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_scientist_male_3" =>
+                new Regex(@"(scientist3_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_shotgunner" =>
+                new Regex(@"^(shotgun_1_\w+|Shotgun_1_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_sniper_1" =>
+                new Regex(@"^(sniper_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_sniper_2" =>
+                new Regex(@"^(sniper2_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_soundman" =>
+                new Regex(@"^(soundman_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_spacegirl_1" or "human_spacegirl_2" =>
+                new Regex(@"^(cultist_girl_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_spaceman_1" =>
+                new Regex(@"^(cultist1_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_spaceman_2" =>
+                new Regex(@"^(cultist2_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_survivor_rifleman" =>
+                new Regex(@"^(assault_survivor_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_survivor_gunner" =>
+                new Regex(@"^(rick_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_survivor_shotgunner" =>
+                new Regex(@"^(shotgun_survivor_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_sword_women" =>
+                new Regex(@"^(sword_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_virgin" =>
+                new Regex(@"^(virgin_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_worker_1" =>
+                new Regex(@"^(worker1_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_worker_2" =>
+                new Regex(@"^(worker2_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_worker_3" =>
+                new Regex(@"^(worker3_\w+)_\d{2,}", RegexOptions.Compiled),
+            "human_worker_4" =>
+                new Regex(@"^(worker4_\w+)_\d{2,}", RegexOptions.Compiled),
+            "terminator" =>
+                new Regex(@"^(terminator_\w+)_\d{2,}", RegexOptions.Compiled),
+            "fake_zombie_basic" => null,
+            "fake_zombie_crawler" => null,
+            "fake_zombie_overlord" => null,
+            "fake_zombie_tank" => null,
+            "human_doctor_female" => null,
+            "human_scientist_male_2_old" => null,
+            _ => throw new FormatException(name)
+        };
+        if (prefix is null) return null;
+
+        foreach (var definition in sprites.baseField["spriteDefinitions"]["Array"])
+        {
+            var id = definition["name"].AsString;
+            if (id.StartsWith("gunner_fall_landing_small")) id = id.Replace("small", "small_");
+            if (prefix.IsMatch(id)) sorted[id] = definition;
+        }
+
+        foreach (var c in animation.baseField["clips"]["Array"])
+        {
+            if (c["name"].AsString is null or "") continue;
+            foreach (var frame in c["frames"]["Array"])
+            {
+                // ReSharper disable once InvertIf
+                if (frame["spriteCollection"]["m_PathID"].AsLong == sprites.info.PathId)
+                {
+                    var index = frame["spriteId"].AsInt;
+                    var definition = sprites.baseField["spriteDefinitions"]["Array"][index];
+                    var id = definition["name"].AsString;
+                    if (id.StartsWith("gunner_fall_landing_small")) id = id.Replace("small", "small_");
+                    if (prefix.IsMatch(id)) continue;
+                    if (id is "DP2_alert_start_03" or "sniper_aim_00") continue;
+                    throw new FormatException($"{name} - {c["name"].AsString} - {id}({index})");
+                }
+
+                // ReSharper disable once InvertIf
+                if (frame["spriteCollection"]["m_PathID"].AsLong == blood.info.PathId)
+                {
+                    var index = frame["spriteId"].AsInt;
+                    var definition = blood.baseField["spriteDefinitions"]["Array"][index];
+                    var id = definition["name"].AsString;
+                    if (sorted.ContainsKey(id)) continue;
+                    // if (prefix.IsMatch(id)) continue;
+                    // throw new FormatException($"{name} - {c["name"].AsString} - {id}({index})");
+                    var p = IdComparer.IdRegex.Match(id).Groups[1].Value;
+                    foreach (var d in blood.baseField["spriteDefinitions"]["Array"])
+                    {
+                        if (d["name"].AsString.StartsWith(p)) sorted[id] = d;
+                    }
                 }
             }
         }
+
+        var psp = BuildPixelStudio(sprites.file, sorted);
+        psp["Id"] = uuid;
+        psp["Name"] = name;
 
         return psp;
     }
@@ -501,6 +568,7 @@ public class GameData : IDisposable
     {
         using var atlas = new MagickImage(MagickColors.Transparent, 256, 256);
         using var rim = new MagickImage(MagickColors.Transparent, 256, 256);
+        using var flip = new MagickImage(MagickColors.Transparent, 256, 256);
         var allocator = new GuillotineAtlasAllocator(new Size(256, 256));
         var name = psp.Value<string>("Name")!;
         var width = psp.Value<int>("Width")!;
@@ -528,6 +596,8 @@ public class GameData : IDisposable
                 var id = $"{part}_{index++:D2}";
                 var region = new Rectangle();
                 var anchor = new Point();
+                var offset = new Point();
+
                 foreach (var layer in frame.Value<JArray>("Layers")!.Children<JObject>())
                 {
                     var key = layer.Value<string>("Name")!;
@@ -541,11 +611,11 @@ public class GameData : IDisposable
                     // ReSharper disable once InvertIf
                     if (key is "_MainTex")
                     {
-                        var x = layer.Value<int>("Sx")!;
-                        var y = height - layer.Value<int>("Sy")!;
-                        bound = source.BoundingBox ?? new MagickGeometry(x, y, 1, 1);
-                        anchor.X = x - bound.X;
-                        anchor.Y = y - bound.Y;
+                        offset.X = layer.Value<int>("Sx");
+                        offset.Y = height - layer.Value<int>("Sy");
+                        bound = source.BoundingBox ?? new MagickGeometry(offset.X, offset.Y, 1, 1);
+                        anchor.X = offset.X - bound.X;
+                        anchor.Y = offset.Y - bound.Y;
                         var allocation = new Allocation?();
                         while (allocation is null)
                         {
@@ -557,6 +627,7 @@ public class GameData : IDisposable
                             allocator.Grow(size);
                             atlas.Extent(0, 0, (uint)size.Width, (uint)size.Height);
                             rim.Extent(0, 0, (uint)size.Width, (uint)size.Height);
+                            flip.Extent(0, 0, (uint)size.Width, (uint)size.Height);
                         }
 
                         region = allocation.Value.Rectangle;
@@ -566,9 +637,9 @@ public class GameData : IDisposable
                         {
                             ["$type"] = "UnityEngine.Rect, UnityEngine.CoreModule",
                             ["x"] = (float)region.X,
-                            ["y"] = (float)region.Y,
+                            ["y"] = (float)(0 - region.Height - region.Y),
                             ["width"] = (float)region.Width,
-                            ["height"] = (float)(height - region.Height)
+                            ["height"] = (float)region.Height
                         });
                         info.Value<JArray>("Anchors")!.Add(new JObject
                         {
@@ -581,44 +652,76 @@ public class GameData : IDisposable
                     switch (key)
                     {
                         case "_MainTex":
-                            if (source.Width != width || source.Height != height) throw new FormatException(layer.Path);
+                            if (source.Width != width ||
+                                source.Height != height ||
+                                bound is null) throw new FormatException(layer.Path);
                             source.ResetPage();
-                            source.Crop(bound!);
+                            source.Crop(bound);
                             atlas.Composite(source, region.X, region.Y, CompositeOperator.Replace);
                             break;
                         case "_RimTex":
-                            if (source.Width != width || source.Height != height) throw new FormatException(layer.Path);
+                            if (source.Width != width ||
+                                source.Height != height ||
+                                bound is null) throw new FormatException(layer.Path);
                             source.ResetPage();
-                            source.Crop(bound!);
+                            source.Crop(bound);
                             rim.Composite(source, region.X, region.Y, CompositeOperator.Replace);
                             break;
                         case "_FlipTex":
-                            if (source.Width != width || source.Height != height) throw new FormatException(layer.Path);
+                            if (source.Width != width ||
+                                source.Height != height ||
+                                bound is null) throw new FormatException(layer.Path);
                             source.ResetPage();
-                            source.Crop(bound!);
-                            // TODO _FlipTex
+                            source.Crop(bound);
+                            flip.Composite(source, region.X, region.Y, CompositeOperator.Replace);
                             break;
-                        default:
+                        case "Effect 1":
+                        case "Effect 2":
+                        case "Effect 3":
+                        case "Effect 4":
+                        case "Selection":
+                        case "attach":
+                        case "attach point":
+                        case "camera":
+                        case "effect":
+                        case "lampshade":
+                        case "laser":
+                        case "light":
+                        case "particules":
+                        case "step":
+                        case "throw":
+                        case "top":
+                        case "zombie_walk_arm_R":
+                        case "zombie_walk_arm_L":
                             ((JArray)(info["AttachPoints"]![id] ??= new JArray())).Add(new JObject
                             {
                                 ["name"] = key,
                                 ["position"] = new JObject
                                 {
                                     ["$type"] = "UnityEngine.Vector3, UnityEngine.CoreModule",
-                                    ["x"] = (float)layer.Value<int>("Sx"),
-                                    ["y"] = (float)layer.Value<int>("Sy"),
+                                    ["x"] = (float)(layer.Value<int>("Sx") - offset.X),
+                                    ["y"] = (float)(layer.Value<int>("Sy") - height + offset.Y),
                                     ["z"] = 0.0
                                 },
                                 ["angle"] = layer.Value<float>("Transparency") * 360
                             });
+                            break;
+                        default:
+                            Console.WriteLine($"Unsupported layer '{key}'.");
                             break;
                     }
                 }
             }
         }
 
+        foreach (var region in info.Value<JArray>("Regions")!.Children<JObject>())
+        {
+            region["y"] = allocator.Size.Height + region.Value<float>("y");
+        }
+
         atlas.Write($@"{path}\sprites_{name}_atlas.png", MagickFormat.Png32);
-        rim.Write($@"{path}\sprites_{name}_rim_atlas.png", MagickFormat.Png32);
+        if (rim.BoundingBox is not null) rim.Write($@"{path}\sprites_{name}_rim_atlas.png", MagickFormat.Png32);
+        if (flip.BoundingBox is not null) flip.Write($@"{path}\sprites_{name}_flip_atlas.png", MagickFormat.Png32);
         {
             using var fs = File.Open($@"{path}\sprites_{name}.sprite.info.json", FileMode.Create);
             using var sw = new StreamWriter(fs, Encoding.ASCII);
@@ -626,6 +729,30 @@ public class GameData : IDisposable
             sw.NewLine = "\n";
             writer.Formatting = Formatting.Indented;
             info.WriteTo(writer);
+        }
+        {
+            var material = new JObject
+            {
+                ["Source"] = "sprites_empty_mat : UnityEngine.Material",
+                ["Name"] = $"sprites_{name}_mat",
+                ["Shader"] = "tk2d/BlendVertexColor",
+                ["Textures"] = new JObject
+                {
+                    ["_MainTex"] = $"sprites_{name}_atlas : UnityEngine.Texture2D",
+                    ["_RimTex"] = $"sprites_{name}_rim_atlas : UnityEngine.Texture2D",
+                    ["_FlipTex"] = $"sprites_{name}_flip_atlas : UnityEngine.Texture2D"
+                },
+                ["Floats"] = new JObject(),
+                ["Colors"] = new JObject()
+            };
+            if (rim.FileName is null or "#00000000") material.Value<JObject>("Textures")!.Remove("_RimTex");
+            if (flip.FileName is null or "#00000000") material.Value<JObject>("Textures")!.Remove("_FlipTex");
+            using var fs = File.Open($@"{path}\sprites_{name}_mat.material.merge.json", FileMode.Create);
+            using var sw = new StreamWriter(fs, Encoding.ASCII);
+            using var writer = new JsonTextWriter(sw);
+            sw.NewLine = "\n";
+            writer.Formatting = Formatting.Indented;
+            material.WriteTo(writer);
         }
     }
 
