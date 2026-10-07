@@ -57,10 +57,38 @@ MOD 放入 `znt_Data/Mods` 目录下
 
 ### FMOD
 
+#### `FMOD.Studio.Bank`
+
 > `*.strings.bank`, `*.bank`
 
 导入新的音频  
 参考 [FMOD.md - 制作 bank 文件](docs/FMOD.md#制作-bank-文件)
+
+#### `FMOD.Sound`
+
+> `*.ogg`, `*.mp3`, `*.wav`
+
+导入新的音频，引用格式 `file://{metadata.id}/{path}`
+
+#### `ZNT.Evolution.Core.Asset.VoiceAsset`
+
+> `*.voice.json`
+
+绑定语音选项
+
+- `index` - 选项序号
+- `path` - 音频
+- `name` - 选项名称
+
+```json
+{
+  "index": 25,
+  "path": "event:/IntroThunder",
+  "assetId": null,
+  "name": "God",
+  "hideFlags": "None"
+}
+```
 
 ### Sprite
 
@@ -90,6 +118,13 @@ MOD 放入 `znt_Data/Mods` 目录下
 
 导入新的精灵动画，命名规范 `anim_xxx`  
 参考 [Sprite.md - Animation Create](docs/Sprite.md#animation-create)
+
+#### `CharacterAnimationAsset`
+
+> `*.animations.json`
+
+导入新的角色动画集，命名规范 `xxxAnimations`  
+参考 [Sprite.md - Animations Create](docs/Sprite.md#animations-create)
 
 #### `ZNT.Evolution.Core.Asset.CustomVisualEffect`
 

@@ -21,6 +21,7 @@ internal class LazyAsset : CustomAssetObject
 
     public override void LoadFromAsset(GameObject gameObject) => throw new AssetException(HierarchyName);
 
+    [UsedImplicitly]
     public void Apply()
     {
         SceneLoader.BeforeLoadScene -= Apply;

@@ -20,12 +20,10 @@ internal static class PublishManagerPatch
     {
         if (!(temp && LevelManager.Mode is LevelManager.SourceMode.EditorCustomLevels)) return;
         var folder = $"{LevelManager.GetChaptersPath(LevelManager.SourceMode.Temp, true)}/Mods";
-        var title = chapter.Title.Content;
         var steam_link = $"steam://url/CommunityFilePage/{chapter.SteamWorkshopId}";
         var web_link = $"https://steamcommunity.com/sharedfiles/filedetails/?id={chapter.SteamWorkshopId}";
         if (Directory.Exists(folder)) Directory.Delete(folder, true);
-        foreach (var context in ModContext.Allocated().Where(context => context.Title == title ||
-                                                                        context.Metadata.Link == steam_link ||
+        foreach (var context in ModContext.Allocated().Where(context => context.Metadata.Link == steam_link ||
                                                                         context.Metadata.Link == web_link))
         {
             Logger.LogInfo($"Copy {context.Path} to {folder}");

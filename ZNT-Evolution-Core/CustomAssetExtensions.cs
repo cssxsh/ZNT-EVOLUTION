@@ -16,6 +16,7 @@ public static class CustomAssetExtensions
 
     extension(AssetElement asset)
     {
+        [UsedImplicitly]
         public bool Bind()
         {
             if (asset.AssetId is null or "") asset.SetAssetId(asset.name);
@@ -49,6 +50,7 @@ public static class CustomAssetExtensions
             }
         }
 
+        [UsedImplicitly]
         public void Unbind()
         {
             lock (AssetElementIndex.IndexPath)
@@ -80,6 +82,7 @@ public static class CustomAssetExtensions
 
     extension(FMODAsset)
     {
+        [UsedImplicitly]
         public static Dictionary<string, FMODAsset> FetchFMODAsset(string path)
         {
             var result = FMODUnity.RuntimeManager.StudioSystem.getBank(path, out var bank);
@@ -107,6 +110,7 @@ public static class CustomAssetExtensions
             return dictionary;
         }
 
+        [UsedImplicitly]
         public static void ClearFMODAsset(string path)
         {
             var result = FMODUnity.RuntimeManager.StudioSystem.getBank(path, out var bank);
@@ -129,6 +133,23 @@ public static class CustomAssetExtensions
         {
             get => Traverse.Create(explosion).Field<bool>("autoExplode").Value;
             set => Traverse.Create(explosion).Field<bool>("autoExplode").Value = value;
+        }
+
+        [UsedImplicitly]
+        public Transform CreatePrefab(Transform parent)
+        {
+            var prefab = ComponentSingleton<GamePoolManager>.Instance.Spawn(explosion.Prefab, parent);
+            var auto = explosion.AutoExplode;
+            try
+            {
+                explosion.AutoExplode = false;
+                explosion.LoadFromAsset(prefab.gameObject);
+                return prefab;
+            }
+            finally
+            {
+                explosion.AutoExplode = auto;
+            }
         }
     }
 
@@ -199,6 +220,7 @@ public static class CustomAssetExtensions
 
     extension(TMPro.TMP_Asset asset)
     {
+        [UsedImplicitly]
         public bool Bind()
         {
             if (asset.hashCode is 0) asset.hashCode = TMPro.TMP_TextUtilities.GetSimpleHashCode(asset.name);
@@ -223,6 +245,7 @@ public static class CustomAssetExtensions
             }
         }
 
+        [UsedImplicitly]
         public void Unbind()
         {
             lock (TMPro.MaterialReferenceManager.instance)

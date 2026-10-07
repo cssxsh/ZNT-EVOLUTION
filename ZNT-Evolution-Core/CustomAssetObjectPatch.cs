@@ -23,22 +23,6 @@ internal static class CustomAssetObjectPatch
         return parameters.ContainsKey(key) ? parameters.GetValue<DamageType>(key) : DamageType.None;
     }
 
-    private static Transform CreatePrefab(this ExplosionAsset explosion, Transform parent)
-    {
-        var prefab = ComponentSingleton<GamePoolManager>.Instance.Spawn(explosion.Prefab, parent);
-        var auto = explosion.AutoExplode;
-        try
-        {
-            explosion.AutoExplode = false;
-            explosion.LoadFromAsset(prefab.gameObject);
-            return prefab;
-        }
-        finally
-        {
-            explosion.AutoExplode = auto;
-        }
-    }
-
     [HarmonyPrefix]
     [HarmonyPatch(typeof(CustomAssetObject), "LoadFromAsset")]
     public static void LoadFromAsset(CustomAssetObject __instance, GameObject gameObject)
@@ -267,10 +251,17 @@ internal static class CustomAssetObjectPatch
     public static void LoadFromAsset(PhysicObjectAsset __instance, GameObject gameObject)
     {
         var behaviour = gameObject.GetComponent<PhysicObjectBehaviour>();
-        if (behaviour.Physic.StartDirection.IsZero()
-            && behaviour.Physic.StartForce is not 0) Logger.LogWarning($"{__instance} StartDirection is zero");
-        behaviour.DamageTriger.enabled = behaviour.DamageCharacterOnTrigger
-                                         || (behaviour.ExplodeOn & ExplodeSurfaceConverter.IgnoreHuman) is not 0;
+        behaviour.DamageTriger.enabled = behaviour.DamageCharacterOnTrigger ||
+                                         behaviour.ExplodeOn.HasFlag(ExplodeSurfaceConverter.Zombie) ||
+                                         behaviour.ExplodeOn.HasFlag(ExplodeSurfaceConverter.Climber) ||
+                                         behaviour.ExplodeOn.HasFlag(ExplodeSurfaceConverter.Blocker) ||
+                                         behaviour.ExplodeOn.HasFlag(ExplodeSurfaceConverter.Tank) ||
+                                         behaviour.ExplodeOn.HasFlag(ExplodeSurfaceConverter.WorldEnemy);
+
+        if (behaviour.Physic.StartDirection.IsZero() && behaviour.Physic.StartForce is not 0)
+        {
+            Logger.LogWarning($"{__instance} StartDirection is zero");
+        }
 
         if (behaviour.DamageTriger.enabled && behaviour.ExplodeOn.HasFlag(ExplodeSurfaceConverter.Target))
         {
@@ -282,8 +273,9 @@ internal static class CustomAssetObjectPatch
     [HarmonyPatch(typeof(PhysicObjectBehaviour), "OnTriggerEnter2D")]
     public static bool OnTriggerEnter2D(PhysicObjectBehaviour __instance, Collider2D other)
     {
-        var flag = __instance.DamageCharacterOnTrigger
-                   && __instance.TargetLayers.ContainsLayer(other.gameObject.layer);
+        var flag =
+            __instance.DamageCharacterOnTrigger &&
+            __instance.TargetLayers.ContainsLayer(other.gameObject.layer);
         if (flag) __instance.SendTargetDamage(other.gameObject);
         // TODO param by EvolutionSettings
         if (flag && __instance.Physic.GravityScale is 0.0f)
@@ -318,32 +310,14 @@ internal static class CustomAssetObjectPatch
     [HarmonyPatch(typeof(HumanBehaviour), "Initialize")]
     public static void Initialize(HumanBehaviour __instance)
     {
-        if (__instance.SharedAsset.CharacterType is CharacterType.Cultist
-            && !CultistBuff.ContainsKey(__instance.Character))
+        // ReSharper disable once InvertIf
+        if (__instance.SharedAsset.CharacterType is CharacterType.Cultist &&
+            !CultistBuff.ContainsKey(__instance.Character))
         {
             var effect = CultistBuff[__instance.Character] = ComponentSingleton<GamePoolManager>.Instance
                 .Spawn(SphereBuffEffect.PoolPrefab().Prefab, __instance.Character.transform)
                 .GetComponent<SphereBuffEffect>();
             effect.name = nameof(CultistBuff);
-        }
-
-        foreach (var (key, attachment) in __instance.SharedAsset.Attachments as IDictionary<string, GameObject>)
-        {
-            switch (key)
-            {
-                case "moving_attack":
-                case "shield_attack":
-                case "shield_effect":
-                case "attach_laser":
-                    continue;
-                default:
-                    if (attachment is null) continue;
-                    if (__instance.transform.Find(key)) continue;
-                    Logger.LogDebug($"Spawn {attachment} for {__instance.gameObject} Attachments[\"{key}\"]");
-                    // 'OnSpawned' triggered by 'BroadcastMessage'
-                    ComponentSingleton<GamePoolManager>.Instance.Spawn(attachment, __instance.transform).name = key;
-                    break;
-            }
         }
     }
 
@@ -459,11 +433,19 @@ internal static class CustomAssetObjectPatch
     {
         var detector = __instance.Detector;
         var collider = detector.GetComponent<Collider2D>();
-        Opponents[collider] = block ? maxOpponents : 0;
         var effect = detector.GetComponent<Trigger>().GetEffect<CharacterAllocationEffect>();
-        effect.capacity = block ? maxOpponents : 0;
-        if (block) effect.StartEffect();
-        else effect.StopEffect();
+        if (block)
+        {
+            effect.capacity = maxOpponents;
+            effect.StartEffect();
+            Opponents[collider] = maxOpponents;
+        }
+        else
+        {
+            effect.capacity = 0;
+            effect.StopEffect();
+            Opponents.Remove(collider);
+        }
     }
 
     [HarmonyPostfix]
@@ -537,8 +519,7 @@ internal static class CustomAssetObjectPatch
         foreach (var line in news.OrderBy(_ => Random.value))
         {
             if (current.ContainsKey(line.Content)) continue;
-            var target = ComponentSingleton<GamePoolManager>.Instance.Spawn(prefab);
-            target.SetParent(container);
+            var target = ComponentSingleton<GamePoolManager>.Instance.Spawn(prefab, container);
             target.localScale = Vector3.one;
             var tm = target.GetComponent<TMPro.TextMeshProUGUI>();
             tm.text = line.Content;

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using BepInEx.Logging;
 using HarmonyLib;
@@ -35,18 +36,26 @@ internal static class StartManagerPatch
         EvolutionCorePlugin.Instance.StartCoroutine(__instance.Evolution());
     }
 
-    private static IEnumerator Evolution(this StartManager starter)
+    extension(StartManager starter)
     {
-        Traverse.Create(starter).Field<bool>("isLoading").Value = true;
-        yield return Initialize();
-        yield return LoadModsFolder();
-        yield return LoadBank();
-        yield return LoadAssetFolder();
-        yield return LoadBrushFolder();
-        yield return LoadDecorFolder();
-        yield return LoadApplyFolder();
-        Traverse.Create(starter).Field<bool>("isLoading").Value = false;
-        starter.LoadNextScene();
+        private bool IsLoading
+        {
+            set => Traverse.Create(starter).Field<bool>("isLoading").Value = value;
+        }
+
+        private IEnumerator Evolution()
+        {
+            starter.IsLoading = true;
+            yield return Initialize();
+            yield return LoadModsFolder();
+            yield return LoadBank();
+            yield return LoadAssetFolder();
+            yield return LoadBrushFolder();
+            yield return LoadDecorFolder();
+            yield return LoadApplyFolder();
+            starter.IsLoading = false;
+            starter.LoadNextScene();
+        }
     }
 
     private static IEnumerator Initialize()
@@ -106,6 +115,14 @@ internal static class StartManagerPatch
                 human.CharacterType = CharacterType.Cultist;
                 Logger.LogDebug($"Fix CharacterType for {human}");
                 break;
+            case HumanAsset { name: "human_spacegirl_1" or "human_spacegirl_2" } human:
+                human.CharacterType = CharacterType.Cultist;
+                Logger.LogDebug($"Fix CharacterType for {human}");
+                break;
+            case HumanAsset { name: "human_spaceman_1" or "human_spaceman_2" } human:
+                human.CharacterType = CharacterType.Cultist;
+                Logger.LogDebug($"Fix CharacterType for {human}");
+                break;
             case LevelElement { name: "drone_exterminator" } drone:
                 drone.Title = "Drone Exterminator";
                 Logger.LogDebug($"Fix Title for {drone}");
@@ -119,6 +136,12 @@ internal static class StartManagerPatch
             case LevelElement { name: "human_daftpunk_2" } daft:
                 daft.Title = "Human Daft Punk 2";
                 Logger.LogDebug($"Fix Title for {daft}");
+                break;
+            case LevelElement { name: "human_gunner_survivor" } rick:
+                rick.Title = "Human Survivor Gunner (Rick)";
+                Logger.LogDebug($"Fix Title for {rick}");
+                rick.CustomAsset.HierarchyName = "Survivor Gunner (Rick)";
+                Logger.LogDebug($"Fix HierarchyName for {rick.CustomAsset}");
                 break;
             case LevelElement { name: "human_perchman" } man:
                 man.Title = "Human Soundman";
@@ -147,15 +170,19 @@ internal static class StartManagerPatch
                 ladder.name = "city_" + ladder.name;
                 Logger.LogDebug($"Fix Name for {ladder}");
                 break;
+            case LevelElement { name: "terminator" } terminator:
+                terminator.Title = "Terminator (Zombinator)";
+                Logger.LogDebug($"Fix Title for {terminator}");
+                terminator.CustomAsset.HierarchyName = "Terminator (Zombinator)";
+                Logger.LogDebug($"Fix HierarchyName for {terminator.CustomAsset}");
+                break;
             case LevelElement { CustomAsset: MovingObjectAsset { Speed: 50.0f } moving }:
                 moving.Speed = 15.0f;
                 Logger.LogDebug($"Fix Speed for {moving}");
                 break;
             case LevelElement { CustomAsset: HumanAsset human } element:
-                if (human.HierarchyName is "Rick") break;
-                if (human.HierarchyName is "Zombinator") break;
                 if (element.Title.Replace("Human ", "") == human.HierarchyName) break;
-                element.CustomAsset.HierarchyName = element.Title.Replace("Human ", "");
+                human.HierarchyName = element.Title.Replace("Human ", "");
                 Logger.LogDebug($"Fix HierarchyName for {human}");
                 break;
             case LevelElement { CustomAsset: not null, Brush: Rotorz.Tile.OrientedBrush brush } element:
@@ -180,6 +207,20 @@ internal static class StartManagerPatch
     private static void HandleAsset(tk2dSpriteCollectionData sprites)
     {
         CustomAssetUtility.Cache[sprites.NameAndType()] = sprites;
+        switch (sprites)
+        {
+            case { name: "sprites_gunner" }:
+            {
+                foreach (var definition in sprites.spriteDefinitions)
+                {
+                    if (definition.name.StartsWith("gunner_fall_landing_small"))
+                    {
+                        definition.name = definition.name.Insert("gunner_fall_landing_small".Length, "_");
+                    }
+                }
+            }
+                break;
+        }
     }
 
     private static void HandleAsset(tk2dSpriteAnimation animation)
@@ -189,8 +230,8 @@ internal static class StartManagerPatch
         {
             case { name: "anim_blood" }:
             {
-                var explosion = animation.GetClipByName("blood_explosion");
                 var sprites = animation.FirstValidClip.frames[0].spriteCollection;
+                var explosion = animation.GetClipByName("blood_explosion");
                 foreach (var frame in explosion.frames) frame.spriteCollection ??= sprites;
                 Logger.LogDebug($"Fix blood_explosion for {animation}");
             }
@@ -233,6 +274,9 @@ internal static class StartManagerPatch
                 break;
             case { name: "anim_daft_punk_1" or "anim_daft_punk_2" }:
             {
+                var contamination = animation.GetClipByName("contamination");
+                contamination.frames[0].spriteId = animation.FirstValidClip.frames[0].spriteId;
+                Logger.LogDebug($"Fix contamination for {animation}");
                 var teleport = animation.GetClipByName("teleport_in");
                 AnimationPatch.Push(animation, new tk2dSpriteAnimationClip(teleport)
                 {
@@ -241,6 +285,25 @@ internal static class StartManagerPatch
                     wrapMode = tk2dSpriteAnimationClip.WrapMode.Once
                 });
                 Logger.LogInfo($"Feat rise for {animation}");
+            }
+                break;
+            case { name: "anim_sniper_2" }:
+            {
+                var sprites = animation.FirstValidClip.frames[0].spriteCollection;
+                var sniper1 = sprites.GetSpriteIdByName("sniper_aim_00");
+                var sniper2 = sprites.GetSpriteIdByName("sniper2_aim_00");
+                _ = animation.GetClipByName("aim").frames
+                    .Where(frame => frame.spriteId == sniper1)
+                    .Sum(frame => frame.spriteId = sniper2);
+                Logger.LogDebug($"Fix aim for {animation}");
+                _ = animation.GetClipByName("aim_start").frames
+                    .Where(frame => frame.spriteId == sniper1)
+                    .Sum(frame => frame.spriteId = sniper2);
+                Logger.LogDebug($"Fix aim_start for {animation}");
+                _ = animation.GetClipByName("shoot").frames
+                    .Where(frame => frame.spriteId == sniper1)
+                    .Sum(frame => frame.spriteId = sniper2);
+                Logger.LogDebug($"Fix shoot for {animation}");
             }
                 break;
             case { name: "anim_traps" }:

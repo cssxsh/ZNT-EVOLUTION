@@ -200,19 +200,19 @@ internal static class SceneLoaderPatch
                     switch (value)
                     {
                         case true when context.IsLoadReady():
+                            HasModChanged = true;
                             toggle.interactable = false;
                             toggle.StartCoroutine(context.Load().ToCoroutine(_ =>
                             {
-                                HasModChanged = true;
                                 toggle.interactable = true;
                                 toggle.SetIsOnWithoutNotify(context.State is ModState.Loaded);
                             }));
                             break;
                         case false when context.IsUnloadReady():
+                            HasModChanged = true;
                             toggle.interactable = false;
                             toggle.StartCoroutine(context.Unload().ToCoroutine(_ =>
                             {
-                                HasModChanged = true;
                                 toggle.interactable = true;
                                 toggle.SetIsOnWithoutNotify(context.State is ModState.Loaded);
                             }));
@@ -493,14 +493,19 @@ internal static class SceneLoaderPatch
                     __instance.SetDefaultUi(component, member);
                 }
             }
+            catch (System.Exception e)
+            {
+                Logger.LogWarning(e);
+            }
             finally
             {
                 __instance.MainContainer = container;
-                var hasUI = panel.childCount is not 0;
-                header.gameObject.SetActive(hasUI);
-                header.gameObject.AddComponent<Button>().onClick.AddListener(panel.ToggleActivation);
-                panel.gameObject.SetActive(hasUI && Activated.Contains(panel.name));
             }
+
+            var hasUI = panel.childCount is not 0;
+            header.gameObject.SetActive(hasUI);
+            header.gameObject.AddComponent<Button>().onClick.AddListener(panel.ToggleActivation);
+            panel.gameObject.SetActive(hasUI && Activated.Contains(panel.name));
         }
 
         scroll.Rebuild(CanvasUpdate.PostLayout);
@@ -682,8 +687,7 @@ internal static class SceneLoaderPatch
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(SupportedTypeBinder), "BindLocalizableString")]
-    public static void BindLocalizableString(
-        SupportedTypeBinder __instance, EditorComponent component, MemberInfo member)
+    public static void BindLocalizable(SupportedTypeBinder __instance, EditorComponent component, MemberInfo member)
     {
         var components = __instance.UiComponents;
         var value = member.GetMemberValue<LocalizableString>(component.Data);

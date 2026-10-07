@@ -118,9 +118,9 @@ internal static class GlobalSettingsPatch
     [HarmonyPatch(typeof(RayConeDetection), "UpdateAngles")]
     public static void UpdateAngles(RayConeDetection __instance, out bool __state, bool force)
     {
-        __state = force
-                  || __instance.NeedUpdate
-                  || __instance.PreviousForward != __instance.transform.forward;
+        __state = force ||
+                  __instance.NeedUpdate ||
+                  __instance.PreviousForward != __instance.transform.forward;
     }
 
     [HarmonyPostfix]
@@ -233,15 +233,9 @@ internal static class GlobalSettingsPatch
 
     private static readonly Regex EmoteRegex = new(@"\[[^]]+\]", RegexOptions.Compiled);
 
-    extension(Dialogue dialogue)
-    {
-        private TMPro.TextMeshProUGUI Text =>
-            Traverse.Create(dialogue).Field<TMPro.TextMeshProUGUI>("text").Value;
-    }
-
     [HarmonyPostfix]
     [HarmonyPatch(typeof(Dialogue), "SetText")]
-    private static void SetText(Dialogue __instance)
+    public static void SetText(Dialogue __instance)
     {
         var tm = __instance.Text;
         tm.richText = DialogueRichText.Value;

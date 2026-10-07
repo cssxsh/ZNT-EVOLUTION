@@ -10,7 +10,7 @@
         <AppDesignerFolder>Properties</AppDesignerFolder>
         <RootNamespace>ZNT.Evolution.Core</RootNamespace>
         <AssemblyName>ZNT-Evolution-Core</AssemblyName>
-        <Version>1.2.3</Version>
+        <Version>1.3.0</Version>
         <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
         <FileAlignment>512</FileAlignment>
         <LangVersion>14</LangVersion>
@@ -448,9 +448,9 @@
         <Compile Include="Editor\SpriteEditor.cs"/>
         <Compile Include="Editor\StairEditor.cs"/>
         <Compile Include="Editor\TutorialBreakingNews.cs"/>
-        <Compile Include="Effect\CharacterAllocationEffect.cs"/>
-        <Compile Include="Editor\VisualEffectAnimationController.cs" />
+        <Compile Include="Editor\VisualEffectAnimationController.cs"/>
         <Compile Include="Editor\ZombieSpawnPointEditor.cs"/>
+        <Compile Include="Effect\CharacterAllocationEffect.cs"/>
         <Compile Include="Effect\CharacterBuff.cs"/>
         <Compile Include="Effect\DialogueEffect.cs"/>
         <Compile Include="Effect\SphereBuffEffect.cs"/>
@@ -474,8 +474,11 @@
             <Plugin Include="$(ZNTGamePath)\BepInEx\plugins\$(MSBuildProjectName)\$(AssemblyName).*.pdb"/>
         </ItemGroup>
         <Delete Files="@(Plugin)"/>
-        <Copy SourceFiles="$(OutputPath)\$(AssemblyName).dll" DestinationFiles="$(ZNTGamePath)\BepInEx\plugins\$(MSBuildProjectName)\$(AssemblyName).$(Version).dll"/>
-        <Copy SourceFiles="$(OutputPath)\$(AssemblyName).pdb" DestinationFiles="$(ZNTGamePath)\BepInEx\plugins\$(MSBuildProjectName)\$(AssemblyName).$(Version).pdb"/>
-        <Copy SourceFiles="$(OutputPath)\ZipStorer.dll" DestinationFiles="$(ZNTGamePath)\BepInEx\plugins\$(MSBuildProjectName)\ZipStorer.dll"/>
+        <Copy SourceFiles="$(OutputPath)\$(AssemblyName).dll"
+              DestinationFiles="$(ZNTGamePath)\BepInEx\plugins\$(MSBuildProjectName)\$(AssemblyName).$(Version).dll"/>
+        <Copy SourceFiles="$(OutputPath)\$(AssemblyName).pdb"
+              DestinationFiles="$(ZNTGamePath)\BepInEx\plugins\$(MSBuildProjectName)\$(AssemblyName).$(Version).pdb"/>
+        <Copy SourceFiles="$(OutputPath)\ZipStorer.dll"
+              DestinationFiles="$(ZNTGamePath)\BepInEx\plugins\$(MSBuildProjectName)\ZipStorer.dll"/>
     </Target>
 </Project>

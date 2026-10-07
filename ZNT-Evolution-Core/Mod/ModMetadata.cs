@@ -7,6 +7,7 @@ using ZNT.Evolution.Core.Asset;
 namespace ZNT.Evolution.Core.Mod;
 
 // ReSharper disable once ClassNeverInstantiated.Global
+// ReSharper disable once ArrangeObjectCreationWhenTypeNotEvident
 [JsonObject]
 public class ModMetadata(
     string id,
@@ -28,10 +29,10 @@ public class ModMetadata(
         var entry = package.GetEntry("metadata.json");
         if (entry is null) throw new FileNotFoundException($"metadata in {path}", "metadata.json");
         using var buffer = new MemoryStream();
-        package.ExtractFile(entry, buffer);
+        _ = package.ExtractFile(entry, buffer);
         buffer.Position = 0;
         var metadata = CustomAssetUtility.DeserializeObject<ModMetadata>(buffer);
-        System.Version.Parse(metadata.Version);
+        _ = System.Version.Parse(metadata.Version);
         foreach (var (_, version) in metadata.Dependencies) System.Version.Parse(version);
         return metadata;
     }
@@ -41,7 +42,7 @@ public class ModMetadata(
         var file = Path.Combine(path, "metadata.json");
         if (!File.Exists(file)) throw new FileNotFoundException($"metadata in {path}", "metadata.json");
         var metadata = CustomAssetUtility.DeserializeObjectFromPath<ModMetadata>(file);
-        System.Version.Parse(metadata.Version);
+        _ = System.Version.Parse(metadata.Version);
         foreach (var (_, version) in metadata.Dependencies) System.Version.Parse(version);
         return metadata;
     }

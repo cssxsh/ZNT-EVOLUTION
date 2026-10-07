@@ -71,6 +71,13 @@ public static class BaseComponentExtensions
         }
     }
 
+    extension(Dialogue dialogue)
+    {
+        [UsedImplicitly]
+        public TMPro.TextMeshProUGUI Text =>
+            Traverse.Create(dialogue).Field<TMPro.TextMeshProUGUI>("text").Value;
+    }
+
     extension(Trigger trigger)
     {
         [UsedImplicitly]
@@ -279,11 +286,13 @@ public static class BaseComponentExtensions
 
     extension<T>(BehaviourAnimationController<T> controller) where T : BaseBehaviour
     {
+        [UsedImplicitly]
         public T Behaviour => Traverse.Create(controller).Field<T>("Behaviour").Value;
     }
 
     extension<T>(PatrolActionUi<T> ui) where T : PatrolAction
     {
+        [UsedImplicitly]
         public T Action => Traverse.Create(ui).Field<T>("Action").Value;
     }
 
@@ -580,6 +589,7 @@ public static class BaseComponentExtensions
 
     extension(SignalReceiverLinker linker)
     {
+        [UsedImplicitly]
         public void AddReceiver(ReceiverLink link)
         {
             Traverse.Create(linker).Method("AddReceiver", link.Component, link).GetValue();
@@ -588,6 +598,7 @@ public static class BaseComponentExtensions
 
     extension(SignalSenderLinker linker)
     {
+        [UsedImplicitly]
         public void AddSender(SenderLink link)
         {
             Traverse.Create(linker).Method("AddSender", link.Component, link).GetValue();

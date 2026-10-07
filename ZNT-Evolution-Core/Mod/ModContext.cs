@@ -293,6 +293,8 @@ public class ModContext
         {
             // ModMetadata
             case { Name: "metadata", Type: "", Format: "json" }:
+            // README.md
+            case { Name: "README", Format: "md" }:
                 return;
             // Localization
             case { Type: "localization", Format: "csv" }:
