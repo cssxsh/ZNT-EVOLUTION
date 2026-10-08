@@ -157,7 +157,7 @@ internal static class CustomAssetObjectPatch
     public static void LoadFromAsset(MovingObjectAsset __instance, GameObject gameObject)
     {
         var behaviour = gameObject.GetComponent<MovingObjectBehaviour>();
-        behaviour.ActivateColliders(false);
+        behaviour.DamageTrigger?.SetActive(false);
         var controller = (MovingObjectAnimationController)behaviour.AnimationController;
         if (__instance.StandAnimation.Contains('{') ||
             __instance.DisableAnimation.Contains('{') ||

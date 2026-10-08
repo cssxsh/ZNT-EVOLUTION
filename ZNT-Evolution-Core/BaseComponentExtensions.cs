@@ -335,16 +335,13 @@ public static class BaseComponentExtensions
     extension(MovingObjectBehaviour behaviour)
     {
         [UsedImplicitly]
+        public Trigger DamageTrigger => Traverse.Create(behaviour).Field<Trigger>("damageTrigger").Value;
+
+        [UsedImplicitly]
         public void SetOrientation(ObjectOrientation.Orientation value)
         {
             Traverse.Create(behaviour).Field<Vector3>("orientation").Value =
                 value is ObjectOrientation.Orientation.Right ? Vector3.forward : Vector3.back;
-        }
-
-        [UsedImplicitly]
-        public void ActivateColliders(bool active)
-        {
-            Traverse.Create(behaviour).Method("ActivateColliders", [typeof(bool)], [active]).GetValue();
         }
     }
 
