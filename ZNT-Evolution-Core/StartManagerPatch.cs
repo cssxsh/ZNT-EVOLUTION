@@ -443,10 +443,12 @@ internal static class StartManagerPatch
                 _ = prefab.GetComponentSafe<MovingObjectSpawnPointEditor>();
                 spawn.ShowDamages(true);
                 break;
-            case MovingObjectBehaviour:
+            case MovingObjectBehaviour moving:
                 _ = prefab.GetComponentSafe<MovingObjectEditor>();
                 _ = prefab.GetComponentSafe<LayerEditor>();
                 _ = prefab.GetComponentSafe<SpriteEditor>();
+                Traverse.Create(moving).Field<Trigger>("damageTrigger").Value ??=
+                    moving.GetComponentInChildren<Trigger>();
                 break;
             case PhysicObjectBehaviour physic:
                 Traverse.Create(physic).Field<Health>("health").Value ??= physic.GetComponentInChildren<Health>();
