@@ -181,4 +181,33 @@ public static class CustomAssetUtility
         prefab = null;
         return false;
     }
+
+    public static PoolSettingsAsset.PoolPrefab AddPoolPrefab(Transform prefab)
+    {
+        // ReSharper disable once Unity.UnknownResource
+        var pool = Resources.Load<PoolSettingsAsset>("Assets/GamePoolSettings");
+        var index = 1;
+
+        foreach (var record in pool.Prefabs)
+        {
+            if (record.Prefab == prefab) return record;
+            foreach (var component in record.Prefab.GetComponentsInChildren<BaseComponent>(true))
+            {
+                if (component.Save() is null) continue;
+                if (component.PoolIndex >= index) index = component.PoolIndex + 1;
+            }
+        }
+
+        foreach (var component in prefab.GetComponentsInChildren<BaseComponent>(true))
+        {
+            if (component.Save() is null) continue;
+            component.PoolIndex = index++;
+        }
+
+        var retriever = prefab.gameObject.GetComponentSafe<PoolRetriever>();
+        retriever.Prefab = prefab;
+        var result = new PoolSettingsAsset.PoolPrefab { Prefab = prefab };
+        pool.Prefabs.Add(result);
+        return result;
+    }
 }
