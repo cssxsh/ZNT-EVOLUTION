@@ -204,28 +204,30 @@ internal static class CustomAssetObjectPatch
         if (__instance.TryGetComponent(out MovingObjectBehaviour moving))
         {
             moving.SetOrientation(value);
-            var controller = (MovingObjectAnimationController)moving.AnimationController;
-            if (controller.Asset.name.EndsWith("(Clone)"))
+            if (moving.AnimationController is MovingObjectAnimationController { Asset: not null } controller)
             {
-                var asset = (MovingObjectAsset)__instance.GetComponent<AssetComponent>().Asset;
-                var direction = value is ObjectOrientation.Orientation.Right ? "right" : "left";
-                controller.Asset.StandAnimation = string.Format(asset.StandAnimation, direction);
-                controller.Asset.DisableAnimation = string.Format(asset.DisableAnimation, direction);
-                controller.Asset.MoveAnimation = string.Format(asset.MoveAnimation, direction);
-                controller.Asset.StopAnimation = string.Format(asset.StopAnimation, direction);
-                controller.Asset.HitAnimation = string.Format(asset.HitAnimation, direction);
-                controller.Asset.DestroyAnimation = string.Format(asset.DestroyAnimation, direction);
-            }
+                if (controller.Asset.name.EndsWith("(Clone)"))
+                {
+                    var asset = (MovingObjectAsset)__instance.GetComponent<AssetComponent>().Asset;
+                    var direction = value is ObjectOrientation.Orientation.Right ? "right" : "left";
+                    controller.Asset.StandAnimation = string.Format(asset.StandAnimation, direction);
+                    controller.Asset.DisableAnimation = string.Format(asset.DisableAnimation, direction);
+                    controller.Asset.MoveAnimation = string.Format(asset.MoveAnimation, direction);
+                    controller.Asset.StopAnimation = string.Format(asset.StopAnimation, direction);
+                    controller.Asset.HitAnimation = string.Format(asset.HitAnimation, direction);
+                    controller.Asset.DestroyAnimation = string.Format(asset.DestroyAnimation, direction);
+                }
 
-            if (Execution.SceneMode is Execution.Mode.Edition &&
-                controller.Animator.GetAnimationClip(controller.Asset.StandAnimation) is { Empty: false } clip)
-            {
-                var frame = clip.frames[0];
-                controller.Animator.Sprite.SetSprite(frame.spriteCollection, frame.spriteId);
+                if (Execution.SceneMode is Execution.Mode.Edition &&
+                    controller.Animator.GetAnimationClip(controller.Asset.StandAnimation) is { Empty: false } clip)
+                {
+                    var frame = clip.frames[0];
+                    controller.Animator.Sprite.SetSprite(frame.spriteCollection, frame.spriteId);
+                }
             }
         }
 
-        var sprite = moving?.AnimationController.Animator.Sprite
+        var sprite = moving?.AnimationController?.Animator.Sprite
                      ?? __instance.GetComponentInChildren<tk2dBaseSprite>();
         if (sprite is null) return;
         sprite.SortingOrder = value is ObjectOrientation.Orientation.Right ? 0 : -1;
