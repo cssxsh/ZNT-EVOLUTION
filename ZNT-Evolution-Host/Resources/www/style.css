@@ -352,6 +352,29 @@ select.input option { background: #1b1f28; color: var(--text); }
     color: #5c6478;
 }
 
+/* ---------- 复合枚举 / 结构化值（Range、Vector） ---------- */
+.flags-cell {
+    display: flex; flex-wrap: wrap; gap: 2px 12px;
+    padding: 3px 0; min-width: 0;
+}
+.flag-item {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 12px; color: var(--muted); cursor: pointer;
+    user-select: none; -webkit-user-select: none;
+}
+.flag-item:hover { color: var(--text); }
+.flag-item:has(input:checked) { color: var(--text); }
+.flag-item input { accent-color: var(--accent); margin: 0; cursor: pointer; }
+
+.struct-cell { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; min-width: 0; }
+.struct-item { display: inline-flex; align-items: center; gap: 4px; min-width: 0; }
+.struct-lbl { font-size: 11px; color: var(--muted); }
+.struct-item .input { width: 86px; text-align: center; }
+
+.flags-cell.invalid, .struct-cell.invalid {
+    outline: 1px solid var(--err); outline-offset: 2px; border-radius: 6px;
+}
+
 /* ---------- 模态框 ---------- */
 .modal {
     position: fixed; inset: 0; z-index: 100;

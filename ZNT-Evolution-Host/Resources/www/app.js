@@ -65,12 +65,18 @@ function normalizeSchema(src) {
     return out;
 }
 
+// 未定义的键按自由文本处理（永远返回一个 def，调用方不必判空）
+const TEXT_KEY_DEF = { type: "text" };
+
 function getKeyDef(type, key) {
     const s = schema[type];
-    if (!s || !s.keys) return null;
+    if (!s || !s.keys) return TEXT_KEY_DEF;
     const k = (key || "").trim();
-    if (!k) return null;
-    return s.keys[k] || null;
+    if (!k) return TEXT_KEY_DEF;
+    if (s.keys[k]) return s.keys[k];
+    // DamageMultipliers[Spit]* 这类带索引/动作的键，退回基础字段定义
+    const base = k.replace(/[=+\-*/]$/, "").replace(/\[\w+]$/, "[*]").trim();
+    return (base && s.keys[base]) || TEXT_KEY_DEF;
 }
 
 function typeDesc(type) {
@@ -86,7 +92,14 @@ function getStepValue(kd) {
     if (kd && kd.step != null && isFinite(Number(kd.step)) && Number(kd.step) > 0) {
         return Number(kd.step);
     }
-    return (kd && kd.numberKind === "int") ? 1 : 0.1;
+    return isIntegralNumber(kd) ? 1 : 0.1;
+}
+
+// min / max / step 都为整数时按整数处理（step 是判定依据，没给 step 一律按 float），UI 不出现小数点
+function isIntegralNumber(kd) {
+    if (!kd || kd.step == null || kd.step === "") return false;
+    if (!Number.isInteger(Number(kd.step))) return false;
+    return [kd.min, kd.max].every(v => v == null || v === "" || Number.isInteger(Number(v)));
 }
 
 function decimalsOf(n) {
@@ -155,7 +168,7 @@ function bindStepButton(btn, action) {
 function validateValue(kd, raw, vtype) {
     const val = raw == null ? "" : String(raw);
 
-    if (vtype === "pattern") {
+    if (vtype === "pattern" || (vtype === "text" && kd && kd.pattern)) {
         if (val === "") return { ok: false, msg: "不能为空" };
         if (kd.pattern) {
             let re;
@@ -177,11 +190,56 @@ function validateValue(kd, raw, vtype) {
         return { ok: true };
     }
 
+    if (vtype === "flags") {
+        const parts = parseFlags(val);
+        if (!parts.length) return { ok: false, msg: "至少选一项" };
+        const opts = (kd.options || []).map(String);
+        const bad = opts.length ? parts.filter(p => !opts.includes(p)) : [];
+        if (bad.length) return { ok: false, msg: "未知成员：" + bad.join(", ") };
+        return { ok: true };
+    }
+
+    if (vtype === "range" || vtype === "vector2" || vtype === "vector3") {
+        const fields = structFields(kd);
+        let obj;
+        try { obj = JSON.parse(val.trim() === "" ? "{}" : val); }
+        catch (e) { return { ok: false, msg: "JSON 解析失败：" + e.message }; }
+        const num = {};
+        for (const f of fields) {
+            const v = obj[f.key];
+            if (v == null) continue;
+            if (!Number.isFinite(Number(v))) return { ok: false, msg: f.key + " 不是有效数字" };
+            num[f.key] = Number(v);
+        }
+        if (!Object.keys(num).length) {
+            return { ok: false, msg: "至少填 " + fields.map(f => f.key).join(" / ") + " 中的一项" };
+        }
+        if (vtype === "range") {
+            const lo = kd.min == null ? null : Number(kd.min);
+            const hi = kd.max == null ? null : Number(kd.max);
+            if (lo !== null && num.MinValue != null && num.MinValue < lo) {
+                return { ok: false, msg: "MinValue 不能小于 " + kd.min };
+            }
+            if (hi !== null && num.MaxValue != null && num.MaxValue > hi) {
+                return { ok: false, msg: "MaxValue 不能大于 " + kd.max };
+            }
+            if (num.MinValue != null && num.MaxValue != null && num.MinValue > num.MaxValue) {
+                return { ok: false, msg: "MinValue 不能大于 MaxValue" };
+            }
+        }
+        return { ok: true };
+    }
+
+    if (vtype === "bool") {
+        if (val !== "true" && val !== "false") return { ok: false, msg: "需为 true 或 false" };
+        return { ok: true };
+    }
+
     if (vtype === "number") {
         if (val.trim() === "") return { ok: false, msg: "不能为空" };
         const n = Number(val);
         if (!Number.isFinite(n)) return { ok: false, msg: "不是有效数字" };
-        if (kd.numberKind === "int" && !Number.isInteger(n)) {
+        if (isIntegralNumber(kd) && !Number.isInteger(n)) {
             return { ok: false, msg: "必须是整数" };
         }
         if (kd.min != null && n < Number(kd.min)) {
@@ -198,6 +256,43 @@ function validateValue(kd, raw, vtype) {
 
 function effectiveType(kd) {
     return (kd && kd.type) ? kd.type : "text";
+}
+
+function parseFlags(raw) {
+    return String(raw == null ? "" : raw).split(",").map(s => s.trim()).filter(Boolean);
+}
+
+function parseStruct(raw) {
+    try {
+        const v = JSON.parse(raw == null || String(raw).trim() === "" ? "{}" : String(raw));
+        return v && typeof v === "object" && !Array.isArray(v) ? v : {};
+    } catch (e) {
+        return {};
+    }
+}
+
+// range / vector2 / vector3 的组件是固定的，schema 里不再重复声明
+function structFields(kd) {
+    if (Array.isArray(kd.fields) && kd.fields.length) return kd.fields;
+    if (kd.type === "range") return [{ key: "MinValue" }, { key: "MaxValue" }];
+    if (kd.type === "vector2") return [{ key: "x" }, { key: "y" }];
+    if (kd.type === "vector3") return [{ key: "x" }, { key: "y" }, { key: "z" }];
+    return [];
+}
+
+function vectorTypeName(kd) {
+    if (kd.type === "vector2") return "UnityEngine.Vector2, UnityEngine.CoreModule";
+    if (kd.type === "vector3") return "UnityEngine.Vector3, UnityEngine.CoreModule";
+    return null;
+}
+
+// 展开的结构化值：组件先占位 undefined，未填写的项在 JSON.stringify 时自然省略
+function structValue(kd, filled) {
+    const out = {};
+    structFields(kd).forEach(f => { out[f.key] = undefined; });
+    const type = vectorTypeName(kd);
+    if (type) out.$type = type;
+    return JSON.stringify(Object.assign(out, filled));
 }
 
 /* =========================================================
@@ -234,6 +329,17 @@ function convertValueForJSON(type, key, raw) {
     if (kd && kd.type === "number") {
         const n = parseNumeric(raw);
         if (n !== null) return n;
+    }
+    if (kd && kd.type === "bool") return String(raw) === "true";
+    if (kd && (kd.type === "range" || kd.type === "vector2" || kd.type === "vector3")) {
+        try {
+            const v = JSON.parse(raw);
+            const type = vectorTypeName(kd);
+            if (type && v && typeof v === "object" && !Array.isArray(v)) v.$type = type;
+            return v;
+        } catch (e) {
+            return raw;
+        }
     }
     return raw;
 }
@@ -344,15 +450,15 @@ function buildValueControl(ov, h, kd, vtype) {
     };
 
     const validateNow = () => {
-        if (vtype === "text") { setError(""); return; }
+        if (vtype === "text" && !(kd && kd.pattern)) { setError(""); return; }
         const r = validateValue(kd, h.value, vtype);
         setError(r.ok ? "" : r.msg);
     };
 
-    /* ---------------- 枚举 ---------------- */
-    if (vtype === "enum") {
+    /* ---------------- 枚举 / 布尔 ---------------- */
+    if (vtype === "enum" || vtype === "bool") {
         const sel = el("select", "input small mono");
-        const opts = (kd.options || []).map(String);
+        const opts = vtype === "bool" ? ["true", "false"] : (kd.options || []).map(String);
 
         const ph = document.createElement("option");
         ph.value = "";
@@ -389,7 +495,8 @@ function buildValueControl(ov, h, kd, vtype) {
     /* ---------------- 数值（带进 / 退步按钮） ---------------- */
     else if (vtype === "number") {
         const step = getStepValue(kd);
-        const dec  = decimalsOf(step);
+        const integral = isIntegralNumber(kd);
+        const dec  = integral ? 0 : decimalsOf(step);
 
         const wrap = el("div", "number-row");
 
@@ -406,8 +513,7 @@ function buildValueControl(ov, h, kd, vtype) {
         const lo = kd.min != null ? kd.min : "-∞";
         const hi = kd.max != null ? kd.max : "∞";
         const range = (kd.min != null || kd.max != null) ? `${lo} ~ ${hi}` : "";
-        input.placeholder = kd.placeholder || range ||
-            (kd.numberKind === "int" ? "整数" : "数值");
+        input.placeholder = kd.placeholder || range || (integral ? "整数" : "数值");
         input.title = (kd.desc ? kd.desc + "  " : "") +
             (range ? `[${range}] 步进 ${step}` : `步进 ${step}`);
 
@@ -432,7 +538,7 @@ function buildValueControl(ov, h, kd, vtype) {
             else base = 0;
 
             let next = roundTo(base + dir * step, dec);
-            if (kd.numberKind === "int") next = Math.round(next);
+            if (integral) next = Math.round(next);
             if (kd.min != null && next < Number(kd.min)) next = Number(kd.min);
             if (kd.max != null && next > Number(kd.max)) next = Number(kd.max);
 
@@ -466,8 +572,81 @@ function buildValueControl(ov, h, kd, vtype) {
         updateButtons();
     }
 
-    /* ---------------- 正则受限文本 ---------------- */
-    else if (vtype === "pattern") {
+    /* ---------------- 复合枚举（flags） ---------------- */
+    else if (vtype === "flags") {
+        const wrap = el("div", "flags-cell");
+        const opts = (kd.options || []).map(String);
+        const selected = parseFlags(h.value);
+        const boxes = [];
+        const candidates = opts.map(name => ({ name, note: "" }))
+            .concat(selected.filter(s => !opts.includes(s)).map(name => ({ name, note: "（非标准值）" })));
+
+        const commit = () => {
+            h.value = boxes.filter(b => b.input.checked).map(b => b.name).join(", ");
+            validateNow();
+            refreshPreview();
+        };
+
+        candidates.forEach(({ name, note }) => {
+            const label = el("label", "flag-item");
+            const input = document.createElement("input");
+            input.type = "checkbox";
+            input.checked = selected.includes(name);
+            input.addEventListener("change", commit);
+            label.appendChild(input);
+            label.appendChild(el("span", null, name + note));
+            wrap.appendChild(label);
+            boxes.push({ name, input });
+        });
+
+        wrap.title = kd.desc || "";
+        control = wrap;
+        node = wrap;
+    }
+
+    /* ---------------- range / vector2 / vector3（组件固定） ---------------- */
+    else if (vtype === "range" || vtype === "vector2" || vtype === "vector3") {
+        const fields = structFields(kd);
+        const value = parseStruct(h.value);
+        const wrap = el("div", "struct-cell");
+        const inputs = {};
+
+        const commit = () => {
+            const filled = {};
+            fields.forEach(f => {
+                const raw = inputs[f.key].value.trim();
+                if (raw === "") return;
+                const num = Number(raw);
+                filled[f.key] = Number.isFinite(num) ? num : raw;
+            });
+            h.value = Object.keys(filled).length || vectorTypeName(kd) ? structValue(kd, filled) : "";
+            validateNow();
+            refreshPreview();
+        };
+
+        fields.forEach(f => {
+            const item = el("label", "struct-item");
+            item.appendChild(el("span", "struct-lbl", f.key));
+            const input = el("input", "input small mono");
+            input.type = "text";
+            input.value = value[f.key] == null ? "" : String(value[f.key]);
+            input.placeholder = f.placeholder || "float";
+            input.addEventListener("input", commit);
+            item.appendChild(input);
+            inputs[f.key] = input;
+            wrap.appendChild(item);
+        });
+
+        const bounds = (vtype === "range" && (kd.min != null || kd.max != null))
+            ? ` [${kd.min != null ? kd.min : "-∞"} ~ ${kd.max != null ? kd.max : "∞"}]`
+            : "";
+        wrap.title = (kd.desc || "") + bounds;
+        control = wrap;
+        node = wrap;
+    }
+
+    /* ---------------- 文本（可带正则限制） ---------------- */
+    else if (vtype === "pattern" || (kd && kd.pattern)) {
         const input = el("input", "input small mono");
         input.type = "text";
         input.value = h.value;
@@ -724,14 +903,7 @@ function duplicateCard(ov) {
 }
 
 function loadSample() {
-    overrides = [
-        newOverride("HumanAsset", "CivilianFemale.*", [
-            { key: "RiseAsset",  value: "SwordWomen : HumanAsset" },
-            { key: "Faction",    value: "Friendly" },
-            { key: "MoveSpeed",  value: "1.2" },
-            { key: "AmmoCount",  value: "30" }
-        ])
-    ];
+    overrides = typeof SAMPLE === "undefined" ? [] : fromJSON(SAMPLE);
     render();
 }
 
@@ -777,7 +949,7 @@ function updateStats() {
             if (!k) return;
             const kd = getKeyDef(o.Type, k);
             const vtype = effectiveType(kd);
-            if (vtype === "text") return;
+            if (vtype === "text" && !(kd && kd.pattern)) return;
             const r = validateValue(kd, h.value, vtype);
             if (!r.ok) issues++;
         });
@@ -827,11 +999,7 @@ function openImport() {
     body.appendChild(el("p", "muted", "粘贴 AssetOverride 的 JSON 数组，或从文件载入。"));
 
     const ta = el("textarea", "input mono modal-textarea");
-    ta.placeholder =
-        '[\n  {\n    "Type": "HumanAsset",\n' +
-        '    "Pattern": "CivilianFemale.*",\n' +
-        '    "Handles": { "RiseAsset": "SwordWomen : HumanAsset" }\n' +
-        '  }\n]';
+    ta.placeholder = typeof SAMPLE === "undefined" ? "" : JSON.stringify(SAMPLE, null, 2);
     body.appendChild(ta);
 
     const errEl = el("p", "error-msg");
