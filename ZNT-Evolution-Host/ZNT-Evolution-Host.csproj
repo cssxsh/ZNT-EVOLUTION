@@ -390,7 +390,9 @@
         <Compile Include="Properties\AssemblyInfo.cs"/>
         <Compile Include="EvolutionHost.cs"/>
         <Compile Include="EvolutionHostPlugin.cs"/>
-        <EmbeddedResource Include="Resources\**"/>
+        <EmbeddedResource Include="Resources\**">
+            <LogicalName>%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
+        </EmbeddedResource>
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets"/>
     <Target Name="AfterBuild">
@@ -399,7 +401,9 @@
             <Plugin Include="$(ZNTGamePath)\BepInEx\plugins\$(MSBuildProjectName)\$(AssemblyName).*.pdb"/>
         </ItemGroup>
         <Delete Files="@(Plugin)"/>
-        <Copy SourceFiles="$(OutputPath)\$(AssemblyName).dll" DestinationFiles="$(ZNTGamePath)\BepInEx\plugins\$(MSBuildProjectName)\$(AssemblyName).$(Version).dll"/>
-        <Copy SourceFiles="$(OutputPath)\$(AssemblyName).pdb" DestinationFiles="$(ZNTGamePath)\BepInEx\plugins\$(MSBuildProjectName)\$(AssemblyName).$(Version).pdb"/>
+        <Copy SourceFiles="$(OutputPath)\$(AssemblyName).dll"
+              DestinationFiles="$(ZNTGamePath)\BepInEx\plugins\$(MSBuildProjectName)\$(AssemblyName).$(Version).dll"/>
+        <Copy SourceFiles="$(OutputPath)\$(AssemblyName).pdb"
+              DestinationFiles="$(ZNTGamePath)\BepInEx\plugins\$(MSBuildProjectName)\$(AssemblyName).$(Version).pdb"/>
     </Target>
 </Project>

@@ -2,8 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Reflection;
 using System.Threading.Tasks;
-using BepInEx.Configuration;
+using BepInEx;
 using BepInEx.Logging;
 using JetBrains.Annotations;
 using Newtonsoft.Json.Linq;
@@ -15,13 +16,13 @@ namespace ZNT.Evolution.Host;
 
 public static class EvolutionHost
 {
+    private static readonly ManualLogSource Logger = BepInExLogger.CreateLogSource(nameof(EvolutionHost));
+
+    private static string _host = "http://localhost:8080/";
+
     private static HttpListener _http;
 
-    internal static ManualLogSource Logger;
-
-    internal static ConfigEntry<string> Uri;
-
-    internal static string RootFolder = ".";
+    private static string _folder = "www";
 
     extension(HttpListener http)
     {
@@ -32,7 +33,7 @@ public static class EvolutionHost
                 try
                 {
                     var context = await http.GetContextAsync();
-                    context.Handle();
+                    _ = context.HandleAsync();
                 }
                 catch (Exception e)
                 {
@@ -44,24 +45,33 @@ public static class EvolutionHost
 
     extension(HttpListenerContext context)
     {
-        private void Handle()
+        private async Task HandleAsync()
         {
-            switch (context.Request)
+            try
             {
-                case { IsWebSocketRequest: true }:
-                    Logger.LogWarning($"{context.Request.HttpMethod}: {context.Request.RawUrl}");
-                    context.Response.Close();
-                    break;
-                case { IsApi: true }:
-                    context.HandleApi();
-                    break;
-                case { HttpMethod: "GET" }:
-                    context.HandleStatic();
-                    break;
-                default:
-                    Logger.LogWarning($"{context.Request.HttpMethod}: {context.Request.RawUrl}");
-                    context.Response.Close();
-                    break;
+                switch (context.Request)
+                {
+                    case { IsWebSocketRequest: true }:
+                        Logger.LogWarning($"{context.Request.HttpMethod}: {context.Request.RawUrl}");
+                        context.Response.Close();
+                        break;
+                    case { IsApi: true }:
+                        // 需要读 Unity 的编辑器状态，留在主线程
+                        context.HandleApi();
+                        break;
+                    case { HttpMethod: "GET" }:
+                        await context.HandleStaticAsync();
+                        break;
+                    default:
+                        Logger.LogWarning($"{context.Request.HttpMethod}: {context.Request.RawUrl}");
+                        context.Response.Close();
+                        break;
+                }
+            }
+            catch (Exception e)
+            {
+                // 响应已被各分支的 using 释放，这里只记录
+                Logger.LogError(e);
             }
         }
 
@@ -89,7 +99,7 @@ public static class EvolutionHost
             }
             catch (Exception e)
             {
-                Logger.LogWarning(e);
+                Logger.LogWarning($"{context.Request.HttpMethod}: {context.Request.RawUrl} -> {e.Message}");
                 obj["status"] = -1;
                 obj["message"] = e.Message;
             }
@@ -97,10 +107,10 @@ public static class EvolutionHost
             CustomAssetUtility.SerializeObject(response.OutputStream, obj);
         }
 
-        private void HandleStatic()
+        private async Task HandleStaticAsync()
         {
             using var response = context.Response;
-            var path = $"{RootFolder}/{context.Request.Url.AbsolutePath}";
+            var path = $"{_folder}/{context.Request.Url.AbsolutePath}";
             if (Directory.Exists(path)) path += "/index.html";
             if (!File.Exists(path))
             {
@@ -127,7 +137,8 @@ public static class EvolutionHost
                 _ => "application/octet-stream"
             };
             response.ContentLength64 = fs.Length;
-            fs.CopyTo(response.OutputStream);
+            // 异步写出，避免在 Unity 主线程上整文件拷贝
+            await fs.CopyToAsync(response.OutputStream).ConfigureAwait(false);
         }
     }
 
@@ -136,23 +147,42 @@ public static class EvolutionHost
         private bool IsApi => request.Url.AbsolutePath.StartsWith("/api/", StringComparison.Ordinal);
     }
 
+    public static void Init()
+    {
+        _host = EvolutionHostPlugin.Uri.Value;
+        _folder = $"{Paths.PluginPath}/ZNT-Evolution-Host/www_{EvolutionHostPlugin.Instance.Info.Metadata.Version}";
+        // ReSharper disable once InvertIf
+        if (!Directory.Exists(_folder))
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+            foreach (var resource in assembly.GetManifestResourceNames())
+            {
+                if (!resource.StartsWith("www", StringComparison.Ordinal)) continue;
+                var path = $"{Paths.PluginPath}/ZNT-Evolution-Host/{resource}";
+                using var source = assembly
+                    .GetManifestResourceStream(resource) ?? throw new FileNotFoundException(resource);
+                Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+                using var output = File.Create(path);
+                source.CopyTo(output);
+            }
+        }
+    }
+
     public static void Start()
     {
         if (_http is { IsListening: true }) return;
-        var host = Uri?.Value ?? "http://localhost:8080/";
-        Logger ??= BepInExLogger.CreateLogSource("Evolution Host");
-        Logger.LogInfo($"Listen: {host}");
+        Logger.LogInfo($"Listen: {_host}");
         try
         {
             _http = new HttpListener { IgnoreWriteExceptions = true };
-            _http.Prefixes.Add(host);
+            _http.Prefixes.Add(_host);
             _http.Start();
             _ = _http.ListenAsync();
         }
         catch (Exception e)
         {
             Logger.LogError(e);
-            _http.Close();
+            _http?.Close();
             _http = null;
         }
     }

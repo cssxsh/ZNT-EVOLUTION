@@ -1,4 +1,5 @@
 using BepInEx;
+using BepInEx.Configuration;
 using HarmonyLib;
 using JetBrains.Annotations;
 
@@ -14,13 +15,15 @@ public class EvolutionHostPlugin : BaseUnityPlugin
     [UsedImplicitly]
     internal static Harmony Harmony;
 
+    [UsedImplicitly]
+    internal static ConfigEntry<string> Uri;
+
     public void Awake()
     {
         Instance = this;
-        EvolutionHost.Logger = Logger;
-        EvolutionHost.Uri = Config.Bind("http", "uri", "http://localhost:8080/");
-        EvolutionHost.RootFolder = $"{Paths.PluginPath}/ZNT-Evolution-Host/www";
+        Uri = Config.Bind("http", "uri", "http://localhost:8080/");
         Harmony ??= new Harmony(Info.Metadata.GUID);
+        EvolutionHost.Init();
     }
 
     public void Start()
