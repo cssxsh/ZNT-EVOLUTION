@@ -149,8 +149,9 @@ public static class EvolutionHost
 
     public static void Init()
     {
+        var version = EvolutionHostPlugin.Instance.Info.Metadata.Version;
         _host = EvolutionHostPlugin.Uri.Value;
-        _folder = $"{Paths.PluginPath}/ZNT-Evolution-Host/www_{EvolutionHostPlugin.Instance.Info.Metadata.Version}";
+        _folder = $"{Paths.PluginPath}/ZNT-Evolution-Host/{version}/www";
         // ReSharper disable once InvertIf
         if (!Directory.Exists(_folder))
         {
@@ -158,7 +159,7 @@ public static class EvolutionHost
             foreach (var resource in assembly.GetManifestResourceNames())
             {
                 if (!resource.StartsWith("www", StringComparison.Ordinal)) continue;
-                var path = $"{Paths.PluginPath}/ZNT-Evolution-Host/{resource}";
+                var path = $"{Paths.PluginPath}/ZNT-Evolution-Host/{version}/{resource}";
                 using var source = assembly
                     .GetManifestResourceStream(resource) ?? throw new FileNotFoundException(resource);
                 Directory.CreateDirectory(Path.GetDirectoryName(path)!);
