@@ -278,21 +278,6 @@ internal static class GlobalSettingsPatch
         }
     }
 
-    extension(EditChapterMenu menu)
-    {
-        private Dropdown SourceDropdown => Traverse.Create(menu).Field<Dropdown>("sourceDropdown").Value;
-    }
-
-    extension(LoadLevelMenu menu)
-    {
-        private Dropdown SourceDropdown => Traverse.Create(menu).Field<Dropdown>("sourceDropdown").Value;
-    }
-
-    extension(NewLevelMenu menu)
-    {
-        private Dropdown LevelSource => Traverse.Create(menu).Field<Dropdown>("levelSource").Value;
-    }
-
     [HarmonyPostfix]
     [HarmonyPatch(typeof(EditChapterMenu), "OnCreate")]
     [HarmonyPatch(typeof(LoadLevelMenu), "OnCreate")]

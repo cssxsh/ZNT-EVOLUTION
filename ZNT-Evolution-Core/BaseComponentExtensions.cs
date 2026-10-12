@@ -69,6 +69,13 @@ public static class BaseComponentExtensions
             get => Traverse.Create(tooltip).Field<string>("text").Value;
             set => Traverse.Create(tooltip).Field<string>("text").Value = value;
         }
+
+        [UsedImplicitly]
+        public Vector2 Offset
+        {
+            get => Traverse.Create(tooltip).Field<Vector2>("offset").Value;
+            set => Traverse.Create(tooltip).Field<Vector2>("offset").Value = value;
+        }
     }
 
     extension(Dialogue dialogue)
@@ -582,6 +589,30 @@ public static class BaseComponentExtensions
         [UsedImplicitly]
         public LocalizableStringMenu TextMenu =>
             Traverse.Create(page).Field<LocalizableStringMenu>("textMenu").Value;
+    }
+
+    extension(ZNT.LevelEditor.MainMenu menu)
+    {
+        [UsedImplicitly]
+        public Text LevelName => Traverse.Create(menu).Field<Text>("levelName").Value;
+    }
+
+    extension(EditChapterMenu menu)
+    {
+        [UsedImplicitly]
+        public Dropdown SourceDropdown => Traverse.Create(menu).Field<Dropdown>("sourceDropdown").Value;
+    }
+
+    extension(LoadLevelMenu menu)
+    {
+        [UsedImplicitly]
+        public Dropdown SourceDropdown => Traverse.Create(menu).Field<Dropdown>("sourceDropdown").Value;
+    }
+
+    extension(NewLevelMenu menu)
+    {
+        [UsedImplicitly]
+        public Dropdown LevelSource => Traverse.Create(menu).Field<Dropdown>("levelSource").Value;
     }
 
     extension(SignalReceiverLinker linker)
