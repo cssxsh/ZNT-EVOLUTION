@@ -1,17 +1,20 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Threading.Tasks;
 using BepInEx.Configuration;
 using BepInEx.Logging;
+using JetBrains.Annotations;
 using Newtonsoft.Json.Linq;
 using ZNT.Evolution.Core.Asset;
+using ZNT.Evolution.Core.Editor;
+using BepInExLogger = BepInEx.Logging.Logger;
 
 namespace ZNT.Evolution.Host;
 
 public static class EvolutionHost
 {
-
     private static HttpListener _http;
 
     internal static ManualLogSource Logger;
@@ -68,8 +71,29 @@ public static class EvolutionHost
             response.ContentType = "application/json; charset=utf-8";
             var obj = new JObject
             {
+                ["method"] = context.Request.HttpMethod,
                 ["path"] = context.Request.Url.LocalPath
             };
+            try
+            {
+                obj["data"] = context.Request switch
+                {
+                    { Url.AbsolutePath: "/api/level/override", HttpMethod: "POST" } =>
+                        ImportAssetOverride(context.Request),
+                    { Url.AbsolutePath: "/api/level/override", HttpMethod: "GET" } =>
+                        ExportAssetOverride(context.Request),
+                    _ => throw new NotSupportedException("Operation not supported")
+                };
+                obj["status"] = 0;
+                obj["message"] = "OK";
+            }
+            catch (Exception e)
+            {
+                Logger.LogWarning(e);
+                obj["status"] = -1;
+                obj["message"] = e.Message;
+            }
+
             CustomAssetUtility.SerializeObject(response.OutputStream, obj);
         }
 
@@ -115,11 +139,13 @@ public static class EvolutionHost
     public static void Start()
     {
         if (_http is { IsListening: true }) return;
-        Logger.LogInfo($"Listen: {Uri.Value}");
+        var host = Uri?.Value ?? "http://localhost:8080/";
+        Logger ??= BepInExLogger.CreateLogSource("Evolution Host");
+        Logger.LogInfo($"Listen: {host}");
         try
         {
             _http = new HttpListener { IgnoreWriteExceptions = true };
-            _http.Prefixes.Add(Uri.Value);
+            _http.Prefixes.Add(host);
             _http.Start();
             _ = _http.ListenAsync();
         }
@@ -147,5 +173,23 @@ public static class EvolutionHost
             _http.Close();
             _http = null;
         }
+    }
+
+    [UsedImplicitly]
+    private static JToken ImportAssetOverride(HttpListenerRequest request)
+    {
+        if (!ComponentSingleton<LevelSettings>.HasInstance()) return new JArray();
+        EvolutionSettings.Instance.AssetOverrideData =
+            CustomAssetUtility.DeserializeObject<List<EvolutionSettings.AssetOverrideRecord>>(request.InputStream);
+        CustomAssetUtility.SerializeObject(out var token, EvolutionSettings.Instance.AssetOverrideData);
+        return token;
+    }
+
+    [UsedImplicitly]
+    private static JToken ExportAssetOverride(HttpListenerRequest request)
+    {
+        if (!ComponentSingleton<LevelSettings>.HasInstance()) return new JArray();
+        CustomAssetUtility.SerializeObject(out var token, EvolutionSettings.Instance.AssetOverrideData);
+        return token;
     }
 }
