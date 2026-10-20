@@ -64,7 +64,7 @@ public static class CustomAssetUtility
     [UsedImplicitly]
     public static void SerializeObjectToPath(string target, object data)
     {
-        using var stream = File.Open(target, FileMode.Create, FileAccess.Write);
+        using var stream = File.Create(target);
         SerializeObject(stream, data, target.EndsWith(".bson"));
     }
 
@@ -112,8 +112,8 @@ public static class CustomAssetUtility
     internal static IEnumerator LoadBuildIn<T>(UnityAction<T> action)
     {
         using var fs = Assembly.GetExecutingAssembly()
-            .GetManifestResourceStream("ZNT.Evolution.Core.Resources.index.bundle");
-        var create = AssetBundle.LoadFromStreamAsync(fs ?? throw new FileNotFoundException("index.bundle"));
+            .GetManifestResourceStream("index.bundle") ?? throw new FileNotFoundException("index.bundle");
+        var create = AssetBundle.LoadFromStreamAsync(fs);
         yield return create;
         var bundle = create.assetBundle;
         var request = bundle.LoadAllAssetsAsync<T>();
@@ -131,8 +131,8 @@ public static class CustomAssetUtility
     internal static IEnumerator LoadPatch<T>(UnityAction<T> action)
     {
         using var fs = Assembly.GetExecutingAssembly()
-            .GetManifestResourceStream("ZNT.Evolution.Core.Resources.patch.bundle");
-        var create = AssetBundle.LoadFromStreamAsync(fs ?? throw new FileNotFoundException("patch.bundle"));
+            .GetManifestResourceStream("patch.bundle") ?? throw new FileNotFoundException("patch.bundle");
+        var create = AssetBundle.LoadFromStreamAsync(fs);
         yield return create;
         var bundle = create.assetBundle;
         var request = bundle.LoadAllAssetsAsync<T>();
@@ -165,8 +165,8 @@ public static class CustomAssetUtility
 
         {
             using var fs = Assembly.GetExecutingAssembly()
-                .GetManifestResourceStream("ZNT.Evolution.Core.Resources.index.bundle");
-            var bundle = AssetBundle.LoadFromStream(fs ?? throw new FileNotFoundException("index.bundle"));
+                .GetManifestResourceStream("index.bundle") ?? throw new FileNotFoundException("index.bundle");
+            var bundle = AssetBundle.LoadFromStream(fs);
             try
             {
                 prefab = bundle.LoadAsset<GameObject>($"prefab/{name}")?.transform;

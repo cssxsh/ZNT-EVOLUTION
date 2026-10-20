@@ -80,8 +80,8 @@ internal static class SceneLoaderPatch
         try
         {
             using var fs = Assembly.GetExecutingAssembly()
-                .GetManifestResourceStream("ZNT.Evolution.Core.Resources.Evolution.csv");
-            using var reader = new StreamReader(fs ?? throw new FileNotFoundException("Evolution.csv"));
+                .GetManifestResourceStream("Evolution.csv") ?? throw new FileNotFoundException("Evolution.csv");
+            using var reader = new StreamReader(fs);
             localization.Import_CSV(Category: "Evolution", CSVstring: reader.ReadToEnd());
         }
         catch (FileNotFoundException e)
