@@ -165,8 +165,8 @@ public static class LevelElementLoader
             _ = visual.Bind();
         }
 
-        var brush = bundle.LoadAsset<Rotorz.Tile.OrientedBrush>("brush")
-                    ?? DeserializeObject<BrushInfo>(folder: path, file: "brush.info.json").Create();
+        var brush = bundle.LoadAsset<Rotorz.Tile.OrientedBrush>("brush") ??
+                    DeserializeObject<BrushInfo>(folder: path, file: "brush.info.json").Create();
         var variation = brush.DefaultOrientation.GetVariation(0);
         Logger.LogDebug($"brush -> {brush} -> {variation}");
 

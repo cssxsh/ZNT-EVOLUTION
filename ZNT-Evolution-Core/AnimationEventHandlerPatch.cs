@@ -87,8 +87,8 @@ internal static class AnimationEventHandlerPatch
         var parameters = controller.Parameters;
         if (parameters.Character.Behaviour is not HumanBehaviour human) return;
         var definition = frame.spriteCollection.spriteDefinitions[frame.spriteId];
-        var point = definition.attachPoints.FirstOrDefault(point => point.name is "throw")
-                    ?? new tk2dSpriteDefinition.AttachPoint();
+        var point = definition.attachPoints.FirstOrDefault(point => point.name is "throw") ??
+                    new tk2dSpriteDefinition.AttachPoint();
         human.PhysicObjectThrower.Throw(
             controller.BoxCollider,
             null,
@@ -106,8 +106,8 @@ internal static class AnimationEventHandlerPatch
         var asset = frame.GetAsset<PhysicObjectAsset>();
         if (asset is null) return;
         var definition = frame.spriteCollection.spriteDefinitions[frame.spriteId];
-        var point = definition.attachPoints.FirstOrDefault(point => point.name is "throw")
-                    ?? new tk2dSpriteDefinition.AttachPoint();
+        var point = definition.attachPoints.FirstOrDefault(point => point.name is "throw") ??
+                    new tk2dSpriteDefinition.AttachPoint();
         var position = controller.transform.position + point.position;
         var orientation = controller.transform.forward;
         var physic = asset.CreateGameObject(position: position).GetComponent<PhysicObjectBehaviour>();

@@ -42,8 +42,8 @@ internal static class CustomAssetObjectPatch
         if (__instance.AutoExplode) return;
         var editor = gameObject.GetComponentSafe<ExplosionEditor>();
         editor.Delay = __instance.Delay;
-        var linker = gameObject.GetComponentInParent<SignalReceiverLinker>()
-                     ?? gameObject.GetComponentSafe<SignalReceiverLinker>();
+        var linker = gameObject.GetComponentInParent<SignalReceiverLinker>() ??
+                     gameObject.GetComponentSafe<SignalReceiverLinker>();
         linker.ExcludedComponents ??= [];
         linker.ExcludedGameObjects ??= [];
         foreach (var child in gameObject.transform.Cast<Transform>())
@@ -227,8 +227,8 @@ internal static class CustomAssetObjectPatch
             }
         }
 
-        var sprite = moving?.AnimationController?.Animator.Sprite
-                     ?? __instance.GetComponentInChildren<tk2dBaseSprite>();
+        var sprite = moving?.AnimationController?.Animator.Sprite ??
+                     __instance.GetComponentInChildren<tk2dBaseSprite>();
         if (sprite is null) return;
         sprite.SortingOrder = value is ObjectOrientation.Orientation.Right ? 0 : -1;
         var properties = new MaterialPropertyBlock();
@@ -345,24 +345,6 @@ internal static class CustomAssetObjectPatch
         if (CultistBuff.Remove(__instance.Character, out var effect))
         {
             ComponentSingleton<GamePoolManager>.Instance.Despawn(effect);
-        }
-
-        foreach (var (key, attachment) in __instance.SharedAsset.Attachments as IDictionary<string, GameObject>)
-        {
-            switch (key)
-            {
-                case "moving_attack":
-                case "shield_attack":
-                case "shield_effect":
-                case "attach_laser":
-                    continue;
-                default:
-                    if (attachment is null) continue;
-                    Logger.LogDebug($"Despawn {attachment} for {__instance.gameObject} Attachments[\"{key}\"]");
-                    // 'OnDespawned' triggered by 'BroadcastMessage'
-                    ComponentSingleton<GamePoolManager>.Instance.Despawn(__instance.transform.Find(key));
-                    break;
-            }
         }
     }
 

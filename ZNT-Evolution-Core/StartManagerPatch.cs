@@ -451,7 +451,8 @@ internal static class StartManagerPatch
                     moving.GetComponentInChildren<Trigger>();
                 break;
             case PhysicObjectBehaviour physic:
-                Traverse.Create(physic).Field<Health>("health").Value ??= physic.GetComponentInChildren<Health>();
+                Traverse.Create(physic).Field<Health>("health").Value ??=
+                    physic.GetComponentInChildren<Health>();
                 break;
             case SentryGunBehaviour sentry:
                 _ = CustomAssetUtility.AddPoolPrefab(prefab.transform);
