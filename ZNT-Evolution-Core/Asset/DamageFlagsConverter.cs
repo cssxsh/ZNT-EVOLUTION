@@ -21,7 +21,8 @@ internal class DamageFlagsConverter : JsonConverter
 
     public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
     {
-        writer.WriteValue(GetDamageFlags((DamageType)value));
+        var flags = GetDamageFlags((DamageType)value);
+        writer.WriteValue(flags is Flags.None ? flags.ToString() : flags.ToStringNames());
     }
 
     public override bool CanRead => true;

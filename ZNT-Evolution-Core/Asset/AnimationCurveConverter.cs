@@ -107,8 +107,10 @@ public class AnimationCurveConverter : CustomCreationConverter<AnimationCurve>
             var y2 = float.Parse(b.Groups[5].Value);
             var k2 = float.Parse(b.Groups[6].Value);
             var curve = AnimationCurve.EaseInOut(x1, y1, x2, y2);
-            curve.keys[0].outTangent = k1;
-            curve.keys[1].inTangent = k2;
+            var keys = curve.keys;
+            keys[0].outTangent = k1;
+            keys[1].inTangent = k2;
+            curve.keys = keys;
             return curve;
         }
 

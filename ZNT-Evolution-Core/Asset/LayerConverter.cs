@@ -23,7 +23,12 @@ public class LayerConverter : JsonConverter
 
     public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
     {
-        var layer = (int)value;
+        var layer = value switch
+        {
+            int i => i,
+            LayerMask mask => mask.value,
+            _ => throw new NotSupportedException(),
+        };
         var name = LayerMask.LayerToName(layer);
         if (name is null or "") writer.WriteValue(layer);
         else writer.WriteValue(name);

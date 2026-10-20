@@ -4,7 +4,6 @@ using System.Reflection;
 using BepInEx.Logging;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 using UnityEngine;
 using BepInExLogger = BepInEx.Logging.Logger;
 
@@ -43,9 +42,24 @@ internal class LazyAsset : CustomAssetObject
         }
     }
 
-    public class MemberConverter(MemberInfo member) : CustomCreationConverter<LazyAsset>
+    public class MemberConverter(MemberInfo member) : JsonConverter
     {
-        public override LazyAsset Create(Type type) => CreateInstance<LazyAsset>();
+        public override bool CanConvert(Type type) => type == typeof(LazyAsset);
+
+        public override bool CanWrite => true;
+
+        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        {
+            writer.WriteValue(value switch
+            {
+                null => null,
+                LazyAsset lazy => lazy.HierarchyName,
+                UnityEngine.Object o => o.NameAndType(),
+                _ => throw new NotSupportedException()
+            });
+        }
+
+        public override bool CanRead => true;
 
         public override object ReadJson(JsonReader reader, Type type, object _, JsonSerializer serializer)
         {
