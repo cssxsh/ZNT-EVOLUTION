@@ -4,7 +4,7 @@ using JetBrains.Annotations;
 
 namespace ZNT.Evolution.Core;
 
-[BepInPlugin(GUID: "xyz.cssxsh.znt.evolution.core", Name: "Evolution Core", Version: "1.3.0")]
+[BepInPlugin(GUID: "xyz.cssxsh.znt.evolution.core", Name: "Evolution Core", Version: "1.3.1")]
 public class EvolutionCorePlugin : BaseUnityPlugin
 {
     [UsedImplicitly]

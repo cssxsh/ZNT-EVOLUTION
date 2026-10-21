@@ -66,7 +66,7 @@ public class EvolutionSettings : Editor
                 AssetOverrideData.Add(new AssetOverrideRecord
                 {
                     Type = nameof(HumanAsset),
-                    Pattern = "This is pattern for name",
+                    Pattern = "$This is pattern for name",
                     Handles = new JObject
                     {
                         [nameof(HumanAsset.RiseAsset)] = "SwordWomen : HumanAsset"

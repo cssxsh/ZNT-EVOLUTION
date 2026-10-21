@@ -903,7 +903,7 @@ internal static class SceneLoaderPatch
                 list.Add(description);
                 item.SetActive(true);
                 opened |= __instance.AccordionItems.Values.Any(i => i.Open);
-                if (!opened) __instance.BrushList.Open(item);
+                if (!opened || item.Id is "Gameplay") __instance.BrushList.Open(item);
                 opened = true;
                 yield return null;
             }
