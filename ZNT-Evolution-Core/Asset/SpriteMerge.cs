@@ -50,7 +50,7 @@ internal class SpriteMerge : EvolutionMerge<tk2dSpriteCollectionData>
         {
             var definition = clone.spriteDefinitions[index];
             definition.material = Material;
-            definition.attachPoints = Attach(definition.name, index);
+            definition.attachPoints = Attach(definition.name, index) ?? definition.attachPoints;
         }
 
         Object.DontDestroyOnLoad(clone);
@@ -61,7 +61,8 @@ internal class SpriteMerge : EvolutionMerge<tk2dSpriteCollectionData>
     {
         _ = AttachPoints.TryGetValue(name, out var points) ||
             AttachPoints.TryGetValue(index.ToString(), out points);
-        return System.Array.ConvertAll(points ?? [], point => new tk2dSpriteDefinition.AttachPoint
+        if (points is null) return null;
+        return System.Array.ConvertAll(points, point => new tk2dSpriteDefinition.AttachPoint
         {
             name = point.name,
             position = Transformed ? point.position / 2 / Source.halfTargetHeight : point.position,
