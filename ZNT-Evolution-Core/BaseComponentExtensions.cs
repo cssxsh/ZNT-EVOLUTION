@@ -282,6 +282,16 @@ public static class BaseComponentExtensions
         }
     }
 
+    extension(Breakable breakable)
+    {
+        [UsedImplicitly]
+        public bool IsOpenToAttack
+        {
+            get => Traverse.Create(breakable).Property<bool>("isOpenToAttack").Value;
+            set => Traverse.Create(breakable).Property<bool>("isOpenToAttack").Value = value;
+        }
+    }
+
     extension(BaseAnimationController controller)
     {
         [UsedImplicitly]
