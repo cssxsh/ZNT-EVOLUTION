@@ -133,6 +133,17 @@ internal static class CustomAssetObjectPatch
 
     #endregion
 
+    #region BreakablePropAsset
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(BreakablePropAnimationController), "PlayDamage")]
+    public static bool PlayDamage(BreakablePropAnimationController __instance)
+    {
+        return __instance.SharedAsset.HitAnimation is not (null or "");
+    }
+
+    #endregion
+
     #region TriggerAsset
 
     [HarmonyPostfix]

@@ -48,7 +48,6 @@ internal static class StartManagerPatch
             starter.IsLoading = true;
             yield return Initialize();
             yield return LoadModsFolder();
-            yield return LoadBank();
             yield return LoadAssetFolder();
             yield return LoadBrushFolder();
             yield return LoadDecorFolder();
@@ -556,25 +555,21 @@ internal static class StartManagerPatch
         }
     }
 
-    private static IEnumerator LoadBank()
-    {
-        Logger.LogInfo("Loading Bank");
-        yield return LevelElementLoader.LoadBanks(folder: Application.streamingAssetsPath, loadSamples: true);
-    }
-
     private static IEnumerator LoadAssetFolder()
     {
-        Logger.LogInfo("Loading Asset Folder");
+        if (!UserManager.IsUserDev) yield break;
         var asset = Path.Combine(Application.dataPath, "Asset");
         if (!Directory.Exists(asset)) yield break;
+        Logger.LogInfo("Loading Asset Folder");
         yield return LevelElementLoader.LoadAssetFromFolder(path: asset);
     }
 
     private static IEnumerator LoadBrushFolder()
     {
-        Logger.LogInfo("Loading Brush Folder");
+        if (!UserManager.IsUserDev) yield break;
         var brush = Path.Combine(Application.dataPath, nameof(LevelElement.Type.Brush));
         if (!Directory.Exists(brush)) yield break;
+        Logger.LogInfo("Loading Brush Folder");
         foreach (var directory in Directory.EnumerateDirectories(brush))
         {
             if (directory.EndsWith(".bak")) continue;
@@ -587,9 +582,10 @@ internal static class StartManagerPatch
 
     private static IEnumerator LoadDecorFolder()
     {
-        Logger.LogInfo("Loading Decor Folder");
+        if (!UserManager.IsUserDev) yield break;
         var decor = Path.Combine(Application.dataPath, nameof(LevelElement.Type.Decor));
         if (!Directory.Exists(decor)) yield break;
+        Logger.LogInfo("Loading Decor Folder");
         foreach (var directory in Directory.EnumerateDirectories(decor))
         {
             if (directory.EndsWith(".bak")) continue;
@@ -602,9 +598,10 @@ internal static class StartManagerPatch
 
     private static IEnumerator LoadApplyFolder()
     {
-        Logger.LogInfo("Loading Apply Folder");
+        if (!UserManager.IsUserDev) yield break;
         var apply = Path.Combine(Application.dataPath, "Apply");
         if (!Directory.Exists(apply)) yield break;
+        Logger.LogInfo("Loading Apply Folder");
         foreach (var directory in Directory.EnumerateDirectories(apply))
         {
             if (directory.EndsWith(".bak")) continue;

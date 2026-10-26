@@ -2,7 +2,6 @@ using System.IO;
 using HarmonyLib;
 using Newtonsoft.Json.Bson;
 
-// ReSharper disable InconsistentNaming
 namespace ZNT.Evolution.Core.Asset;
 
 public class BsonDataWriter : BsonWriter
