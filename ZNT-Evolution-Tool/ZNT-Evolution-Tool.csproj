@@ -18,6 +18,8 @@
         <PackageReference Include="Newtonsoft.Json" Version="13.0.4"/>
     </ItemGroup>
     <ItemGroup>
-        <EmbeddedResource Include="Resources\**"/>
+        <EmbeddedResource Include="Resources\**">
+            <LogicalName>%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
+        </EmbeddedResource>
     </ItemGroup>
 </Project>

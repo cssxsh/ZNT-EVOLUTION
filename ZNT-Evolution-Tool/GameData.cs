@@ -38,9 +38,8 @@ public class GameData : IDisposable
         };
         GameRes = Manager.LoadAssetsFile($"{path}/znt_Data/Resources/unity default resources");
         GameBundle = Manager.LoadBundleFile($"{path}/znt_Data/data.unity3d");
-        using var tpk =
-            Assembly.GetExecutingAssembly().GetManifestResourceStream("ZNT.Evolution.Tool.Resources.classdata.tpk")
-            ?? throw new FileNotFoundException("classdata.tpk");
+        using var tpk = Assembly.GetExecutingAssembly()
+            .GetManifestResourceStream("classdata.tpk") ?? throw new FileNotFoundException("classdata.tpk");
         Manager.LoadClassPackage(tpk);
         Manager.LoadClassDatabaseFromPackage(GameBundle.file.Header.EngineVersion);
     }
