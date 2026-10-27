@@ -183,7 +183,7 @@ public class GameData : IDisposable
             ["Name"] = "temp",
             ["Width"] = 144,
             ["Height"] = 144,
-            ["Type"] = 2,
+            ["Type"] = 1,
             ["Clips"] = new JArray(),
             ["Background"] = false,
             ["BackgroundColor"] = new JObject { ["r"] = 0.0, ["g"] = 0.0, ["b"] = 0.0, ["a"] = 0.0 },
@@ -549,7 +549,8 @@ public class GameData : IDisposable
                     var p = IdComparer.IdRegex.Match(id).Groups[1].Value;
                     foreach (var d in blood.baseField["spriteDefinitions"]["Array"])
                     {
-                        if (d["name"].AsString.StartsWith(p)) sorted[id] = d;
+                        var i = d["name"].AsString;
+                        if (i.StartsWith(p)) sorted[i] = d;
                     }
                 }
             }
