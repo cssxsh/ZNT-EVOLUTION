@@ -564,6 +564,7 @@ public class GameData : IDisposable
     }
 
     [UsedImplicitly]
+    [SuppressMessage("Trimming", "IL2026")]
     public static void PixelStudioToFiles(JObject psp, string path)
     {
         using var atlas = new MagickImage(MagickColors.Transparent, 256, 256);
@@ -585,6 +586,20 @@ public class GameData : IDisposable
             ["Name"] = $"sprites_{name}",
             ["Transformed"] = true
         };
+        var material = new JObject
+        {
+            ["Source"] = "sprites_empty_mat : UnityEngine.Material",
+            ["Name"] = $"sprites_{name}_mat",
+            ["Shader"] = "tk2d/BlendVertexColor",
+            ["Textures"] = new JObject
+            {
+                ["_MainTex"] = $"sprites_{name}_atlas : UnityEngine.Texture2D",
+                ["_RimTex"] = $"sprites_{name}_rim_atlas : UnityEngine.Texture2D",
+                ["_FlipTex"] = $"sprites_{name}_flip_atlas : UnityEngine.Texture2D"
+            },
+            ["Floats"] = new JObject(),
+            ["Colors"] = new JObject()
+        };
         foreach (var clip in psp.Value<JArray>("Clips")!.Children<JObject>())
         {
             var part = clip.Value<string>("Name")!;
@@ -601,19 +616,20 @@ public class GameData : IDisposable
                 foreach (var layer in frame.Value<JArray>("Layers")!.Children<JObject>())
                 {
                     var key = layer.Value<string>("Name")!;
-                    var history = JObject.Parse(layer.Value<string>("_historyJson")!);
-                    using var source = new MagickImage(history["_source"] switch
+                    var history = JObject.Parse(layer.Value<string>("_historyJson") ?? "{}");
+                    if (!history.TryGetValue("_source", out var png)) continue;
+                    using var source = new MagickImage(png switch
                     {
                         JValue base64 => Convert.FromBase64String(base64.Value<string>()!),
                         JArray bytes => bytes.ToObject<byte[]>()!,
                         _ => throw new FormatException(layer.Path)
                     });
                     // ReSharper disable once InvertIf
-                    if (key is "_MainTex")
+                    if (bound is null)
                     {
                         offset.X = layer.Value<int>("Sx");
                         offset.Y = height - layer.Value<int>("Sy");
-                        bound = source.BoundingBox ?? new MagickGeometry(offset.X, offset.Y, 1, 1);
+                        bound = source.BoundingBox ?? new MagickGeometry(0, 0, 1, 1);
                         anchor.X = offset.X - bound.X;
                         anchor.Y = offset.Y - bound.Y;
                         var allocation = new Allocation?();
@@ -651,7 +667,7 @@ public class GameData : IDisposable
 
                     switch (key)
                     {
-                        case "_MainTex":
+                        case "_MainTex" or "Layer 1":
                             if (source.Width != width ||
                                 source.Height != height ||
                                 bound is null) throw new FormatException(layer.Path);
@@ -659,7 +675,7 @@ public class GameData : IDisposable
                             source.Crop(bound);
                             atlas.Composite(source, region.X, region.Y, CompositeOperator.Replace);
                             break;
-                        case "_RimTex":
+                        case "_RimTex" or "Layer 2":
                             if (source.Width != width ||
                                 source.Height != height ||
                                 bound is null) throw new FormatException(layer.Path);
@@ -731,20 +747,6 @@ public class GameData : IDisposable
             info.WriteTo(writer);
         }
         {
-            var material = new JObject
-            {
-                ["Source"] = "sprites_empty_mat : UnityEngine.Material",
-                ["Name"] = $"sprites_{name}_mat",
-                ["Shader"] = "tk2d/BlendVertexColor",
-                ["Textures"] = new JObject
-                {
-                    ["_MainTex"] = $"sprites_{name}_atlas : UnityEngine.Texture2D",
-                    ["_RimTex"] = $"sprites_{name}_rim_atlas : UnityEngine.Texture2D",
-                    ["_FlipTex"] = $"sprites_{name}_flip_atlas : UnityEngine.Texture2D"
-                },
-                ["Floats"] = new JObject(),
-                ["Colors"] = new JObject()
-            };
             if (rim.FileName is null or "#00000000") material.Value<JObject>("Textures")!.Remove("_RimTex");
             if (flip.FileName is null or "#00000000") material.Value<JObject>("Textures")!.Remove("_FlipTex");
             using var fs = File.Open($@"{path}\sprites_{name}_mat.material.merge.json", FileMode.Create);
