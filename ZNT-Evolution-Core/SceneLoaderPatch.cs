@@ -352,6 +352,26 @@ internal static class SceneLoaderPatch
     #region EditorStartScene
 
     [HarmonyPostfix]
+    [HarmonyPatch(typeof(StartMenu), "OnAwake")]
+    public static void OnAwake(StartMenu __instance)
+    {
+        var folder = (RectTransform)__instance.transform.Find("Panel/Layout/Folder Button");
+        if (folder) return;
+        var publish = (RectTransform)__instance.transform.Find("Panel/Layout/Publish Button");
+        folder = Object.Instantiate(publish, publish.parent);
+        folder.name = "Folder Button";
+        folder.SetSiblingIndex(4);
+        folder.Find("Text").GetComponent<Text>().text = "FOLDER";
+        folder.Find("Icon").GetComponent<Image>().sprite =
+            CustomAssetUtility.DeserializeObject<Sprite>("icon_Save : UnityEngine.Sprite");
+        folder.GetComponent<Button>().OnClick(() =>
+        {
+            var path = $"{Application.persistentDataPath}/Users/{UserManager.UserId}/Custom Levels/Editor";
+            System.Diagnostics.Process.Start(path);
+        });
+    }
+
+    [HarmonyPostfix]
     [HarmonyPatch(typeof(PublishChapterMenu), "SelectDestination")]
     public static void SelectDestination(PublishChapterMenu __instance, int value)
     {
