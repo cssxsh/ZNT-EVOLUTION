@@ -29,7 +29,7 @@ internal class SpriteInfo : EvolutionInfo<tk2dSpriteCollectionData>
     public readonly Rect[] Regions;
 
     [JsonProperty("Anchors")]
-    public readonly Vector2[] Anchors;
+    public readonly Vector2?[] Anchors;
 
     [JsonProperty("AttachPoints")]
     public readonly Dictionary<string, tk2dSpriteDefinition.AttachPoint[]> AttachPoints;
@@ -46,7 +46,7 @@ internal class SpriteInfo : EvolutionInfo<tk2dSpriteCollectionData>
         float targetHeight,
         string[] names,
         Rect[] regions,
-        Vector2[] anchors = null, Vector2? anchor = null,
+        Vector2?[] anchors = null, Vector2? anchor = null,
         Dictionary<string, tk2dSpriteDefinition.AttachPoint[]> points = null,
         string name = null,
         Material material = null,
@@ -71,9 +71,9 @@ internal class SpriteInfo : EvolutionInfo<tk2dSpriteCollectionData>
         var anchors = new Vector2[Regions.Length];
         for (var i = 0; i < Regions.Length; i++)
         {
-            names[i] = Names.IsIndexValid(i) ? Names[i] : $"region_{i}";
+            names[i] = Names.ElementAtOrDefault(i) ?? $"region_{i:D2}";
             regions[i] = Regions[i];
-            anchors[i] = Anchors.IsIndexValid(i) ? Anchors[i] : Regions[i].size / 2;
+            anchors[i] = Anchors.ElementAtOrDefault(i) ?? Regions[i].size / 2;
             if (!Transformed) continue;
             anchors[i].y = regions[i].height - anchors[i].y;
             regions[i].y = Material.mainTexture.height - regions[i].height - regions[i].y;

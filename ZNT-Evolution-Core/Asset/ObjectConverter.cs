@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using BepInEx.Logging;
 using HarmonyLib;
@@ -125,10 +126,8 @@ internal class ObjectConverter : CustomCreationConverter<UnityEngine.Object>
             attached.Clear();
             foreach (var frame in clip.frames)
             {
-                if (frame.spriteCollection is not null &&
-                    frame.spriteCollection.spriteDefinitions.IsIndexValid(frame.spriteId))
+                if (frame.spriteCollection?.spriteDefinitions.ElementAtOrDefault(frame.spriteId) is {} definition)
                 {
-                    var definition = frame.spriteCollection.spriteDefinitions[frame.spriteId];
                     foreach (var point in definition.attachPoints)
                     {
                         if (point is null) continue;

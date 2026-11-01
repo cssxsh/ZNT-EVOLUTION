@@ -183,8 +183,7 @@ internal static class AnimationEventHandlerPatch
     [Description("RegisterTriggerEvent:boom")]
     public static void Boom(HumanAnimationController controller, tk2dSpriteAnimationFrame frame)
     {
-        if (controller.SharedAsset.ExplosionAssets.IsIndexValid(frame.eventInt) &&
-            controller.SharedAsset.ExplosionAssets[frame.eventInt] is {} asset)
+        if (controller.SharedAsset.ExplosionAssets.ElementAtOrDefault(frame.eventInt) is {} asset)
         {
             asset.CreateGameObject(position: controller.transform.position);
         }
