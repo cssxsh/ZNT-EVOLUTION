@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Net;
 using System.Reflection;
@@ -8,6 +9,7 @@ using BepInEx;
 using BepInEx.Logging;
 using JetBrains.Annotations;
 using Newtonsoft.Json.Linq;
+using UnityEngine;
 using ZNT.Evolution.Core.Asset;
 using ZNT.Evolution.Core.Editor;
 using BepInExLogger = BepInEx.Logging.Logger;
@@ -86,22 +88,34 @@ public static class EvolutionHost
             };
             try
             {
-                obj["data"] = context.Request switch
-                {
-                    { Url.AbsolutePath: "/api/level/override", HttpMethod: "POST" } =>
-                        ImportAssetOverride(context.Request),
-                    { Url.AbsolutePath: "/api/level/override", HttpMethod: "GET" } =>
-                        ExportAssetOverride(context.Request),
-                    _ => throw new NotSupportedException("Operation not supported")
-                };
                 obj["status"] = 0;
                 obj["message"] = "OK";
+                obj["data"] = context.Request.HttpMethod switch
+                {
+                    "GET" => context.Request.Url.AbsolutePath switch
+                    {
+                        "/api/data/material" => ExportMaterial(context.Request),
+                        "/api/data/animation" => ExportAnimation(context.Request),
+                        "/api/data/explosion" => ExportExplosionAsset(context.Request),
+                        "/api/data/physic" => ExportPhysicObjectAsset(context.Request),
+                        "/api/data/human" => ExportHumanAsset(context.Request),
+                        "/api/data/element" => ExportLevelElement(context.Request),
+                        "/api/level/override" => ExportAssetOverride(context.Request),
+                        _ => throw new NotSupportedException("Operation not supported")
+                    },
+                    "POST" => context.Request.Url.AbsolutePath switch
+                    {
+                        "/api/level/override" => ImportAssetOverride(context.Request),
+                        _ => throw new NotSupportedException("Operation not supported")
+                    },
+                    _ => throw new NotSupportedException("Operation not supported")
+                };
             }
             catch (Exception e)
             {
-                Logger.LogWarning($"{context.Request.HttpMethod}: {context.Request.RawUrl} -> {e.Message}");
                 obj["status"] = -1;
                 obj["message"] = e.Message;
+                Logger.LogWarning($"{context.Request.HttpMethod}: {context.Request.RawUrl} -> {e.Message}");
             }
 
             CustomAssetUtility.SerializeObject(response.OutputStream, obj);
@@ -149,17 +163,14 @@ public static class EvolutionHost
 
     public static void Init()
     {
-        var version = EvolutionHostPlugin.Instance.Info.Metadata.Version;
         _host = EvolutionHostPlugin.Uri.Value;
-        _folder = $"{Paths.PluginPath}/ZNT-Evolution-Host/{version}/www";
-        // ReSharper disable once InvertIf
-        if (!Directory.Exists(_folder))
+        _folder = $"{Paths.PluginPath}/ZNT-Evolution-Host/www";
         {
             var assembly = Assembly.GetExecutingAssembly();
             foreach (var resource in assembly.GetManifestResourceNames())
             {
                 if (!resource.StartsWith("www", StringComparison.Ordinal)) continue;
-                var path = $"{Paths.PluginPath}/ZNT-Evolution-Host/{version}/{resource}";
+                var path = $"{Paths.PluginPath}/ZNT-Evolution-Host/{resource}";
                 using var source = assembly
                     .GetManifestResourceStream(resource) ?? throw new FileNotFoundException(resource);
                 Directory.CreateDirectory(Path.GetDirectoryName(path)!);
@@ -207,12 +218,184 @@ public static class EvolutionHost
     }
 
     [UsedImplicitly]
-    private static JToken ImportAssetOverride(HttpListenerRequest request)
+    [SuppressMessage("ReSharper", "Unity.PreferAddressByIdToGraphicsParams")]
+    private static JToken ExportMaterial(HttpListenerRequest request)
     {
-        if (!ComponentSingleton<LevelSettings>.HasInstance()) return new JArray();
-        EvolutionSettings.Instance.AssetOverrideData =
-            CustomAssetUtility.DeserializeObject<List<EvolutionSettings.AssetOverrideRecord>>(request.InputStream);
-        CustomAssetUtility.SerializeObject(out var token, EvolutionSettings.Instance.AssetOverrideData);
+        var name = request.QueryString.Get("name") ?? throw new ArgumentException("need name");
+        var material = CustomAssetUtility.DeserializeObject<Material>($"{name} : UnityEngine.Material");
+        if (material is null) return null;
+        return new JObject
+        {
+            ["Name"] = material.name,
+            ["Shader"] = material.shader.name,
+            ["Textures"] = material.shader.name switch
+            {
+                "ZNT/Characters/Characters Base" => new JObject
+                {
+                    ["_MainTex"] = material.GetTexture("_MainTex")?.NameAndType(),
+                    ["_RimTex"] = material.GetTexture("_RimTex")?.NameAndType()
+                },
+                "ZNT/Evolution/Flat Textured AlphaTest" => new JObject
+                {
+                    ["_MainTex"] = material.GetTexture("_MainTex")?.NameAndType(),
+                    ["_FlipTex"] = material.GetTexture("_FlipTex")?.NameAndType()
+                },
+                _ => new JObject
+                {
+                    ["_MainTex"] = material.GetTexture("_MainTex")?.NameAndType()
+                }
+            },
+            ["Floats"] = material.shader.name switch
+            {
+                "ZNT/Characters/Characters Base" => new JObject
+                {
+                    ["_AmbientModifier"] = material.GetFloat("_AmbientModifier"),
+                    // ["_AmbientToggle"] = material.GetFloat("_AmbientToggle"),
+                    ["_Brightness"] = material.GetFloat("_Brightness"),
+                    ["_CullingType"] = material.GetFloat("_CullingType"),
+                    ["_Cutoff"] = material.GetFloat("_Cutoff"),
+                    ["_MainTexHSize"] = material.GetFloat("_MainTexHSize"),
+                    ["_MainTexVSize"] = material.GetFloat("_MainTexVSize"),
+                    ["_RimIntensity"] = material.GetFloat("_RimIntensity"),
+                    ["_RimSize"] = material.GetFloat("_RimSize"),
+                    ["_SelfIllumination"] = material.GetFloat("_SelfIllumination"),
+                    // ["_VertexColorIntensity"] = material.GetFloat("_VertexColorIntensity"),
+                    // ["_Limit"] = material.GetFloat("_Limit"),
+                    // ["_Parallax"] = material.GetFloat("_Parallax"),
+                    // ["_SpecularPower"] = material.GetFloat("_SpecularPower")
+                },
+                "ZNT/Common/Flat Textured AlphaTest" => new JObject
+                {
+                    // ["_Brightness"] = material.GetFloat("_Brightness"),
+                    // ["_CullingType"] = material.GetFloat("_CullingType"),
+                    // ["_Cutoff"] = material.GetFloat("_Cutoff"),
+                    // ["_MainTexHSize"] = material.GetFloat("_MainTexHSize"),
+                    // ["_MainTexVSize"] = material.GetFloat("_MainTexVSize"),
+                    // ["_RimIntensity"] = material.GetFloat("_RimIntensity"),
+                    // ["_RimSize"] = material.GetFloat("_RimSize"),
+                    // ["_SelfIllumination"] = material.GetFloat("_SelfIllumination"),
+                    // ["_VertexColorIntensity"] = material.GetFloat("_VertexColorIntensity")
+                },
+                "ZNT/Common/Animated Flat Textured Cutout" => new JObject
+                {
+                    ["_ScaleX"] = material.GetFloat("_ScaleX"),
+                    ["_ScaleY"] = material.GetFloat("_ScaleY"),
+                    ["_Speed"] = material.GetFloat("_Speed")
+                },
+                "ZNT/Common/Animated Flat Textured Transparent" => new JObject
+                {
+                    ["_BlendType1"] = material.GetFloat("_BlendType1"),
+                    ["_BlendType2"] = material.GetFloat("_BlendType2"),
+                    // ["_BumpScale"] = material.GetFloat("_BumpScale"),
+                    ["_CullingType"] = material.GetFloat("_CullingType"),
+                    ["_CutOut"] = material.GetFloat("_CutOut"),
+                    // ["_Cutoff"] = material.GetFloat("_Cutoff"),
+                    // ["_DetailNormalMapScale"] = material.GetFloat("_DetailNormalMapScale"),
+                    // ["_DstBlend"] = material.GetFloat("_DstBlend"),
+                    // ["_EmissivePower"] = material.GetFloat("_EmissivePower"),
+                    // ["_Glossiness"] = material.GetFloat("_Glossiness"),
+                    // ["_Metallic"] = material.GetFloat("_Metallic"),
+                    // ["_Mode"] = material.GetFloat("_Mode"),
+                    // ["_OcclusionStrength"] = material.GetFloat("_OcclusionStrength"),
+                    // ["_Parallax"] = material.GetFloat("_Parallax"),
+                    ["_ScaleX"] = material.GetFloat("_ScaleX"),
+                    ["_ScaleY"] = material.GetFloat("_ScaleY"),
+                    // ["_SpecularPower"] = material.GetFloat("_SpecularPower"),
+                    ["_Speed"] = material.GetFloat("_Speed"),
+                    // ["_SrcBlend"] = material.GetFloat("_SrcBlend"),
+                    // ["_UVSec"] = material.GetFloat("_UVSec"),
+                    ["_ZWrite"] = material.GetFloat("_ZWrite")
+                },
+                "ZNT/Environments/Environments Base" => new JObject
+                {
+                    // ["_AmbientModifier"] = material.GetFloat("_AmbientModifier"),
+                    // ["_Brightness"] = material.GetFloat("_Brightness"),
+                    // ["_CullingType"] = material.GetFloat("_CullingType"),
+                    ["_Cutoff"] = material.GetFloat("_Cutoff"),
+                    ["_EmissivePower"] = material.GetFloat("_EmissivePower"),
+                    // ["_SelfIllumination"] = material.GetFloat("_SelfIllumination"),
+                    ["_SpecularPower"] = material.GetFloat("_SpecularPower"),
+                    // ["_RimIntensity"] = material.GetFloat("_RimIntensity"),
+                    // ["_MainTexHSize"] = material.GetFloat("_MainTexHSize"),
+                    // ["_MainTexVSize"] = material.GetFloat("_MainTexVSize"),
+                    // ["_RimSize"] = material.GetFloat("_RimSize"),
+                    // ["PixelSnap"] = material.GetFloat("PixelSnap"),
+                    // ["_BlendType1"] = material.GetFloat("_BlendType1"),
+                    // ["_BlendType2"] = material.GetFloat("_BlendType2"),
+                    // ["_ZWrite"] = material.GetFloat("_ZWrite"),
+                    // ["_ScaleX"] = material.GetFloat("_ScaleX"),
+                    // ["_ScaleY"] = material.GetFloat("_ScaleY"),
+                    // ["_Speed"] = material.GetFloat("_Speed"),
+                    // ["_BumpScale"] = material.GetFloat("_BumpScale"),
+                    // ["_DetailNormalMapScale"] = material.GetFloat("_DetailNormalMapScale"),
+                    // ["_DstBlend"] = material.GetFloat("_DstBlend"),
+                    // ["_Glossiness"] = material.GetFloat("_Glossiness"),
+                    // ["_Metallic"] = material.GetFloat("_Metallic"),
+                    // ["_Mode"] = material.GetFloat("_Mode"),
+                    // ["_OcclusionStrength"] = material.GetFloat("_OcclusionStrength"),
+                    // ["_Parallax"] = material.GetFloat("_Parallax"),
+                    // ["_SrcBlend"] = material.GetFloat("_SrcBlend"),
+                    // ["_UVSec"] = material.GetFloat("_UVSec")
+                },
+                "ZNT/Evolution/Flat Textured AlphaTest" => new JObject
+                {
+                    ["_UseFlip"] = material.GetFloat("_UseFlip"),
+                    ["_AmbientValue"] = material.GetFloat("_AmbientValue")
+                },
+                _ => new JObject()
+            },
+            ["Colors"] = material.shader.name switch
+            {
+                _ => new JObject
+                {
+                    ["_Color"] = JObject.FromObject(material.GetColor("_Color"), CustomAssetUtility.Serializer)
+                }
+            }
+        };
+    }
+
+    [UsedImplicitly]
+    private static JToken ExportAnimation(HttpListenerRequest request)
+    {
+        var name = request.QueryString.Get("name") ?? throw new ArgumentException("need name");
+        var animation = CustomAssetUtility.DeserializeObject<tk2dSpriteAnimation>($"{name} : tk2dSpriteAnimation");
+        CustomAssetUtility.SerializeObject(out var token, animation);
+        return token;
+    }
+
+    [UsedImplicitly]
+    private static JToken ExportExplosionAsset(HttpListenerRequest request)
+    {
+        var name = request.QueryString.Get("name") ?? throw new ArgumentException("need name");
+        var explosion = CustomAssetUtility.DeserializeObject<ExplosionAsset>($"{name} : ExplosionAsset");
+        CustomAssetUtility.SerializeObject(out var token, explosion);
+        return token;
+    }
+
+    [UsedImplicitly]
+    private static JToken ExportPhysicObjectAsset(HttpListenerRequest request)
+    {
+        var name = request.QueryString.Get("name") ?? throw new ArgumentException("need name");
+        var physic = CustomAssetUtility.DeserializeObject<PhysicObjectAsset>($"{name} : PhysicObjectAsset");
+        CustomAssetUtility.SerializeObject(out var token, physic);
+        return token;
+    }
+
+    [UsedImplicitly]
+    private static JToken ExportHumanAsset(HttpListenerRequest request)
+    {
+        var name = request.QueryString.Get("name") ?? throw new ArgumentException("need name");
+        var human = CustomAssetUtility.DeserializeObject<HumanAsset>($"{name} : HumanAsset");
+        CustomAssetUtility.SerializeObject(out var token, human);
+        return token;
+    }
+
+    [UsedImplicitly]
+    private static JToken ExportLevelElement(HttpListenerRequest request)
+    {
+        var name = request.QueryString.Get("name") ?? throw new ArgumentException("need name");
+        var element = CustomAssetUtility.DeserializeObject<LevelElement>($"{name} : LevelElement");
+        CustomAssetUtility.SerializeObject(out var token, element);
         return token;
     }
 
@@ -220,6 +403,16 @@ public static class EvolutionHost
     private static JToken ExportAssetOverride(HttpListenerRequest request)
     {
         if (!ComponentSingleton<LevelSettings>.HasInstance()) return new JArray();
+        CustomAssetUtility.SerializeObject(out var token, EvolutionSettings.Instance.AssetOverrideData);
+        return token;
+    }
+
+    [UsedImplicitly]
+    private static JToken ImportAssetOverride(HttpListenerRequest request)
+    {
+        if (!ComponentSingleton<LevelSettings>.HasInstance()) return new JArray();
+        EvolutionSettings.Instance.AssetOverrideData =
+            CustomAssetUtility.DeserializeObject<List<EvolutionSettings.AssetOverrideRecord>>(request.InputStream);
         CustomAssetUtility.SerializeObject(out var token, EvolutionSettings.Instance.AssetOverrideData);
         return token;
     }
