@@ -1105,6 +1105,142 @@ document.getElementById("btnClear").addEventListener("click", () => {
 });
 
 /* =========================================================
+ *  服务器同步（GET / POST /api/level/override）
+ * ======================================================= */
+
+const API_URL = "/api/level/override";
+
+/* ---------- 简易 Toast 提示 ---------- */
+function showToast(msg, type = "info") {
+    let toast = document.getElementById("app-toast");
+    if (!toast) {
+        toast = document.createElement("div");
+        toast.id = "app-toast";
+        document.body.appendChild(toast);
+    }
+    toast.textContent = msg;
+    toast.className = "app-toast " + type + " show";
+    clearTimeout(toast._timer);
+    toast._timer = setTimeout(() => toast.classList.remove("show"), 3000);
+}
+
+/* ---------- 按钮加载状态 ---------- */
+function setButtonLoading(btn, loading, loadingText = "处理中…") {
+    if (!btn) return;
+    if (loading) {
+        btn._originalText = btn.textContent;
+        btn.textContent = loadingText;
+        btn.disabled = true;
+    } else {
+        if (btn._originalText) btn.textContent = btn._originalText;
+        btn.disabled = false;
+    }
+}
+
+/* ---------- 从服务器载入 ---------- */
+async function loadFromServer() {
+    if (overrides.length > 0) {
+        if (!confirm("当前已有编辑内容，从服务器载入将覆盖现有数据，确定继续吗？")) return;
+    }
+
+    const btn = document.getElementById("btnLoad");
+    setButtonLoading(btn, true, "载入中…");
+
+    try {
+        const res = await fetch(API_URL, { method: "GET" });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        const json = await res.json();
+        if (json.status !== 0) {
+            throw new Error(json.message || "服务器返回错误");
+        }
+
+        const data = json.data;
+        let arr = null;
+
+        // 兼容多种 data 结构
+        if (Array.isArray(data)) {
+            arr = data;
+        } else if (data && Array.isArray(data.Overrides)) {
+            arr = data.Overrides;
+        } else if (data && typeof data === "object") {
+            if (Object.keys(data).length === 0) {
+                arr = [];                       // 空对象视为空列表
+            } else if (data.Type || data.Pattern || data.Handles) {
+                arr = [data];                   // 单个覆盖项包装成数组
+            } else {
+                throw new Error("返回数据格式无法识别");
+            }
+        } else {
+            throw new Error("返回数据格式无法识别");
+        }
+
+        overrides = fromJSON(arr);
+        hideModal();                            // 若模态框开着则关闭
+        render();
+        showToast("已从服务器载入", "success");
+    } catch (err) {
+        console.error(err);
+        showToast("载入失败：" + err.message, "error");
+    } finally {
+        setButtonLoading(btn, false);
+    }
+}
+
+/* ---------- 提交到服务器 ---------- */
+async function saveToServer() {
+    // 简单校验：检查是否有明显问题
+    let hasIssues = false;
+    overrides.forEach(o => {
+        if (!o.Type.trim() || !o.Pattern.trim()) hasIssues = true;
+        try { new RegExp(o.Pattern); } catch (e) { hasIssues = true; }
+        o.handles.forEach(h => {
+            const k = (h.key || "").trim();
+            if (!k) return;
+            const kd = getKeyDef(o.Type, k);
+            const vtype = effectiveType(kd);
+            if (vtype === "text" && !(kd && kd.pattern)) return;
+            const r = validateValue(kd, h.value, vtype);
+            if (!r.ok) hasIssues = true;
+        });
+    });
+
+    if (hasIssues) {
+        if (!confirm("当前数据存在校验问题（如空 Type/Pattern、正则错误、值不符合要求），仍要提交吗？")) return;
+    }
+
+    const btn = document.getElementById("btnSave");
+    setButtonLoading(btn, true, "提交中…");
+
+    try {
+        const payload = toJSON();
+        const res = await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        const json = await res.json();
+        if (json.status !== 0) {
+            throw new Error(json.message || "服务器返回错误");
+        }
+
+        showToast("提交成功", "success");
+    } catch (err) {
+        console.error(err);
+        showToast("提交失败：" + err.message, "error");
+    } finally {
+        setButtonLoading(btn, false);
+    }
+}
+
+/* ---------- 绑定按钮事件 ---------- */
+document.getElementById("btnLoad").addEventListener("click", loadFromServer);
+document.getElementById("btnSave").addEventListener("click", saveToServer);
+
+/* =========================================================
  *  启动
  * ======================================================= */
 
