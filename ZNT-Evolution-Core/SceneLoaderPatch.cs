@@ -238,6 +238,8 @@ internal static class SceneLoaderPatch
                 .Find("Option Panels/Video/Scroll Area/ScrollView/Content/FullScreen Entry");
             var fps = (RectTransform)menu.transform
                 .Find("Option Panels/Video/Scroll Area/ScrollView/Content/Max FPS Entry");
+            var display = (RectTransform)menu.transform
+                .Find("Option Panels/Video/Scroll Area/ScrollView/Content/Display Entry/");
             foreach (var (_, info) in BepInEx.Bootstrap.Chainloader.PluginInfos)
             {
                 if (!info.Metadata.GUID.Contains("znt")) continue;
@@ -281,6 +283,27 @@ internal static class SceneLoaderPatch
                         });
                         input.SetTextWithoutNotify(((int)entry.BoxedValue & int.MaxValue).ToString());
                         input.interactable = toggle.isOn;
+                        item.gameObject.SetActive(true);
+                    }
+                    else if (typeof(System.Enum).IsAssignableFrom(entry.SettingType))
+                    {
+                        var names = System.Enum.GetNames(entry.SettingType);
+                        var values = System.Enum.GetValues(entry.SettingType);
+                        var item = Object.Instantiate(original: display, parent: content);
+                        item.name = $"{info.Metadata.Name} {entry.Definition} Entry";
+                        item.gameObject.SetActive(false);
+                        var localize = item.Find("Text").GetComponent<I2.Loc.Localize>();
+                        localize.Term = term.Term;
+                        var dropdown = item.Find("Container/Dropdown").GetComponent<TMPro.TMP_Dropdown>();
+                        dropdown.onValueChanged = new TMPro.TMP_Dropdown.DropdownEvent();
+                        dropdown.options.Clear();
+                        dropdown.options.AddRange(names.Select(name => new TMPro.TMP_Dropdown.OptionData(name)));
+                        dropdown.value = System.Array.IndexOf(values, entry.BoxedValue);
+                        dropdown.RefreshShownValue();
+                        dropdown.onValueChanged.AddListener(index =>
+                        {
+                            entry.BoxedValue = values.GetValue(index);
+                        });
                         item.gameObject.SetActive(true);
                     }
                 }
