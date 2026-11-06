@@ -31,8 +31,12 @@ public class SpriteEditor : Editor, IEditorOverride, IEditorUpdate
     [SerializeInEditor(name: "Sprite Definition")]
     public string SpriteDefinition
     {
-        get => Sprite.CurrentSprite.name;
-        set => Sprite.spriteId = Sprite.GetSpriteIdByName(value);
+        get => Sprite.CurrentSprite?.name;
+        set
+        {
+            if (Sprite.CurrentSprite?.name == value) return;
+            Sprite.spriteId = Sprite.GetSpriteIdByName(value);
+        }
     }
 
     [SerializeInEditor(name: "Sprite Color")]
@@ -128,6 +132,7 @@ public class SpriteEditor : Editor, IEditorOverride, IEditorUpdate
 
     public static Texture2D MarkReadable(Texture texture)
     {
+        SceneLoader.BeforeLoadScene += Cache.Clear;
         if (Cache.TryGetValue(texture, out var cached)) return cached;
         var source = new Texture2D(width: texture.width, height: texture.height)
         {
