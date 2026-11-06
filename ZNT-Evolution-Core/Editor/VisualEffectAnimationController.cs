@@ -14,10 +14,16 @@ public class VisualEffectAnimationController : BaseAnimationController
         EventHandler.RegisterEndEvent(animation, Despawn);
     }
 
+    protected override void OnAwake()
+    {
+        base.OnAwake();
+        if (animation.OverrideLibrary) Animator.Library = animation.Library;
+        Initialize();
+    }
+
     [UsedImplicitly]
     private void OnSpawned()
     {
-        Initialize();
         Play(animation);
     }
 

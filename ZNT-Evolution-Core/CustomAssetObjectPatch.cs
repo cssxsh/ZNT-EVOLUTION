@@ -477,6 +477,7 @@ internal static class CustomAssetObjectPatch
     public static Transform GetPrefab(Transform __result, VisualEffect __instance)
     {
         if (__instance is not CustomVisualEffect custom) return __result;
+        if (custom.RuntimePrefab) return custom.RuntimePrefab;
         custom.RuntimePrefab = Object.Instantiate(__result);
         Object.DontDestroyOnLoad(custom.RuntimePrefab);
         custom.RuntimePrefab.name = __instance.name;
