@@ -247,64 +247,70 @@ internal static class SceneLoaderPatch
                 {
                     var term = _localization.AddTerm($"{info.Metadata.Name}/{entry.Definition}");
                     term.SetTranslation(0, $"[{info.Metadata.Name}] {entry.Description.Description}");
-                    if (entry.SettingType == typeof(bool))
+                    switch (entry.BoxedValue)
                     {
-                        var item = Object.Instantiate(original: fullscreen, parent: content);
-                        item.name = $"{info.Metadata.Name} {entry.Definition} Entry";
-                        item.gameObject.SetActive(false);
-                        var localize = item.Find("Text").GetComponent<I2.Loc.Localize>();
-                        localize.Term = term.Term;
-                        var toggle = item.Find("Toggle").GetComponent<Toggle>();
-                        toggle.OnValueChanged(value => entry.BoxedValue = value);
-                        toggle.SetIsOnWithoutNotify((bool)entry.BoxedValue);
-                        item.gameObject.SetActive(true);
-                    }
-                    else if (entry.SettingType == typeof(int))
-                    {
-                        var item = Object.Instantiate(original: fps, parent: content);
-                        item.name = $"{info.Metadata.Name} {entry.Definition} Entry";
-                        item.gameObject.SetActive(false);
-                        var localize = item.Find("Text").GetComponent<I2.Loc.Localize>();
-                        localize.Term = term.Term;
-                        var canvas = item.Find("Container").GetComponent<CanvasGroup>();
-                        var toggle = item.Find("Container/Toggle").GetComponent<Toggle>();
-                        var input = item.Find("Container/InputField").GetComponent<InputField>();
-                        canvas.interactable = true;
-                        toggle.OnValueChanged(value =>
+                        case bool value:
                         {
-                            entry.BoxedValue = (value ? 0 : int.MinValue) | ((int)entry.BoxedValue & int.MaxValue);
-                            input.interactable = value;
-                        });
-                        toggle.SetIsOnWithoutNotify((int)entry.BoxedValue >= 0);
-                        input.OnEndEdit(value =>
+                            var item = Object.Instantiate(original: fullscreen, parent: content);
+                            item.name = $"{info.Metadata.Name} {entry.Definition} Entry";
+                            item.gameObject.SetActive(false);
+                            var localize = item.Find("Text").GetComponent<I2.Loc.Localize>();
+                            localize.Term = term.Term;
+                            var toggle = item.Find("Toggle").GetComponent<Toggle>();
+                            toggle.OnValueChanged(v => entry.BoxedValue = v);
+                            toggle.SetIsOnWithoutNotify(value);
+                            item.gameObject.SetActive(true);
+                        }
+                            break;
+                        case int value:
                         {
-                            if (value is null or "") entry.BoxedValue = entry.DefaultValue;
-                            else entry.SetSerializedValue(value);
-                        });
-                        input.SetTextWithoutNotify(((int)entry.BoxedValue & int.MaxValue).ToString());
-                        input.interactable = toggle.isOn;
-                        item.gameObject.SetActive(true);
-                    }
-                    else if (typeof(System.Enum).IsAssignableFrom(entry.SettingType))
-                    {
-                        var names = System.Enum.GetNames(entry.SettingType);
-                        var values = System.Enum.GetValues(entry.SettingType);
-                        var item = Object.Instantiate(original: display, parent: content);
-                        item.name = $"{info.Metadata.Name} {entry.Definition} Entry";
-                        item.gameObject.SetActive(false);
-                        var localize = item.Find("Text").GetComponent<I2.Loc.Localize>();
-                        localize.Term = term.Term;
-                        var dropdown = item.Find("Container/Dropdown").GetComponent<TMPro.TMP_Dropdown>();
-                        dropdown.onValueChanged = new TMPro.TMP_Dropdown.DropdownEvent();
-                        dropdown.options.Clear();
-                        dropdown.options.AddRange(names.Select(name => new TMPro.TMP_Dropdown.OptionData(name)));
-                        dropdown.value = System.Array.IndexOf(values, entry.BoxedValue);
-                        dropdown.RefreshShownValue();
-                        dropdown.onValueChanged.AddListener(index =>
+                            var item = Object.Instantiate(original: fps, parent: content);
+                            item.name = $"{info.Metadata.Name} {entry.Definition} Entry";
+                            item.gameObject.SetActive(false);
+                            var localize = item.Find("Text").GetComponent<I2.Loc.Localize>();
+                            localize.Term = term.Term;
+                            var canvas = item.Find("Container").GetComponent<CanvasGroup>();
+                            var toggle = item.Find("Container/Toggle").GetComponent<Toggle>();
+                            var input = item.Find("Container/InputField").GetComponent<InputField>();
+                            canvas.interactable = true;
+                            toggle.OnValueChanged(v =>
+                            {
+                                entry.BoxedValue = (v ? 0 : int.MinValue) | (value & int.MaxValue);
+                                input.interactable = v;
+                            });
+                            toggle.SetIsOnWithoutNotify(value >= 0);
+                            input.OnEndEdit(v =>
+                            {
+                                if (v is null or "") entry.BoxedValue = entry.DefaultValue;
+                                else entry.SetSerializedValue(v);
+                            });
+                            input.SetTextWithoutNotify((value & int.MaxValue).ToString());
+                            input.interactable = toggle.isOn;
+                            item.gameObject.SetActive(true);
+                        }
+                            break;
+                        case System.Enum value:
                         {
-                            entry.BoxedValue = values.GetValue(index);
-                        });
-                        item.gameObject.SetActive(true);
+                            var names = System.Enum.GetNames(entry.SettingType);
+                            var values = System.Enum.GetValues(entry.SettingType);
+                            var item = Object.Instantiate(original: display, parent: content);
+                            item.name = $"{info.Metadata.Name} {entry.Definition} Entry";
+                            item.gameObject.SetActive(false);
+                            var localize = item.Find("Text").GetComponent<I2.Loc.Localize>();
+                            localize.Term = term.Term;
+                            var dropdown = item.Find("Container/Dropdown").GetComponent<TMPro.TMP_Dropdown>();
+                            dropdown.onValueChanged = new TMPro.TMP_Dropdown.DropdownEvent();
+                            dropdown.options.Clear();
+                            dropdown.options.AddRange(names.Select(name => new TMPro.TMP_Dropdown.OptionData(name)));
+                            dropdown.value = System.Array.IndexOf(values, value);
+                            dropdown.RefreshShownValue();
+                            dropdown.onValueChanged.AddListener(index =>
+                            {
+                                entry.BoxedValue = values.GetValue(index);
+                            });
+                            item.gameObject.SetActive(true);
+                        }
+                            break;
                     }
                 }
             }
@@ -336,6 +342,13 @@ internal static class SceneLoaderPatch
                             var input = item.Find("Container/InputField").GetComponent<InputField>();
                             input.SetTextWithoutNotify((value & int.MaxValue).ToString());
                             input.interactable = toggle.isOn;
+                        }
+                            break;
+                        case System.Enum value:
+                        {
+                            var values = System.Enum.GetValues(entry.SettingType);
+                            var dropdown = item.Find("Container/Dropdown").GetComponent<TMPro.TMP_Dropdown>();
+                            dropdown.value = System.Array.IndexOf(values, value);
                         }
                             break;
                     }
