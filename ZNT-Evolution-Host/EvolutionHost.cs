@@ -95,6 +95,7 @@ public static class EvolutionHost
                     "GET" => context.Request.Url.AbsolutePath switch
                     {
                         "/api/data/material" => ExportMaterial(context.Request),
+                        "/api/data/sprite" => ExportSpriteInfo(context.Request),
                         "/api/data/animation" => ExportAnimation(context.Request),
                         "/api/data/explosion" => ExportExplosionAsset(context.Request),
                         "/api/data/physic" => ExportPhysicObjectAsset(context.Request),
@@ -222,7 +223,7 @@ public static class EvolutionHost
     private static JToken ExportMaterial(HttpListenerRequest request)
     {
         var name = request.QueryString.Get("name") ?? throw new ArgumentException("need name");
-        var material = CustomAssetUtility.DeserializeObject<Material>($"{name} : UnityEngine.Material");
+        var material = CustomAssetUtility.DeserializeObject<Material>(name);
         if (material is null) return null;
         return new JObject
         {
@@ -355,10 +356,62 @@ public static class EvolutionHost
     }
 
     [UsedImplicitly]
+    private static JToken ExportSpriteInfo(HttpListenerRequest request)
+    {
+        var name = request.QueryString.Get("name") ?? throw new ArgumentException("need name");
+        var sprites = CustomAssetUtility.DeserializeObject<tk2dSpriteCollectionData>(name);
+        var names = new string[sprites.spriteDefinitions.Length];
+        var regions = new Rect[sprites.spriteDefinitions.Length];
+        var anchors = new Vector2?[sprites.spriteDefinitions.Length];
+        var points = new Dictionary<string, tk2dSpriteDefinition.AttachPoint[]>();
+        // CustomAssetUtility.SerializeObject(out var token, animation);
+        for (var i = 0; i < sprites.spriteDefinitions.Length; i++)
+        {
+            const float delta = 1f / 1000f;
+            var definition = sprites.spriteDefinitions[i];
+            var source = definition.material.mainTexture;
+            var region = Rect.zero;
+            var anchor = Vector2.zero;
+            // ReSharper disable InconsistentNaming
+            var src_x = definition.uvs[0].x * source.width - delta;
+            var src_y = (1.0f - definition.uvs[2].y) * source.height + delta;
+            var src_w = definition.uvs[3].x * source.width + delta - region.x;
+            var src_h = (1.0f - definition.uvs[1].y) * source.height - delta - region.y;
+            var offset_x = (0.0f - definition.positions[0].x) / definition.texelSize.x;
+            var offset_y = definition.positions[2].y / definition.texelSize.y;
+            // ReSharper restore InconsistentNaming
+            region.x = (float)Math.Round(src_x);
+            region.y = (float)Math.Round(source.height - src_y - src_h);
+            region.width = (float)Math.Round(src_w);
+            region.height = (float)Math.Round(src_h);
+            anchor.x = (float)Math.Round(offset_x);
+            anchor.y = (float)Math.Round(src_h - offset_y);
+
+            names[i] = definition.name;
+            regions[i] = region;
+            anchors[i] = anchor;
+            if (definition.attachPoints.Length > 0) points[definition.name] = definition.attachPoints;
+        }
+
+        var info = new SpriteInfo(
+            orthoSize: 1.0f / sprites.invOrthoSize,
+            targetHeight: 2.0f * sprites.halfTargetHeight,
+            names: names,
+            regions: regions,
+            anchors: anchors,
+            points: points,
+            name: sprites.name,
+            material: sprites.materials[0],
+            transformed: true);
+        CustomAssetUtility.SerializeObject(out var token, info);
+        return token;
+    }
+
+    [UsedImplicitly]
     private static JToken ExportAnimation(HttpListenerRequest request)
     {
         var name = request.QueryString.Get("name") ?? throw new ArgumentException("need name");
-        var animation = CustomAssetUtility.DeserializeObject<tk2dSpriteAnimation>($"{name} : tk2dSpriteAnimation");
+        var animation = CustomAssetUtility.DeserializeObject<tk2dSpriteAnimation>(name);
         CustomAssetUtility.SerializeObject(out var token, animation);
         return token;
     }
@@ -367,7 +420,7 @@ public static class EvolutionHost
     private static JToken ExportExplosionAsset(HttpListenerRequest request)
     {
         var name = request.QueryString.Get("name") ?? throw new ArgumentException("need name");
-        var explosion = CustomAssetUtility.DeserializeObject<ExplosionAsset>($"{name} : ExplosionAsset");
+        var explosion = CustomAssetUtility.DeserializeObject<ExplosionAsset>(name);
         CustomAssetUtility.SerializeObject(out var token, explosion);
         return token;
     }
@@ -376,7 +429,7 @@ public static class EvolutionHost
     private static JToken ExportPhysicObjectAsset(HttpListenerRequest request)
     {
         var name = request.QueryString.Get("name") ?? throw new ArgumentException("need name");
-        var physic = CustomAssetUtility.DeserializeObject<PhysicObjectAsset>($"{name} : PhysicObjectAsset");
+        var physic = CustomAssetUtility.DeserializeObject<PhysicObjectAsset>(name);
         CustomAssetUtility.SerializeObject(out var token, physic);
         return token;
     }
@@ -385,7 +438,7 @@ public static class EvolutionHost
     private static JToken ExportHumanAsset(HttpListenerRequest request)
     {
         var name = request.QueryString.Get("name") ?? throw new ArgumentException("need name");
-        var human = CustomAssetUtility.DeserializeObject<HumanAsset>($"{name} : HumanAsset");
+        var human = CustomAssetUtility.DeserializeObject<HumanAsset>(name);
         CustomAssetUtility.SerializeObject(out var token, human);
         return token;
     }
@@ -394,7 +447,7 @@ public static class EvolutionHost
     private static JToken ExportLevelElement(HttpListenerRequest request)
     {
         var name = request.QueryString.Get("name") ?? throw new ArgumentException("need name");
-        var element = CustomAssetUtility.DeserializeObject<LevelElement>($"{name} : LevelElement");
+        var element = CustomAssetUtility.DeserializeObject<LevelElement>(name);
         CustomAssetUtility.SerializeObject(out var token, element);
         return token;
     }
