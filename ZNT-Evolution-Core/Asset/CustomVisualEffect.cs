@@ -23,7 +23,7 @@ public class CustomVisualEffect : VisualEffect
         }
     }
 
-    private void OnDestroy() => Destroy(RuntimePrefab);
+    private void OnDestroy() => Destroy(RuntimePrefab?.gameObject);
 
     public void Populate(Transform prefab)
     {

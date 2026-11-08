@@ -36,6 +36,7 @@ public static class CustomAssetExtensions
                     case VisualEffect effect:
                         if (VisualEffectIndex.Index.Elements.ContainsKey(effect.AssetId)) return false;
                         VisualEffectIndex.Index.AddAssetElement(effect);
+                        _ = effect.Prefab;
                         return true;
                     case ShaderAnimator animator:
                         if (ShaderAnimatorIndex.Index.Elements.ContainsKey(animator.AssetId)) return false;
