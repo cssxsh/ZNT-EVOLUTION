@@ -112,6 +112,7 @@ public class ZombieSpawnPointEditor : CharacterSpawnPointEditor, IEditorOverride
     {
         SceneLoader.BeforeLoadScene += MutationAssets.Clear;
         if (MutationAssets.Count is not 0) return;
+        MutationAssets["_None"] = null;
         foreach (var (_, asset) in CustomAssetUtility.Cache)
         {
             if (asset is not CharacterMutation { MutationTarget: MutationTarget.Zombie } mutation) continue;
