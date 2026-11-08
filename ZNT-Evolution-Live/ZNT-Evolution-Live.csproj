@@ -400,18 +400,7 @@
         <Compile Include="Net\BsonDataReader.cs"/>
         <Compile Include="Net\BsonDataWriter.cs"/>
         <Compile Include="Net\GameClient.cs"/>
-    </ItemGroup>
-    <ItemGroup>
         <EmbeddedResource Include="Resources\**"/>
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets"/>
-    <Target Name="AfterBuild">
-        <ItemGroup>
-            <Plugin Include="$(ZNTGamePath)\BepInEx\plugins\$(MSBuildProjectName)\$(AssemblyName).*.dll"/>
-            <Plugin Include="$(ZNTGamePath)\BepInEx\plugins\$(MSBuildProjectName)\$(AssemblyName).*.pdb"/>
-        </ItemGroup>
-        <Delete Files="@(Plugin)"/>
-        <Copy SourceFiles="$(OutputPath)\$(AssemblyName).dll" DestinationFiles="$(ZNTGamePath)\BepInEx\plugins\$(MSBuildProjectName)\$(AssemblyName).$(Version).dll"/>
-        <Copy SourceFiles="$(OutputPath)\$(AssemblyName).pdb" DestinationFiles="$(ZNTGamePath)\BepInEx\plugins\$(MSBuildProjectName)\$(AssemblyName).$(Version).pdb"/>
-    </Target>
 </Project>

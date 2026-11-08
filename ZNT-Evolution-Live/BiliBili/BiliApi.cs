@@ -34,7 +34,7 @@ public class BiliApi : MonoBehaviour
     private readonly ClientWebSocket WebSocketImpl = new();
     // ReSharper restore InconsistentNaming
 
-    private static readonly ConcurrentBag<ArraySegment<byte>> BufferPooling = new();
+    private static readonly ConcurrentBag<ArraySegment<byte>> BufferPooling = [];
     private ArraySegment<byte> AuthPacket => Packet(WsOperation.OP_AUTH, JObject.Parse(WebsocketInfo.AuthBody));
     private static readonly ArraySegment<byte> HeartBeatPacket = Packet(WsOperation.OP_HEARTBEAT, null);
 

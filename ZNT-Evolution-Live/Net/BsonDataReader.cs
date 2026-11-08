@@ -12,13 +12,8 @@ public class BsonDataReader : BsonReader
         Traverse.Create(this).Field<BinaryReader>("_reader").Value = new FixTypeReader(stream);
     }
 
-    private class FixTypeReader : BinaryReader
+    private class FixTypeReader(Stream input) : BinaryReader(input)
     {
-        public FixTypeReader(Stream input) : base(input)
-        {
-            // Fix ReadSByte() for Newtonsoft.Json.Bson.BsonType
-        }
-
         public override sbyte ReadSByte()
         {
             var type = base.ReadSByte();
