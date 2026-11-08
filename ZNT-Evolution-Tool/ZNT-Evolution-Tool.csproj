@@ -5,8 +5,12 @@
         <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <PublishSingleFile>true</PublishSingleFile>
+        <SelfContained>true</SelfContained>
+        <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     </PropertyGroup>
     <ItemGroup>
+        <PackageReference Include="AssetRipper.TextureDecoder" Version="2.6.3"/>
         <PackageReference Include="AssetsTools.NET" Version="3.0.5"/>
         <PackageReference Include="AssetsTools.NET.MonoCecil" Version="3.0.4"/>
         <PackageReference Include="AssetsTools.NET.Texture" Version="3.0.2"/>
@@ -14,7 +18,7 @@
         <PackageReference Include="Fmod5Sharp" Version="3.1.0"/>
         <PackageReference Include="FModBankParser" Version="1.2.0"/>
         <PackageReference Include="JetBrains.Annotations" Version="2026.2.0"/>
-        <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="14.17.1"/>
+        <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="15.1.0"/>
         <PackageReference Include="Newtonsoft.Json" Version="13.0.4"/>
     </ItemGroup>
     <ItemGroup>
