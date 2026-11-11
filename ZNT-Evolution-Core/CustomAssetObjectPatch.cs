@@ -396,20 +396,7 @@ internal static class CustomAssetObjectPatch
         var flags = DamageFlagsConverter.GetDamageFlags(__instance.DamageType);
         var damage = DamageFlagsConverter.GetDamageFlags(param.GetDamageType());
         if (!(flags is 0 || flags.HasFlag(damage))) return false;
-        var timer = __instance.Timer;
-        var hits = __instance.Hits;
-        if (--hits > 0)
-        {
-            timer.Start();
-            __instance.Timer = timer;
-            __instance.Hits = hits;
-            return false;
-        }
-
-        hits = __instance.RefillOnEnraged ? __instance.TargetHitCount : 0;
-        timer.Stop();
-        __instance.Timer = timer;
-        __instance.Hits = hits;
+        if (!__instance.RegisterHit()) return false;
         repulse.GetComponent<ExplosionEditor>().StartExplosion();
         __instance.Event<BoolEvent>("OnRage").Invoke(__instance.FreezeOnRage);
         return false;

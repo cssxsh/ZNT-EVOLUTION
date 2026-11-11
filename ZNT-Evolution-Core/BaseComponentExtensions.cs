@@ -208,17 +208,23 @@ public static class BaseComponentExtensions
     extension(Rage rage)
     {
         [UsedImplicitly]
-        public Timer Timer
+        public bool RegisterHit()
         {
-            get => Traverse.Create(rage).Field<Timer>("refillTimer").Value;
-            set => Traverse.Create(rage).Field<Timer>("refillTimer").Value = value;
-        }
-
-        [UsedImplicitly]
-        public int Hits
-        {
-            get => Traverse.Create(rage).Field<int>("currentHitCount").Value;
-            set => Traverse.Create(rage).Field<int>("currentHitCount").Value = value;
+            var timer = Traverse.Create(rage).Field<Timer>("refillTimer").Value;
+            var hits = Traverse.Create(rage).Field<int>("currentHitCount").Value;
+            try
+            {
+                timer.Start();
+                if (--hits > 0) return false;
+                hits = rage.RefillOnEnraged ? rage.TargetHitCount : 0;
+                timer.Stop();
+                return true;
+            }
+            finally
+            {
+                Traverse.Create(rage).Field<Timer>("refillTimer").Value = timer;
+                Traverse.Create(rage).Field<int>("currentHitCount").Value = hits;
+            }
         }
 
         [UsedImplicitly]
