@@ -155,14 +155,6 @@ internal static class DebugPatch
         }
     }
 
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(Health), "ProxyTarget", MethodType.Setter)]
-    public static void SetProxyTarget(Health __instance, Health value)
-    {
-        Traverse.Create(__instance).Field<bool>("isProxy").Value = value is not null;
-        Traverse.Create(__instance).Field<string>("proxyId").Value ??= __instance.name;
-    }
-
     [HarmonyPrefix]
     [HarmonyPatch(typeof(CharacterAsset), "SetHealth")]
     public static bool SetHealth(CharacterAsset __instance, Character character)

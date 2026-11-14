@@ -183,6 +183,23 @@ public static class BaseComponentExtensions
         }
     }
 
+    extension(Health health)
+    {
+        [UsedImplicitly]
+        public bool IsProxy
+        {
+            get => Traverse.Create(health).Field<bool>("isProxy").Value;
+            set => Traverse.Create(health).Field<bool>("isProxy").Value = value;
+        }
+
+        [UsedImplicitly]
+        public string ProxyId
+        {
+            get => Traverse.Create(health).Field<string>("proxyId").Value;
+            set => Traverse.Create(health).Field<string>("proxyId").Value = value;
+        }
+    }
+
     extension(Weapon weapon)
     {
         [UsedImplicitly]
