@@ -363,8 +363,7 @@ public static class EvolutionHost
         var names = new string[sprites.spriteDefinitions.Length];
         var regions = new Rect[sprites.spriteDefinitions.Length];
         var anchors = new Vector2?[sprites.spriteDefinitions.Length];
-        var points = new Dictionary<string, tk2dSpriteDefinition.AttachPoint[]>();
-        // CustomAssetUtility.SerializeObject(out var token, animation);
+        var points = new SortedDictionary<string, tk2dSpriteDefinition.AttachPoint[]>();
         for (var i = 0; i < sprites.spriteDefinitions.Length; i++)
         {
             const float delta = 1f / 1000f;
@@ -399,7 +398,7 @@ public static class EvolutionHost
             names: names,
             regions: regions,
             anchors: anchors,
-            points: points,
+            points: new Dictionary<string, tk2dSpriteDefinition.AttachPoint[]>(points),
             name: sprites.name,
             material: sprites.materials[0],
             transformed: true);
