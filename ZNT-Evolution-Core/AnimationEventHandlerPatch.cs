@@ -190,6 +190,13 @@ internal static class AnimationEventHandlerPatch
     }
 
     [UsedImplicitly]
+    [Description("RegisterTriggerEvent:icon")]
+    public static void Icon(HumanAnimationController controller, tk2dSpriteAnimationFrame frame)
+    {
+        controller.PlayIcon(frame.soundParamName);
+    }
+
+    [UsedImplicitly]
     [Description("RegisterTriggerEvent:summon_human")]
     public static void Summon(BaseAnimationController controller, tk2dSpriteAnimationFrame frame)
     {
