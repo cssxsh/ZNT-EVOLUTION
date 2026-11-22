@@ -31,7 +31,7 @@ public static class CustomAssetExtensions
                     case FMODAsset fmod:
                         if (FmodAssetIndex.Index.Elements.ContainsKey(fmod.AssetId)) return false;
                         FmodAssetIndex.Index.AddAssetElement(fmod);
-                        FmodAssetIndex.PathIndex.TryAdd(fmod.path, fmod);
+                        FmodAssetIndex.PathIndex.Add(fmod.path, fmod);
                         return true;
                     case VisualEffect effect:
                         if (VisualEffectIndex.Index.Elements.ContainsKey(effect.AssetId)) return false;
