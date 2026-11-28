@@ -156,7 +156,6 @@ public class HumanEditor : CharacterEditor
 
     private void OnDespawned()
     {
-        foreach (var (_, buff) in Buffs) buff.Remove(Character);
-        Buffs.Clear();
+        ResetBuff();
     }
 }

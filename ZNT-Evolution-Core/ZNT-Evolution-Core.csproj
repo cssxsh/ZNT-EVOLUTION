@@ -433,6 +433,7 @@
         <Compile Include="Asset\VoiceAsset.cs"/>
         <Compile Include="Editor\CharacterEditor.cs"/>
         <Compile Include="Editor\CharacterSpawnPointEditor.cs"/>
+        <Compile Include="Editor\ChemistEditor.cs"/>
         <Compile Include="Editor\Editor.cs"/>
         <Compile Include="Editor\EvolutionSettings.cs"/>
         <Compile Include="Editor\ExplosionEditor.cs"/>
@@ -449,6 +450,7 @@
         <Compile Include="Editor\StairEditor.cs"/>
         <Compile Include="Editor\TutorialBreakingNews.cs"/>
         <Compile Include="Editor\VisualEffectAnimationController.cs"/>
+        <Compile Include="Editor\ZombieEditor.cs"/>
         <Compile Include="Editor\ZombieSpawnPointEditor.cs"/>
         <Compile Include="Effect\CharacterAllocationEffect.cs"/>
         <Compile Include="Effect\CharacterBuff.cs"/>

@@ -332,6 +332,9 @@ internal static class CustomAssetObjectPatch
                 .GetComponent<SphereBuffEffect>();
             effect.name = nameof(CultistBuff);
         }
+
+        var chemist = __instance.gameObject.GetComponentSafe<ChemistEditor>();
+        __instance.Health.OnDamage.AddReceiver(chemist, chemist.OnDamage);
     }
 
     [HarmonyPostfix]

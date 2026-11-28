@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using JetBrains.Annotations;
 using UnityEngine;
 using ZNT.Evolution.Core.Effect;
 
@@ -9,9 +10,10 @@ public abstract class CharacterEditor : Editor
 {
     protected Character Character => field ??= GetComponentInChildren<Character>();
 
+    [UsedImplicitly]
     protected readonly Dictionary<string, CharacterBuff> Buffs = new();
 
-    public void ApplyBuff(Parameters parameters)
+    public virtual void ApplyBuff(Parameters parameters)
     {
         if (parameters?.Id is null or "") return;
         var buff = ScriptableObject.CreateInstance<CharacterBuff>();
@@ -24,6 +26,22 @@ public abstract class CharacterEditor : Editor
 
         buff.Apply(Character);
         Buffs[buff.AssetId] = buff;
+    }
+
+    public virtual void ResetBuff()
+    {
+        foreach (var (_, buff) in Buffs) buff.Remove(Character);
+        Buffs.Clear();
+    }
+
+    public virtual void ApplyEnemy()
+    {
+        // ...
+    }
+
+    public virtual void ResetEnemy()
+    {
+        // ...
     }
 
     protected virtual void Update()

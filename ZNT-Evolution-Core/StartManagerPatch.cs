@@ -473,6 +473,7 @@ internal static class StartManagerPatch
             }
                 break;
             case ZombieBehaviour zombie:
+                _ = prefab.GetComponentSafe<ZombieEditor>();
                 zombie.Vision.Detection.SetVisible(true);
                 zombie.Vision.Detection.SetIgnoreSerialization(false);
                 zombie.Vision.Detection.GetComponent<SerialIdentifier>().SetSerialize(true);
